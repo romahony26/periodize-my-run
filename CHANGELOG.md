@@ -9,6 +9,7 @@ The app's Change log page is drawn from this file.
 - Packages to send to someone, built by `tools/package.py`: a self-contained Mac app ("Periodize My Run.app", Apple silicon, holding its own Python and every library, so nothing is downloaded), and small Windows and Linux archives with a double-click installer that downloads what the computer lacks.
 - An uninstaller for every system: `./uninstall.sh` on macOS and Linux, `uninstall.ps1` on Windows. It stops the app, stops it starting by itself and removes its Python environment. Your data is kept unless you add `--data` (Windows: `-Data`), which asks you to type "delete" first.
 ### Changed
+- Links in the app and its documents now point to the project's GitHub address, `romahony26/periodize-my-run`, the same one the in-app update check uses. Before, the links and the update check named different addresses, so the update check could never find a new version.
 - The README's install section is rewritten as numbered steps for macOS, Windows and Linux (including Raspberry Pi), with where to get the files, where things are kept on each system, and a new Uninstall section. Both installers now end by saying how to remove the app.
 - The README's feature list now covers weather, Explain my plan, the purpose of each run and what is learned from your own history.
 

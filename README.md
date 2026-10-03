@@ -137,10 +137,10 @@ by itself. It changes nothing else on the computer.
 ### 1. Get the files
 
 Either download the ZIP from
-<https://github.com/romahony26/periodize> (Code, Download ZIP) and unpack it
+<https://github.com/romahony26/periodize-my-run> (Code, Download ZIP) and unpack it
 where you want the app to live, or:
 
-    git clone https://github.com/romahony26/periodize.git periodize-my-run
+    git clone https://github.com/romahony26/periodize-my-run.git
 
 Keep the folder where you put it: the app runs from there.
 
@@ -448,7 +448,7 @@ real Garmin login is not covered by the suite.
 
 ## Reporting a problem
 
-Open an issue at https://github.com/romahony26/periodize/issues: say what you
+Open an issue at https://github.com/romahony26/periodize-my-run/issues: say what you
 did, what happened and what you expected, and paste the relevant part of the
 Log tab if it helps (check it for anything personal first). Security problems
 should be reported privately instead: see SECURITY.md.
