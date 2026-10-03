@@ -248,7 +248,7 @@ function settingsView(){const s=S.settings;
     <div><label for="aero_runs">Aerobic runs by heart rate</label>${yn('aero_runs',s.aero_runs)}</div>
     <div><label for="weeks_ahead">Provisional weeks shown ahead</label><select id="weeks_ahead">${[1,2,3,4,5].map(n=>opt(n,n,s.weeks_ahead)).join('')}</select></div>
     <div><label for="push_days">Days kept on the watch</label><select id="push_days">${[7,14,21].map(n=>opt(n,n,s.push_days)).join('')}</select></div>
-    <div><label for="notify">Daily message address (optional)</label><input id="notify" style="width:100%" value="${E(s.notify_url||'')}" placeholder="https://ntfy.sh/your-private-topic"></div></div>
+    <div><label for="notify">Daily message address (optional)</label><input id="notify" style="width:100%" value="${E(s.notify_url||'')}" placeholder="https://ntfy.sh/your-private-topic"><p class="xs mute" style="margin:6px 0 0">A morning message with the day's session. Save first, then send a test.</p><p style="margin:8px 0 0"><button class="ghost" id="ntest" ${S.notify_set?'':'disabled'}>Send a test message</button></p></div></div>
     <div class="row" style="align-items:center;margin-top:18px;border-top:1px solid var(--line);padding-top:16px"><button class="btn" id="ssave">Save and replan</button><span class="xs mute">Applies to How you train and Advanced.</span>
     <a class="ghost" style="margin-left:auto" href="/api/export">Download backup</a><span class="small mute">App password: ${S.has_password?'set':'not set'}</span></div></div>
   <div class="card" id="youcard"><p class="eyebrow">About you</p><p class="xs mute" style="margin-top:0">Used only for age grading and fuelling. Read from Garmin once; clear them to stop age grading.</p>
@@ -256,9 +256,6 @@ function settingsView(){const s=S.settings;
     <label for="ydob">Date of birth</label><input id="ydob" type="date" value="${E(S.about_you.birth_date||'')}">
     <label for="ygel">Carbohydrate in one of your gels (g)</label><input id="ygel" type="number" min="10" max="60" value="${S.about_you.gel_carbs_g}">
     <p style="margin:12px 0 0"><button class="ghost" id="ysave">Save</button></p></div>
-  <div class="card" id="phonecard"><p class="eyebrow">On your phone</p><p class="xs mute" style="margin-top:0">Open this address on your phone and choose <b>Add to Home Screen</b> from the browser's share or menu button. It gets its own icon and opens without browser bars.</p>
-    <p class="xs mute">For a morning message with the day's session, set the daily message address under Advanced${S.notify_set?'':' and save'}.</p>
-    <p style="margin:12px 0 0"><button class="ghost" id="ntest" ${S.notify_set?'':'disabled'}>Send a test message</button></p></div>
   <div class="card"><p class="eyebrow">Backups</p><p class="xs mute" style="margin-top:0">Made every night and thinned as they age: daily for 7 days, weekly for 4 weeks, monthly for 3 months. Restoring saves the current state first, so it can be undone.</p>
     <label for="abk">Automatic backups</label>${yn('abk',S.auto_backup)}
     <label for="bsel">Backup</label><select id="bsel">${S.backups.map(b=>`<option value="${E(b.name)}" data-part="local">${E(b.made.replace('T',' '))} (${b.size_kb} KB)</option>`).join('')||'<option value="">None yet</option>'}</select>

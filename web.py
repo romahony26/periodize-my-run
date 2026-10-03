@@ -1171,9 +1171,8 @@ def about():
             "Add a pair with the date you started using it. Its distance is every run from that date until you start the next pair. Set a limit and you are told when it is passed.",
             "This assumes one pair in use at a time. There is no research-backed distance at which shoes should be replaced.",
         ]),
-        ("On your phone", [
-            "Open the app on your phone and choose Add to Home Screen: it gets its own icon and opens without browser bars.",
-            "For a morning message with the day's session and any easing, set a daily message address under Settings (for example a private ntfy topic) and press Send a test.",
+        ("Daily message", [
+            "For a morning message with the day's session and any easing, set a daily message address under Settings, Advanced (for example a private ntfy topic), save, and press Send a test message.",
         ]),
         ("Missed sessions", [
             "If a session day passes with no run, the session is moved to the first later day that week that keeps an easy or rest day either side of every hard day. It replaces that day's easy run, and the day is marked as moved.",

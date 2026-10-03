@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.20.2 - 2026-10-03
+### Removed
+- The "On your phone" card in Settings. Its Send a test message button now sits under the daily message address in Advanced.
+
 ## 1.20.1 - 2026-10-03
 ### Added
 - The Buy me a coffee link in Settings (About Periodize) and in the README.
