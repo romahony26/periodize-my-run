@@ -17,7 +17,7 @@ async function api(path, body, method){
   return j;
 }
 let fastT=null;
-async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE){S=s;return}if(document.querySelector('.day.drag'))return;S=s;render();clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
+async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV){S=s;return}if(document.querySelector('.day.drag'))return;S=s;render();clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';
   if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize cannot be opened from another device yet.</p><p class="small">On the computer running Periodize, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}
@@ -32,7 +32,7 @@ function render(){
   if(!S.setup_done||!S.setup_seen){$('#nav').innerHTML='';$('#sync').innerHTML='';if(S.setup_done&&!S.setup_seen)wiz.step=6;return wizard()}
   const T={plan:'Plan',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
   $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}" data-v="${v}">${T[v]}</button>`).join('');
-  $$('#nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();render();scrollTo({top:0})});
+  $$('#nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})});
   const j=S.job;
   $('#sync').innerHTML=j.running?`<span class="dot busy"></span>${E(j.progress||'Working')}…`
     :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?'Updated '+E(S.last_run.slice(5).replace('T',' ')):'Not updated yet'} <button class="ghost" id="run">Update</button>`;
@@ -124,11 +124,11 @@ function youView(){
   const f=S.fitness,p=S.profile,L=S.limits,st=S.steps;if(!f)return '<div class="grid"><div class="card c12">No plan yet.</div></div>';
   const t=s=>s?`<span class="num">${fmt(s.time_s)}</span> <span class="mute xs">${nice(s.date)} ${s.date.slice(0,4)}</span>`:'—';
   return `<div class="grid">
-  <div class="card"><p class="eyebrow">Threshold pace</p><div class="big num">${E(f.threshold)}</div><p class="small mute">${f.change>=0?'+':''}${f.change.toFixed(1)}% on last week. Best evidence: ${E(f.evidence)}.</p>
+  <div class="card"><p class="eyebrow" style="display:flex;align-items:center">Threshold pace ${trendBtn('speed')}</p>${TR&&TR.speed?dirTag(TR.speed.dir,TR.speed.window):''}<div class="big num">${E(f.threshold)}</div><p class="small mute">${f.change>=0?'+':''}${f.change.toFixed(1)}% on last week. Best evidence: ${E(f.evidence)}.</p>
     ${S.watch_threshold?(w=>`<p class="xs mute" id="wthr" style="margin:8px 0 0">Your watch's estimate: <b class="num">${E(w.pace)}</b>${w.hr?` at <b class="num">${w.hr}</b> bpm`:''} (${w.date?nice(w.date):'undated'}), ${Math.abs(w.diff)<0.5?'the same as':Math.abs(w.diff)+'% '+(w.diff>0?'faster than':'slower than')} the figure above. ${w.used?'It counts as evidence while it is under six weeks old.':'It is more than six weeks old, so it is shown but not used.'}</p>`)(S.watch_threshold):''}</div>
-  <div class="card"><p class="eyebrow">Race-specific endurance</p><div class="big num">${Math.round(f.endurance*100)}%</div>
+  <div class="card"><p class="eyebrow" style="display:flex;align-items:center">Race-specific endurance ${trendBtn('base')}</p>${TR&&TR.base?dirTag(TR.base.dir,TR.base.window):''}<div class="big num">${Math.round(f.endurance*100)}%</div>
     ${Object.entries(f.endurance_parts).map(([k,v])=>`<div class="xs mute" style="margin-top:8px">${E(k)} · ${Math.round(v*100)}%</div><div class="bar"><i style="width:${Math.round(v*100)}%"></i></div>`).join('')}</div>
-  <div class="card"><p class="eyebrow">Steps outside your runs</p>${st?`<div class="big num">${st.week.toLocaleString()}</div><p class="small mute">a day over the last 7 days. Your normal is ${st.normal.toLocaleString()}${st.yesterday!=null?`; yesterday ${st.yesterday.toLocaleString()}`:''}. About ${U()==='mi'?st.miles_week+' mi':Math.round(st.miles_week*KM)+' km'} of walking a week that the plan does not schedule.</p>
+  <div class="card"><p class="eyebrow" style="display:flex;align-items:center">Steps outside your runs ${trendBtn('steps')}</p>${TR&&TR.steps?dirTag(TR.steps.dir,TR.steps.window):''}${st?`<div class="big num">${st.week.toLocaleString()}</div><p class="small mute">a day over the last 7 days. Your normal is ${st.normal.toLocaleString()}${st.yesterday!=null?`; yesterday ${st.yesterday.toLocaleString()}`:''}. About ${U()==='mi'?st.miles_week+' mi':Math.round(st.miles_week*KM)+' km'} of walking a week that the plan does not schedule.</p>
     <div class="bar"><i style="width:${Math.min(100,Math.round(50*st.week/Math.max(st.normal,1)))}%"></i></div><p class="xs mute" style="margin:6px 0 0">Unusually heavy days and weeks ease your training. See How it works.</p>`:'<p class="small mute">Builds up once a few weeks of step counts are in.</p>'}</div>
   ${S.aerobic?(a=>`<div class="card c12"><p class="eyebrow">Is it working? Pace at the same heart rate</p>
     <div class="grid" style="gap:22px"><div style="grid-column:span 7;min-width:0"><table><tr><th>Month</th>${a.monthly.stages.map(x=>`<th class="r">${x} bpm</th>`).join('')}</tr>
@@ -152,17 +152,18 @@ function youView(){
     ${(rows=>{const tip=s=>nice(s[6])+': fitness '+Math.round(s[1])+', fatigue '+Math.round(s[2])+', form '+(s[3]>0?'+':'')+Math.round(s[3])+', load that day '+s[4];
       return lineChart(rows,1,'var(--brand)','Fitness, last '+rows.length+' days',v=>Math.round(v),false,tip)+lineChart(rows,2,'var(--amber)','Fatigue',v=>Math.round(v),false,tip)+lineChart(rows,3,'var(--race)','Form',v=>Math.round(v),false,tip)})(F.days.map((d,i)=>[i,d.fitness,d.fatigue,d.form,d.load,0,d.date]))}
     <p class="xs mute" style="margin:8px 0 0">Load this week ${F.week}, last week ${F.prev_week}. Fitness is your daily load averaged over about six weeks, fatigue over one; form is the difference. See How it works.</p></div>
-  <div class="card" id="driftcard"><p class="eyebrow">Aerobic drift on long runs</p>${S.drift&&S.drift.length?`<table><tr><th>Date</th><th class="r">Run</th><th class="r">Drift</th></tr>${S.drift.slice().reverse().slice(0,7).map(d=>`<tr><td>${nice(d.date)}</td><td class="r num">${U()==='mi'?d.mi+' mi':Math.round(d.mi*KM)+' km'}</td><td class="r num ${d.drift<=5?'green':'amber'}"><b>${d.drift}%</b></td></tr>`).join('')}</table>
+  <div class="card" id="driftcard"><p class="eyebrow" style="display:flex;align-items:center">Aerobic drift on long runs ${trendBtn('durability')}</p>${TR&&TR.durability?dirTag(TR.durability.dir,TR.durability.window):''}${S.drift&&S.drift.length?`<table><tr><th>Date</th><th class="r">Run</th><th class="r">Drift</th></tr>${S.drift.slice().reverse().slice(0,7).map(d=>`<tr><td>${nice(d.date)}</td><td class="r num">${U()==='mi'?d.mi+' mi':Math.round(d.mi*KM)+' km'}</td><td class="r num ${d.drift<=5?'green':'amber'}"><b>${d.drift}%</b></td></tr>`).join('')}</table>
     <p class="xs mute" style="margin:8px 0 0">How much pace per heartbeat faded in the second half. Lower is better; under 5% is the usual rule of thumb. Heat and hills raise it.</p>`:'<p class="small mute">Appears after a steady run of 70 minutes or more.</p>'}</div>`)(S.form):''}
   <div class="card c12" id="shoecard"><p class="eyebrow">Shoes</p>${S.shoes.length?`<table>${S.shoes.map(s=>`<tr><td><b>${E(s.name)}</b> ${s.current?'<span class="tag green">in use</span>':s.retired?'<span class="tag">retired</span>':''}</td><td class="mute">since ${nice(s.start)} ${s.start.slice(0,4)}</td><td class="r num ${s.over?'amber':''}"><b>${s.dist} ${U()}</b>${s.alert?` <span class="mute">of ${s.alert}</span>`:''}</td><td class="r num mute">${s.runs} runs</td><td class="r"><button class="ghost" data-shdel="${s.id}" aria-label="Remove ${E(s.name)}">Remove</button></td></tr>`).join('')}</table>`:'<p class="small mute">No shoes yet. Add the pair you run in and its distance is counted from your runs.</p>'}
     <div class="row"><div><label for="shn">Name</label><input id="shn" placeholder="Shoe name" maxlength="60"></div><div><label for="shs">Using since</label><input id="shs" type="date" value="${S.today}"></div>
     <div><label for="shm">Distance already on them (${U()})</label><input id="shm" type="number" min="0" size="6"></div><div><label for="sha">Tell me at (${U()}, optional)</label><input id="sha" type="number" min="50" size="6"></div><button class="ghost" id="shadd">Add shoes</button></div>
     <p class="xs mute" style="margin:8px 0 0">A pair counts every run from its start date until the next pair's start date.</p></div>
-  <div class="card c8"><p class="eyebrow">Race predictor</p>${S.predictions?`<table><tr><th>Distance</th><th class="r">If you raced today</th><th class="r">Pace</th><th class="r">With endurance built</th></tr>${S.predictions.map(x=>`<tr><td>${E(x.name)}</td><td class="r num"><b>${x.now}</b></td><td class="r num mute">${E(x.pace)}</td><td class="r num">${x.gap?`${x.full} <span class="mute xs">(${x.gap} faster)</span>`:'<span class="mute">same</span>'}</td></tr>`).join('')}</table>
-    <p class="xs mute" style="margin:8px 0 0">Times come from your current speed and your own record across distances. For the longer races, part of today's time is endurance you have not built yet: the last column is the time at the same speed once your long runs and race-pace miles are in place. Getting faster on top of that moves every row. 50K ignores terrain.</p>`:'<p class="small mute">Available once a plan exists.</p>'}</div>
+  <div class="card c8"><p class="eyebrow">Race predictor</p>${S.predictions?`<table><tr><th>Distance</th><th class="r">If you raced today</th><th class="r">Pace</th><th class="r">With endurance built</th><th class="r">Last 6 weeks</th></tr>${S.predictions.map(x=>{const d=TR&&TR.predictions?TR.predictions[x.name]:undefined;return `<tr><td>${E(x.name)}</td><td class="r num"><b>${x.now}</b></td><td class="r num mute">${E(x.pace)}</td><td class="r num">${x.gap?`${x.full} <span class="mute xs">(${x.gap} faster)</span>`:'<span class="mute">same</span>'}</td><td class="r num ${d<0?'green':d>0?'amber':'mute'}">${d==null?'—':d===0?'same':(d<0?'▼ ':'▲ ')+fmt(Math.abs(d))}</td></tr>`}).join('')}</table>
+    <p class="xs mute" style="margin:8px 0 0">Times come from your current speed and your own record across distances. For the longer races, part of today's time is endurance you have not built yet: "with endurance built" is the time at the same speed once your long runs and race-pace miles are in place. "Last 6 weeks" shows how each prediction has moved: short races follow your speed, long ones also your endurance, so the column shows which kind of fitness you are gaining. Getting faster on top of that moves every row. 50K ignores terrain.</p>`:'<p class="small mute">Available once a plan exists.</p>'}</div>
   <div class="card"><p class="eyebrow">VO2max</p>${S.vo2?`<div class="big num">${S.vo2.garmin??'—'}</div><div class="xs mute">Garmin's estimate${S.vo2.garmin_date?', '+nice(S.vo2.garmin_date):''}</div>
     ${chart('Garmin VO2max by year',S.vo2.by_year,x=>x.v,x=>x.y+': '+x.v,x=>x.y)}
     <p class="xs mute" style="margin:8px 0 0">Garmin's own estimate from your watch, shown for reference. The app's paces and predictions come from your running, not from this figure.</p>`:'<p class="small mute">Available once a plan exists.</p>'}</div>
+  ${recoveryCard()}${trendModal()}
   <div class="card c12"><p class="eyebrow">Race results</p>${S.results.length?`<div style="max-height:340px;overflow:auto"><table><tr><th>Date</th><th>Race</th><th class="r">Time</th><th class="r">Pace</th><th class="r">Age grade</th><th></th><th></th></tr>${S.results.map(x=>`<tr><td class="num">${nice(x.date)} ${x.date.slice(0,4)}</td><td>${E(x.name)}${x.note?`<div class="xs mute" style="max-width:520px">${E(x.note)}</div>`:''}</td><td class="r num"><b>${fmt(x.time_s)}</b></td><td class="r num mute">${E(x.pace)}</td><td class="r num">${x.age_grade?x.age_grade+'%':'<span class="mute">—</span>'}</td><td><span class="tag">${{found:'found in Garmin',log:'your log',entered:'entered'}[x.source]||x.source}</span>${x.counts?'':' <span class="tag">not counted</span>'}</td><td class="r" style="white-space:nowrap"><button class="ghost" data-redit="${x.id}" aria-label="Correct ${E(x.name)}">Correct</button> <button class="ghost" data-rdel="${x.id}" aria-label="Remove ${E(x.name)}">Not a race</button></td></tr>`).join('')}</table></div>`:'<p class="small mute">None yet. They are found in your Garmin history, or add one below.</p>'}
     ${S.best_grade?`<p class="xs mute" style="margin:8px 0 0">Best age grade: <b class="num">${S.best_grade.age_grade}%</b> (${E(S.best_grade.name.split(' · ')[0])}, ${S.best_grade.date.slice(0,4)}). Age grade is your time against the world-best standard for your age and sex.</p>`:S.about_you.sex&&S.about_you.birth_date?'':'<p class="xs mute" style="margin:8px 0 0">Add your sex and date of birth under Settings to see age grades.</p>'}
     <div class="row"><div><label for="xn">Race</label><input id="xn" placeholder="Race name"></div><div><label for="xd">Date</label><input id="xd" type="date"></div>
@@ -297,7 +298,7 @@ function histView(){
   return h+'</div></div>'+dayModal()}
 const scc=v=>v>=85?'green':v>=65?'amber':'red';
 const SCTIP='Execution score out of 100: how closely the run matched the planned session. 85 or more is on target, 65 to 84 is close, under 65 is off target. Open the detail to see why.';
-let CH={}, CHN=0, CHANGES=null, PACE=null, MAPZ=0;
+let CH={}, CHN=0, CHANGES=null, PACE=null, MAPZ=0, TR=null, TRV=null;
 const GLINK=(id,cls)=>`<a class="gl ${cls||''}" href="https://connect.garmin.com/modern/activity/${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer" title="Open in Garmin Connect" aria-label="Open this activity in Garmin Connect"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6 15 14H1z" fill="#007cc3"/></svg></a>`;
 function lineChart(series,idx,color,label,fmtv,invert,tip){
   const pts=series.filter(s=>s[idx]!=null);if(pts.length<3)return '';
@@ -368,6 +369,27 @@ function dayModal(){
   return h+'</div></div>'}
 async function openDay(date){SEL=null;DAY={loading:true};render();try{DAY=await api('day/'+date)}catch(e){DAY=null}render()}
 async function loadHist(){HIST=await api('history');if(view==='hist')render()}
+async function loadTrends(){try{TR=await api('trends')}catch(e){TR={}}if(view==='you')render()}
+const DIRS={rising:['green','▲ Improving'],falling:['amber','▼ Slipping'],steady:['','Steady'],higher:['amber','▲ Above your normal'],lower:['','▼ Below your normal']};
+function dirTag(d,win){if(!d)return '';const [c,t]=DIRS[d]||['',d];return `<span class="tag ${c}" title="Over ${E(win||'')}">${t}</span>`}
+function trendBtn(k){return `<button class="ghost xs" data-trend="${k}" style="margin-left:auto;padding:3px 9px" aria-label="Show the trend">Trend</button>`}
+function secPace(v){if(!v)return '—';const s=(U()==='mi'?1609.344:1000)/v;return Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0')+'/'+U()}
+function dayNum(d){return Date.parse(d+'T12:00:00Z')/864e5}
+function trendModal(){if(!TRV)return '';const t=TR&&TR[TRV];
+  const body=!TR?'<p><span class="spin"></span>Loading</p>':!t||!t.rows||t.rows.length<3?'<p class="small mute">Not enough history yet for a trend. It builds up week by week.</p>':(()=>{
+    const ser=t.rows.map(r=>[dayNum(r.date),r.v]);
+    const fv=TRV==='speed'?secPace:TRV==='base'?v=>Math.round(v)+'%':TRV==='durability'?v=>v+'%':v=>Math.round(v).toLocaleString();
+    const tip=s=>{const r=t.rows.find(x=>dayNum(x.date)===s[0]);return nice(r.date)+': '+fv(r.v)+(r.mi?` (${U()==='mi'?r.mi+' mi':Math.round(r.mi*KM)+' km'} run)`:'')};
+    return lineChart(ser,1,'var(--brand)',t.title,fv,TRV==='durability',tip)})();
+  return `<div class="ov" id="tov"><div class="modal" style="width:min(680px,100%)" role="dialog" aria-modal="true" aria-labelledby="tmt"><p class="eyebrow"><span id="tmt">${E(t?t.title:'Trend')}</span> ${t?dirTag(t.dir,t.window):''}<button class="ghost" id="trex" style="margin-left:auto" aria-label="Close">Close</button></p>
+    ${body}${t?`<p class="small" style="margin:10px 0 0">${E(t.text)}</p>${t.change!=null&&TRV!=='steps'?`<p class="xs mute" style="margin:6px 0 0">Change over ${E(t.window)}: <b class="num">${t.change>0?'+':''}${t.change}${TRV==='speed'?'%':TRV==='base'?' points':' points of drift'}</b></p>`:''}`:''}</div></div>`}
+function recoveryCard(){const R=TR&&TR.recovery;
+  if(!R)return `<div class="card c12" id="reccard"><p class="eyebrow">Recovery trends</p><p class="small mute">${TR?'Builds up once a few weeks of sleep and HRV are in.':'<span class="spin"></span>Loading'}</p></div>`;
+  const one=(k,color,invert)=>{const x=R[k];if(!x||x.rows.length<3)return '';const ser=x.rows.map(r=>[dayNum(r.date),r.v]);const fv=v=>v+' '+x.unit;
+    return `<div style="grid-column:span 4;min-width:0">${lineChart(ser,1,color,x.label,fv,invert,s=>{const r=x.rows.find(y=>dayNum(y.date)===s[0]);return nice(r.date)+': '+fv(r.v)})}
+      <p class="xs mute" style="margin:4px 0 0">${x.normal?`Your normal ${x.normal[0]} ${x.unit} (±${x.normal[1]}) `:''}${dirTag(x.dir,'7 days against your normal')}</p></div>`};
+  return `<div class="card c12" id="reccard"><p class="eyebrow">Recovery trends</p><div class="grid" style="gap:18px">${one('hrv','var(--green)',false)}${one('rhr','var(--amber)',true)}${one('sleep_h','var(--brand)',false)}</div>
+    <p class="xs mute" style="margin:8px 0 0">7-day averages over 12 weeks, the way the research reads them: one night is noise, a week-long drift is real. Higher HRV, lower resting heart rate and more sleep are better, so each chart is drawn with better as up. These are the same figures the daily adjustment uses.</p></div>`}
 function changesView(){if(!CHANGES)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
   const col={Added:'green',Changed:'amber',Removed:'red',Fixed:'unknown'};
   return `<div class="grid"><div class="card c12"><p class="eyebrow">Change log</p><p class="small mute" style="margin:0">You are running version <b class="num">${E(S.version)}</b>. Every version is listed here, newest first, with what was added, changed, removed or fixed.</p></div>
@@ -461,6 +483,9 @@ function bind(){
   $$('[data-pace]').forEach(b=>b.onclick=()=>pace(b.dataset.pace));
   on('#pgo',()=>pace($('#pgo').dataset.race,$('#ptime').value));
   on('#pacex',()=>{PACE=null;render()});
+  $$('[data-trend]').forEach(b=>b.onclick=()=>{TRV=b.dataset.trend;render();if(!TR)loadTrends()});
+  on('#trex',()=>{TRV=null;render()});
+  if($('#tov'))$('#tov').onclick=e=>{if(e.target.id==='tov'){TRV=null;render()}};
   if($('#pov'))$('#pov').onclick=e=>{if(e.target.id==='pov'){PACE=null;render()}};
   $$('[data-mz]').forEach(b=>b.onclick=()=>{MAPZ=Math.max(-3,Math.min(4,MAPZ+(+b.dataset.mz)));render()});
   if($('#mapsw'))$('#mapsw').onchange=async()=>{await api('settings',{map_tiles:$('#mapsw').value==='1'});toast('Saved');location.reload()};
@@ -488,6 +513,6 @@ function bind(){
     d.ondrop=async e=>{e.preventDefault();d.classList.remove('over');const a=e.dataTransfer.getData('text/plain')||from,b=d.dataset.date;if(!a||a===b)return;
       try{const r=await api('plan/move',{from:a,to:b});r.warning?toast(r.warning,'warn'):toast('Swapped. Updating your watch.');await load()}catch(x){}}});
 }
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(SEL||DAY||PACE)){SEL=null;DAY=null;PACE=null;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(SEL||DAY||PACE||TRV)){SEL=null;DAY=null;PACE=null;TRV=null;render()}});
 load();
 setInterval(()=>{const a=document.activeElement;if(a&&['INPUT','SELECT'].includes(a.tagName))return;if(document.querySelector('.day.drag'))return;load()},6000);

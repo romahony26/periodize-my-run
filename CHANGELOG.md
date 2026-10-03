@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.19.0 - 2026-10-03
+### Added
+- Trends on the Fitness page. Threshold pace (speed), Race-specific endurance (the endurance base), Aerobic drift (durability) and Steps outside your runs each have a Trend button showing up to 26 weeks, and a tag saying whether each is improving, steady or slipping over the window that suits it: speed over 6 weeks (steady within 1%), endurance base over 4 weeks, durability over the last six long runs, steps over 7 days against your normal.
+- The weekly history behind the trends is rebuilt from your past runs, so the charts reach back before the app was installed. It is kept up to date by the daily update.
+- A Recovery trends card: 7-day heart-rate variability, resting heart rate and sleep over 12 weeks, each against your normal.
+- The race predictor has a "Last 6 weeks" column showing how each prediction has moved: short races follow speed, long races also endurance, so it shows which kind of fitness you are gaining.
+- PRINCIPLES.md: fitness as three things (speed, endurance base, durability), each with its trend window.
+
 ## 1.18.0 - 2026-10-03
 ### Added
 - 5K and 10K goals get a taper: the week before race week drops to about 70% with a short session kept, about 8 to 14 days in all.

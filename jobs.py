@@ -18,6 +18,7 @@ import aerobic
 import profile
 import push
 import results
+import trends
 import vault
 from log import log, scrub
 
@@ -320,6 +321,13 @@ def run(kind):
             _progress("Sending workouts to Garmin")
             sent, removed, same = push.sync_calendar(db.cfg())
             msg = f"{sent} workouts sent, {same} unchanged"
+        if kind in ("setup", "daily", "replan"):
+            try:                       # keep the weekly fitness history for the trend charts up to date, so the page never waits for it
+                _c, _p, _r, _L = context()
+                if _L:
+                    trends.history(_c, _L, dt.date.today())
+            except Exception as e:
+                log.error("Trend history update failed: %s", type(e).__name__)
         if kind == "daily" and c["auto_backup"]:
             backup.nightly()
         if kind == "setup":

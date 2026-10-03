@@ -43,6 +43,7 @@ import push
 import results
 import vault
 import equiv
+import trends
 from flask.sessions import SecureCookieSessionInterface
 
 from log import log, scrub, setup
@@ -880,6 +881,27 @@ def learned(c, L):
     if m.get("updated"):
         out.append(f"Last recalculated {m['updated']}. It is redone after every sync.")
     return out
+
+
+_TRENDS = {"key": None, "data": None}
+
+
+@app.get("/api/trends")
+def trends_view():
+    """Speed, endurance base, durability, steps and recovery over time, each with its direction. Cached until the next sync."""
+    c, today = db.cfg(), dt.date.today()
+    lo = jobs.last_ok(("setup", "daily", "replan", "readiness", "push"))
+    key = (today.isoformat(), lo.isoformat() if lo else None, c["units"])
+    if _TRENDS["key"] != key:
+        _c, prof, rs, L = jobs.context()
+        if not prof or not L:
+            return jsonify(error="Not enough data yet."), 404
+        hist = trends.history(_c, L, today)
+        _TRENDS["data"] = {"speed": trends.speed(c, hist), "base": trends.base(hist), "durability": trends.durability(today),
+                           "steps": trends.steps(today), "recovery": trends.recovery(today),
+                           "predictions": trends.prediction_change(_c, hist, trends.all_distances())}
+        _TRENDS["key"] = key
+    return jsonify(_TRENDS["data"])
 
 
 @app.get("/api/backups")

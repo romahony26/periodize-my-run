@@ -94,7 +94,7 @@ def drift(series):
     return round(100 * (a / b - 1), 1)
 
 
-def drift_history(today, weeks=16, min_minutes=70):
+def drift_history(today, weeks=16, min_minutes=70, limit=10):
     """Aerobic drift on each long steady run."""
     plan = {r["date"]: r["type"] for r in db.rows("SELECT date,type FROM plan WHERE date>=?", ((today - dt.timedelta(weeks=weeks)).isoformat(),))}
     out = []
@@ -104,7 +104,7 @@ def drift_history(today, weeks=16, min_minutes=70):
         d = drift(r.get("series"))
         if d is not None:
             out.append({"date": r["date"].isoformat(), "mi": round(r["mi"], 1), "minutes": round(r["timer_s"] / 60), "drift": d})
-    return out[-10:]
+    return out[-limit:]
 
 
 def fuel(minutes, per_hour=None, gel_g=25, race=False):
