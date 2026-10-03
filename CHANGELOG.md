@@ -3,6 +3,17 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.18.0 - 2026-10-03
+### Added
+- 5K and 10K goals get a taper: the week before race week drops to about 70% with a short session kept, about 8 to 14 days in all.
+- One of the two weekly strength sessions now includes plyometrics (pogo hops, skips for height, bounds), which the research links with better economy and faster 5K times.
+- Hilly goal races: every third week of the specific phase, the long run includes 15 to 30 minutes of steady downhill running, which protects the legs against downhill muscle damage for weeks after.
+- Course pacing marks every sustained climb of 20% or steeper for walking in races of three hours or more.
+- Ultra race-day notes: at least 30 to 50 g of carbohydrate an hour from the start, start slower than feels necessary, no ibuprofen (with the trial behind it), and naps under 30 minutes and banked sleep for races through the night.
+- PRINCIPLES.md: new sections on 5K and 10K and on ultras and hilly trail races (75 principles in all), each graded honestly; the evidence for ultras is mostly laboratory, race-record and survey data.
+### Fixed
+- A fuel-practice note no longer replaces another note on the same long run.
+
 ## 1.17.0 - 2026-10-03
 ### Added
 - Fitness fades during a break: after 10 days without a run the fitness estimate eases by 0.35% a day, up to 12%, following the detraining research, so your first paces back match what you can do now. Before, it could fall by only 0.5% a week.

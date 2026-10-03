@@ -200,7 +200,9 @@ real Garmin login is not covered by the suite.
   or injured. Override it when you know better.
 - Running only, Garmin only.
 - Marathon planning is the most developed. 5K, 10K, half marathon and ultra
-  goals use simpler session rules. Ultra predictions ignore terrain.
+  goals use simpler session rules, and the research behind ultra and mountain
+  training is thin (see PRINCIPLES.md, sections 11 and 12). Ultra predictions
+  ignore terrain, heat, night and altitude.
 - No run/walk plans for complete beginners.
 - This is a training tool, not medical advice.
 

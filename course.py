@@ -4,7 +4,10 @@
     because GPX elevation is noisy and noise reads as climbing.
   - Pacing is even effort: every stretch is run at the same energy cost, using Minetti's measured cost of running on a gradient
     (Minetti et al. 2002), the same curve the app uses for grade-adjusted pace. Uphill miles come out slower, downhill miles faster,
-    and the total is the target time. It does not model fatigue, walking, footing, wind or heat.
+    and the total is the target time. It does not model fatigue, footing, wind or heat.
+  - In races of three hours or more, a split with a sustained climb of 20% or steeper is marked for walking. On steep enough
+    ground walking costs less energy than running at the same climbing speed (Giovanelli and colleagues, 2016); the 20% line is
+    this project's choice, below the gradient where the lab measured it, because tired legs and slower climbers favour walking sooner.
   - Climb targets are specificity, a coaching principle rather than a research finding: by three weeks out, your weekly climb per
     mile matches the race's. The ramp starts sixteen weeks out from wherever you are now.
 """
@@ -15,6 +18,8 @@ from assess import MI
 from fitrun import effort
 
 STEP = 100.0
+HIKE_GRADE = 0.20               # sustained climbs this steep are walked in long races
+HIKE_MIN_S = 3 * 3600
 HILLY_M_PER_MILE = 16.0        # about 10 m per km: below this a course is treated as flat for training purposes
 
 
@@ -61,17 +66,21 @@ def pacing(profile, race_miles, target_s, units="mi"):
     for k in range(count):
         a, b = k * per, min((k + 1) * per, race_miles * MI)
         secs = up = down = 0.0
+        steep = False
         j = int(a // seg)
         while j < n and j * seg < b - 1e-6:
             part = (min((j + 1) * seg, b) - max(j * seg, a)) / seg
             secs += part * cost[j] / total_cost * target_s
             dz = (profile[j + 1] - profile[j]) * part * scale
             up, down = up + max(dz, 0), down + max(-dz, 0)
+            k3 = min(j + 3, n)                               # 300 m ahead: a sustained climb, not a bump
+            steep = steep or (k3 > j and (profile[k3] - profile[j]) / (STEP * (k3 - j)) >= HIKE_GRADE)
             j += 1
         t += secs
         length = (b - a) / per
         rows.append({"n": k + 1, "len": round(length, 2), "split_s": round(secs), "pace_s": round(secs / length) if length > 0.05 else None,
-                     "cum_s": round(t), "up_m": round(up), "down_m": round(down)})
+                     "cum_s": round(t), "up_m": round(up), "down_m": round(down),
+                     "walk": bool(steep and target_s >= HIKE_MIN_S)})
     flat = target_s / (race_miles * MI / per)
     return {"rows": rows, "flat_pace_s": round(flat), "climb_m": round(climb(profile) * scale), "target_s": round(target_s), "units": units,
             "slowest": max((r for r in rows if r["pace_s"]), key=lambda r: r["pace_s"])["n"], "fastest": min((r for r in rows if r["pace_s"]), key=lambda r: r["pace_s"])["n"]}

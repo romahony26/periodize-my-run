@@ -102,7 +102,8 @@ def workout(day, tp, c, slow=0.0):
 STRENGTH_SPORT = {"sportTypeId": 5, "sportTypeKey": "strength_training", "displayOrder": 5}
 STRENGTH = {
     "Strength A": "Squat or leg press; single-leg deadlift; calf raises (straight and bent knee); side plank. 3 sets of 5-8 controlled reps, well short of failure.",
-    "Strength B": "Split squat or step-up; hip thrust; calf raises; hamstring curl or bridge walk-outs. 3 sets of 5-8 controlled reps, well short of failure.",
+    "Strength B": "Split squat or step-up; hip thrust; hamstring curl or bridge walk-outs, 3 sets of 5-8 controlled reps, well short of failure. Then plyometrics: "
+                  "pogo hops 3 x 20, skipping for height 3 x 20 m, bounding 3 x 20 m, quick and light, full recovery between.",
 }
 
 

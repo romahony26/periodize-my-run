@@ -1215,7 +1215,7 @@ def about():
         ("Strength", [
             "Two short sessions a week on the days shown, one a week in the race-specific phase, none in the last two weeks before the goal race.",
             "Strength A: squat or leg press; single-leg deadlift; calf raises with straight and bent knee; side plank.",
-            "Strength B: split squat or step-up; hip thrust; calf raises; hamstring curl or bridge walk-outs.",
+            "Strength B: split squat or step-up; hip thrust; hamstring curl or bridge walk-outs; then plyometrics: pogo hops, skipping for height and bounding, quick and light, with full recovery between sets.",
             "Three sets of 5–8 controlled reps, stopping well short of failure. Start light for four weeks, then add load.",
         ]),
         ("Backups and calendars", [

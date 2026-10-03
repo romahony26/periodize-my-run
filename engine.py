@@ -215,7 +215,7 @@ def plan(st, c, L, races):
     build_weeks = c["build_weeks_before_down"]
     if age and age >= 50 and not db.rows("SELECT 1 FROM settings WHERE key='build_weeks_before_down'"):
         build_weeks = min(build_weeks, 2)      # from 50, a down week every third week: recovery takes longer with age [C]
-    taper_weeks = (2, 3) if gtype in ("marathon", "ultra") else (2,) if gtype == "half" else ()
+    taper_weeks = (2, 3) if gtype in ("marathon", "ultra") else (2,)      # 5K to half: the week before race week (8-14 days in all)
     if this_races and this_races[-1]["priority"] == "A":
         mode = "race"
     elif wtr in taper_weeks:
@@ -253,7 +253,7 @@ def plan(st, c, L, races):
     else:
         target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": comeback[0] if comeback else 0.80 * prior3,
                   "postrace": min(0.5 * ref, 25), "tuneup": 0.75 * ref,
-                  "taper": (0.80 if wtr == 3 else 0.65) * max(ref, 0.9 * max(wk[-6:] or [0])), "race": 0.4 * ref}[mode]
+                  "taper": (0.80 if wtr == 3 else 0.65 if gtype in ("marathon", "ultra", "half") else 0.70) * max(ref, 0.9 * max(wk[-6:] or [0])), "race": 0.4 * ref}[mode]
     target = max(target, c["min_miles"])
 
     # ---- layout ----
@@ -454,7 +454,7 @@ def plan(st, c, L, races):
                 + (f" Fuel: {c['race_carbs_g_per_h']} g of carbohydrate an hour." if r["miles"] >= 13 else ""))
         kg = _weight()
         if a_race:
-            note += race_day_advice(kg)
+            note += race_day_advice(kg, r["miles"], now_s)
         prep = {back: race_eve_advice(r["miles"], back, kg) for back in (1, 2)} if a_race else {}
         wu = 0 if r["miles"] >= 20 else 2
         week[i] = {"type": "Race", "label": r["name"], "note": note, "miles": round(r["miles"] + (wu + 1 if wu else 0), 3),
@@ -494,7 +494,14 @@ def plan(st, c, L, races):
         fuel = 30 if wtr > 27 else 45 if wtr > 18 else 60 if wtr > 10 else 70
         long_i = next((i for i in range(7) if days[i]["type"] == "Long"), None)
         if long_i is not None and days[long_i]["miles"] >= 12:
-            days[long_i]["note"] = f"Fuel practice: {fuel} g of carbohydrate an hour."
+            days[long_i]["note"] = (days[long_i]["note"] + " " if days[long_i]["note"] else "") + f"Fuel practice: {fuel} g of carbohydrate an hour."
+    hilly = goal and goal.get("climb_m") and goal.get("miles") and goal["climb_m"] / goal["miles"] >= 16
+    if hilly and specific and mode == "build" and week_no % 3 == 0:
+        long_i = next((i for i in range(7) if days[i]["type"] == "Long"), None)
+        if long_i is not None:
+            days[long_i]["note"] = ("Downhill practice: include 15 to 30 minutes of steady downhill running on a route like the race's. One session "
+                                    "protects the legs against downhill damage for weeks after. " + days[long_i]["note"]).strip()
+            why.append("Downhill practice on this week's long run: your goal race is hilly, and descending is what damages the legs most in long races.")
     return {"mode": mode, "weeks_to_race": wtr, "goal": goal, "gtype": gtype, "target": target, "total": sum(d["miles"] for d in days),
             "days": days, "why": why, "done": done, "long": max((d["miles"] for d in days), default=0)}
 
@@ -514,11 +521,19 @@ def race_eve_advice(miles, back, kg):
     return ""
 
 
-def race_day_advice(kg):
-    """Race-day reminders that follow the research: caffeine, drinking, painkillers, shoes. Each one is something to have tried in training."""
+def race_day_advice(kg, miles=26.2, predicted_s=0):
+    """Race-day reminders that follow the research: caffeine, drinking, painkillers, shoes; for ultras, steady fuelling and sleep.
+    Each one is something to have tried in training."""
     mg = f" (about {round(kg * 3 / 25) * 25} mg for you)" if kg else ""
-    return (f" Optional: caffeine at about 3 mg per kg{mg} an hour before, only if you have tried it in training. Drink to thirst, not by schedule."
-            " No ibuprofen or similar painkillers before or during. Race in shoes you have already run in at race pace.")
+    out = (f" Optional: caffeine at about 3 mg per kg{mg} an hour before, only if you have tried it in training. Drink to thirst, not by schedule."
+           " No ibuprofen or similar painkillers before or during" + (": in an ultra trial it raised the rate of kidney injury." if miles > 26.3 else ".") +
+           " Race in shoes you have already run in at race pace.")
+    if miles > 26.3:
+        out += (" Eat from the start and keep eating: at least 30 to 50 g of carbohydrate an hour, more if your gut is trained to it."
+                " Start slower than feels necessary: the fastest ultra runners pace most evenly, and the legs, not the lungs, usually decide the end.")
+    if predicted_s >= 18 * 3600:
+        out += " If you will run through a night, plan short naps of under 30 minutes, and sleep extra in the week before."
+    return out
 
 
 def project(st, pl):

@@ -19,8 +19,10 @@ Every principle carries one mark:
 - **[P]** this project's own choice of a value or a rule, made because something had to be chosen.
 
 Most of the research was done on trained recreational and sub-elite runners, over 6 to 16 weeks, with 10K or laboratory tests
-rather than marathons. Women and older runners are under-represented. Averages hide wide individual differences in almost every
-finding. That is why Periodize keeps measuring the athlete against their own history.
+rather than marathons. The evidence is thinnest at the two ends: 5K and 10K training rests on a handful of small trials, and
+ultramarathons and mountain races have almost no training trials at all, so sections 11 and 12 lean more on laboratory studies,
+race data and coaching practice, and say so. Women and older runners are under-represented. Averages hide wide individual
+differences in almost every finding. That is why Periodize keeps measuring the athlete against their own history.
 
 ## 1. Foundations
 
@@ -128,9 +130,11 @@ finding. That is why Periodize keeps measuring the athlete against their own his
     and lets the pace float. The heart rate moves up 5 beats only when 10 miles at the current level is comfortable. [P]
 32. **Short fast strides and 200 m repeats** keep speed and form without heavy fatigue. [C]
 33. **Strength training improves running economy without harming aerobic fitness.** [R] (*strong*) Heavy-load and plyometric
-    training work best; light-load and isometric training much less (Llanos-Lagos and colleagues, 2024). One trial also found it
-    made economy hold up better late in a long run (Zanini and colleagues, 2025) (*limited*). Periodize places two short sessions
-    a week on easy days, one a week in the race-specific phase, and none in the last two weeks before the goal race. [C]
+    training work best; light-load and isometric training much less (Llanos-Lagos and colleagues, 2024). Explosive training cut 5K
+    times by about 3% in nine weeks (Paavolainen and colleagues, 1999) (*moderate*), and one trial found strength work made economy
+    hold up better late in a long run (Zanini and colleagues, 2025) (*limited*). Periodize places two short sessions a week on easy
+    days, one heavy and one with plyometrics (hops, skips, bounds); one a week in the race-specific phase; none in the last two
+    weeks before the goal race. [C]
 
 ## 6. The shape of a season
 
@@ -145,7 +149,9 @@ finding. That is why Periodize keeps measuring the athlete against their own his
     and the usual number of runs improves performance (Bosquet and colleagues, 2007; Wang and colleagues, 2023). Among 158,000
     recreational marathoners, a disciplined three-week taper was linked with finishing about 2.6% faster than a minimal one (Smyth
     and Lawlor, 2021) (*moderate*). Periodize tapers over three weeks for the marathon and ultra (about 80%, then 65%, then race
-    week) and two weeks for the half.
+    week) and two weeks for the half (65%, then race week). For 5K and 10K, the week before race week drops to about 70%, keeping
+    a short session: about 8 to 14 days in all, the range the meta-analysis found best. Taper length for ultras has never been
+    tested; the marathon taper is borrowed.
 37. **A race is followed by recovery.** [R] (*limited*) Easy running from two days after a marathon did not slow recovery
     compared with rest (Martínez-Navarro and colleagues, 2021). Periodize plans a recovery week at about half your usual volume
     after a race or a very long run, with no sessions. [C]
@@ -216,18 +222,62 @@ finding. That is why Periodize keeps measuring the athlete against their own his
 58. **Race results are compared across ages with age grading.** [R] (*moderate*) Performance declines with age at a known average
     rate (Tanaka and Seals, 2008); standards by age, sex and distance come from public-domain tables (Jones, 2025).
 
-## 11. Measurement limits
+## 11. 5K and 10K
 
-59. **Wrist heart rate is imperfect.** [R] (*moderate*) Wrist monitors agree less well with a medical ECG than chest straps do,
+59. **The easy share stays high for short races too.** [R] (*moderate*) With the hard work held equal, sub-elite runners who did
+    about four fifths of their running easy improved more over 10 km than those who did two thirds at threshold (Esteve-Lanao and
+    colleagues, 2007). The extra intensity a short race needs comes from intervals, not from harder easy days.
+60. **Intervals of a few minutes near 5K pace are the main session.** [R] (*strong*) Intervals of 2 to 4 minutes, between
+    threshold and maximal aerobic pace, improve race performance more than all-out sprints (Rosenblat and colleagues, 2020).
+    For a 5K or 10K goal Periodize alternates 5K-pace and 10K-pace intervals week by week, with threshold work alongside. [C]
+61. **Short all-out efforts help only if volume holds.** [R] (*moderate*) Repeated 30-second sprints improved 10K time when
+    weekly volume fell by a quarter, but not when it fell by two thirds (Bangsbo and colleagues, 2009; Iaia and colleagues, 2009).
+    Periodize keeps volume and uses relaxed 200 m repeats and strides for speed instead.
+
+## 12. Ultras and hilly trail races
+
+What is known here comes mostly from laboratory studies of hills, race records and surveys of finishers. There are almost no trials
+of ultra training, so read these as the best available reasoning, not proven method.
+
+62. **In long ultras the legs give out before the lungs.** [R] (*moderate*) Muscle damage, above all from running downhill,
+    limits performance more than aerobic capacity, economy or the gut (Tiller and Millet, 2024). Uphill running works the hips
+    harder; downhill running loads the thighs as they lengthen, which is what damages them (Vernillo and colleagues, 2017).
+63. **Practise descending.** [R] (*strong* that it protects; *limited* on how often) One session of downhill running reduces the
+    muscle damage from the next, for up to about nine weeks; eccentric and plyometric strength work gives a smaller version of the
+    same protection (Bontemps and colleagues, 2020). For a hilly goal race, Periodize adds 15 to 30 minutes of steady downhill
+    running to the long run every third week of the specific phase. [P]
+64. **Train on ground like the race.** [C] Weekly climb rises toward the race's climb per mile over the final months; an injury
+    review also linked low yearly climbing and mostly-asphalt training with more injury in trail runners (*limited*).
+65. **Walk the steep climbs.** [R] (*moderate*) On steep enough ground, walking costs less energy than running at the same rate of
+    climb, and poles mainly make it feel easier (Giovanelli and colleagues, 2016, 2019). In races of three hours or more, the
+    pacing plan marks every sustained climb of 20% or steeper for walking. The 20% line is this project's choice, set below the
+    gradient where the laboratory found the crossover, because tired legs and slower climbers favour walking sooner. [P]
+66. **Volume and experience matter most.** [R] (*moderate*) Previous ultra finishes, marathon best and weekly training volume
+    predict ultra performance best (Knechtle and colleagues, 2010). Long runs stay easy, and in the specific phase a medium run
+    the day before the long run practises running on tired legs. [C]
+67. **Start slower than feels necessary.** [R] (*moderate*) Almost every ultra runner slows down; the fastest start relatively
+    slower and hold their speed most evenly (race records from Western States and the Ultra-Trail du Mont-Blanc).
+68. **Eat from the start, and keep eating.** [R] (*strong*) At least 30 to 50 g of carbohydrate an hour, more if your gut is
+    trained to it (Tiller and colleagues, 2019). Drink to thirst; drinking too much, not too little, causes the dangerous fall in
+    blood sodium (Hew-Butler and colleagues, 2015).
+69. **No ibuprofen during an ultra.** [R] (*strong*) In a randomised, placebo-controlled trial, ibuprofen during an ultra raised
+    the rate of acute kidney injury from 34% to 52% (Lipman and colleagues, 2017).
+70. **Plan for the night.** [R] (*limited*) In races through the night most runners nap, usually for under 30 minutes, and most bank
+    extra sleep in the week before; four in five report symptoms of sleep loss, including falls and hallucinations (Martin and
+    colleagues, 2018). Periodize adds these points to the race-day notes when the predicted time is 18 hours or more.
+
+## 13. Measurement limits
+
+71. **Wrist heart rate is imperfect.** [R] (*moderate*) Wrist monitors agree less well with a medical ECG than chest straps do,
     and in one comparison a Garmin wrist monitor agreed least well of the devices tested (Gillinov and colleagues, 2017). They are
     least reliable at high intensity and in the cold, so Periodize uses heart rate over minutes, never seconds, and a chest strap
     improves everything heart-rate based.
-60. **A watch's fitness estimates are approximate.** [R] (*moderate*) Garmin's VO2max estimate was within about 7% of laboratory
+72. **A watch's fitness estimates are approximate.** [R] (*moderate*) Garmin's VO2max estimate was within about 7% of laboratory
     values on average (Carrier and colleagues, 2025), and is thrown off by heat, terrain and a wrong maximum heart rate.
-61. **A watch's distance on a treadmill is a guess.** [P] Treadmill runs are judged by heart rate and time.
-62. **A watch's altitude can be wrong.** [P] Each watch's altitude is checked on runs that start and finish in the same place,
+73. **A watch's distance on a treadmill is a guess.** [P] Treadmill runs are judged by heart rate and time.
+74. **A watch's altitude can be wrong.** [P] Each watch's altitude is checked on runs that start and finish in the same place,
     and hills are only adjusted for when it proves reliable.
-63. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
+75. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
     measures built from watch data. They guide training; they do not diagnose anything.
 
 ## Known gaps: where Periodize does not yet follow the evidence
@@ -239,6 +289,11 @@ Listed so they are not mistaken for principles.
 - **Heat** slows runners, and slower runners proportionally more (Ely and colleagues, 2007), but paces are not adjusted for it:
   doing so would need a weather service, and Periodize talks to nothing but Garmin.
 - **Sex** does not change the plan, and from age 50 only the down-week rhythm changes, not the spacing of hard days.
+- **Ultra and trail training is still measured in distance.** Time on feet and climbing matter more than distance on the
+  mountain, but the plan, the watch and the long-run limits still count miles. Hiking and pole practice, night running, heat
+  and altitude preparation are not planned.
+- **Ultra predictions** come from road fitness and ignore terrain, heat, night and altitude; for ultras the pacing plan shows how
+  to spread effort, not times to hit.
 - **Low energy availability** (not eating enough for the training) harms health and performance (Mountjoy and colleagues, 2023);
   Periodize does not screen for it.
 
@@ -250,6 +305,8 @@ on a detail.
 
 - Banister EW (1991). Modeling elite athletic performance. In: *Physiological Testing of Elite Athletes*. Human Kinetics. *From memory; a book chapter.*
 - Bassett DR, Howley ET (2000). Limiting factors for maximum oxygen uptake and determinants of endurance performance. *Med Sci Sports Exerc* 32:70–84.
+- Bangsbo J and colleagues (2009). Reduced volume and increased training intensity elevate muscle Na+-K+ pump α2-subunit expression as well as short- and long-term work capacity in humans. *J Appl Physiol*. *From memory; finding search-confirmed.*
+- Bontemps B, Vercruyssen F, Gruet M, Louis J (2020). Downhill running: what are the effects and how can we adapt? A narrative review. *Sports Med*.
 - Bosquet L, Montpetit J, Arvisais D, Mujika I (2007). Effects of tapering on performance: a meta-analysis. *Med Sci Sports Exerc*.
 - Buist I and colleagues (2008). No effect of a graded training program on the number of running-related injuries in novice runners: a randomized controlled trial. *Am J Sports Med*.
 - Carrier B, Marten Chaves S, Navalta JW (2025). Validation of aerobic capacity (VO2max) and pulse oximetry in wearable technology. *Sensors*.
@@ -260,23 +317,30 @@ on a detail.
 - Doherty C and colleagues (2020). An evaluation of the training determinants of marathon performance: a meta-analysis with meta-regression. *J Sci Med Sport* 23:182–188.
 - Düking P and colleagues (2021). Monitoring and adapting endurance training on the basis of heart rate variability monitored by wearable technologies. *J Sci Med Sport*.
 - Ely MR, Cheuvront SN, Roberts WO, Montain SJ (2007). Impact of weather on marathon-running performance. *Med Sci Sports Exerc*.
+- Esteve-Lanao J, Foster C, Seiler S, Lucia A (2007). Impact of training intensity distribution on performance in endurance athletes. *J Strength Cond Res* 21:943–949.
 - Foster C and colleagues (2001). Differences in perceptions of training by coaches and athletes. *S Afr J Sports Med*. *From memory.*
 - Gillinov S and colleagues (2017). Variable accuracy of wearable heart rate monitors during aerobic exercise. *Med Sci Sports Exerc* 49:1697–1703.
+- Giovanelli N, Ortiz ALR, Henninger K, Kram R (2016). Energetics of vertical kilometer foot races; is steeper cheaper? *J Appl Physiol* 120:370–375.
+- Giovanelli N and colleagues (2019). Do poles save energy during steep uphill walking? *Eur J Appl Physiol*.
 - Grivas and colleagues (2026). Training variability and threshold density: a conceptual comparison of East African and Norwegian endurance training systems. *Front Physiol*.
 - Haugen T, Sandbakk Ø, Seiler S, Tønnessen E (2022). The training characteristics of world-class distance runners. *Sports Med Open* 8:46.
 - Hellard P and colleagues (2006). Assessing the limitations of the Banister model in monitoring training. *J Sports Sci* 24:509–520.
 - Hew-Butler T and colleagues (2015). Statement of the Third International Exercise-Associated Hyponatremia Consensus Development Conference. *Clin J Sport Med* 25:303–320.
+- Iaia FM and colleagues (2009). Four weeks of speed endurance training reduces energy expenditure during exercise and maintains muscle oxidative capacity despite a reduction in training volume. *J Appl Physiol*. *From memory; finding search-confirmed.*
 - Impellizzeri FM and colleagues (2020). Acute:chronic workload ratio: conceptual issues and fundamental pitfalls. *Int J Sports Physiol Perform*.
 - Jeukendrup A (2014). A step towards personalized sports nutrition: carbohydrate intake during exercise. *Sports Med*. *From memory.*
 - Jones A (2025). Road running age standards. Public domain (CC0).
 - Jones AM (2024). The fourth dimension: physiological resilience as an independent determinant of endurance exercise performance. *J Physiol* 602:4113–4128.
 - Joyner MJ, Coyle EF (2008). Endurance exercise performance: the physiology of champions. *J Physiol* 586:35–44.
 - Llanos-Lagos C, Ramirez-Campillo R, Moran J, Sáez de Villarreal E (2024). Effect of strength training programs in middle- and long-distance runners' economy at different running speeds: a systematic review with meta-analysis. *Sports Med* 54.
+- Knechtle B, Rosemann T, Knechtle P, Lepers R (2010). Predictor variables for a 100-km race time in male ultra-marathoners. *Percept Mot Skills* 111:681–693.
 - Küster M and colleagues (2013). Consumption of analgesics before a marathon and the incidence of cardiovascular, gastrointestinal and renal problems. *BMJ Open*.
+- Lipman GS and colleagues (2017). Ibuprofen versus placebo effect on acute kidney injury in ultramarathons: a randomised controlled trial. *Emerg Med J* 34:637–642.
 - Lopes TR and colleagues (2023). How much does sleep deprivation impair endurance performance? A systematic review and meta-analysis. *Eur J Sport Sci* 23:1279–1292.
 - Lucia A and colleagues (2003). Tour de France versus Vuelta a España: which is harder? *Med Sci Sports Exerc*. *From memory.*
 - Manresa-Rocamora A and colleagues (2021). Heart rate variability-guided training for enhancing cardiac-vagal modulation, aerobic fitness, and endurance performance. *Int J Environ Res Public Health*.
 - Martínez-Navarro I and colleagues (2021). The week after running a marathon: effects of running vs elliptical training vs resting. *Eur J Sport Sci*.
+- Martin T, Arnal PJ, Hoffman MD, Millet GY (2018). Sleep habits and strategies of ultramarathon runners. *PLoS One* 13:e0194705.
 - Meeusen R and colleagues (2013). Prevention, diagnosis, and treatment of the overtraining syndrome: joint consensus statement of the ECSS and the ACSM. *Med Sci Sports Exerc* 45:186–205.
 - Midgley AW, McNaughton LR, Wilkinson M (2006). Is there an optimal training intensity for enhancing the maximal oxygen uptake of distance runners? *Sports Med* 36:117–132.
 - Minetti AE and colleagues (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *J Appl Physiol*. *From memory.*
@@ -285,9 +349,11 @@ on a detail.
 - Mujika I, Padilla S (2000). Detraining: loss of training-induced physiological and performance adaptations. Parts I and II. *Sports Med* 30:79–87 and 145–154.
 - Muniz-Pumares D and colleagues (2024). The training intensity distribution of marathon runners across performance levels. *Sports Med*.
 - Nielsen RØ and colleagues (2014). Excessive progression in weekly running distance and risk of running-related injuries. *J Orthop Sports Phys Ther*.
+- Paavolainen L and colleagues (1999). Explosive-strength training improves 5-km running time by improving running economy and muscle power. *J Appl Physiol* 86:1527–1533.
 - Plews DJ, Laursen PB, Kilding AE, Buchheit M (2012). Heart rate variability in elite triathletes: is variation in variability the key to effective training? *Eur J Appl Physiol*.
 - Plews DJ and colleagues (2013). Training adaptation and heart rate variability in elite endurance athletes: opening the door to effective monitoring. *Sports Med*.
 - Raysmith BP, Drew MK (2016). Performance success or failure is influenced by weeks lost to injury and illness in elite Australian track and field athletes: a 5-year prospective study. *J Sci Med Sport* 19:778–783.
+- Rosenblat MA, Perrotta AS, Thomas SG (2020). Effect of high-intensity interval training versus sprint interval training on time-trial performance: a systematic review and meta-analysis. *Sports Med*.
 - Riegel PS (1981). Athletic records and human endurance. *Am Sci* 69:285–290.
 - Sandbakk Ø and colleagues (2025). Best-practice training characteristics within Olympic endurance sports as described by Norwegian world-class coaches. *Sports Med Open* 11:45.
 - Saragiotto BT and colleagues (2014). What are the main risk factors for running-related injuries? *Sports Med*.
@@ -303,8 +369,11 @@ on a detail.
 - Stöggl T, Sperlich B (2014). Polarized training has greater impact on key endurance variables than threshold, high intensity, or high volume training. *Front Physiol* 5:33.
 - Tanaka H, Seals DR (2008). Endurance exercise performance in Masters athletes: age-associated changes and underlying physiological mechanisms. *J Physiol* 586:55–63.
 - Thomas DT, Erdman KA, Burke LM (2016). Nutrition and athletic performance: joint position statement. *Med Sci Sports Exerc* 48:543–568.
+- Tiller NB and colleagues (2019). International Society of Sports Nutrition position stand: nutritional considerations for single-stage ultra-marathon training and racing. *J Int Soc Sports Nutr* 16:50.
+- Tiller NB, Millet GY (2024). Decoding ultramarathon: muscle damage as the main impediment to performance. *Sports Med* 55:535–543.
 - Tønnessen E, Sandbakk Ø, Sandbakk SB, Seiler S, Haugen T (2024). Training session models in endurance sports: a Norwegian perspective on best practice recommendations. *Sports Med* 54:2935–2953.
 - van der Worp MP and colleagues (2015). Injuries in runners: a systematic review on risk factors and sex differences. *PLoS One*.
+- Vernillo G and colleagues (2017). Biomechanics and physiology of uphill and downhill running. *Sports Med* 47:615–629.
 - Vickers AJ, Vertosick EA (2016). An empirical study of race times in recreational endurance runners. *BMC Sports Sci Med Rehabil*.
 - Walsh NP and colleagues (2021). Sleep and the athlete: narrative review and 2021 expert consensus recommendations. *Br J Sports Med* 55:356–368.
 - Wang Z and colleagues (2023). Effects of tapering on performance in endurance athletes: a systematic review and meta-analysis. *PLoS One*.
