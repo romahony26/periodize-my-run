@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.3.0 - 2026-10-03
+### Added
+- "How accurate are the predictions?" on the Fitness page. For each of your races in the last three years, the prediction is rebuilt from what was known the Monday before and set against your actual time (adjusted to a flat course where the course is known), with the average error and whether the predictions lean cautious or optimistic for you. Each race is worked out once and kept.
+
 ## 2.2.0 - 2026-10-03
 ### Added
 - Heat adjustment, off unless you switch it on (Settings, Connections). On hot, humid days fast paces are eased by the widely used temperature-plus-dew-point table, on top of any recovery easing; a dangerously hot and humid day turns the session into an easy run; and once your goal race is within 16 days, the goal card shows the race-day forecast and how much slower to expect. The forecast is read for the hour you usually run, worked out from your runs.

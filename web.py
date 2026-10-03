@@ -977,7 +977,8 @@ def trends_view():
         hist = trends.history(_c, L, today)
         _TRENDS["data"] = {"speed": trends.speed(c, hist), "base": trends.base(hist), "durability": trends.durability(today),
                            "steps": trends.steps(today), "recovery": trends.recovery(today),
-                           "predictions": trends.prediction_change(_c, hist, trends.all_distances())}
+                           "predictions": trends.prediction_change(_c, hist, trends.all_distances()),
+                           "races": trends.race_check(_c, L, today)}
         _TRENDS["key"] = key
     return jsonify(_TRENDS["data"])
 

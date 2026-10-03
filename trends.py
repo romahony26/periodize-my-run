@@ -162,3 +162,40 @@ def prediction_change(c, hist, distances):
 
 def all_distances():
     return equiv.DISTANCES + [("50K", 50000.0)]
+
+
+def race_check(c, L, today, years=3, limit=12):
+    """How close the predictions are to your actual races.
+
+    For each race in the last `years` years, the prediction is rebuilt from what was known on the Monday before it (runs, earlier
+    races, the watch's estimate), with today's rules, and set against the actual time (adjusted to a flat course where that is
+    known, since predictions are for flat courses). Positive error = the prediction was slower than you ran (pessimistic).
+    Each race is worked out once and kept."""
+    import results
+    cache = dict(db.get("race_check") or {})
+    since = (today - dt.timedelta(days=365 * years)).isoformat()
+    rows, changed = [], False
+    for r in results.listing(c["units"]):
+        if r["date"] < since or not r["counts"] or not r.get("flat_s") or not r.get("dist_m"):
+            continue
+        key = f"{r['date']}|{round(r['dist_m'])}|{round(r['flat_s'])}"
+        if key not in cache:
+            day = dt.date.fromisoformat(r["date"])
+            try:
+                st = assess.assess(c, L, _monday(day), None)
+            except Exception:      # noqa: BLE001 - one race must not stop the others
+                st = None
+            cache[key] = round(assess.projection({"tp": st["tp"], "endurance": st["endurance"]}, c, r["dist_m"] / assess.MI)[0]) if st else None
+            changed = True
+        pred = cache[key]
+        if pred:
+            rows.append({"date": r["date"], "name": r["name"].split(" · ")[-1] if " · " in r["name"] else r["name"], "distance": r["name"].split(" · ")[0],
+                         "predicted": engine.hms(pred), "actual": engine.hms(r["flat_s"]), "error": round((pred - r["flat_s"]) / r["flat_s"] * 100, 1)})
+        if len(rows) >= limit:
+            break
+    if changed:
+        db.put("race_check", cache)
+    if not rows:
+        return None
+    errs = [x["error"] for x in rows]
+    return {"rows": rows, "mean_abs": round(statistics.mean(abs(e) for e in errs), 1), "bias": round(statistics.mean(errs), 1), "n": len(rows)}

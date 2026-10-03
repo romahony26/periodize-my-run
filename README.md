@@ -39,7 +39,8 @@ It then reads your history and builds the plan, showing progress as it goes.
   race, taper, race.
 - Sessions that progress one step from what you last completed.
 - 3 to 6 running days, any long run day, and days you cannot run.
-- Race predictions for today and for full preparation.
+- Race predictions for today and for full preparation, and a check of how
+  accurate past predictions were against your actual races.
 
 **Every day**
 - Downloads new runs, sleep, HRV, resting heart rate, weight and steps.
