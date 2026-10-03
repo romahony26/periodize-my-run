@@ -31,6 +31,33 @@ def best_block(wk, since, n=8):
     return max((sum(vals[i:i + n]) / n for i in range(max(len(vals) - n + 1, 1))), default=0.0) if vals else 0.0
 
 
+BLOCK, FOLLOW = 8, 6      # an 8-week block counts as proven if the 6 weeks after it held up
+
+
+def proven_block(wk, since, excused=(), hurt=(), n=BLOCK):
+    """Highest n-week average since `since` that was not followed by a breakdown.
+
+    A breakdown is two weeks in a row under 35% of the block's average within the FOLLOW weeks after it, or a day in `hurt`
+    (recorded as sick or injured) in that time. A low week within two weeks of a day in `excused` (a race or a very long run,
+    or a holiday) is planned rest, not a breakdown. Blocks too recent to have FOLLOW weeks after them are not yet proven.
+    """
+    ks, vals = list(wk), list(wk.values())
+    week = dt.timedelta(days=7)
+    best = 0.0
+    for i in range(len(vals) - n - FOLLOW + 1):
+        if ks[i] < since:
+            continue
+        avg = sum(vals[i:i + n]) / n
+        if avg <= best:
+            continue
+        after = list(zip(ks[i + n:i + n + FOLLOW], vals[i + n:i + n + FOLLOW], strict=True))
+        low = [v < 0.35 * avg and not any(k - 2 * week <= e < k + week for e in excused) for k, v in after]
+        if any(a and b for a, b in zip(low, low[1:], strict=False)) or any(after[0][0] <= h < after[-1][0] + week for h in hurt):
+            continue
+        best = avg
+    return best
+
+
 def derive(today=None):
     today = today or dt.date.today()
     runs = db.rows("SELECT * FROM activities WHERE sport='running' AND date!='' AND dist_m>0 ORDER BY date")
@@ -42,6 +69,14 @@ def derive(today=None):
     recent8 = sum(recent) / len(recent) if recent else 0.0
     best8_3y = best_block(wk, y3)
     best8_all = best_block(wk, dt.date.min)
+    # what the body has shown it can hold: blocks that were not followed by a breakdown
+    excused = [dt.date.fromisoformat(r["date"]) for r in runs if (r["dist_m"] or 0) >= 20 * MI]
+    excused += [dt.date.fromisoformat(r["date"]) for r in db.rows("SELECT date FROM results WHERE dist_m>=21000 AND date!=''")]
+    hurt = []
+    for s in db.rows("SELECT kind,start,end FROM status"):
+        a, b = dt.date.fromisoformat(s["start"]), dt.date.fromisoformat(s["end"]) if s["end"] else today
+        (excused if s["kind"] == "holiday" else hurt).extend(a + dt.timedelta(days=i) for i in range(0, max((b - a).days, 0) + 1, 7))
+    proven8_3y, proven8_all = proven_block(wk, y3, excused, hurt), proven_block(wk, dt.date.min, excused, hurt)
 
     # maximum heart rate from the last three years, ignoring one-off sensor spikes
     peaks = sorted((r["max_hr"] for r in runs if r["max_hr"] and r["date"] >= y3.isoformat() and (r["timer_s"] or 0) > 900 and r["max_hr"] < 215), reverse=True)
@@ -69,6 +104,8 @@ def derive(today=None):
     prof = {
         "first_run": runs[0]["date"], "runs": len(runs), "miles": sum((r["dist_m"] or 0) for r in runs) / MI,
         "years": (today - dates[0]).days / 365.25, "recent8": recent8, "best8_3y": best8_3y, "best8_all": best8_all,
+        "proven8_3y": proven8_3y, "proven8_all": proven8_all, "proven8_year": proven_block(wk, y1, excused, hurt),
+        "weeks_unbroken": unbroken(dates, today),
         "longest_year": max(((r["dist_m"] or 0) / MI for r in runs if r["date"] >= y1.isoformat()), default=0.0),
         "runs_per_week": sum(1 for r in runs if r["date"] >= (today - dt.timedelta(weeks=8)).isoformat()) / 8,
         "hrmax_observed": hrmax, "bests": bests,
@@ -78,9 +115,31 @@ def derive(today=None):
     return prof
 
 
+def unbroken(dates, today):
+    """Whole weeks since the last gap of 7 or more days without a run (a gap that long costs fitness: Feely and colleagues, 2022)."""
+    last = today
+    for d in reversed(dates):
+        if (last - d).days >= 8:
+            break
+        last = d
+    return (today - last).days // 7
+
+
+def peak_from(prof):
+    """Peak week from what was held without breaking down, not from the recent average: (miles, the reason in words)."""
+    p3, pall = prof.get("proven8_3y"), prof.get("proven8_all")
+    if p3 is None:                       # a profile stored before this rule
+        p3 = pall = prof["best8_3y"]
+    if not pall:                         # too little history for a proven block yet
+        return max(prof["recent8"] * 1.25, 20), "125% of your last 8 weeks (no 8-week block with 6 sound weeks after it yet)"
+    if pall > p3 * 1.10:
+        return max(5 * (pall // 5), 20), "the highest 8-week average you have held without breaking down afterwards, in all your history"
+    return max(p3 * 1.10, 20), "110% of the highest 8-week average you have held without breaking down afterwards, in the last 3 years"
+
+
 def limits(prof, c, goal_miles):
     """Personal planning limits from history. Rules of thumb; every value can be overridden in settings."""
-    peak = max(prof["best8_3y"] * 1.10, prof["recent8"] * 1.25, 20)
+    peak, peak_why = peak_from(prof)
     peak = min(round(peak / 5) * 5, 90)
     if goal_miles is None or goal_miles < 10:
         long_spec, spec_weeks = min(max(0.30 * peak, 8), 16), 10
@@ -92,6 +151,9 @@ def limits(prof, c, goal_miles):
         long_spec, spec_weeks = min(max(0.45 * peak, 18), 28), 16
     hr = c.get("hrmax") or prof.get("hrmax_observed") or 185
     return {
+        "peak_why": "the peak week you set" if c.get("peak_miles_override") else peak_why,
+        "weeks_unbroken": prof.get("weeks_unbroken"),
+        "proven_miles": prof.get("proven8_year") or prof.get("proven8_3y") or prof.get("best8_3y") or prof["recent8"],
         "peak_miles": c.get("peak_miles_override") or peak, "base_cap_miles": round(0.9 * (c.get("peak_miles_override") or peak)),
         "long_run_cap_specific": round(long_spec), "long_run_cap_base": round(long_spec) - 3, "long_run_floor": max(round(0.45 * long_spec), 5),
         "specific_weeks": spec_weeks, "hrmax": hr, "easy_hr_max": round(0.76 * hr), "steady_hr_max": round(0.82 * hr),

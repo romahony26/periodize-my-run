@@ -545,7 +545,8 @@ def state():
              "miles_week": round(sp["week"] * 7 * 0.75 / assess.MI, 1)} if sp else None
     lo = jobs.last_ok()
     return jsonify(
-        version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=insights.warnings(today, c["units"]) if db.get("setup_done") else [], shoes=insights.shoes(c["units"]),
+        version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=insights.warnings(today, c["units"], c.get("sex"), L["hrmax"] if L else None) if db.get("setup_done") else [],
+        timing=insights.timing(today, L["hrmax"] if L else None, c["sleep_7night_min_h"]) if db.get("setup_done") else None, shoes=insights.shoes(c["units"]),
         drift=insights.drift_history(today) if db.get("setup_done") else [], best_grade=best_grade, about_you={"sex": c.get("sex"), "birth_date": c.get("birth_date"), "gel_carbs_g": c.get("gel_carbs_g")},
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
@@ -1172,7 +1173,10 @@ def about():
             "Planning looks at the 8 weeks before each Monday.",
         ]),
         ("Your personal limits (from your history)", [
-            f"Peak week: {D(L['peak_miles'])}. The larger of 110% of your best 8-week average in 3 years and 125% of your last 8 weeks." if L else "Not yet calculated.",
+            f"Peak week: {D(L['peak_miles'])}, from {L['peak_why']}. A block counts only if the six weeks after it held up: no two weeks in a row under 35% of it "
+            "(rest after a race, a very long run or a holiday is not counted against it), and no time recorded as sick or injured. Your recent average does not raise it." if L else "Not yet calculated.",
+            f"Above {D(engine.half(L['proven_miles']))} a week (the most you have held for eight weeks in the last year) the weekly rise is halved, and after a week or more without running "
+            "the distance is held level for three weeks." if L else "",
             f"Longest long run: {D(L['long_run_cap_specific'])} in the race-specific phase, {D(L['long_run_cap_base'])} before it." if L else "",
             f"Maximum heart rate {L['hrmax']}: easy under {L['easy_hr_max']}, steady under {L['steady_hr_max']}, threshold cap {L['threshold_hr_cap']}, race-effort band {L['marathon_hr_band'][0]}–{L['marathon_hr_band'][1]}." if L else "",
             f"Race-specific phase: the last {L['specific_weeks']} weeks before the goal race." if L else "",

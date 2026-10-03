@@ -3,6 +3,19 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.5.0 - 2026-10-03
+### Changed
+- Your peak week now comes from what you have held without breaking down, not from your recent average. It is taken from your best eight-week block that was followed by six sound weeks (no two weeks in a row under 35% of the block, and no time recorded as sick or injured; rest after a race, a very long run or a holiday does not count against it): the larger of that block from all your history and 110% of that block from the last three years. A high recent average no longer raises it. With too little history, the old rule (your last eight weeks plus 25%) still applies.
+- Volume builds more slowly on new ground. Up to the most you have held for eight weeks in the last year, a building week still rises by 6%; beyond that it rises by 3%. After a week or more without running, the distance is held level for three weeks before building again. The reasons shown with each week say which applied.
+- Long races for men: the race note now presses the patient start harder, because men slow far more than women in the second half.
+### Added
+- "When you run" on the Fitness page: your usual start time and the share of runs in the morning, daytime and evening. When there is enough data it also shows how you slept after hard runs that ended within four hours of sleep compared with your other runs, counts early runs that followed a short night, and reports when your usual run time has shifted by an hour or more (as a pattern only). Nothing here changes the plan and nothing has to be entered.
+- A watch-out on the morning after a hard run that ended within four hours of sleep, because that morning's heart-rate variability will read low for a reason other than fatigue.
+- For women, a warning about a jump in run length now also says what a bone stress injury feels like, since these are about twice as common in women.
+- The time you fell asleep is now kept from the Garmin sleep data already fetched. The first sync after this version reads it for the nights already stored.
+- Your history now shows the most you have held without breaking down (three years, and ever) and how many weeks you have gone without a week off running.
+- Principles: a new section 14, "Consistency, working life and sex", with the peer-reviewed sources for all of the above, and what the evidence does not support (planning by menstrual cycle phase; reading a shift in run time as stress).
+
 ## 2.4.1 - 2026-10-03
 ### Changed
 - The Update button at the top of every page is now called Sync, and the wording follows it everywhere: "Synced" with the time, "Daily sync time" in Settings, and the warnings about a failed or overdue sync. "Update" now only ever means a new version of the app.

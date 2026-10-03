@@ -8,6 +8,8 @@ Sources, where there is one:
     30 days went with more overuse injuries. The same study found no link with week-to-week mileage change, so there is no weekly warning.
   - Fuelling: Jeukendrup (2014): about 30 g of carbohydrate an hour for 1-2 hours, up to 60 g for 2-3 hours, up to 90 g beyond 2.5 hours.
   - Aerobic drift under 5% is a common coaching rule of thumb, not a research threshold.
+  - Run timing: Leota and colleagues (2025, 14,689 people): hard exercise ending within 4 hours of sleep went with later, shorter sleep
+    and lower overnight HRV. Sargent and colleagues (2014): early training cuts sleep. Bone stress injury by sex: Hollander and colleagues (2021).
 """
 import datetime as dt
 import math
@@ -79,6 +81,100 @@ def spikes(today, units="mi"):
     return out
 
 
+LATE_H = 4           # Leota and colleagues (2025): hard exercise ending within 4 hours of sleep went with later, shorter sleep and lower overnight HRV
+EARLY = 7 * 60       # a run starting before 07:00 counts as early
+
+
+def _clock(minutes):
+    return f"{int(minutes) // 60 % 24:02d}:{int(minutes) % 60:02d}"
+
+
+def _median(xs):
+    xs = sorted(xs)
+    return (xs[len(xs) // 2] + xs[(len(xs) - 1) // 2]) / 2 if xs else None
+
+
+def timing(today, hrmax=None, short_sleep_h=6.0):
+    """When the athlete runs, and what that does to sleep. Feedback only: nothing here changes the plan.
+
+    Returns {"usual", "parts", "notes": [text], "watch": text or None}, or None with fewer than 8 runs with a start time in 16 weeks.
+    """
+    since = today - dt.timedelta(weeks=16)
+    plan = {r["date"]: r["type"] for r in db.rows("SELECT date,type FROM plan WHERE date>=?", (since.isoformat(),))}
+    nights = {r["date"]: r for r in db.rows("SELECT date,sleep_h,hrv,sleep_start FROM daily WHERE date>=?", (since.isoformat(),))}
+    runs = []
+    for r in db.rows("SELECT start,date,timer_s,avg_hr FROM activities WHERE sport='running' AND dist_m>0 AND date>=? AND start IS NOT NULL ORDER BY start", (since.isoformat(),)):
+        try:
+            t = dt.datetime.fromisoformat(str(r["start"]))
+        except ValueError:
+            continue
+        t = (t if t.tzinfo else t.replace(tzinfo=dt.UTC)).astimezone().replace(tzinfo=None)      # stored in GMT; shown in local time
+        secs = r["timer_s"] or 0
+        hard = plan.get(r["date"]) in ("Key", "Race") or secs >= 5400 or bool(hrmax and r["avg_hr"] and r["avg_hr"] >= 0.80 * hrmax and secs >= 1200)
+        runs.append({"day": t.date(), "start": t.hour * 60 + t.minute, "end": t + dt.timedelta(seconds=secs), "hard": hard})
+    if len(runs) < 8:
+        return None
+    last8 = [r for r in runs if r["day"] > today - dt.timedelta(weeks=8)] or runs
+    share = lambda f: round(100 * sum(1 for r in last8 if f(r["start"])) / len(last8))
+    out = {"usual": _clock(_median([r["start"] for r in last8])), "notes": [], "watch": None,
+           "parts": {"morning": share(lambda m: m < 9 * 60), "day": share(lambda m: 9 * 60 <= m < 17 * 60), "evening": share(lambda m: m >= 17 * 60)}}
+
+    # a shift in the usual time: reported, not judged (no study has tested what such a shift means)
+    cut = today - dt.timedelta(weeks=4)
+    now, before = [r["start"] for r in runs if r["day"] > cut], [r["start"] for r in runs if r["day"] <= cut]
+    if len(now) >= 6 and len(before) >= 6 and abs(_median(now) - _median(before)) >= 60:
+        d = _median(now) - _median(before)
+        out["notes"].append(f"Over the last four weeks your runs have started about {abs(d) / 60:.1f} hours {'later' if d > 0 else 'earlier'} than in the three months before "
+                            f"({_clock(_median(now))} against {_clock(_median(before))}). This is shown as a pattern only: no study has tested what such a shift means.")
+
+    # hard runs close to sleep, measured against the athlete's own nights
+    known = []
+    for n in nights.values():
+        if n["sleep_start"]:
+            h, m = map(int, n["sleep_start"].split(":"))
+            known.append(h * 60 + m + (1440 if h < 15 else 0))       # minutes after midnight of the evening before; past midnight runs on
+    usual_bed = _median(known) if len(known) >= 5 else None
+
+    def gap_h(r):
+        n = nights.get((r["day"] + dt.timedelta(days=1)).isoformat())       # Garmin files a night under the morning it ends
+        bed = usual_bed
+        if n and n["sleep_start"]:
+            h, m = map(int, n["sleep_start"].split(":"))
+            bed = h * 60 + m + (1440 if h < 15 else 0)
+        if bed is None:
+            return None
+        return (dt.datetime.combine(r["day"], dt.time()) + dt.timedelta(minutes=bed) - r["end"]).total_seconds() / 3600
+
+    late, other = [], []
+    for r in runs:
+        n, g = nights.get((r["day"] + dt.timedelta(days=1)).isoformat()), gap_h(r)
+        if g is None or not n or not n["sleep_h"]:
+            continue
+        (late if r["hard"] and 0 <= g < LATE_H else other).append(n)
+    if len(late) >= 3 and len(other) >= 8:
+        ds = 60 * (sum(n["sleep_h"] for n in late) / len(late) - sum(n["sleep_h"] for n in other) / len(other))
+        text = (f"After hard runs that ended within {LATE_H} hours of sleep ({len(late)} nights) you slept {abs(ds):.0f} minutes "
+                f"{'less' if ds < 0 else 'more'} than after your other runs")
+        hl, ho = [n["hrv"] for n in late if n["hrv"]], [n["hrv"] for n in other if n["hrv"]]
+        if len(hl) >= 3 and len(ho) >= 8:
+            dh = sum(hl) / len(hl) - sum(ho) / len(ho)
+            text += f", and overnight HRV was {abs(dh):.0f} ms {'lower' if dh < 0 else 'higher'}"
+        out["notes"].append(text + ". In a study of 14,689 people, hard exercise ending within four hours of sleep went with later, shorter sleep and lower HRV; "
+                                   "easy running in the evening did not.")
+    y = [r for r in runs if r["day"] == today - dt.timedelta(days=1) and r["hard"]]
+    if y and (g := gap_h(y[-1])) is not None and 0 <= g < LATE_H:
+        out["watch"] = (f"Yesterday's hard run ended about {g:.1f} hours before you slept. Hard running within four hours of sleep is linked with shorter sleep "
+                        "and lower overnight HRV, so read this morning's numbers with that in mind.")
+
+    # early runs after a short night
+    early = [r for r in runs if r["day"] > cut and r["start"] < EARLY]
+    short = [r for r in early if (nights.get(r["day"].isoformat()) or {"sleep_h": None})["sleep_h"] and nights[r["day"].isoformat()]["sleep_h"] < short_sleep_h]
+    if len(short) >= 2:
+        out["notes"].append(f"{len(short)} of your {len(early)} runs before {_clock(EARLY)} in the last four weeks came after under {short_sleep_h:g} hours of sleep. "
+                            "Early training cuts sleep unless bedtime moves earlier with it, and short sleep slows recovery.")
+    return out
+
+
 def drift(series):
     """Aerobic drift for a steady run: how much pace per heartbeat fell from the first half to the second, as a percentage.
 
@@ -141,8 +237,14 @@ def shoes(units="mi"):
     return out[::-1]
 
 
-def warnings(today, units="mi"):
+def warnings(today, units="mi", sex=None, hrmax=None):
     out = spikes(today, units)
+    if sex == "F" and any(w["kind"] == "spike" for w in out):
+        out.append({"kind": "bone", "date": today.isoformat(), "text": "Bone stress injuries are about twice as common in women runners as in men. "
+                    "Pain on a bone that sharpens as a run goes on, or that you can press with one finger, is a reason to stop and have it looked at."})
+    t = timing(today, hrmax)
+    if t and t["watch"]:
+        out.append({"kind": "timing", "date": today.isoformat(), "text": t["watch"]})
     for s in shoes(units):
         if s["current"] and s["over"]:
             out.append({"kind": "shoes", "date": today.isoformat(), "text": f"{s['name']} have passed the {s['alert']} {units} you set as their limit ({s['dist']} {units})."})

@@ -245,10 +245,19 @@ def plan(st, c, L, races):
     cap = L["peak_miles"] if specific else L["base_cap_miles"]
     quality_new = st["prev_t_min"] < 8
     if mode == "build":
-        grow = 1.0 if quality_new else 1 + c["weekly_increase"]
-        target = min(max(ref, 0.92 * max(last4 or [0])) * grow, cap)
+        base = max(ref, 0.92 * max(last4 or [0]))
+        proven = L.get("proven_miles") or cap           # the most held for 8 weeks in the last year without breaking down after
+        gap = (L.get("weeks_unbroken") if L.get("weeks_unbroken") is not None else 99) < 3
+        grow = 1.0 if quality_new or gap else 1 + c["weekly_increase"]
+        new_ground = not (quality_new or gap) and base * grow > proven
+        if new_ground:      # up to the proven level at the usual rate, beyond it at half: consistency before more miles
+            grow = max(1 + c["weekly_increase"] / 2, min(grow, proven / base if base else grow))
+        target = min(base * grow, cap)
         why.append("Volume held level because fast running is being reintroduced; one change at a time." if quality_new
+                   else "Volume held level: there was a week or more without running in the last three weeks. The routine comes back before the miles do." if gap
                    else f"Volume is at your cap for this phase ({dist(cap, c['units'])})." if target >= cap
+                   else f"Volume up {grow - 1:.0%}, half the usual rate: this is more than you have held for eight weeks in the last year "
+                        f"({dist(half(proven), c['units'])}), and weeks strung together count for more than a faster build." if new_ground
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
     else:
         target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": comeback[0] if comeback else 0.80 * prior3,
@@ -451,6 +460,8 @@ def plan(st, c, L, races):
         now_s, full_s = projection(st, c, r["miles"])
         a_race = r["priority"] == "A"
         note = (f"Predicted {hms(now_s)}. Start at {pace(r['miles'] * MI / now_s, c['units'])}/{c['units']} and no faster for the first half."
+                + (" Men slow far more than women in the second half of long races, and the fastest men most of all: the patient start is where your time is made."
+                   if c.get("sex") == "M" and r["miles"] >= 13 else "")
                 + (f" Fuel: {c['race_carbs_g_per_h']} g of carbohydrate an hour." if r["miles"] >= 13 else ""))
         kg = _weight()
         if a_race:
