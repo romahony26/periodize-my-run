@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.16.2 - 2026-10-03
+### Changed
+- PRINCIPLES.md rewritten: 60 principles in 11 sections, each matched to what the planner actually does, with the strength of the evidence behind every research finding (strong, moderate or limited). New sections on foundations (consistency, your own baseline, trends, agreeing signs), durability, injury risk, the shape of a season and measurement limits.
+- References checked against their published records (title, authors, journal and main finding); the few still cited from memory are marked. Newly cited: Raysmith and Drew 2016, Doherty 2020, Haugen 2022, Muniz-Pumares 2024, Silva Oliveira 2024, Smyth and Lawlor 2021, Llanos-Lagos 2024, Hellard 2006, Gillinov 2017, Riegel 1981 and others.
+### Added
+- A "Known gaps" section listing where Periodize does not yet follow the evidence: fitness after a long break, how you feel, the return after a light week, heat, age and sex, and low energy availability.
+
 ## 1.16.1 - 2026-10-03
 ### Added
 - An MIT licence (LICENSE), so anyone may use, change and share Periodize.
