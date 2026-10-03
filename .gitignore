@@ -30,7 +30,7 @@ tests/
 check.sh
 requirements-dev.txt
 ruff.toml
-tools/brochure.py
+tools/screenshots.py
 tools/lock.py
 tools/live_scan.sh
 tools/package.py

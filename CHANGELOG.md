@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.8.1 - 2026-10-03
+### Changed
+- The README now shows the app in pictures: the plan, the weeks ahead and the season, a day's card, Explain my plan, the Fitness page, a run in detail, a pacing plan and the phone view. All are taken from the app running with a made-up test athlete, by `tools/screenshots.py`.
+### Removed
+- The PDF brochure and the tool that built it. The README's pictures replace it.
+
 ## 2.8.0 - 2026-10-03
 ### Added
 - Installers no longer need Python to be installed first. If the computer has no Python 3.12 or later, the installer downloads a private copy into the app's own folder (about 30 MB, checked against a pinned SHA-256 in `runtime.lock`; a download that does not match is refused). Nothing is installed system-wide, and the uninstaller removes it. Works on Windows (64-bit), Linux (x86-64 and 64-bit ARM) and Apple-silicon Macs.

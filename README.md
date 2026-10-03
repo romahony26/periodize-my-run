@@ -17,6 +17,48 @@ used when it runs: the rules are ordinary code in `engine.py` and `assess.py`.
 >   wrong, and Garmin can break the connection at any time. Read
 >   [DISCLAIMER.md](DISCLAIMER.md); the app asks you to accept it once.
 
+## What it looks like
+
+All pictures are of the app running with a made-up test athlete.
+
+**The plan.** Your goal and forecast, today's session and how recovered you
+are, then each week day by day.
+
+![The plan page: goal, forecast, today and the weeks](screenshots/plan.png)
+
+**Weeks ahead and the season.** The next weeks in detail, and the whole build
+to race day.
+
+![The coming weeks](screenshots/weeks.png)
+![The season outline](screenshots/season.png)
+
+**Every day says what it is for**, with its paces, fuelling and whether it is
+on your watch.
+
+<img src="screenshots/day.png" alt="A day's card: the session, what it is for, fuelling and watch status" width="560">
+
+**Explain my plan.** Every decision behind the plan, the numbers from your own
+data that led to it, and where the rule comes from.
+
+<img src="screenshots/explain.png" alt="Explain my plan: each decision with your data and the evidence" width="640">
+
+**Is it working?** Threshold pace, race-specific endurance, and your pace at
+the same heart rate month by month.
+
+![The Fitness page](screenshots/fitness.png)
+
+**Each run in detail**, scored against what was planned.
+
+<img src="screenshots/run.png" alt="A run in detail: pace, heart rate, map and execution score" width="640">
+
+**A pacing plan for a hilly race**, mile by mile at even effort.
+
+<img src="screenshots/pace.png" alt="An even-effort pacing plan from a course file" width="560">
+
+**On a phone**, from your home screen.
+
+<img src="screenshots/phone.png" alt="The plan on a phone" width="300">
+
 ## Features
 
 **Setup wizard (in the browser, three steps)**
