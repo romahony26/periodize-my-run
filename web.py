@@ -388,8 +388,8 @@ def _days(c, today, L=None):
     tps = {r["monday"]: r["tp"] for r in db.rows("SELECT monday,tp FROM weeks")}
     plan = {r["date"]: r for r in db.rows("SELECT * FROM plan WHERE date>=? AND date<=?", (start.isoformat(), end.isoformat()))}
     done = {}
-    for r in db.rows("SELECT id,date,dist_m,timer_s,avg_hr,name FROM activities WHERE sport='running' AND date>=? AND date<=? ORDER BY dist_m DESC", (start.isoformat(), end.isoformat())):
-        a = done.setdefault(r["date"], {"m": 0.0, "s": 0.0, "n": 0, "id": r["id"]})     # the link goes to the day's longest run
+    for r in db.rows("SELECT id,date,dist_m,timer_s,avg_hr,name,weather FROM activities WHERE sport='running' AND date>=? AND date<=? ORDER BY dist_m DESC", (start.isoformat(), end.isoformat())):
+        a = done.setdefault(r["date"], {"m": 0.0, "s": 0.0, "n": 0, "id": r["id"], "wx": heat.words(heat.of(r), c["units"])})     # the link goes to the day's longest run
         a["m"] += r["dist_m"] or 0
         a["s"] += r["timer_s"] or 0
         a["n"] += 1
@@ -419,7 +419,7 @@ def _days(c, today, L=None):
         if a:
             v = a["m"] / a["s"] if a["s"] else None
             item["done"] = {"dist": engine.dist(round(a["m"] / assess.MI, 1), "mi") if c["units"] == "mi" else f"{a['m'] / 1000:.1f} km",
-                            "pace": engine.pace(v, c["units"]) + "/" + c["units"] if v else "", "runs": a["n"], "id": a["id"]}
+                            "pace": engine.pace(v, c["units"]) + "/" + c["units"] if v else "", "runs": a["n"], "id": a["id"], "weather": a["wx"]}
         if d <= today:
             f = _fresh(d, c)
             if f:
@@ -624,7 +624,7 @@ def settings():
         db.put("update_check", bool(j["update_check"]))
     if "heat_adjust" in j:
         db.put("heat_adjust", bool(j["heat_adjust"]))
-        log.info("Heat adjustment switched %s", "on" if j["heat_adjust"] else "off")
+        log.info("Weather switched %s", "on" if j["heat_adjust"] else "off")
         if db.get("setup_done"):
             jobs.start("readiness")
     if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust", "update_check"}:

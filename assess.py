@@ -8,6 +8,7 @@ import math
 import statistics
 
 import db
+import heat
 import equiv
 from fitrun import BIN, HR_LO, HR_STEP
 
@@ -140,6 +141,7 @@ def race_evidence(monday, weeks=26):
 def load_runs(start, end):
     out = []
     trust = db.get("altitude_trust") or {}
+    wx_on = bool(db.get("heat_adjust"))
     for r in db.rows("SELECT * FROM activities WHERE sport='running' AND date>=? AND date<? AND dist_m>0 ORDER BY start", (start.isoformat(), end.isoformat())):
         d = json.loads(r["detail"]) if r["detail"] else {}
         if d.get("error"):
@@ -152,6 +154,14 @@ def load_runs(start, end):
                   "ascent_m": d.get("ascent_m") if d.get("ascent_m") is not None else r["ascent_m"],
                   "avg_hr": d.get("avg_hr") or r["avg_hr"], "best5k": r["best5k"], "best10k": r["best10k"],
                   "start_utc": r["start"], "max_hr_sum": r["max_hr"], "training_effect": r["training_effect"], "garmin_load": r["garmin_load"]})
+        # weather: what the run was worth in neutral conditions. Distances at each heart rate are scaled up, so a run in the heat
+        # (or the cold) is not read as lost fitness. Only when weather tracking is on.
+        w = heat.of(r) if wx_on else None
+        d["wx"], d["wx_k"] = w, 1 / (1 - w["pct"] / 100) if w and w.get("pct") else 1.0
+        if d["wx_k"] != 1.0:
+            for key in ("hr_m", "hr_gap"):
+                if d.get(key):
+                    d[key] = [x * d["wx_k"] for x in d[key]]
         out.append(d)
     return out
 
@@ -184,7 +194,9 @@ def assess(c, L, monday, prev_tp=None):
                 s = (r.get("best_dist") or {}).get(key) or (r.get("best5k") if key == "5000" else r.get("best10k") if key == "10000" else None)
                 v = int(key) / s if s else None
             if v:
-                cands.append((v * f, f"best {int(key) // 60} min" if kind == "dur" else f"best {int(key) / 1000:g} km", r["date"]))
+                k = r.get("wx_k", 1.0)
+                cands.append((v * f * k, (f"best {int(key) // 60} min" if kind == "dur" else f"best {int(key) / 1000:g} km")
+                              + (f" (worth {(k - 1) * 100:.1f}% more in neutral weather)" if k > 1.004 else ""), r["date"]))
     flat = [r for r in R if usable(r, c)]
     recent = [r for r in flat if r["date"] >= monday - dt.timedelta(days=28)]
     fit = hr_speed_line(recent, L["hrmax"])
@@ -216,9 +228,10 @@ def assess(c, L, monday, prev_tp=None):
         why = f"no running for {off} days: fitness eased {fade:.1%} this week, as aerobic fitness fades during a break"
 
     for r in R:
-        r["t_min"] = band(r, T_FLOOR * tp, 99, "sec_by_speed") / 60
-        r["mp_mi"] = band(r, MP_BAND[0] * tp, MP_BAND[1] * tp) / MI
-        r["fast_mi"] = band(r, MP_BAND[0] * tp, 99) / MI
+        rtp = tp / r.get("wx_k", 1.0)       # in heat or cold the same effort is a slower pace, and still counts
+        r["t_min"] = band(r, T_FLOOR * rtp, 99, "sec_by_speed") / 60
+        r["mp_mi"] = band(r, MP_BAND[0] * rtp, MP_BAND[1] * rtp) / MI
+        r["fast_mi"] = band(r, MP_BAND[0] * rtp, 99) / MI
     weeks = []
     for k in range(WINDOW_WEEKS, 0, -1):
         ws = monday - dt.timedelta(weeks=k)

@@ -239,11 +239,15 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     only if you have tried it in training; drink to thirst, because drinking too much is the serious risk for most runners
     (Hew-Butler and colleagues, 2015); no ibuprofen or similar painkillers, which were linked with more serious problems during
     marathons (Küster and colleagues, 2013) (*moderate*); and race in shoes you have already run in at race pace. [C]
-59. **Heat slows you; plan for it.** [R] (*moderate*) Marathon times fall progressively as it gets warmer and more humid, and
-    slower runners lose proportionally more (Ely and colleagues, 2007). If you switch heat adjustment on, fast paces are eased on
-    hot days by the widely used temperature-plus-dew-point table [C], a dangerously hot and humid day turns the session into an
-    easy run, and the race-day forecast for your goal race is shown once it is within 16 days. Off by default, because it needs a
-    weather service (Open-Meteo), which receives only your rough location. [P]
+59. **Heat slows you; plan for it.** [R] (*strong*) Across 1,258 endurance races, performance was best at a wet-bulb globe
+    temperature (WBGT, which combines temperature, humidity, sun and wind) of 7.5 to 15 °C, about 10 to 17.5 °C of air
+    temperature, and fell by 0.3 to 0.4% for each degree outside that range (Mantzios and colleagues, 2022). Marathon times
+    fall progressively as it gets warmer, and slower runners lose proportionally more (Ely and colleagues, 2007; El Helou and
+    colleagues, 2012). If you switch weather on, fast paces are eased by 0.35% for each degree of WBGT above 15 °C, a day at
+    28 °C WBGT or more turns the session into an easy run [C], and the race-day forecast for your goal race is shown once it is
+    within 16 days. WBGT is estimated for shade from temperature and humidity (Stull, 2011), so full sun on a still day is
+    harder than the figure says. Off by default, because it needs a weather service (Open-Meteo), which receives only rough
+    locations and dates. [P]
 60. **Hilly races need hilly training.** [C] Weekly climb is raised toward the race's climb per mile over the final months.
 61. **Race results are compared across ages with age grading.** [R] (*moderate*) Performance declines with age at a known average
     rate (Tanaka and Seals, 2008); standards by age, sex and distance come from public-domain tables (Jones, 2025).
@@ -374,14 +378,34 @@ of ultra training, so read these as the best available reasoning, not proven met
     plan" lists each decision that shapes the plan, the numbers from your own data that led to it, and whether the rule behind
     it is research, coaching convention or this project's choice.
 
+## 16. Weather
+
+89. **Fitness is judged on what a run was worth in neutral weather.** [P] With weather switched on, each outdoor run is given
+    the temperature, humidity, wind and rain it was run in. Its pace is then scaled by the same 0.35% per degree of WBGT, above
+    15 °C or below 7.5 °C, before it counts as evidence of your threshold, your pace at a heart rate, or your time at threshold
+    and race pace. A hot spell is therefore not read as lost fitness, nor a cool one as a gain. The size of the effect comes
+    from race results (Mantzios and colleagues, 2022); applying it to training runs is this project's choice.
+90. **Cold slows running too, but less is known.** [R] (*moderate*) The same race data show performance falling below the
+    optimum range as well as above it (Mantzios and colleagues, 2022), and in the laboratory cold air did not by itself reduce
+    endurance performance (Cheuvront and colleagues, 2005) (*limited*). Because the two disagree, Periodize My Run allows
+    for cold when judging fitness only up to 1.5%, and does not ease the paces of a session for it. [P]
+91. **Wind and rain are recorded, not adjusted for.** [R] (*moderate*) Running into wind costs energy that rises with the square
+    of the wind speed, and running close behind another runner removes most of it (Pugh, 1970, 1971). But in marathon results
+    wind, humidity and rain had no effect of their own once temperature was allowed for (El Helou and colleagues, 2012;
+    Vihma, 2010): on a course that turns, a headwind is partly given back, and rain mostly comes with cooler air. So a run's
+    wind and rain are shown beside it, and no figure is changed for them. A very windy day is a reason to judge a session by
+    effort, not pace. [C]
+
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
 Listed so they are not mistaken for principles.
 
 - **How you feel is not yet counted.** Self-reported fatigue, soreness and mood track the response to training at least as well as
   device measures (Saw and colleagues, 2016) (*strong*). Periodize My Run can record them but does not yet use them.
-- **Heat** is adjusted for only if you switch it on, since it needs a weather service; and only for the temperature and humidity
-  forecast, not for sun, wind or your acclimatisation.
+- **Weather** is used only if you switch it on, since it needs a weather service. Heat is estimated from temperature and
+  humidity, not measured sun or wind, and takes no account of how used to heat you are, although two weeks of training in
+  heat reduces its effect (Racinais and colleagues, 2015). Runs without a stored GPS track use your usual location, which is
+  wrong for runs done elsewhere.
 - **From age 50** only the down-week rhythm changes, not the spacing of hard days.
 - **Time of day is reported, not planned.** Periodize My Run does not know when you will run a planned session, so it cannot warn
   before a late hard session, only after. Sleep onset comes from Garmin; with another watch source the sleep comparisons are not
@@ -410,6 +434,7 @@ on a detail.
 - Buist I and colleagues (2008). No effect of a graded training program on the number of running-related injuries in novice runners: a randomized controlled trial. *Am J Sports Med*.
 - Carrier B, Marten Chaves S, Navalta JW (2025). Validation of aerobic capacity (VO2max) and pulse oximetry in wearable technology. *Sensors*.
 - Casado A, Foster C, Bakken M, Tjelta LI (2023). Does lactate-guided threshold interval training within a high-volume low-intensity approach represent the "next step" in the evolution of distance running training? *Int J Environ Res Public Health*.
+- Cheuvront SN, Carter R, Castellani JW, Sawka MN (2005). Hypohydration impairs endurance exercise performance in temperate but not cold air. *J Appl Physiol*. *Abstract read.*
 - Costa RJS and colleagues (2017). Gut-training: the impact of two weeks repetitive gut-challenge during exercise. *Appl Physiol Nutr Metab*.
 - Craven J and colleagues (2022). Effects of acute sleep loss on physical performance: a systematic and meta-analytical review. *Sports Med* 52:2669–2690.
 - Damsted C, Parner ET, Sørensen H, Malisoux L, Hulme A, Nielsen RO (2019). The association between changes in weekly running distance and running-related injury: preparing for a half marathon. *J Orthop Sports Phys Ther* 49:230–238. *Abstract read.*
@@ -419,6 +444,7 @@ on a detail.
 - Dial MB and colleagues (2025). Validation of nocturnal resting heart rate and heart rate variability in consumer wearables. *Physiol Rep*.
 - Doherty C and colleagues (2020). An evaluation of the training determinants of marathon performance: a meta-analysis with meta-regression. *J Sci Med Sport* 23:182–188.
 - Düking P and colleagues (2021). Monitoring and adapting endurance training on the basis of heart rate variability monitored by wearable technologies. *J Sci Med Sport*.
+- El Helou N and colleagues (2012). Impact of environmental parameters on marathon running performance. *PLoS One*. *Abstract read.*
 - Ely MR, Cheuvront SN, Roberts WO, Montain SJ (2007). Impact of weather on marathon-running performance. *Med Sci Sports Exerc*.
 - Esteve-Lanao J, Foster C, Seiler S, Lucia A (2007). Impact of training intensity distribution on performance in endurance athletes. *J Strength Cond Res* 21:943–949.
 - Feely C, Smyth B, Caulfield B, Lawlor A (2022). Estimating the cost of training disruptions on marathon performance. *Front Sports Act Living*. *Abstract read.*
@@ -450,6 +476,7 @@ on a detail.
 - Lopes TR and colleagues (2023). How much does sleep deprivation impair endurance performance? A systematic review and meta-analysis. *Eur J Sport Sci* 23:1279–1292.
 - Lucia A and colleagues (2003). Tour de France versus Vuelta a España: which is harder? *Med Sci Sports Exerc*. *From memory.*
 - Manresa-Rocamora A and colleagues (2021). Heart rate variability-guided training for enhancing cardiac-vagal modulation, aerobic fitness, and endurance performance. *Int J Environ Res Public Health*.
+- Mantzios K and colleagues (2022). Effects of weather parameters on endurance running performance: discipline-specific analysis of 1258 races. *Med Sci Sports Exerc*. *Abstract read.*
 - Martin T, Arnal PJ, Hoffman MD, Millet GY (2018). Sleep habits and strategies of ultramarathon runners. *PLoS One* 13:e0194705.
 - Martínez-Navarro I and colleagues (2021). The week after running a marathon: effects of running vs elliptical training vs resting. *Eur J Sport Sci*.
 - McNulty KL and colleagues (2020). The effects of menstrual cycle phase on exercise performance in eumenorrheic women: a systematic review and meta-analysis. *Sports Med*. *Abstract's conclusion read; authors and year from memory.*
@@ -466,8 +493,11 @@ on a detail.
 - Paavolainen L and colleagues (1999). Explosive-strength training improves 5-km running time by improving running economy and muscle power. *J Appl Physiol* 86:1527–1533.
 - Plews DJ and colleagues (2013). Training adaptation and heart rate variability in elite endurance athletes: opening the door to effective monitoring. *Sports Med*.
 - Plews DJ, Laursen PB, Kilding AE, Buchheit M (2012). Heart rate variability in elite triathletes: is variation in variability the key to effective training? *Eur J Appl Physiol*.
+- Pugh LGCE (1970). Oxygen intake in track and treadmill running with observations on the effect of air resistance. *J Physiol*. *Abstract read.*
+- Pugh LGCE (1971). The influence of wind resistance in running and walking and the mechanical efficiency of work against horizontal or vertical forces. *J Physiol*. *Abstract read.*
 - Raysmith BP, Drew MK (2016). Performance success or failure is influenced by weeks lost to injury and illness in elite Australian track and field athletes: a 5-year prospective study. *J Sci Med Sport* 19:778–783.
 - Riegel PS (1981). Athletic records and human endurance. *Am Sci* 69:285–290.
+- Racinais S and colleagues (2015). Consensus recommendations on training and competing in the heat. *Scand J Med Sci Sports*. *Title and record confirmed; full text downloaded, not yet read.*
 - Rosenblat MA, Perrotta AS, Thomas SG (2020). Effect of high-intensity interval training versus sprint interval training on time-trial performance: a systematic review and meta-analysis. *Sports Med*.
 - Ruuska PS and colleagues (2012). Self-rated mental stress and exercise training response in healthy subjects. *Front Physiol*. *Abstract read.*
 - Sandbakk Ø and colleagues (2025). Best-practice training characteristics within Olympic endurance sports as described by Norwegian world-class coaches. *Sports Med Open* 11:45.
@@ -486,6 +516,7 @@ on a detail.
 - Stöggl T, Sperlich B (2014). Polarized training has greater impact on key endurance variables than threshold, high intensity, or high volume training. *Front Physiol* 5:33.
 - Stults-Kolehmainen MA, Bartholomew JB, Sinha R (2014). Chronic psychological stress impairs recovery of muscular function and somatic sensations over a 96-hour period. *J Strength Cond Res*. *Abstract read.*
 - Stutz J, Eiholzer R, Spengler CM (2019). Effects of evening exercise on sleep in healthy participants: a systematic review and meta-analysis. *Sports Med*. *Abstract read.*
+- Stull R (2011). Wet-bulb temperature from relative humidity and air temperature. *J Appl Meteorol Climatol* 50:2267–2269. *From memory; only its formula is used.*
 - Tanaka H, Seals DR (2008). Endurance exercise performance in Masters athletes: age-associated changes and underlying physiological mechanisms. *J Physiol* 586:55–63.
 - Thomas C, Jones H, Whitworth-Turner C, Louis J (2020). High-intensity exercise in the evening does not disrupt sleep in endurance runners. *Eur J Appl Physiol*. *Abstract read.*
 - Thomas DT, Erdman KA, Burke LM (2016). Nutrition and athletic performance: joint position statement. *Med Sci Sports Exerc* 48:543–568.
@@ -495,6 +526,7 @@ on a detail.
 - van der Worp MP and colleagues (2015). Injuries in runners: a systematic review on risk factors and sex differences. *PLoS One*.
 - Vernillo G and colleagues (2017). Biomechanics and physiology of uphill and downhill running. *Sports Med* 47:615–629.
 - Vickers AJ, Vertosick EA (2016). An empirical study of race times in recreational endurance runners. *BMC Sports Sci Med Rehabil*.
+- Vihma T (2010). Effects of weather on the performance of marathon runners. *Int J Biometeorol*. *Abstract read.*
 - Walsh NP and colleagues (2021). Sleep and the athlete: narrative review and 2021 expert consensus recommendations. *Br J Sports Med* 55:356–368.
 - Wang Z and colleagues (2023). Effects of tapering on performance in endurance athletes: a systematic review and meta-analysis. *PLoS One*.
 - Zanini M, Folland JP and colleagues (2025). Strength training improves running economy durability and fatigued high-intensity performance in well-trained male runners: a randomized control trial. *Med Sci Sports Exerc*.

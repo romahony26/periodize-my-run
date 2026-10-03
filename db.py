@@ -47,7 +47,7 @@ DEFAULTS = {
 }
 
 
-SCHEMA_VERSION = 18
+SCHEMA_VERSION = 19
 # Upgrades applied in order to an older database: {version reached: [SQL statements]}.
 MIGRATIONS = {
     2: ["CREATE TABLE IF NOT EXISTS moves (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)"],
@@ -72,6 +72,7 @@ MIGRATIONS = {
          "ALTER TABLE plan DROP COLUMN gcal_id", "ALTER TABLE plan DROP COLUMN gcal_hash"],
     11: ["DROP TABLE IF EXISTS chat", "DROP TABLE IF EXISTS overrides", "DELETE FROM settings WHERE key IN ('anthropic_key','coach_model')"],
     18: ["ALTER TABLE daily ADD COLUMN sleep_start TEXT"],
+    19: ["ALTER TABLE activities ADD COLUMN weather TEXT"],
     7: ["CREATE TABLE IF NOT EXISTS aerobic_tests (date TEXT PRIMARY KEY, stages TEXT, source TEXT, activity_id TEXT)"],
 }
 _ready = False

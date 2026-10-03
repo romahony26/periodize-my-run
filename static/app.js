@@ -111,7 +111,7 @@ function planView(){
       ${b.week.rhr?`<div class="stat"><div class="v num">${b.week.rhr}</div><div class="k">Resting HR, 7-day${b.normal.rhr?' · normal '+b.normal.rhr:''}${b.rhr?' · today '+Math.round(b.rhr):''}</div></div>`:''}</div>
       ${a?'':`<p class="xs mute" style="margin:8px 0 0">${E(b.reasons.join('; '))}</p>`}`:''}
     ${sd.fuel?`<p class="lab2">Fuelling · about ${Math.floor(sd.fuel.minutes/60)} h ${String(sd.fuel.minutes%60).padStart(2,'0')}</p><p class="small" style="margin:4px 0 0">${E(sd.fuel.text)}${sd.fuel.per_hour<sd.fuel.guide&&!sd.fuel.race?` <span class="mute">The guideline for this length is up to ${sd.fuel.guide} g an hour; the plan steps you up toward race day.</span>`:''}</p>`:''}
-    ${sd.done?`<p class="lab2">What you ran</p><p class="small" style="margin:4px 0 0"><b class="num">${E(sd.done.dist)}</b> at ${E(sd.done.pace)}${sd.done.runs>1?` over ${sd.done.runs} runs`:''} ${sd.done.id?GLINK(sd.done.id):''} <button class="ghost" data-dopen="${sd.date}" style="margin-left:8px">Run detail</button></p>`:''}
+    ${sd.done?`<p class="lab2">What you ran</p><p class="small" style="margin:4px 0 0"><b class="num">${E(sd.done.dist)}</b> at ${E(sd.done.pace)}${sd.done.runs>1?` over ${sd.done.runs} runs`:''} ${sd.done.id?GLINK(sd.done.id):''} <button class="ghost" data-dopen="${sd.date}" style="margin-left:8px">Run detail</button></p>${sd.done.weather?`<p class="xs mute" id="runwx" style="margin:4px 0 0">Weather: ${E(sd.done.weather)}</p>`:''}`:''}
     ${sy?`<p class="lab2">Garmin</p><p class="small" style="margin:4px 0 0"><span class="chip ${sc[sy.state]}"><i></i>${{synced:'Synced',pending:'Waiting to sync',later:'Not sent yet',off:'Not sending',past:'Past',none:'Nothing to send'}[sy.state]}</span> ${E(sy.text)}</p>`:''}
     </div></div>`}
   h+=dayModal();
@@ -323,9 +323,9 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
   <div class="card c6 conn" id="ccal">${head('▦','Calendar file',chip(true,'Ready',''))}
     <p class="small">The next sessions as a file for Apple Calendar, Outlook or Google Calendar. Import it by hand; nothing is sent anywhere.</p>
     <p class="cact"><a class="ghost" href="/api/calendar.ics">Download calendar file</a></p></div>
-  <div class="card c12 conn" id="cheat">${head('☀','Heat adjustment (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
-    <p class="small">Eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only thing sent is your rough location, rounded to about 10 km, taken from your latest outdoor run. Off unless you switch it on.</p>
-    <label for="heatsw">Adjust for heat</label>${yn('heatsw',S.heat&&S.heat.on)}
+  <div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
+    <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
+    <label for="heatsw">Track the weather and adjust for it</label>${yn('heatsw',S.heat&&S.heat.on)}
     ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
@@ -561,7 +561,7 @@ function bind(){
   on('#wfsave',async()=>{await api('watch',{source:'fitfolder',fit_folder:$('#wfolder').value});toast('Folder set. Reading it now.');await load()});
   on('#corgo',async()=>{await api('coros/login',{email:$('#cem').value,password:$('#cpw').value});$('#cpw').value='';toast('COROS connected (experimental)');await api('watch',{source:'coros'});await load()});
   on('#cordis',async()=>{await api('coros/disconnect',{});toast('COROS disconnected');await load()});
-  if($('#heatsw'))$('#heatsw').onchange=async()=>{await api('settings',{heat_adjust:$('#heatsw').value==='1'});toast($('#heatsw').value==='1'?'Heat adjustment on':'Heat adjustment off');await load()};
+  if($('#heatsw'))$('#heatsw').onchange=async()=>{await api('settings',{heat_adjust:$('#heatsw').value==='1'});toast($('#heatsw').value==='1'?'Weather on':'Weather off');await load()};
   const restartWait=()=>{toast('Restarting into the new version…');let n=0;const t=setInterval(async()=>{n++;try{const r=await fetch('/api/state',{headers:{'X-Requested-With':'periodize'}});if(r.ok){clearInterval(t);location.reload()}}catch(e){}if(n>60)clearInterval(t)},2000)};
   $$('[data-upd]').forEach(b=>b.onclick=async()=>{const act=b.dataset.upd,v=b.dataset.v;
     if(act==='install'&&!confirm('Update to version '+v+'? A backup is made first, and you can switch back under Settings, About.'))return;

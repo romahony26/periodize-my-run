@@ -3,6 +3,16 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.7.0 - 2026-10-03
+### Added
+- Weather for every run. With weather switched on (Settings, Connections), each outdoor run of the last three years is given the temperature, dew point, wind and rain it was run in, read once from Open-Meteo for the run's rounded start location and hour. It is shown with the run on its day card.
+- Fitness is judged on what a run was worth in neutral weather. A run's pace is scaled for the heat (or the cold) before it counts as evidence of your threshold, your pace at a heart rate, or your time at threshold and race pace, so a hot spell is not read as lost fitness. The reason given for your threshold says when the weather was allowed for.
+- Principles: a new section 16, "Weather", covering heat, cold, wind and rain, with seven added references.
+### Changed
+- How much heat slows you now comes from race data, not a coaching table: performance is best at a wet-bulb globe temperature of 7.5 to 15 °C and falls about 0.35% for each degree outside it (1,258 endurance races). Fast paces are eased by that amount on hot days, and a day at 28 °C or more turns the session into an easy run. The estimate is for shade, so on humid days it eases a little less than the old table did (about 2.3% at 25 °C with an 18 °C dew point, where the table gave 3.75%).
+- Wind and rain are recorded and shown but change no figure: in marathon results they had no effect of their own once temperature was allowed for.
+- "Heat adjustment" in Settings is now "Weather". It is still off unless you switch it on. When on, the rough locations (to about 10 km) and dates of your runs are sent to Open-Meteo, where before only your latest rough location was.
+
 ## 2.6.1 - 2026-10-03
 ### Fixed
 - The lists of studies on the How it works page closed by themselves a few seconds after being opened, because the page refreshes every six seconds. An open list now stays open, and the refresh waits while any expandable section is open (this also fixes "Enter a test by hand" on the Fitness page).

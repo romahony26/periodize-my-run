@@ -311,6 +311,7 @@ def run(kind):
             if prof_:        # after the results, because the taper is learned from them
                 respond.derive(db.get("hrmax") or prof_.get("hrmax_observed"))
         if kind in ("setup", "daily", "readiness"):
+            heat.track(_progress)          # the weather each run was run in; does nothing unless weather is switched on
             watch.sync_rest(kind, c, _progress)
         if kind in ("setup", "daily", "replan"):
             if aerobic.read_tests():
