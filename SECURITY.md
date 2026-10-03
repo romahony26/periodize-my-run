@@ -35,4 +35,4 @@ One athlete, on a computer they control (a Mac or a Raspberry Pi), reached from 
 
 ## Reporting a problem
 
-Please report privately, not in a public issue: use the repository's private security advisory form, or email the maintainer named in the repository. Include what you did, what happened and what you expected. Please allow time for a fix before publishing.
+Please report privately, not in a public issue, using the private security report form: https://github.com/romahony26/periodize/security/advisories/new. Include what you did, what happened and what you expected. Please allow time for a fix before publishing.

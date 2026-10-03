@@ -33,9 +33,12 @@ def keep(names, today=None):
     """Which backups to keep, from their names. Pure function: the same rule is used here and by tools/pull_backup.py."""
     today = today or dt.date.today()
     by_day = {}
-    for n in sorted(names):
+    def when(n):              # date, then time made; the nightly has no time in its name and counts as the start of its day
         m = NAME.match(n)
-        if m:
+        return (m.group(1), (m.group(2) or "-000000")[1:7]) if m else ("", "")
+    for n in sorted(names, key=when):
+        m = NAME.match(n)
+        if m and not m.group(3):                               # a restore's safety copy never takes the day's place
             by_day[dt.date.fromisoformat(m.group(1))] = n      # the latest backup of each day
     days = sorted(by_day, reverse=True)
     kept = set(days[:DAILY])
@@ -45,8 +48,9 @@ def keep(names, today=None):
         months.setdefault((d.year, d.month), d)
     kept |= set(list(weeks.values())[:WEEKLY]) | set(list(months.values())[:MONTHLY])
     out = {by_day[d] for d in kept}
-    # a restore's safety copy from today is kept until tomorrow's thinning
-    out |= {n for n in names if NAME.match(n) and "-pre" in n and NAME.match(n).group(1) == today.isoformat()}
+    # everything from today (the nightly, any made by hand, a restore's safety copy) is kept until tomorrow's thinning, so a
+    # backup you have just made, or are about to restore from, is never removed from under you
+    out |= {n for n in names if NAME.match(n) and NAME.match(n).group(1) == today.isoformat()}
     return out
 
 

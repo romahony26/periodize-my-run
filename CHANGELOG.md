@@ -3,6 +3,17 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.20.0 - 2026-10-03
+### Added
+- The season outline shows each week's distance above its bar and marks races under their week (★ goal race, ● tune-up), with a list of the season's races and the week each falls in. On a phone it scrolls sideways.
+- An "About Periodize" card in Settings: the version, what changed, the MIT licence, how to report a problem (a link to open an issue), how to report a security problem privately, and a Buy me a coffee link once its address is set.
+- README: how to report a problem.
+### Changed
+- SECURITY.md points to the private security report form instead of an email address that was never given.
+### Fixed
+- A backup you had made earlier the same day could be deleted when you restored from it: the restore's safety copy counted as the day's latest backup, and the thinning removed the rest. Now every backup from today is kept until tomorrow's thinning, and a safety copy never takes the place of a day's real backup.
+- "The latest backup of the day" is now decided by the time it was made. Before, the nightly backup always counted as the latest, because of how the file names sort.
+
 ## 1.19.0 - 2026-10-03
 ### Added
 - Trends on the Fitness page. Threshold pace (speed), Race-specific endurance (the endurance base), Aerobic drift (durability) and Steps outside your runs each have a Trend button showing up to 26 weeks, and a tag saying whether each is improving, steady or slipping over the window that suits it: speed over 6 weeks (steady within 1%), endurance base over 4 weeks, durability over the last six long runs, steps over 7 days against your normal.

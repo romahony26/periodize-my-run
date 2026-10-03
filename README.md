@@ -206,6 +206,13 @@ real Garmin login is not covered by the suite.
 - No run/walk plans for complete beginners.
 - This is a training tool, not medical advice.
 
+## Reporting a problem
+
+Open an issue at https://github.com/romahony26/periodize/issues: say what you
+did, what happened and what you expected, and paste the relevant part of the
+Log tab if it helps (check it for anything personal first). Security problems
+should be reported privately instead: see SECURITY.md.
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE): free to use, change and share, with no warranty.

@@ -511,6 +511,10 @@ def state():
         season += [x for x in (db.get("season") or []) if x["monday"] > last]
         k = 1 if c["units"] == "mi" else assess.MI / 1000
         season = [dict(x, total=round(x["total"] * k), long=round(x["long"] * k)) for x in season]
+        for x in season:           # races in each week, so the outline can show them
+            end = (dt.date.fromisoformat(x["monday"]) + dt.timedelta(days=7)).isoformat()
+            x["races"] = [{"name": r["name"], "date": r["date"], "priority": r["priority"]}
+                          for r in db.rows("SELECT name,date,priority FROM races WHERE date>=? AND date<? ORDER BY date", (x["monday"], end))]
         g = db.get("garmin_lt")
         if g:
             age = (today - dt.date.fromisoformat(g["date"])).days if g.get("date") else None
@@ -521,7 +525,7 @@ def state():
              "miles_week": round(sp["week"] * 7 * 0.75 / assess.MI, 1)} if sp else None
     lo = jobs.last_ok()
     return jsonify(
-        version=changelog()[0]["version"], climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=insights.warnings(today, c["units"]) if db.get("setup_done") else [], shoes=insights.shoes(c["units"]),
+        version=changelog()[0]["version"], project=PROJECT, climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=insights.warnings(today, c["units"]) if db.get("setup_done") else [], shoes=insights.shoes(c["units"]),
         drift=insights.drift_history(today) if db.get("setup_done") else [], best_grade=best_grade, about_you={"sex": c.get("sex"), "birth_date": c.get("birth_date"), "gel_carbs_g": c.get("gel_carbs_g")},
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
@@ -883,6 +887,8 @@ def learned(c, L):
     return out
 
 
+PROJECT = {"url": "https://github.com/romahony26/periodize",
+           "support": ""}      # the maintainer's Buy Me a Coffee page; the link stays hidden while this is empty
 _TRENDS = {"key": None, "data": None}
 
 

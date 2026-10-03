@@ -113,10 +113,13 @@ function planView(){
     </div></div>`}
   h+=dayModal();
   if(S.season&&S.season.length>4){const mx=Math.max(...S.season.map(x=>x.total),1), col={race:'var(--race)',taper:'var(--amber)',down:'var(--mute)',recover:'var(--mute)',postrace:'var(--mute)',return:'var(--mute)',tuneup:'var(--amber)'};
+    const races=S.season.flatMap((x,i)=>(x.races||[]).map(r=>Object.assign({week:i+1},r)));
     h+=`<div class="grid" style="margin-top:22px"><div class="card c12" id="season"><p class="eyebrow">Season outline · ${S.season.length} weeks to ${E(f&&f.goal?f.goal.name:'your goal')}</p>
-      <div class="chart" role="list" style="height:96px">${S.season.map(x=>{const tip='Week of '+nice(x.monday)+': '+x.mode+', '+x.total+' '+U()+', long run '+x.long+' '+U();return `<div class="b" role="listitem" tabindex="0" data-tip="${E(tip)}" aria-label="${E(tip)}" style="height:${Math.max(6,Math.round(100*x.total/mx))}%;${col[x.mode]?'background:'+col[x.mode]:''}"></div>`}).join('')}</div>
-      <div class="xs mute" style="display:flex;justify-content:space-between"><span>${nice(S.season[0].monday)}</span><span>${nice(S.season[S.season.length-1].monday)}</span></div>
-      <p class="xs mute" style="margin:8px 0 0">Weekly distance, hover or tap a bar. Grey: lighter weeks · amber: taper and tune-up races · red: race week. Only this week is fixed; each later week assumes the one before goes to plan, and all are redrawn at every weekly review.</p></div></div>`}
+      <div class="sout" role="list" aria-label="Weekly distance for each week of the season">${S.season.map((x,i)=>{const rc=(x.races||[]);const tip='Week of '+nice(x.monday)+': '+x.mode+', '+x.total+' '+U()+', long run '+x.long+' '+U()+(rc.length?'. Race: '+rc.map(r=>r.name).join(', '):'');
+        return `<div class="sw" role="listitem" tabindex="0" title="${E(tip)}" aria-label="${E(tip)}"><span class="sv num">${x.total}</span><div class="sbar"><i style="height:${Math.max(4,Math.round(100*x.total/mx))}%;${col[x.mode]?'background:'+col[x.mode]:''}"></i></div>
+          <span class="sr">${rc.map(r=>`<b class="${r.priority==='A'?'ra':'rb'}" title="${E(r.name)}">${r.priority==='A'?'★':'●'}</b>`).join('')}</span><span class="sd">${i%4===0?nice(x.monday):''}</span></div>`}).join('')}</div>
+      ${races.length?`<ul class="clist" style="margin-top:10px;list-style:none;padding-left:0">${races.map(r=>`<li><b class="${r.priority==='A'?'ra':'rb'}">${r.priority==='A'?'★':'●'}</b> ${E(r.name)} · ${nice(r.date)} · ${r.priority==='A'?'goal race':'tune-up'} · week ${r.week} of ${S.season.length}</li>`).join('')}</ul>`:''}
+      <p class="xs mute" style="margin:8px 0 0">Weekly distance in ${U()==='mi'?'miles':'km'} above each bar; ★ goal race, ● tune-up race. Grey: lighter weeks · amber: taper and tune-up race weeks · red: race week. Only this week is fixed; each later week assumes the one before goes to plan, and all are redrawn at every weekly review.</p></div></div>`}
   if(f)h+=`<div class="grid" style="margin-top:22px"><div class="card c12"><p class="eyebrow">Why this week looks like this</p><ul class="why">${f.week.why.map(w=>`<li>${E(w)}</li>`).join('')||'<li>Nothing unusual.</li>'}</ul></div></div>`;
   return h;
 }
@@ -263,7 +266,17 @@ function settingsView(){const s=S.settings;
     <p class="xs mute">For a copy off this computer, use Download backup above, or see How it works for a daily copy into a cloud folder.</p>
     <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button></p></div>
   ${connections()}
-  <div class="card c12"><p class="small mute" style="margin:0">Periodize version <b class="num">${E(S.version)}</b> · <a href="#" id="tochanges">What changed</a></p></div></div>`}
+  ${aboutCard()}</div>`}
+function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" target="_blank" rel="noopener noreferrer">${t}</a>`;
+  return `<div class="card c12" id="aboutcard"><p class="eyebrow">About Periodize</p>
+    <p class="small" style="margin:0">Version <b class="num">${E(S.version)}</b> · <a href="#" id="tochanges">What changed</a>${P.url?' · '+x(P.url,'Source code'):''}</p>
+    <ul class="clist">
+      <li><b>Licence:</b> MIT. Free to use, change and share, with no warranty${P.url?' ('+x(P.url+'/blob/main/LICENSE','read the licence')+')':''}.</li>
+      <li><b>Found a problem or have an idea?</b> ${P.url?x(P.url+'/issues/new','Open an issue')+'. Say what you did, what happened and what you expected; the Log tab often helps, but check it for anything personal before pasting.':'See the README.'}</li>
+      <li><b>A security problem?</b> Please report it privately, not in a public issue${P.url?': '+x(P.url+'/security/advisories/new','private security report'):''}. See SECURITY.md.</li>
+      ${P.support?`<li><b>Like it?</b> ${x(P.support,'Buy me a coffee')} ☕</li>`:''}
+    </ul>
+    <p class="xs mute" style="margin:8px 0 0">Periodize is a training tool, not medical advice. It is not affiliated with Garmin.</p></div>`}
 function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="chip ${ok?'green':warn?'amber':'unknown'}"><i></i>${ok?yes:no}</span>`;
   const head=(icon,name,c)=>`<div class="chead"><span class="cicon" aria-hidden="true">${icon}</span><b>${name}</b><span style="margin-left:auto">${c}</span></div>`;
   return `<div class="c12 sechead"><h2>Connections</h2><p class="small mute">Where your data comes from and where copies go. Tokens are kept encrypted on this computer; no passwords are stored.</p></div>
