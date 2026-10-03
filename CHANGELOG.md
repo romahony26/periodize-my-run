@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.7.4 - 2026-10-03
+### Added
+- The History tab shows the trend of your execution score over time: a line of the average of your last five scored sessions, session by session, with each session's own score on hover. It appears once three sessions have been scored, so it no longer waits for a second full week. The weekly bars are still shown once there are two weeks.
+
 ## 2.7.3 - 2026-10-03
 ### Fixed
 - The History tab did not show today's run until the next day: it only listed days before today. A run now appears there, scored, as soon as it has been synced. A day whose run has not been done yet is still not counted as missed.

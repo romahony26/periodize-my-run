@@ -203,5 +203,8 @@ def history(c, L, weeks=12):
             d = dt.date.fromisoformat(x["date"])
             wk.setdefault((d - dt.timedelta(days=d.weekday())).isoformat(), []).append(x["score"]["score"])
     scored = [x["score"]["score"] for x in out if x["score"]]
-    return {"sessions": out, "weeks": [{"week": k, "avg": round(sum(v) / len(v)), "n": len(v)} for k, v in sorted(wk.items())],
+    # the trend: each scored session, oldest first, with the average of it and the four before it
+    asc = [(x["date"], x["score"]["score"]) for x in reversed(out) if x["score"]]
+    trend = [{"date": d, "score": v, "avg": round(sum(s for _, s in asc[max(i - 4, 0):i + 1]) / len(asc[max(i - 4, 0):i + 1]))} for i, (d, v) in enumerate(asc)]
+    return {"trend": trend, "sessions": out, "weeks": [{"week": k, "avg": round(sum(v) / len(v)), "n": len(v)} for k, v in sorted(wk.items())],
             "average": round(sum(scored) / len(scored)) if scored else None, "count": len(scored)}
