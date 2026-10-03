@@ -62,8 +62,8 @@ the same heart rate month by month.
 ## Features
 
 **Setup wizard (in the browser, three steps)**
-1. Connect Garmin: email and password, plus the two-step code if your
-   account uses one.
+1. Connect your watch: choose Garmin or COROS, then give the email and
+   password (and the two-step code, for a Garmin account that uses one).
 2. Add your races: a goal race and any tune-up races, from 5K to 100 miles.
 3. Say how you train: units, running days, long run day, days you cannot
    run, and whether to send workouts to your watch.

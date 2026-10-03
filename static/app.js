@@ -303,7 +303,7 @@ function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" ta
       <li><b>A security problem?</b> Please report it privately, not in a public issue${P.url?': '+x(P.url+'/security/advisories/new','private security report'):''}. See SECURITY.md.</li>
       ${P.support?`<li><b>Like it?</b> ${x(P.support,'Buy me a coffee')} ☕</li>`:''}
     </ul>${updatesBox()}${termsBox('tbox3')}
-    <p class="xs mute" style="margin:8px 0 0">Periodize My Run is a training tool, not medical advice; you use it at your own risk. Keep it off the internet: it is for your own computer or home network. It is not affiliated with Garmin.</p></div>`}
+    <p class="xs mute" style="margin:8px 0 0">Periodize My Run is a training tool, not medical advice; you use it at your own risk. Keep it off the internet: it is for your own computer or home network. It is not affiliated with Garmin or COROS.</p></div>`}
 function watchCard(head,chip){const w=S.watch||{source:'garmin'}, opt=(v,t)=>`<option value="${v}" ${w.source===v?'selected':''}>${t}</option>`;
   return `<div class="card c6 conn" id="cwatch">${head('⇄','Where your runs come from',chip(w.connected,E(w.name||'Garmin'),'Not connected',w.source!=='garmin'))}
     <label for="wsrc">Source</label><select id="wsrc">${opt('garmin','Garmin (runs, sleep, HRV, workouts to the watch)')}${opt('fitfolder','FIT files from a folder (any watch, runs only)')}${opt('coros','COROS (runs only)')}</select>
@@ -491,21 +491,27 @@ function wizard(){
       <label for="whr">Maximum heart rate, if you know it is different</label><input id="whr" type="number" min="120" max="230" placeholder="${L.hrmax}" style="width:120px">
       ${nav(null,'wdone','Open my plan')}`;
   }else if(j.running||wiz.step===5&&S.setup_started){
-    h+=stepper(5)+`<p class="h">Building your plan</p><p style="margin:14px 0"><span class="spin"></span>${E(j.progress||'Starting')}</p><p class="small mute">The first run reads your whole Garmin history and downloads your recent runs at an unhurried pace, so it takes 10 to 30 minutes. You can close this page; it carries on.</p>`;
+    h+=stepper(5)+`<p class="h">Building your plan</p><p style="margin:14px 0"><span class="spin"></span>${E(j.progress||'Starting')}</p><p class="small mute">The first run reads your whole running history and downloads your recent runs at an unhurried pace, so it takes 10 to 30 minutes. You can close this page; it carries on.</p>`;
     if(p)h+=`<div class="stats"><div class="stat"><div class="v num">${p.runs.toLocaleString()}</div><div class="k">runs found</div></div><div class="stat"><div class="v num">${p.first_run.slice(0,4)}</div><div class="k">running since</div></div><div class="stat"><div class="v num">${dU(p.miles)}</div><div class="k">lifetime</div></div></div>`;
     if(j.error)h+=`<div class="alert err" style="margin-top:14px">${E(j.error)}</div><button class="btn" id="retry">Try again</button>`;
   }else if(wiz.step===1){
-    h+=stepper(1)+`<p class="h">Welcome</p><p class="small">Periodize My Run builds a running plan from your own Garmin history and keeps adjusting it from what you do. Setup takes a few minutes of your time, then 10 to 30 minutes of its own.</p>
+    h+=stepper(1)+`<p class="h">Welcome</p><p class="small">Periodize My Run builds a running plan from your own running history (Garmin or COROS) and keeps adjusting it from what you do. Setup takes a few minutes of your time, then 10 to 30 minutes of its own.</p>
       <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except your watch's service, the weather service if you switch heat adjustment on, and a daily version check with GitHub.</li>
-      <li><b>No passwords are kept.</b> Your Garmin password is used once to sign in; only an access token is stored, encrypted.</li>
+      <li><b>No passwords are kept.</b> Your Garmin or COROS password is used once to sign in; only an access token is stored, encrypted.</li>
       <li><b>No AI is used.</b> The plan comes from fixed rules and your data, and every decision is explained.</li>
       <li><b>It is not medical advice.</b> For pain that changes your stride, chest symptoms or illness with fever, stop and see a clinician.</li></ul>
       ${S.remote?'':(S.has_password?'':'<p class="xs mute">To open the app from another device later, set an app password on this computer with <code>python web.py --set-password</code>.</p>')}
       ${termsBox('tbox1')}<p style="margin:12px 0 0"><label class="small"><input type="checkbox" id="wterms"> I have read and accept the terms of use, including that this is not medical advice and that I run at my own risk</label></p>
       ${nav(null,'w1','Get started')}`;
   }else if(wiz.step===2){
-    h+=stepper(2)+`<p class="h">Connect Garmin</p>`;
-    if(S.garmin.connected)h+=`<p>Connected${S.garmin.name?' as <b>'+E(S.garmin.name)+'</b>':''}.</p>${nav('wb1','w2')}`;
+    const src=wiz.src||(S.watch&&S.watch.source==='coros'?'coros':'garmin'), ok=src==="coros"?S.watch.coros:S.garmin.connected;
+    h+=stepper(2)+`<p class="h">Connect your watch</p><label for="wsw">Which watch do you use?</label><select id="wsw"><option value="garmin" ${src==='garmin'?'selected':''}>Garmin</option><option value="coros" ${src==='coros'?'selected':''}>COROS</option></select>`;
+    if(src==='coros'){
+      if(ok)h+=`<p>Connected to COROS.</p><p class="xs mute">COROS gives the app your runs. It has no sleep or HRV to share, so sessions are not adjusted day by day, and nothing is sent to your watch.</p>${nav('wb1','w2')}`;
+      else h+=`<p class="small mute">Your password goes straight to COROS, once, and is not stored. COROS has no official way for a personal app to sign in, so this uses the web interface its own Training Hub site uses. It reads your runs only and never changes your account. Your region (Europe, USA or China) is found automatically.</p>
+        <label for="cem">COROS email</label><input id="cem" type="email" autocomplete="username" style="width:100%"><label for="cpw">COROS password</label><input id="cpw" type="password" autocomplete="current-password" style="width:100%">
+        <p style="margin:18px 0 0"><button class="ghost" id="wb1">Back</button> <button class="btn" id="wcl">Connect</button></p>`;
+    }else if(S.garmin.connected)h+=`<p>Connected${S.garmin.name?' as <b>'+E(S.garmin.name)+'</b>':''}.</p>${nav('wb1','w2')}`;
     else if(wiz.mfa)h+=`<p class="mute">Garmin sent you a code. Enter it here.</p><div class="row"><input id="code" aria-label="Garmin code" inputmode="numeric" autocomplete="one-time-code"><button class="btn" id="mfa">Confirm</button></div>`;
     else h+=`<p class="small mute">Your password goes straight to Garmin, once, and is not stored. Garmin offers no other way for a personal app to sign in.</p>
       <label for="em">Garmin email</label><input id="em" type="email" autocomplete="username" style="width:100%"><label for="pw">Garmin password</label><input id="pw" type="password" autocomplete="current-password" style="width:100%">
@@ -528,6 +534,8 @@ function wizard(){
 function bind(){
   const on=(id,fn)=>{const e=$(id);if(e)e.onclick=async ev=>{ev.preventDefault();try{await fn()}catch(x){}}};
   on('#gl',async()=>{const r=await api('garmin/login',{email:$('#em').value,password:$('#pw').value});if(r.result==='needs_mfa')wiz.mfa=true;await load()});
+  on('#wcl',async()=>{await api('coros/login',{email:$('#cem').value,password:$('#cpw').value});$('#cpw').value='';toast('COROS connected');await load()});
+  if($('#wsw'))$('#wsw').onchange=async()=>{wiz.src=$('#wsw').value;if(wiz.src==='garmin'&&S.watch&&S.watch.source!=='garmin'){try{await api('watch',{source:'garmin'});await load();return}catch(e){}}render()};
   on('#mfa',async()=>{await api('garmin/mfa',{code:$('#code').value});wiz.mfa=false;await load()});
   on('#w1',async()=>{if(!$('#wterms').checked)return toast('Please read and accept the terms of use first.','err');await api('terms',{accept:true});wiz.step=2;render()});
   if($('#taccept'))$('#taccept').onclick=async()=>{if(!$('#tok2').checked)return toast('Tick the box to accept the terms.','err');await api('terms',{accept:true});toast('Thank you');await load()};

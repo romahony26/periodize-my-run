@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.8.5 - 2026-10-03
+### Added
+- Setup now asks which watch you use, Garmin or COROS, and signs in to the one you choose. Before, COROS could only be chosen afterwards in Settings. The welcome page and the "building your plan" page no longer assume Garmin.
+
 ## 2.8.4 - 2026-10-03
 ### Fixed
 - COROS: the connection now works. Checked against a real COROS account (Europe): sign-in, the list of runs, the .fit download and reading the file all succeed. Two things were wrong. COROS has a separate server for Europe, the USA and China, and a sign-in token works only on its own region's server; the app now tries each and keeps the one that accepts the token. And COROS's list of activities needs a date range, which was not sent.
