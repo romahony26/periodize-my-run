@@ -13,6 +13,7 @@ import calibrate
 import db
 import engine
 import execution
+import heat
 import aerobic
 import profile
 import push
@@ -265,6 +266,17 @@ def adjust():
             adj.update({"easy": True, "slow": 0.0, "advice": "Changed to an easy run today because " +
                         ("several warning signs agree." if r["level"] == "red" else "a warning sign has lasted three mornings.") +
                         " The session comes back once you have recovered."})
+        h = heat.at(today, heat.run_hour(today)) if c.get("heat_adjust") and fast else None
+        if h and not (adj and adj.get("easy")):
+            say = f"the forecast at {h['hour']}:00 is {h['temp']}°C with a dew point of {h['dew']}°C"
+            if h["pct"] is None:
+                adj = {"slow": 0.0, "level": r["level"], "reasons": [say], "easy": True, "heat": h,
+                       "advice": "Changed to an easy run today: it will be too hot and humid for hard running. Run early or late if you can."}
+            elif h["pct"] > 0:
+                adj = adj or {"slow": 0.0, "reasons": [], "level": r["level"]}
+                adj["slow"] = round(adj["slow"] + h["pct"] / 100, 4)
+                adj["reasons"] = adj["reasons"] + [f"{say}: paces eased {h['pct']:g}% for the heat"]
+                adj["heat"] = h
         db.run("UPDATE plan SET adjust=? WHERE date=?", (json.dumps(adj) if adj else None, today.isoformat()))
     if r["level"] == "unknown" and not watch.has_recovery_data():
         r["reasons"] = [f"{watch.NAMES[watch.name()]} gives no sleep or heart-rate variability, so sessions are not adjusted day by day."]

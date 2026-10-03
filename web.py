@@ -37,6 +37,7 @@ import insights
 import forecast
 import garmin
 import calfile
+import heat
 import coros
 import watch
 import aerobic
@@ -472,6 +473,10 @@ def state():
                 "change": round(fc["seconds"] - prev[-1]) if prev else None,
                 "index_now": round(fc["current_index"], 1), "index_race": round(fc["index"], 1), "proven": round(fc["proven"]["index"], 1),
                 "proven_from": fc["proven"]["from"], "proven_date": fc["proven"]["date"]}
+            if c.get("heat_adjust"):
+                rh = heat.at(dt.date.fromisoformat(goal["date"]), 9, cached_only=True)    # race starts are usually around 9
+                if rh:
+                    fitness["goal"]["heat"] = rh
     # plan against actual, by week, for weeks the app has planned
     comp = []
     for k in range(4, -1, -1):
@@ -544,6 +549,8 @@ def state():
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
         compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")),
+        heat={"on": bool(c.get("heat_adjust")), "located": bool((db.get("heat_forecast") or {}).get("loc")),
+              "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None},
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
         job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
@@ -607,7 +614,12 @@ def settings():
         db.put("auto_backup", bool(j["auto_backup"]))
     if "map_tiles" in j:
         db.put("map_tiles", bool(j["map_tiles"]))
-    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles"}:
+    if "heat_adjust" in j:
+        db.put("heat_adjust", bool(j["heat_adjust"]))
+        log.info("Heat adjustment switched %s", "on" if j["heat_adjust"] else "off")
+        if db.get("setup_done"):
+            jobs.start("readiness")
+    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust"}:
         return jsonify(ok=True)       # nothing here changes the plan
     sr = j.get("seed_race")
     if isinstance(sr, dict) and _is_num(sr.get("miles"), 0.5, 200) and _is_num(sr.get("time_s"), 120, 400_000):
@@ -1337,7 +1349,7 @@ def about():
             "No password is stored, anywhere. Your Garmin password goes straight to Garmin once and is exchanged for an access token. Garmin offers personal apps no sign-in that avoids this.",
             "The Garmin tokens and your notification address are encrypted before they are stored. The key is kept in a separate file outside the data folder, readable only by you, so a copy of your data or a backup gives away no logins.",
             "What encryption here cannot do: someone who can read all of your user account's files can read the key as well. Full-disk encryption on the computer is the protection against that.",
-            "Nothing is sent anywhere except Garmin, and your notification address if you set one.",
+            "Nothing is sent anywhere except your watch's service (Garmin, or COROS if you choose it), your notification address if you set one, and, only if you switch heat adjustment on, your rough location (to about 10 km) to Open-Meteo for the weather.",
             "From other devices the app needs a password, set on this computer; only a salted hash of it is kept. Five wrong attempts lock that device out for 15 minutes. The app refuses to listen on the network without one.",
             "On a Raspberry Pi the installer creates a certificate so the connection is encrypted (https). Your browser will warn once because the certificate is self-made.",
             "Every change must come from the app's own page: requests from other websites, unknown host names and forged forms are refused. The page runs no script except its own file.",

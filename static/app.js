@@ -60,13 +60,15 @@ function planView(){
       <div class="stats"><div class="stat"><div class="v num">${g.now}</div><div class="k">If you raced today</div></div>
       <div class="stat" style="border-color:var(--brand)"><div class="v num">${g.forecast.time}</div><div class="k">Race-day forecast${g.forecast.change?` · <span class="${g.forecast.change<0?'green':'amber'}">${g.forecast.change<0?'▼':'▲'} ${fmt(Math.abs(g.forecast.change))} this week</span>`:''}</div></div>
       <div class="stat"><div class="v num">${E(g.target||'—')}</div><div class="k">Your goal</div></div></div>
+      ${g.heat?`<p class="small" style="margin:10px 0 0">☀ Race-day weather around 9:00: <b>${g.heat.temp}°C, dew point ${g.heat.dew}°C</b>. ${g.heat.pct===null?'<b class="amber">Very hot and humid: race for the finish, not a time, and start well inside your pace.</b>':g.heat.pct>0?`Expect about <b>${g.heat.pct}%</b> slower than the forecast above; start that much slower.`:'No slowdown expected for the heat.'}</p>`:''}
       ${(fc=>`<p class="small" style="margin:12px 0 0">${fc.gap?`The forecast is <b class="${fc.gap[0]==='ahead'?'green':'amber'}">${fc.gap[1]} ${fc.gap[0]==='ahead'?'ahead of':'behind'}</b> your goal. `:''}It assumes you complete <b>${fc.pct}%</b> of the plan${fc.chosen?`, the figure you set${fc.history_pct!==null?` (your last two years averaged ${fc.history_pct}%${fc.plan_pct!==null&&fc.plan_days>=7?`; this plan so far ${fc.plan_pct}%`:''})`:''}`:fc.plan_weight>=100?', your record on this plan so far':fc.plan_weight>0?`, a blend of your history (${fc.history_pct}%) and this plan so far (${fc.plan_pct}%)`:fc.history_pct!==null?', your average over the last two years':', a general figure until there is history'}.</p>
       <p class="xs mute" style="margin:6px 0 0">Complete all of it: <b class="num">${fc.all}</b> · Complete ${fc.poor_pct}%: <b class="num">${fc.poor}</b>${fc.out_of_reach?' · Your goal is beyond the best you have shown in three years; a new best along the way will move the forecast.':fc.needs_all?' · Your goal is within reach only if nearly all of the plan gets done.':''}</p>`)(g.forecast)}</div>`}
   else h+=`<div class="card hero c6"><p class="eyebrow">Goal</p><p class="h">No goal race yet</p><p class="mute small">Add one under Races & status and the plan will build toward it.</p></div>`;
   h+=`<div class="card c6"><p class="eyebrow">Today ${r&&r.date===S.today?`<span class="chip ${r.level}"><i></i>${lev[r.level]}</span>`:''}</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}</span></p>
     ${stepList(t.text)}
-    ${t.adjust?`<p class="small amber" style="margin:10px 0 0"><b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}</p>`:''}
+    ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
+    ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}</p>`:''}
     ${r&&r.date===S.today?`<p class="xs mute" style="margin:10px 0 0">${E(r.reasons.join(' · '))}</p>${r.sleep_h||r.hrv?`<p class="xs mute" style="margin:4px 0 0">Last night: ${[r.sleep_h?r.sleep_h.toFixed(1)+' h sleep':'',r.sleep_score?'sleep score '+r.sleep_score:'',r.hrv?'HRV '+Math.round(r.hrv):'',r.rhr?'resting HR '+Math.round(r.rhr):''].filter(Boolean).join(' · ')}</p>`:''}`:''}
     ${t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''}${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}</div>`;
   h+='</div>';
@@ -305,6 +307,10 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
   <div class="card c6 conn" id="ccal">${head('▦','Calendar file',chip(true,'Ready',''))}
     <p class="small">The next sessions as a file for Apple Calendar, Outlook or Google Calendar. Import it by hand; nothing is sent anywhere.</p>
     <p class="cact"><a class="ghost" href="/api/calendar.ics">Download calendar file</a></p></div>
+  <div class="card c12 conn" id="cheat">${head('☀','Heat adjustment (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
+    <p class="small">Eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only thing sent is your rough location, rounded to about 10 km, taken from your latest outdoor run. Off unless you switch it on.</p>
+    <label for="heatsw">Adjust for heat</label>${yn('heatsw',S.heat&&S.heat.on)}
+    ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next update, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
     <label for="mapsw">Show runs on a real map</label>${yn('mapsw',S.map_tiles)}</div>`}
@@ -449,7 +455,7 @@ function wizard(){
     if(j.error)h+=`<div class="alert err" style="margin-top:14px">${E(j.error)}</div><button class="btn" id="retry">Try again</button>`;
   }else if(wiz.step===1){
     h+=stepper(1)+`<p class="h">Welcome</p><p class="small">Periodize My Run builds a running plan from your own Garmin history and keeps adjusting it from what you do. Setup takes a few minutes of your time, then 10 to 30 minutes of its own.</p>
-      <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except Garmin.</li>
+      <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except your watch's service, and the weather service if you switch heat adjustment on.</li>
       <li><b>No passwords are kept.</b> Your Garmin password is used once to sign in; only an access token is stored, encrypted.</li>
       <li><b>No AI is used.</b> The plan comes from fixed rules and your data, and every decision is explained.</li>
       <li><b>It is not medical advice.</b> For pain that changes your stride, chest symptoms or illness with fever, stop and see a clinician.</li></ul>
@@ -515,6 +521,7 @@ function bind(){
   on('#wfsave',async()=>{await api('watch',{source:'fitfolder',fit_folder:$('#wfolder').value});toast('Folder set. Reading it now.');await load()});
   on('#corgo',async()=>{await api('coros/login',{email:$('#cem').value,password:$('#cpw').value});$('#cpw').value='';toast('COROS connected (experimental)');await api('watch',{source:'coros'});await load()});
   on('#cordis',async()=>{await api('coros/disconnect',{});toast('COROS disconnected');await load()});
+  if($('#heatsw'))$('#heatsw').onchange=async()=>{await api('settings',{heat_adjust:$('#heatsw').value==='1'});toast($('#heatsw').value==='1'?'Heat adjustment on':'Heat adjustment off');await load()};
   on('#gmdis',async()=>{if(!confirm('Disconnect Garmin? The plan stops updating until you connect again.'))return;await api('garmin/disconnect',{});toast('Garmin disconnected');await load()});
   $$('.gpx').forEach(inp=>inp.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const pts=await readGpx(f);await api('races/'+inp.dataset.race+'/course',{points:pts});toast('Course added');await load()}catch(x){if(x&&x.message&&x.message!=='undefined')toast(x.message,'err')}});
   $$('[data-gpx]').forEach(b=>b.onclick=()=>$('#gpx'+b.dataset.gpx).click());

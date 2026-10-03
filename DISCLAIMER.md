@@ -39,6 +39,8 @@ service, hold your data, or owe you support, updates or fixes.
   computer's security, for your backups, and for who can reach the app.
 - **Do not put it on the internet.** It is built for your own computer or your home network only. Do not forward a router
   port to it or publish it on a public address. If you use a private network such as Tailscale, keep the app password set.
+- **Heat adjustment is optional.** If you switch it on, your rough location (to about 10 km) is sent to Open-Meteo for the
+  weather forecast; nothing else is. Forecasts can be wrong, so judge the conditions yourself on the day.
 - **Keep your copy up to date** and check the change log; older versions may contain problems that have since been fixed.
 
 ## 5. Garmin, COROS and other services

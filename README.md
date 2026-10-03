@@ -48,6 +48,12 @@ It then reads your history and builds the plan, showing progress as it goes.
 - Counts steps taken outside your runs as background load.
 - Optional daily message with today's session.
 
+**Heat (optional)**
+- Switch on heat adjustment and fast paces are eased on hot, humid days, a
+  dangerously hot day becomes an easy run, and the race-day forecast appears
+  for your goal race. The weather comes from Open-Meteo, which receives only
+  your rough location.
+
 **Where your runs come from**
 - Garmin (the full connection: runs, sleep, HRV, resting heart rate, steps,
   and workouts sent to the watch).
@@ -232,8 +238,10 @@ filtered out, but check before sharing it.
   blocked by the content policy.
 
 **Data**
-- Nothing is sent anywhere except Garmin and the
-  notification address if set (which may not point at this computer).
+- Nothing is sent anywhere except your watch's service (Garmin, or COROS if
+  chosen), the notification address if set (which may not point at this
+  computer), and, only if you switch heat adjustment on, your rough location
+  (to about 10 km) to Open-Meteo for the weather forecast.
 - Logs and the database are readable only by you; logs are filtered for
   anything shaped like a password, token, key or email address.
 - The downloadable backup, and the copies `tools/pull_backup.py` makes,

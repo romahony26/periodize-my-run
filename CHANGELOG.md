@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.2.0 - 2026-10-03
+### Added
+- Heat adjustment, off unless you switch it on (Settings, Connections). On hot, humid days fast paces are eased by the widely used temperature-plus-dew-point table, on top of any recovery easing; a dangerously hot and humid day turns the session into an easy run; and once your goal race is within 16 days, the goal card shows the race-day forecast and how much slower to expect. The forecast is read for the hour you usually run, worked out from your runs.
+- The weather comes from Open-Meteo (free, no account). The only thing sent is your rough location, rounded to about 10 km, taken from your latest outdoor run. The page never waits for it: forecasts are fetched by the scheduled updates and kept for three hours.
+### Fixed
+- When a session was turned into an easy run, the Today card said "Paces eased 0.0%"; it now says what changed and why.
+
 ## 2.1.0 - 2026-10-03
 ### Added
 - Where your runs come from is now a choice, in Settings, Connections: Garmin (unchanged and still the default), FIT files from a folder, or COROS (experimental).

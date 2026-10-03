@@ -225,19 +225,24 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     only if you have tried it in training; drink to thirst, because drinking too much is the serious risk for most runners
     (Hew-Butler and colleagues, 2015); no ibuprofen or similar painkillers, which were linked with more serious problems during
     marathons (Küster and colleagues, 2013) (*moderate*); and race in shoes you have already run in at race pace. [C]
-58. **Hilly races need hilly training.** [C] Weekly climb is raised toward the race's climb per mile over the final months.
-59. **Race results are compared across ages with age grading.** [R] (*moderate*) Performance declines with age at a known average
+58. **Heat slows you; plan for it.** [R] (*moderate*) Marathon times fall progressively as it gets warmer and more humid, and
+    slower runners lose proportionally more (Ely and colleagues, 2007). If you switch heat adjustment on, fast paces are eased on
+    hot days by the widely used temperature-plus-dew-point table [C], a dangerously hot and humid day turns the session into an
+    easy run, and the race-day forecast for your goal race is shown once it is within 16 days. Off by default, because it needs a
+    weather service (Open-Meteo), which receives only your rough location. [P]
+59. **Hilly races need hilly training.** [C] Weekly climb is raised toward the race's climb per mile over the final months.
+60. **Race results are compared across ages with age grading.** [R] (*moderate*) Performance declines with age at a known average
     rate (Tanaka and Seals, 2008); standards by age, sex and distance come from public-domain tables (Jones, 2025).
 
 ## 11. 5K and 10K
 
-60. **The easy share stays high for short races too.** [R] (*moderate*) With the hard work held equal, sub-elite runners who did
+61. **The easy share stays high for short races too.** [R] (*moderate*) With the hard work held equal, sub-elite runners who did
     about four fifths of their running easy improved more over 10 km than those who did two thirds at threshold (Esteve-Lanao and
     colleagues, 2007). The extra intensity a short race needs comes from intervals, not from harder easy days.
-61. **Intervals of a few minutes near 5K pace are the main session.** [R] (*strong*) Intervals of 2 to 4 minutes, between
+62. **Intervals of a few minutes near 5K pace are the main session.** [R] (*strong*) Intervals of 2 to 4 minutes, between
     threshold and maximal aerobic pace, improve race performance more than all-out sprints (Rosenblat and colleagues, 2020).
     For a 5K or 10K goal Periodize My Run alternates 5K-pace and 10K-pace intervals week by week, with threshold work alongside. [C]
-62. **Short all-out efforts help only if volume holds.** [R] (*moderate*) Repeated 30-second sprints improved 10K time when
+63. **Short all-out efforts help only if volume holds.** [R] (*moderate*) Repeated 30-second sprints improved 10K time when
     weekly volume fell by a quarter, but not when it fell by two thirds (Bangsbo and colleagues, 2009; Iaia and colleagues, 2009).
     Periodize My Run keeps volume and uses relaxed 200 m repeats and strides for speed instead.
 
@@ -246,45 +251,45 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
 What is known here comes mostly from laboratory studies of hills, race records and surveys of finishers. There are almost no trials
 of ultra training, so read these as the best available reasoning, not proven method.
 
-63. **In long ultras the legs give out before the lungs.** [R] (*moderate*) Muscle damage, above all from running downhill,
+64. **In long ultras the legs give out before the lungs.** [R] (*moderate*) Muscle damage, above all from running downhill,
     limits performance more than aerobic capacity, economy or the gut (Tiller and Millet, 2024). Uphill running works the hips
     harder; downhill running loads the thighs as they lengthen, which is what damages them (Vernillo and colleagues, 2017).
-64. **Practise descending.** [R] (*strong* that it protects; *limited* on how often) One session of downhill running reduces the
+65. **Practise descending.** [R] (*strong* that it protects; *limited* on how often) One session of downhill running reduces the
     muscle damage from the next, for up to about nine weeks; eccentric and plyometric strength work gives a smaller version of the
     same protection (Bontemps and colleagues, 2020). For a hilly goal race, Periodize My Run adds 15 to 30 minutes of steady downhill
     running to the long run every third week of the specific phase. [P]
-65. **Train on ground like the race.** [C] Weekly climb rises toward the race's climb per mile over the final months; an injury
+66. **Train on ground like the race.** [C] Weekly climb rises toward the race's climb per mile over the final months; an injury
     review also linked low yearly climbing and mostly-asphalt training with more injury in trail runners (*limited*).
-66. **Walk the steep climbs.** [R] (*moderate*) On steep enough ground, walking costs less energy than running at the same rate of
+67. **Walk the steep climbs.** [R] (*moderate*) On steep enough ground, walking costs less energy than running at the same rate of
     climb, and poles mainly make it feel easier (Giovanelli and colleagues, 2016, 2019). In races of three hours or more, the
     pacing plan marks every sustained climb of 20% or steeper for walking. The 20% line is this project's choice, set below the
     gradient where the laboratory found the crossover, because tired legs and slower climbers favour walking sooner. [P]
-67. **Volume and experience matter most.** [R] (*moderate*) Previous ultra finishes, marathon best and weekly training volume
+68. **Volume and experience matter most.** [R] (*moderate*) Previous ultra finishes, marathon best and weekly training volume
     predict ultra performance best (Knechtle and colleagues, 2010). Long runs stay easy, and in the specific phase a medium run
     the day before the long run practises running on tired legs. [C]
-68. **Start slower than feels necessary.** [R] (*moderate*) Almost every ultra runner slows down; the fastest start relatively
+69. **Start slower than feels necessary.** [R] (*moderate*) Almost every ultra runner slows down; the fastest start relatively
     slower and hold their speed most evenly (race records from Western States and the Ultra-Trail du Mont-Blanc).
-69. **Eat from the start, and keep eating.** [R] (*strong*) At least 30 to 50 g of carbohydrate an hour, more if your gut is
+70. **Eat from the start, and keep eating.** [R] (*strong*) At least 30 to 50 g of carbohydrate an hour, more if your gut is
     trained to it (Tiller and colleagues, 2019). Drink to thirst; drinking too much, not too little, causes the dangerous fall in
     blood sodium (Hew-Butler and colleagues, 2015).
-70. **No ibuprofen during an ultra.** [R] (*strong*) In a randomised, placebo-controlled trial, ibuprofen during an ultra raised
+71. **No ibuprofen during an ultra.** [R] (*strong*) In a randomised, placebo-controlled trial, ibuprofen during an ultra raised
     the rate of acute kidney injury from 34% to 52% (Lipman and colleagues, 2017).
-71. **Plan for the night.** [R] (*limited*) In races through the night most runners nap, usually for under 30 minutes, and most bank
+72. **Plan for the night.** [R] (*limited*) In races through the night most runners nap, usually for under 30 minutes, and most bank
     extra sleep in the week before; four in five report symptoms of sleep loss, including falls and hallucinations (Martin and
     colleagues, 2018). Periodize My Run adds these points to the race-day notes when the predicted time is 18 hours or more.
 
 ## 13. Measurement limits
 
-72. **Wrist heart rate is imperfect.** [R] (*moderate*) Wrist monitors agree less well with a medical ECG than chest straps do,
+73. **Wrist heart rate is imperfect.** [R] (*moderate*) Wrist monitors agree less well with a medical ECG than chest straps do,
     and in one comparison a Garmin wrist monitor agreed least well of the devices tested (Gillinov and colleagues, 2017). They are
     least reliable at high intensity and in the cold, so Periodize My Run uses heart rate over minutes, never seconds, and a chest strap
     improves everything heart-rate based.
-73. **A watch's fitness estimates are approximate.** [R] (*moderate*) Garmin's VO2max estimate was within about 7% of laboratory
+74. **A watch's fitness estimates are approximate.** [R] (*moderate*) Garmin's VO2max estimate was within about 7% of laboratory
     values on average (Carrier and colleagues, 2025), and is thrown off by heat, terrain and a wrong maximum heart rate.
-74. **A watch's distance on a treadmill is a guess.** [P] Treadmill runs are judged by heart rate and time.
-75. **A watch's altitude can be wrong.** [P] Each watch's altitude is checked on runs that start and finish in the same place,
+75. **A watch's distance on a treadmill is a guess.** [P] Treadmill runs are judged by heart rate and time.
+76. **A watch's altitude can be wrong.** [P] Each watch's altitude is checked on runs that start and finish in the same place,
     and hills are only adjusted for when it proves reliable.
-76. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
+77. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
     measures built from watch data. They guide training; they do not diagnose anything.
 
 ## Known gaps: where Periodize My Run does not yet follow the evidence
@@ -293,8 +298,8 @@ Listed so they are not mistaken for principles.
 
 - **How you feel is not yet counted.** Self-reported fatigue, soreness and mood track the response to training at least as well as
   device measures (Saw and colleagues, 2016) (*strong*). Periodize My Run can record them but does not yet use them.
-- **Heat** slows runners, and slower runners proportionally more (Ely and colleagues, 2007), but paces are not adjusted for it:
-  doing so would need a weather service, and Periodize My Run talks to nothing but Garmin.
+- **Heat** is adjusted for only if you switch it on, since it needs a weather service; and only for the temperature and humidity
+  forecast, not for sun, wind or your acclimatisation.
 - **Sex** does not change the plan, and from age 50 only the down-week rhythm changes, not the spacing of hard days.
 - **Ultra and trail training is still measured in distance.** Time on feet and climbing matter more than distance on the
   mountain, but the plan, the watch and the long-run limits still count miles. Hiking and pole practice, night running, heat
