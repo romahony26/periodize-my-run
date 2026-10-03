@@ -48,6 +48,7 @@ import results
 import vault
 import equiv
 import trends
+import updates
 from flask.sessions import SecureCookieSessionInterface
 
 from log import log, scrub, setup
@@ -549,6 +550,7 @@ def state():
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
         compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")),
+        update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
         heat={"on": bool(c.get("heat_adjust")), "located": bool((db.get("heat_forecast") or {}).get("loc")),
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None},
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
@@ -614,12 +616,14 @@ def settings():
         db.put("auto_backup", bool(j["auto_backup"]))
     if "map_tiles" in j:
         db.put("map_tiles", bool(j["map_tiles"]))
+    if "update_check" in j:
+        db.put("update_check", bool(j["update_check"]))
     if "heat_adjust" in j:
         db.put("heat_adjust", bool(j["heat_adjust"]))
         log.info("Heat adjustment switched %s", "on" if j["heat_adjust"] else "off")
         if db.get("setup_done"):
             jobs.start("readiness")
-    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust"}:
+    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust", "update_check"}:
         return jsonify(ok=True)       # nothing here changes the plan
     sr = j.get("seed_race")
     if isinstance(sr, dict) and _is_num(sr.get("miles"), 0.5, 200) and _is_num(sr.get("time_s"), 120, 400_000):
@@ -861,6 +865,37 @@ def setup_finish():
     """The athlete has seen the summary at the end of the first-run wizard."""
     db.put("setup_seen", True)
     return jsonify(ok=True)
+
+
+@app.get("/api/updates")
+def updates_state():
+    return jsonify(updates.state())
+
+
+@app.post("/api/updates")
+def updates_act():
+    """check | install | choose | dismiss. Installing or choosing restarts the app into that version."""
+    j = request.json or {}
+    act, v = j.get("action"), j.get("version")
+    try:
+        if act == "check":
+            updates.check()
+        elif act == "dismiss":
+            db.put("update_dismissed", str(v)[:20])
+        elif act in ("install", "choose"):
+            if jobs.status["running"]:
+                return jsonify(error="Wait for the current update to finish, then try again."), 409
+            (updates.install if act == "install" else updates.choose)(v)
+            updates.restart_soon()
+            return jsonify(ok=True, restarting=True)
+        else:
+            return jsonify(error="Unknown action."), 400
+    except ValueError as e:
+        return jsonify(error=str(e)), 400
+    except (requests.RequestException, OSError) as e:
+        log.error("Update failed: %s", type(e).__name__)
+        return jsonify(error="The update could not be completed. Nothing was changed."), 400
+    return jsonify(updates.state())
 
 
 @app.post("/api/watch")
@@ -1350,7 +1385,7 @@ def about():
             "No password is stored, anywhere. Your Garmin password goes straight to Garmin once and is exchanged for an access token. Garmin offers personal apps no sign-in that avoids this.",
             "The Garmin tokens and your notification address are encrypted before they are stored. The key is kept in a separate file outside the data folder, readable only by you, so a copy of your data or a backup gives away no logins.",
             "What encryption here cannot do: someone who can read all of your user account's files can read the key as well. Full-disk encryption on the computer is the protection against that.",
-            "Nothing is sent anywhere except your watch's service (Garmin, or COROS if you choose it), your notification address if you set one, and, only if you switch heat adjustment on, your rough location (to about 10 km) to Open-Meteo for the weather.",
+            "Nothing is sent anywhere except your watch's service (Garmin, or COROS if you choose it), your notification address if you set one, only if you switch heat adjustment on, your rough location (to about 10 km) to Open-Meteo for the weather, and, unless you switch it off, a daily request to GitHub for the latest version number.",
             "From other devices the app needs a password, set on this computer; only a salted hash of it is kept. Five wrong attempts lock that device out for 15 minutes. The app refuses to listen on the network without one.",
             "On a Raspberry Pi the installer creates a certificate so the connection is encrypted (https). Your browser will warn once because the certificate is self-made.",
             "Every change must come from the app's own page: requests from other websites, unknown host names and forged forms are refused. The page runs no script except its own file.",
@@ -1378,6 +1413,8 @@ def main():
     ap.add_argument("--allow-host", help="add a hostname that may be used to reach the app, then exit")
     ap.add_argument("--always-login", choices=("on", "off"), help="require the app password even from this computer (use behind a reverse proxy), then exit")
     a = ap.parse_args()
+    if not (a.set_password or a.allow_host or a.always_login):
+        updates.launch(sys.argv[1:])           # run the version chosen in the app, if one was
     if a.set_password:
         return set_password()
     if a.always_login:

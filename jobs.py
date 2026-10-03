@@ -19,6 +19,7 @@ import profile
 import push
 import results
 import trends
+import updates
 import watch
 import vault
 from log import log, scrub
@@ -408,6 +409,13 @@ def _check_due(now):
     return lo is None or lo < _local(max(passed))
 
 
+def _update_due(now):
+    """Once a day, at a random time for this install: has a day passed since the last check?"""
+    last = (db.get("update_info") or {}).get("checked")
+    due = now.replace(hour=12, minute=0, second=0, microsecond=0) + jitter("update " + now.date().isoformat()) * 24   # anywhere in the day
+    return now >= due and (not last or last[:10] < now.date().isoformat())
+
+
 def daily_due(now):
     """When today's daily update is due: the chosen time, moved by today's jitter."""
     hh, mm = (int(x) for x in db.get("run_time").split(":"))
@@ -438,6 +446,8 @@ def scheduler():
                 elif not recently_tried and db.get("push_enabled") and _check_due(now):
                     last_try = now
                     run("push")
+            if db.get("setup_done") and db.get("update_check") and _update_due(dt.datetime.now()):
+                updates.check()
         except Exception:
             log.error("scheduler error\n%s", traceback.format_exc())
         time.sleep(300)

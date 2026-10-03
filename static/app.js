@@ -53,7 +53,7 @@ function stepList(text){return text?`<ul class="steps">${text.split('; ').map(x=
 function planView(){
   const f=S.fitness, r=S.readiness, t=S.days.find(d=>d.today)||{};
   const lev={green:'Recovered',amber:'A bit tired',red:'Not recovered',unknown:'Waiting for watch sync'};
-  let h='<div class="grid">'+termsNotice();
+  let h='<div class="grid">'+termsNotice()+updateBanner();
   if(f&&f.goal){const g=f.goal, wk=f.week.weeks_to_race||0;
     h+=`<div class="card hero c6">${ring(Math.max(0.03,Math.min(1,1-g.days/252)),wk+'w')}<p class="eyebrow">Goal</p><p class="h">${E(g.name)}</p>
       <div class="mute small">${nice(g.date)} · ${g.days} days to go</div>
@@ -274,6 +274,19 @@ function md(t){return E(t||'').split(/\n\n+/).map(b=>{b=b.trim();if(!b||b==='---
   const lines=b.split('\n');if(lines.every(l=>/^\s*- /.test(l)||/^\s{2,}\S/.test(l))){const items=[];lines.forEach(l=>{if(/^\s*- /.test(l))items.push(l.replace(/^\s*- /,''));else items[items.length-1]+=' '+l.trim()});return `<ul class="clist">${items.map(i=>`<li>${bold(i)}</li>`).join('')}</ul>`}
   return `<p class="small" style="margin:6px 0">${bold(lines.join(' '))}</p>`}).join('')}
 function termsBox(id){return `<details id="${id}" class="small" style="margin:10px 0 0" ${TOPEN[id]?'open':''}><summary>Read the terms of use and disclaimer</summary><div style="max-height:46vh;overflow:auto;padding:4px 2px 0">${TERMS?md(TERMS.text):'<span class="spin"></span>Loading'}</div></details>`}
+function updateBanner(){const u=S.update;if(!u||!u.newer||u.dismissed)return '';const P=S.project||{};
+  return `<div class="card c12" id="updnote" style="margin-bottom:18px"><p class="small" style="margin:0"><b>Version ${E(u.latest)} is available</b> (you have ${E(u.running)}).
+    ${P.url?`<a href="${E(P.url)}/blob/v${E(u.latest)}/CHANGELOG.md" target="_blank" rel="noopener noreferrer">What's new</a>`:''}</p>
+    <p style="margin:10px 0 0"><button class="btn" data-upd="install" data-v="${E(u.latest)}">Update now</button> <button class="ghost" data-upd="dismiss" data-v="${E(u.latest)}">Dismiss</button></p></div>`}
+function updatesBox(){const u=S.update;
+  if(!S.update_check)return `<p class="small" style="margin:12px 0 0"><b>Updates:</b> not checked automatically. <label class="small" style="margin-left:6px"><input type="checkbox" id="updchk"> Check GitHub once a day</label></p>`;
+  if(!u)return '';
+  const st=u.status==='not public'?'Update checks start once the project is public on GitHub.':u.status&&u.status!=='ok'?'Last check: '+E(u.status)+'.':u.latest?(u.newer?`Version <b>${E(u.latest)}</b> is available.`:'You have the newest version.'):'';
+  const vs=[...new Set([u.base,...(u.installed||[])])].sort((a,b)=>a.split('.').map(Number).reduce((x,y,i)=>x||y-b.split('.').map(Number)[i],0));
+  return `<div style="margin-top:12px"><p class="small" style="margin:0"><b>Updates:</b> ${st} ${u.checked?`<span class="mute xs">Checked ${E(u.checked.replace('T',' '))}.</span>`:''}</p>
+    <p style="margin:8px 0 0"><button class="ghost" data-upd="check">Check now</button>${u.newer?` <button class="btn" data-upd="install" data-v="${E(u.latest)}">Update to ${E(u.latest)}</button>`:''}</p>
+    ${vs.length>1?`<label for="updver">Switch version</label><div class="copyrow"><select id="updver">${vs.map(v=>`<option value="${E(v)}" ${v===u.running?'selected':''}>${E(v)}${v===u.base?' (installed)':''}${v===u.running?' (running now)':''}</option>`).join('')}</select><button class="ghost" id="updgo">Switch</button></div><p class="xs mute">Go back to an earlier version, or forward again. A backup is made first; the app restarts.</p>`:''}
+    <label class="small" style="display:block;margin-top:8px"><input type="checkbox" id="updchk" checked> Check GitHub for new versions once a day (nothing about you is sent)</label></div>`}
 function termsNotice(){if(!S.setup_done||S.terms_ok)return '';
   return `<div class="card c12" id="termsnote" style="margin-bottom:18px"><p class="eyebrow">Terms of use</p><p class="small" style="margin:0">Periodize My Run is a training tool, not medical advice. You run at your own risk, your data and its security are yours to look after, and the app must not be put on the internet. Please read and accept the terms once.</p>
     ${termsBox('tbox2')}<p style="margin:12px 0 0"><label class="small"><input type="checkbox" id="tok2"> I have read and accept the terms of use</label> <button class="btn" id="taccept" style="margin-left:10px">Accept</button></p></div>`}
@@ -285,7 +298,7 @@ function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" ta
       <li><b>Found a problem or have an idea?</b> ${P.url?x(P.url+'/issues/new','Open an issue')+'. Say what you did, what happened and what you expected; the Log tab often helps, but check it for anything personal before pasting.':'See the README.'}</li>
       <li><b>A security problem?</b> Please report it privately, not in a public issue${P.url?': '+x(P.url+'/security/advisories/new','private security report'):''}. See SECURITY.md.</li>
       ${P.support?`<li><b>Like it?</b> ${x(P.support,'Buy me a coffee')} ☕</li>`:''}
-    </ul>${termsBox('tbox3')}
+    </ul>${updatesBox()}${termsBox('tbox3')}
     <p class="xs mute" style="margin:8px 0 0">Periodize My Run is a training tool, not medical advice; you use it at your own risk. Keep it off the internet: it is for your own computer or home network. It is not affiliated with Garmin.</p></div>`}
 function watchCard(head,chip){const w=S.watch||{source:'garmin'}, opt=(v,t)=>`<option value="${v}" ${w.source===v?'selected':''}>${t}</option>`;
   return `<div class="card c6 conn" id="cwatch">${head('⇄','Where your runs come from',chip(w.connected,E(w.name||'Garmin'),'Not connected',w.source!=='garmin'))}
@@ -463,7 +476,7 @@ function wizard(){
     if(j.error)h+=`<div class="alert err" style="margin-top:14px">${E(j.error)}</div><button class="btn" id="retry">Try again</button>`;
   }else if(wiz.step===1){
     h+=stepper(1)+`<p class="h">Welcome</p><p class="small">Periodize My Run builds a running plan from your own Garmin history and keeps adjusting it from what you do. Setup takes a few minutes of your time, then 10 to 30 minutes of its own.</p>
-      <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except your watch's service, and the weather service if you switch heat adjustment on.</li>
+      <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except your watch's service, the weather service if you switch heat adjustment on, and a daily version check with GitHub.</li>
       <li><b>No passwords are kept.</b> Your Garmin password is used once to sign in; only an access token is stored, encrypted.</li>
       <li><b>No AI is used.</b> The plan comes from fixed rules and your data, and every decision is explained.</li>
       <li><b>It is not medical advice.</b> For pain that changes your stride, chest symptoms or illness with fever, stop and see a clinician.</li></ul>
@@ -530,6 +543,13 @@ function bind(){
   on('#corgo',async()=>{await api('coros/login',{email:$('#cem').value,password:$('#cpw').value});$('#cpw').value='';toast('COROS connected (experimental)');await api('watch',{source:'coros'});await load()});
   on('#cordis',async()=>{await api('coros/disconnect',{});toast('COROS disconnected');await load()});
   if($('#heatsw'))$('#heatsw').onchange=async()=>{await api('settings',{heat_adjust:$('#heatsw').value==='1'});toast($('#heatsw').value==='1'?'Heat adjustment on':'Heat adjustment off');await load()};
+  const restartWait=()=>{toast('Restarting into the new version…');let n=0;const t=setInterval(async()=>{n++;try{const r=await fetch('/api/state',{headers:{'X-Requested-With':'periodize'}});if(r.ok){clearInterval(t);location.reload()}}catch(e){}if(n>60)clearInterval(t)},2000)};
+  $$('[data-upd]').forEach(b=>b.onclick=async()=>{const act=b.dataset.upd,v=b.dataset.v;
+    if(act==='install'&&!confirm('Update to version '+v+'? A backup is made first, and you can switch back under Settings, About.'))return;
+    b.disabled=true;try{const r=await api('updates',{action:act,version:v});if(r.restarting)return restartWait();toast(act==='dismiss'?'Dismissed until the next version':'Checked');await load()}catch(e){b.disabled=false}});
+  on('#updgo',async()=>{const v=$('#updver').value;if(v===S.update.running)return toast('That version is already running.');if(!confirm('Switch to version '+v+'? A backup is made first; the app restarts.'))return;
+    const r=await api('updates',{action:'choose',version:v});if(r.restarting)restartWait()});
+  if($('#updchk'))$('#updchk').onchange=async()=>{await api('settings',{update_check:$('#updchk').checked});toast($('#updchk').checked?'Update checks on':'Update checks off');await load()};
   on('#gmdis',async()=>{if(!confirm('Disconnect Garmin? The plan stops updating until you connect again.'))return;await api('garmin/disconnect',{});toast('Garmin disconnected');await load()});
   $$('.gpx').forEach(inp=>inp.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const pts=await readGpx(f);await api('races/'+inp.dataset.race+'/course',{points:pts});toast('Course added');await load()}catch(x){if(x&&x.message&&x.message!=='undefined')toast(x.message,'err')}});
   $$('[data-gpx]').forEach(b=>b.onclick=()=>$('#gpx'+b.dataset.gpx).click());

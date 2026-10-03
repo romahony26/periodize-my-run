@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.4.0 - 2026-10-03
+### Added
+- Updates from the app. Once the project is public on GitHub, the app checks once a day, at a random time, for a newer version (nothing about you is sent) and shows a notice: Update now, or Dismiss until the next version. Settings, About shows the update status, a Check now button, and a list of versions to switch between, so you can go back to an earlier one and forward again.
+- Every update is checked before it is used: downloaded over HTTPS from the project's GitHub, unpacked safely (no file can land outside its folder), its version must be the one asked for, every Python file must compile, and its library list must match the installed one. A version that needs new libraries is installed with the installer instead. A backup is made before every update or switch; nothing is deleted.
+- Versions installed this way live in the data folder, because on a Raspberry Pi the app may write nowhere else; the copy the installer put in place starts whichever version was chosen.
+- The daily check can be switched off in Settings, About.
+
 ## 2.3.0 - 2026-10-03
 ### Added
 - "How accurate are the predictions?" on the Fitness page. For each of your races in the last three years, the prediction is rebuilt from what was known the Monday before and set against your actual time (adjusted to a flat course where the course is known), with the average error and whether the predictions lean cautious or optimistic for you. Each race is worked out once and kept.

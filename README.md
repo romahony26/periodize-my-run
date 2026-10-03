@@ -198,10 +198,14 @@ again. A backup never contains your Garmin login or app password.
 secrets. `tools/pull_backup.py`, run on another computer, fetches one every
 day into a folder that Google Drive for desktop or iCloud Drive uploads.
 
-**Updating.** Download the new version over the old folder (or `git pull`),
-then run the installer again. Your data is kept; the database upgrades itself.
-On Linux the installer asks for the app password again (you can enter the same
-one); this signs other devices out.
+**Updating.** Once the project is public, the app checks GitHub once a day and
+shows a notice when a new version is out: Update now, or Dismiss until the next
+one. Settings, About lists the versions you have and lets you switch back. A
+version that needs new libraries says so and is installed with the installer
+instead: download the new version over the old folder (or `git pull`), then run
+the installer again. Your data is kept; the database upgrades itself. On Linux
+the installer asks for the app password again (you can enter the same one); this
+signs other devices out.
 
 **Stopping or removing it.** macOS:
 `launchctl unload ~/Library/LaunchAgents/com.periodizemyrun.app.plist`. Windows:
@@ -241,8 +245,10 @@ filtered out, but check before sharing it.
 **Data**
 - Nothing is sent anywhere except your watch's service (Garmin, or COROS if
   chosen), the notification address if set (which may not point at this
-  computer), and, only if you switch heat adjustment on, your rough location
-  (to about 10 km) to Open-Meteo for the weather forecast.
+  computer), only if you switch heat adjustment on, your rough location (to
+  about 10 km) to Open-Meteo for the weather forecast, and, unless you switch it
+  off, a daily request to GitHub for the latest version number (nothing about
+  you is sent).
 - Logs and the database are readable only by you; logs are filtered for
   anything shaped like a password, token, key or email address.
 - The downloadable backup, and the copies `tools/pull_backup.py` makes,

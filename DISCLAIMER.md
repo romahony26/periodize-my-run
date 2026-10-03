@@ -41,7 +41,9 @@ service, hold your data, or owe you support, updates or fixes.
   port to it or publish it on a public address. If you use a private network such as Tailscale, keep the app password set.
 - **Heat adjustment is optional.** If you switch it on, your rough location (to about 10 km) is sent to Open-Meteo for the
   weather forecast; nothing else is. Forecasts can be wrong, so judge the conditions yourself on the day.
-- **Keep your copy up to date** and check the change log; older versions may contain problems that have since been fixed.
+- **Keep your copy up to date** and check the change log; older versions may contain problems that have since been fixed. The app
+  can check GitHub once a day for a new version (nothing about you is sent) and install it when you choose; updates come with the
+  same lack of warranty as everything else here.
 
 ## 5. Garmin, COROS and other services
 
