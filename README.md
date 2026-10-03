@@ -39,7 +39,8 @@ It then reads your history and builds the plan, showing progress as it goes.
 **Your watch**
 - The next 21 days (or 7 or 14) kept on the Garmin calendar as structured
   workouts with pace targets, including strength sessions.
-- Checked every four hours (02:00, 06:00 ... UTC): changed days are re-sent
+- Checked every four hours (around 02:00, 06:00 ... UTC, each check moved by
+  up to 30 minutes at random): changed days are re-sent
   and any workout deleted from the Garmin calendar is put back. Your own
   workouts are never touched.
 

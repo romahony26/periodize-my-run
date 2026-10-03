@@ -15,11 +15,11 @@ def event(p, tp, c):
     """The event for one planned day, or None for a rest day. All-day, so it does not claim a time you did not choose."""
     if not p["steps"] or p["type"] == "Rest":
         return None
-    day = dict(p, steps=json.loads(p["steps"]))
     adj = json.loads(p["adjust"]) if p["adjust"] else {}
+    day = engine.as_run(dict(p, steps=json.loads(p["steps"])), adj)
     text = engine.describe(day, tp, c["units"], adj.get("slow", 0.0)) if tp else ""
     extra = [x for x in (p["note"], f"Also: {p['strength']}" if p["strength"] else "") if x]
-    return {"summary": f"{TYPES.get(p['type'], 'Run')}: {p['label']} {engine.dist(p['miles'], c['units'])}", "description": "\n".join([text] + extra)}
+    return {"summary": f"{TYPES.get(day['type'], 'Run')}: {day['label']} {engine.dist(p['miles'], c['units'])}", "description": "\n".join([text] + extra)}
 
 
 def ics(c, days=60):

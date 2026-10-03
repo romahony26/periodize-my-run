@@ -63,6 +63,13 @@ ABBR = {"threshold": "threshold", "10k": "10K pace", "5k": "5K pace", "mp": "MP"
 WARMUP_REST_S = 60
 
 
+def as_run(day, adj):
+    """The day as it should be run today: a session turned into an easy run when the warning signs say so (see jobs.adjust)."""
+    if not adj or not adj.get("easy") or not day.get("steps") or day.get("type") in ("Rest", "Race"):
+        return day
+    return dict(day, steps=[("d", day["miles"], "easy")], label=f"Easy (was {day['label']})", type="Easy")
+
+
 def warmup_rest(day):
     """A session's steps with a minute's rest between the warm-up and the hard part."""
     steps = list(day["steps"])
@@ -137,6 +144,44 @@ def hr_levels(hrmax):
 
 
 # ---------------------------------------------------------------- weekly plan
+def break_return(wk):
+    """Coming back from an unplanned break? Returns (target miles, explanation) or None.
+
+    A break is two or more weeks in a row under 40% of the athlete's usual level (the mean of their three biggest weeks in the
+    window). The return lasts about as long as the break did, up to four weeks: about half the usual volume first, then three
+    quarters, all easy. Rebuilding gradually after time off is standard practice; the halves and quarters are convention. [C]
+    """
+    if len(wk) < 6:
+        return None
+    usual = mean(sorted(wk, reverse=True)[:3]) or 0.0
+    if usual < 10:
+        return None
+    low = [m < 0.4 * usual for m in wk]
+    back = 0
+    while back < len(wk) and not low[-1 - back]:
+        back += 1
+    brk = 0
+    while back + brk < len(wk) and low[-1 - back - brk]:
+        brk += 1
+    if brk < 2:
+        return None
+    span = min(brk, 4)
+    if back >= span:
+        return None
+    first = back < max(span // 2, 1)
+    return ((0.5 if first else 0.75) * usual,
+            f"Return week {back + 1} of {span} after {brk} light weeks: about {'half' if first else 'three quarters'} of your usual volume, all easy. "
+            "Fitness fades during a break, so the paces have been eased too.")
+
+
+def age_on(birth, day):
+    try:
+        b = dt.date.fromisoformat(str(birth)[:10])
+    except ValueError:
+        return None
+    return day.year - b.year - ((day.month, day.day) < (b.month, b.day))
+
+
 def goal_race(races, monday):
     a = [r for r in races if r["priority"] == "A" and r["date"] >= monday]
     return min(a, key=lambda r: r["date"]) if a else None
@@ -165,6 +210,11 @@ def plan(st, c, L, races):
         else:
             break
     prior3 = mean(wk[-4:-1]) or 0.0
+    comeback = break_return(wk)
+    age = age_on(c.get("birth_date"), mon) if c.get("birth_date") else None
+    build_weeks = c["build_weeks_before_down"]
+    if age and age >= 50 and not db.rows("SELECT 1 FROM settings WHERE key='build_weeks_before_down'"):
+        build_weeks = min(build_weeks, 2)      # from 50, a down week every third week: recovery takes longer with age [C]
     taper_weeks = (2, 3) if gtype in ("marathon", "ultra") else (2,) if gtype == "half" else ()
     if this_races and this_races[-1]["priority"] == "A":
         mode = "race"
@@ -178,13 +228,16 @@ def plan(st, c, L, races):
     elif len(st["flags"]) >= c["flags_to_back_off"]:
         mode = "recover"
         why.append("Recovery week: " + "; ".join(st["flags"]) + ".")
+    elif comeback:
+        mode = "return"
+        why.append(comeback[1])
     elif prior3 > 8 and wk[-1] < 0.5 * prior3:
         mode = "return"
         why.append(f"Return week: last week was well below your recent level ({dist(half(wk[-1]), c['units'])} against {dist(half(prior3), c['units'])}). "
                    "Missed sessions are not made up.")
-    elif full >= c["build_weeks_before_down"]:
+    elif full >= build_weeks:
         mode = "down"
-        why.append(f"Down week: {full} full weeks in a row.")
+        why.append(f"Down week: {full} full weeks in a row" + (" (every third week from age 50)." if build_weeks < c["build_weeks_before_down"] else "."))
     else:
         mode = "build"
 
@@ -198,7 +251,7 @@ def plan(st, c, L, races):
                    else f"Volume is at your cap for this phase ({dist(cap, c['units'])})." if target >= cap
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
     else:
-        target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": 0.80 * prior3,
+        target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": comeback[0] if comeback else 0.80 * prior3,
                   "postrace": min(0.5 * ref, 25), "tuneup": 0.75 * ref,
                   "taper": (0.80 if wtr == 3 else 0.65) * max(ref, 0.9 * max(wk[-6:] or [0])), "race": 0.4 * ref}[mode]
     target = max(target, c["min_miles"])
@@ -257,6 +310,11 @@ def plan(st, c, L, races):
 
     # long run
     lr_cap = L["long_run_cap_specific"] if specific else L["long_run_cap_base"]
+    if gtype != "ultra":
+        three_h = 3 * 3600 * tp * ZONES["easy"][0] / MI       # miles in about three hours at the slow end of easy pace
+        if three_h < lr_cap:
+            lr_cap = max(three_h, L["long_run_floor"])
+            why.append(f"Long run kept to about three hours ({dist(half(lr_cap), c['units'])}): beyond that the injury and recovery cost outweighs the gain. [C]")
     safe = max(st["longest_30d"] * 1.10, L["long_run_floor"])
     if mode in ("build", "down", "taper", "tuneup"):
         lr = min(lr_cap, safe, max((0.38 if mode == "build" else 0.33) * target, L["long_run_floor"]))
@@ -394,6 +452,10 @@ def plan(st, c, L, races):
         a_race = r["priority"] == "A"
         note = (f"Predicted {hms(now_s)}. Start at {pace(r['miles'] * MI / now_s, c['units'])}/{c['units']} and no faster for the first half."
                 + (f" Fuel: {c['race_carbs_g_per_h']} g of carbohydrate an hour." if r["miles"] >= 13 else ""))
+        kg = _weight()
+        if a_race:
+            note += race_day_advice(kg)
+        prep = {back: race_eve_advice(r["miles"], back, kg) for back in (1, 2)} if a_race else {}
         wu = 0 if r["miles"] >= 20 else 2
         week[i] = {"type": "Race", "label": r["name"], "note": note, "miles": round(r["miles"] + (wu + 1 if wu else 0), 3),
                    "steps": ([("d", wu, "easy")] if wu else []) + [("d", r["miles"], None)] + ([("d", 1, "easy")] if wu else [])}
@@ -406,7 +468,8 @@ def plan(st, c, L, races):
                 lab, stp, mi_ = opts[back]
                 if back not in ({1, 3, 4, 5} if n >= 5 else {1, 3, 4} if n == 4 else {1, 4}):
                     lab, stp, mi_ = "Rest", None, 0   # fewer running days: keep the shakeout and the sharpener
-                week[j] = {"type": "Rest" if stp is None else "Key" if lab == "Sharpener" else "Easy", "label": lab, "steps": stp, "miles": mi_}
+                week[j] = {"type": "Rest" if stp is None else "Key" if lab == "Sharpener" else "Easy", "label": lab, "steps": stp, "miles": mi_,
+                           "note": prep.get(back, "")}
             elif back == 1:
                 week[j] = {"type": "Easy", "label": "Easy + strides", "steps": [("d", 3, "easy"), ("strides", 4)], "miles": 3}
             elif back == 2 and week[j]["type"] in ("Key", "Long"):
@@ -416,6 +479,8 @@ def plan(st, c, L, races):
                 {"type": "Easy", "label": "Easy", "steps": [("d", 4, "easy")], "miles": 4}
 
     strength = {(Ld + 1) % 7: "Strength A", (key1 + 1) % 7 if key1 is not None else (Ld + 4) % 7: "Strength B"} if c["strength"] and mode != "race" and (wtr is None or wtr > 2) else {}
+    if specific and strength:
+        strength = {(Ld + 1) % 7: "Strength A"}      # one session a week in the race-specific phase keeps the gains at less cost
     days = []
     for i in range(7):
         d = week[i]
@@ -432,6 +497,28 @@ def plan(st, c, L, races):
             days[long_i]["note"] = f"Fuel practice: {fuel} g of carbohydrate an hour."
     return {"mode": mode, "weeks_to_race": wtr, "goal": goal, "gtype": gtype, "target": target, "total": sum(d["miles"] for d in days),
             "days": days, "why": why, "done": done, "long": max((d["miles"] for d in days), default=0)}
+
+
+def _weight():
+    r = db.rows("SELECT weight_kg FROM daily WHERE weight_kg IS NOT NULL ORDER BY date DESC LIMIT 1")
+    return r[0]["weight_kg"] if r and 35 <= (r[0]["weight_kg"] or 0) <= 200 else None
+
+
+def race_eve_advice(miles, back, kg):
+    """Carbohydrate before a goal race: loading for the last 36-48 hours before a marathon or longer (Thomas and colleagues, 2016)."""
+    if miles >= 20:
+        g = f" (about {round(kg * 10 / 50) * 50} g for you)" if kg else ""
+        return f"Carbohydrate loading: about 10 g per kg of body weight today{g}, from bread, rice, pasta, potatoes, cereal or juice. Keep fibre and fat low."
+    if miles >= 10 and back == 1:
+        return "Carbohydrate-rich meals today, nothing new."
+    return ""
+
+
+def race_day_advice(kg):
+    """Race-day reminders that follow the research: caffeine, drinking, painkillers, shoes. Each one is something to have tried in training."""
+    mg = f" (about {round(kg * 3 / 25) * 25} mg for you)" if kg else ""
+    return (f" Optional: caffeine at about 3 mg per kg{mg} an hour before, only if you have tried it in training. Drink to thirst, not by schedule."
+            " No ibuprofen or similar painkillers before or during. Race in shoes you have already run in at race pace.")
 
 
 def project(st, pl):

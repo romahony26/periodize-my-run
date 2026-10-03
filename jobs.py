@@ -1,6 +1,8 @@
 """The pipeline (download, assess, plan, adjust, send) and the scheduler that keeps it running."""
 import datetime as dt
+import hashlib
 import json
+import secrets
 import threading
 import time
 import traceback
@@ -124,11 +126,13 @@ def today_message():
     r = r[0]
     wk = db.rows("SELECT tp FROM weeks WHERE monday=?", ((today - dt.timedelta(days=today.weekday())).isoformat(),))
     adj = json.loads(r["adjust"]) if r["adjust"] else {}
-    day = dict(r, steps=json.loads(r["steps"]) if r["steps"] else None)
+    day = engine.as_run(dict(r, steps=json.loads(r["steps"]) if r["steps"] else None), adj)
     text = engine.describe(day, wk[0]["tp"], c["units"], adj.get("slow", 0.0)) if wk and day["steps"] else ""
     rd = db.get("readiness") or {}
-    out = f"Today: {r['label']}" + (f" {engine.dist(r['miles'], c['units'])}" if r["miles"] else "") + (f"\n{text}" if text else "")
-    if adj.get("slow"):
+    out = f"Today: {day['label']}" + (f" {engine.dist(r['miles'], c['units'])}" if r["miles"] else "") + (f"\n{text}" if text else "")
+    if adj.get("easy"):
+        out += "\n" + adj["advice"] + " " + "; ".join(adj.get("reasons", []))
+    elif adj.get("slow"):
         out += f"\nPaces eased {adj['slow']:.1%}: " + "; ".join(adj.get("reasons", []))
     elif rd.get("level") in ("green", "amber"):
         out += "\nRecovery: " + "; ".join(rd.get("reasons", []))
@@ -243,14 +247,23 @@ def adjust():
     r = engine.readiness(today, c)
     r["date"] = today.isoformat()
     db.put("readiness", r)
+    hist = {k: v for k, v in (db.get("readiness_log") or {}).items() if k >= (today - dt.timedelta(days=14)).isoformat()}
+    if r["level"] != "unknown":
+        hist[today.isoformat()] = r["points"]
+    db.put("readiness_log", hist)
     db.run("UPDATE plan SET adjust=NULL WHERE date>?", (today.isoformat(),))
     row = db.rows("SELECT * FROM plan WHERE date=?", (today.isoformat(),))
     if row and c["daily_adjust"]:
         steps = json.loads(row[0]["steps"]) if row[0]["steps"] else []
-        fast = any((s[0] == "d" and s[2] in engine.QUALITY) or s[0] == "r" for s in steps)
+        fast = row[0]["type"] != "Race" and any((s[0] == "d" and s[2] in engine.QUALITY) or s[0] == "r" for s in steps)
         adj = {"slow": r["slow"], "reasons": r["reasons"], "level": r["level"]} if fast and r["slow"] > 0 else None
-        if adj and r["level"] == "red":
-            adj["advice"] = "Consider swapping today with an easy day, or running it all easy."
+        # a bad morning, or a warning sign three mornings running, turns the session into an easy run: when signs persist, the
+        # trials of readiness-guided training swapped hard days for easy ones rather than only slowing them
+        run3 = all(hist.get((today - dt.timedelta(days=i)).isoformat(), 0) >= 1 for i in range(3))
+        if adj and (r["level"] == "red" or run3):
+            adj.update({"easy": True, "slow": 0.0, "advice": "Changed to an easy run today because " +
+                        ("several warning signs agree." if r["level"] == "red" else "a warning sign has lasted three mornings.") +
+                        " The session comes back once you have recovered."})
         db.run("UPDATE plan SET adjust=? WHERE date=?", (json.dumps(adj) if adj else None, today.isoformat()))
     log.info("Readiness today: %s (%s)", r["level"], "; ".join(r["reasons"]))
     return r
@@ -345,15 +358,45 @@ def last_ok(kinds=("setup", "daily")):
 
 
 CHECK_HOURS_UTC = (2, 6, 10, 14, 18, 22)
+JITTER_S = 1800      # every scheduled contact with Garmin moves up to 30 minutes either way
+
+
+def jitter(tag):
+    """A fixed random offset, from -30 to +30 minutes, for one scheduled run.
+
+    Each install has its own random seed, so installs do not all reach Garmin at the same moment, and each run (a date and a slot)
+    gets its own offset, so one install does not always call at the same minute either. The offset for a run never changes, so the
+    scheduler, which wakes every five minutes, agrees with itself about when the run is due.
+    """
+    seed = db.get("jitter_seed")
+    if not seed:
+        seed = secrets.token_hex(16)
+        db.put("jitter_seed", seed)
+    h = hashlib.sha256(f"{seed}:{tag}".encode()).digest()
+    return dt.timedelta(seconds=int.from_bytes(h[:4], "big") % (2 * JITTER_S + 1) - JITTER_S)
+
+
+def _local(t):
+    return t.astimezone().replace(tzinfo=None)
 
 
 def _check_due(now):
-    """True when a Garmin calendar check slot (every four hours, UTC) has passed since the last successful job of any kind."""
+    """True when a Garmin calendar check (every four hours, UTC, each moved by its own jitter) has passed since the last
+    successful job of any kind."""
     utc = now.astimezone(dt.UTC)
-    slot = max((utc.replace(hour=h, minute=0, second=0, microsecond=0) for h in CHECK_HOURS_UTC if h <= utc.hour),
-               default=utc.replace(hour=CHECK_HOURS_UTC[-1], minute=0, second=0, microsecond=0) - dt.timedelta(days=1))
+    slots = [(utc.replace(hour=h, minute=0, second=0, microsecond=0) + dt.timedelta(days=d)) for d in (-1, 0, 1) for h in CHECK_HOURS_UTC]
+    due = [t + jitter("check " + t.isoformat()) for t in slots]
+    passed = [t for t in due if t <= utc]
+    if not passed:
+        return False
     lo = last_ok(("setup", "daily", "replan", "readiness", "push"))
-    return lo is None or lo < slot.astimezone().replace(tzinfo=None)
+    return lo is None or lo < _local(max(passed))
+
+
+def daily_due(now):
+    """When today's daily update is due: the chosen time, moved by today's jitter."""
+    hh, mm = (int(x) for x in db.get("run_time").split(":"))
+    return now.replace(hour=hh, minute=mm, second=0, microsecond=0) + jitter("daily " + now.date().isoformat())
 
 
 def scheduler():
@@ -367,8 +410,7 @@ def scheduler():
                 backup.nightly()          # once a day, whether or not Garmin could be reached
             if db.get("setup_done") and garmin.has_tokens() and not status["running"]:
                 now = dt.datetime.now()
-                hh, mm = (int(x) for x in db.get("run_time").split(":"))
-                due = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
+                due = daily_due(now)
                 lo = last_ok()
                 recently_tried = last_try and (now - last_try).total_seconds() < 1800
                 if not recently_tried and ((now >= due and (lo is None or lo < due)) or (lo is None or (now - lo).total_seconds() > 26 * 3600)):

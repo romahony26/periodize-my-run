@@ -382,12 +382,13 @@ def _days(c, today, L=None):
         if p:
             tp = tps.get((d - dt.timedelta(days=d.weekday())).isoformat())
             adj = json.loads(p["adjust"]) if p["adjust"] else None
-            day = dict(p, steps=json.loads(p["steps"]) if p["steps"] else None)
-            item.update({"type": p["type"], "label": p["label"], "dist": engine.dist(p["miles"], c["units"]) if p["miles"] else "", "miles": p["miles"] or 0,
+            planned = dict(p, steps=json.loads(p["steps"]) if p["steps"] else None)
+            day = engine.as_run(planned, adj)
+            item.update({"type": day["type"], "label": day["label"], "dist": engine.dist(p["miles"], c["units"]) if p["miles"] else "", "miles": p["miles"] or 0,
                          "short": engine.short(day, c["units"]), "week": (d - dt.timedelta(days=d.weekday())).isoformat(),
                          "text": engine.describe(day, tp, c["units"], (adj or {}).get("slow", 0.0)) if tp and day["steps"] else "",
                          "note": p["note"], "strength": p["strength"], "source": p["source"], "adjust": adj, "on_watch": bool(p["pushed_hash"]),
-                         "original": engine.describe(day, tp, c["units"], 0.0) if tp and day["steps"] and adj and adj.get("slow") else "",
+                         "original": engine.describe(planned, tp, c["units"], 0.0) if tp and day["steps"] and adj and (adj.get("slow") or adj.get("easy")) else "",
                          "sync": _sync_status(p, day, tp, adj, c, d, today)})
             if tp and day["steps"] and not item["past"] and L:
                 mins = sum(execution.planned_zones(day["steps"], tp, L["hrmax"])[0]) / 60
@@ -1063,7 +1064,9 @@ def about():
         ("How each week is chosen", [
             "Race week, taper (3 weeks for a marathon, 1 for a half), tune-up race week, recovery after a race, recovery when warning signs appear, return after missed training, down week, or build week, checked in that order.",
             f"Build weeks add {c['weekly_increase']:.0%} to your recent volume up to your cap. Volume is held level in a week where fast running is being reintroduced.",
-            f"A down week (75%) follows {c['build_weeks_before_down']} full weeks in a row.",
+            f"A down week (75%) follows {c['build_weeks_before_down']} full weeks in a row; from age 50, two, unless you have set this yourself.",
+            "After two or more weeks well below your usual level, for any reason, the return lasts about as long as the break (up to four weeks): about half your usual volume, then three quarters, all easy. The break is spotted from your runs.",
+            "During a break the fitness estimate fades too: nothing for the first 10 days without a run, then 0.35% a day, up to 12%, so your first paces back match what you can do now.",
             f"Warning signs: resting heart rate up {c['rhr_rise_bpm']}+ on your normal, HRV down {1 - c['hrv_drop_fraction']:.0%}+, sleep under {c['sleep_7night_min_h']} h a night, easy pace per heartbeat down {c['easy_pace_drop_fraction']:.0%}+. {c['flags_to_back_off']} of them make a recovery week.",
             f"Each Monday the week is planned from real data. The {c['weeks_ahead']} weeks after are planned provisionally, each assuming the one before goes to plan, and are redone at every weekly review.",
         ]),
@@ -1071,7 +1074,7 @@ def about():
             f"Threshold ladder, one step on from your biggest session of the last 3 weeks: {ladder}.",
             "Marathon goal: midweek marathon-pace block grows one mile at a time (4 to 8); marathon-pace long runs of 8 → 10 → 12 → 14 miles at least 13 days apart in the specific phase; 10K-pace intervals every third week.",
             "Half marathon goal: half-marathon-pace blocks of 3 to 6 miles in the specific phase. 5K and 10K goals: alternating 5K-pace and 10K-pace intervals, plus threshold.",
-            "Long run: never more than 10% beyond your longest run of the last 30 days.",
+            "Long run: never more than 10% beyond your longest run of the last 30 days, and, except for ultra goals, no more than about three hours.",
             f"Your week: {c['run_days']} running days, long run on {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][c['long_day']]}. With 5 or 6 days there are two quality sessions; with 3 or 4 there is one.",
             f"Strength reminders: {yn(c['strength'])}.",
         ]),
@@ -1171,7 +1174,9 @@ def about():
             "Sleep points, against your own normal: last night an hour or more under = 1 (two hours under, or under 5 hours = 2); last night's sleep score below your normal range = 1 (far below = 2); the last 3 nights averaging an hour under = 1. Sleep counts for at most 2.",
             "Trend points: 7-day HRV half a spread below your normal = 1 (a full spread below, outside your normal range = 2); 7-day resting heart rate 3 above normal = 1 (5 above = 2).",
             "The windows come from the research. The exact point values are the app's own choice.",
-            f"Each point eases today's fast running by {calibrate.value('slow_per_point'):.1%}, up to four points. Easy running is not changed. At 3+ points it also suggests swapping to an easy day.",
+            f"Each point eases today's fast running by {calibrate.value('slow_per_point'):.1%}, up to four points. Easy running is not changed.",
+            "At 3+ points, or a point or more on three mornings running, the session becomes an easy run of the same distance, on the watch too. The planned session is still shown, and comes back once you have recovered.",
+            "Every scheduled contact with Garmin (the daily update and the four-hourly watch check) is moved by its own random amount, up to 30 minutes either way, so installs do not all reach Garmin at the same moment.",
             "The easing per point is measured from your own runs once there are enough; see What it has learned about you.",
         ]),
         ("Holidays", [
@@ -1190,7 +1195,7 @@ def about():
             f"Status: {yn(c['push_enabled'])}. The next {c['push_days']} days are kept on your Garmin calendar as structured workouts with pace targets on the fast parts.",
             f"Easy and steady runs: {'pace range alerts' if c['easy_target'] == 'pace' else 'no pace alerts'}.",
             "A day is re-sent only when it changes: a replan, a move, or today's pace adjustment. Only workouts made by this app (names starting PZ) are ever deleted.",
-            "Every four hours (02:00, 06:00, 10:00, 14:00, 18:00 and 22:00 UTC) the app checks your Garmin calendar and puts back any workout that is missing, such as one deleted in Garmin Connect.",
+            "Every four hours (around 02:00, 06:00, 10:00, 14:00, 18:00 and 22:00 UTC, each moved by up to 30 minutes at random) the app checks your Garmin calendar and puts back any workout that is missing, such as one deleted in Garmin Connect.",
         ]),
         ("Moving sessions", [
             "Drag any future day onto another to swap them. It warns if two hard days end up back to back.",
@@ -1208,7 +1213,7 @@ def about():
             "Do not train hard while eating well under what you burn. If you want to lose weight, do it early in the plan, by a small daily deficit, and stop before the race-specific phase.",
         ]),
         ("Strength", [
-            "Two short sessions a week on the days shown, none in the last two weeks before the goal race.",
+            "Two short sessions a week on the days shown, one a week in the race-specific phase, none in the last two weeks before the goal race.",
             "Strength A: squat or leg press; single-leg deadlift; calf raises with straight and bent knee; side plank.",
             "Strength B: split squat or step-up; hip thrust; calf raises; hamstring curl or bridge walk-outs.",
             "Three sets of 5–8 controlled reps, stopping well short of failure. Start light for four weeks, then add load.",

@@ -3,6 +3,19 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.17.0 - 2026-10-03
+### Added
+- Fitness fades during a break: after 10 days without a run the fitness estimate eases by 0.35% a day, up to 12%, following the detraining research, so your first paces back match what you can do now. Before, it could fall by only 0.5% a week.
+- A graded return after any break of two weeks or more, spotted from your runs: about half your usual volume, then three quarters, all easy, for about as long as the break lasted.
+- When warning signs persist (three or more on one morning, or one on three mornings running), today's session becomes an easy run of the same distance, on the watch too. The planned session is still shown.
+- Race-week guidance on the calendar: carbohydrate loading worked out from your Garmin weight for the two days before a marathon or longer, and race-day notes on caffeine, drinking to thirst, painkillers and shoes.
+- Every scheduled contact with Garmin (the daily update and the four-hourly watch check) is moved by its own random amount, up to 30 minutes either way, so installs do not all reach Garmin at once.
+### Changed
+- From age 50 (read from your Garmin profile), a down week comes every third week instead of every fourth, unless you have set this yourself.
+- Long runs are kept to about three hours, except for ultra goals.
+- Strength work drops to one session a week in the race-specific phase.
+- PRINCIPLES.md and How it works describe all of the above; four of the known gaps are closed.
+
 ## 1.16.2 - 2026-10-03
 ### Changed
 - PRINCIPLES.md rewritten: 60 principles in 11 sections, each matched to what the planner actually does, with the strength of the evidence behind every research finding (strong, moderate or limited). New sections on foundations (consistency, your own baseline, trends, agreeing signs), durability, injury risk, the shape of a season and measurement limits.

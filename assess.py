@@ -156,6 +156,16 @@ def load_runs(start, end):
     return out
 
 
+def detraining(days_off):
+    """Share of threshold fitness lost after `days_off` days without running.
+
+    Aerobic fitness holds for the first week or so, then falls: trained runners lose roughly 4-14% of their aerobic capacity over
+    two to four weeks without training, and recent gains go first (Mujika and Padilla, 2000). The values here (nothing for 10
+    days, then 0.35% a day, at most 12%) are this project's middle-of-the-range reading of that. [P]
+    """
+    return min(max(days_off - 10, 0) * 0.0035, 0.12)
+
+
 def assess(c, L, monday, prev_tp=None):
     """c: settings, L: personal limits, monday: first day of the week being planned."""
     R = load_runs(monday - dt.timedelta(weeks=WINDOW_WEEKS), monday)
@@ -198,6 +208,12 @@ def assess(c, L, monday, prev_tp=None):
         return None
     seed = prev_tp or raw
     tp = min(max(raw, seed * (1 - c["max_weekly_loss"])), seed * (1 + c["max_weekly_gain"]))
+    last = max((r["date"] for r in R if r["mi"] >= 1), default=None)
+    off = (monday - last).days - 1 if last else WINDOW_WEEKS * 7
+    fade = detraining(off) - detraining(off - 7)     # this week's share of the loss, so a long break adds up week by week
+    if fade > 0:
+        tp = min(tp, seed * (1 - fade))
+        why = f"no running for {off} days: fitness eased {fade:.1%} this week, as aerobic fitness fades during a break"
 
     for r in R:
         r["t_min"] = band(r, T_FLOOR * tp, 99, "sec_by_speed") / 60

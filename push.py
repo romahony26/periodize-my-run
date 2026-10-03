@@ -212,8 +212,9 @@ def sync_calendar(c, dry_run=False):
     for r in rows:
         d = dt.date.fromisoformat(r["date"])
         tp = tps.get((d - dt.timedelta(days=d.weekday())).isoformat())
-        day = dict(r, steps=json.loads(r["steps"]) if r["steps"] else None)
-        slow = (json.loads(r["adjust"]) if r["adjust"] else {}).get("slow", 0.0)
+        adj = json.loads(r["adjust"]) if r["adjust"] else {}
+        day = engine.as_run(dict(r, steps=json.loads(r["steps"]) if r["steps"] else None), adj)
+        slow = adj.get("slow", 0.0)
         _upsert(r["date"], workout(day, tp, c, slow) if tp else None, r["garmin_id"], r["pushed_hash"], "garmin_id", "pushed_hash", dry_run, counts)
         sw = strength_workout(r["strength"]) if c["strength"] and c["push_strength"] else None
         _upsert(r["date"], sw, r["strength_id"], r["strength_hash"], "strength_id", "strength_hash", dry_run, counts)

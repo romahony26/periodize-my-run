@@ -51,8 +51,11 @@ finding. That is why Periodize keeps measuring the athlete against their own his
 9. **Fitness is read from what you actually ran, not from your goal.** [P] The threshold estimate comes from recent race
    results, your own pace-to-heart-rate relationship over the last four weeks, and the watch's own estimate while it is less than
    six weeks old. A goal time only shows the gap.
-10. **Fitness estimates move slowly.** [P] The estimate may rise by at most 1.5% a week and fall by at most 0.5%, so one good or
-    bad run cannot swing the plan. (See the known gaps: after a long break this fall limit is too slow.)
+10. **Fitness estimates move slowly, except during a break.** [P] The estimate may rise by at most 1.5% a week and fall by at most
+    0.5%, so one good or bad run cannot swing the plan. When you stop running, though, fitness really does fall: trained runners
+    lose roughly 4 to 14% of their aerobic capacity over two to four weeks without training, recent gains first (Mujika and
+    Padilla, 2000) [R] (*moderate*). So after 10 days without a run the estimate eases by 0.35% a day, up to 12%, and your first
+    paces back are set from that. [P]
 11. **Longer races need endurance on top of speed.** [R] (*strong* for the association) Across 85 studies, weekly distance, the
     number of long runs and total hours were the most consistent training predictors of marathon time (Doherty and colleagues,
     2020). Simple formulas that scale a short race to a marathon are optimistic for recreational runners who lack that volume
@@ -99,132 +102,143 @@ finding. That is why Periodize keeps measuring the athlete against their own his
 24. **Previous injury is the strongest known risk factor for the next one.** [R] (*strong*) (Saragiotto and colleagues, 2014;
     van der Worp and colleagues, 2015) After an injury Periodize returns you on easy running for twice as long as you were out,
     up to 14 days. [P]
-25. **Everyday walking is load too.** [P] Unusually heavy weeks on your feet count as a warning sign for the weekly plan.
+25. **After any break, build back gradually.** [C] Two or more weeks well below your usual level, whatever the reason, are followed
+    by a return lasting about as long as the break (up to four weeks): about half your usual volume first, then three quarters,
+    all easy. Periodize notices the break from your runs; nothing has to be entered.
+26. **Everyday walking is load too.** [P] Unusually heavy weeks on your feet count as a warning sign for the weekly plan.
 
 ## 5. The sessions
 
-26. **Threshold running** raises the pace you can sustain. [R] (*limited*) It is done as repeats with short recoveries, run in
+27. **Threshold running** raises the pace you can sustain. [R] (*limited*) It is done as repeats with short recoveries, run in
     control rather than to exhaustion. World-class runners and coaches describe this controlled, broken-up threshold work as
     central (Casado and colleagues, 2023; Tønnessen and colleagues, 2024), and more total work at slightly lower intensity
     beat less work at higher intensity in a controlled trial (Seiler and colleagues, 2013). Periodize progresses it by adding
     time at the pace, from 15 to 40 minutes, before the pace itself moves. [C]
-27. **Faster repeats** (around 10K and 5K pace) develop maximal aerobic capacity. [R] (*moderate*) Well-trained runners need
+28. **Faster repeats** (around 10K and 5K pace) develop maximal aerobic capacity. [R] (*moderate*) Well-trained runners need
     high intensities to raise it further (Midgley and colleagues, 2006). For a 5K or 10K goal they are the main session; for a
     marathon they appear about one week in three once threshold work is established. [P]
-28. **Race-pace running becomes the centre of the final phase before a long race.** [R] (*limited*) World-class marathoners shift
+29. **Race-pace running becomes the centre of the final phase before a long race.** [R] (*limited*) World-class marathoners shift
     from faster intervals early in the season to marathon-pace work late (Haugen and colleagues, 2022). For the marathon,
     Periodize builds midweek marathon-pace runs (4 to 8 miles) and, every second week or so, a long run with 8 to 14 miles at
     marathon pace. [C]
-29. **Long runs are steady, not shuffled.** [C] Once fast running is established, the long run is run at a steady effort a
-    little slower than marathon pace; early on, and for ultra goals, it is easy.
-30. **Aerobic runs by heart rate.** [C] Before the race-specific phase, one run a week holds a fixed heart rate below threshold
+30. **Long runs are steady, not shuffled.** [C] Once fast running is established, the long run is run at a steady effort a
+    little slower than marathon pace; early on, and for ultra goals, it is easy. Except for ultra goals, a long run is kept to
+    about three hours: beyond that, the injury risk and recovery cost grow faster than the benefit. [C]
+31. **Aerobic runs by heart rate.** [C] Before the race-specific phase, one run a week holds a fixed heart rate below threshold
     and lets the pace float. The heart rate moves up 5 beats only when 10 miles at the current level is comfortable. [P]
-31. **Short fast strides and 200 m repeats** keep speed and form without heavy fatigue. [C]
-32. **Strength training improves running economy without harming aerobic fitness.** [R] (*strong*) Heavy-load and plyometric
+32. **Short fast strides and 200 m repeats** keep speed and form without heavy fatigue. [C]
+33. **Strength training improves running economy without harming aerobic fitness.** [R] (*strong*) Heavy-load and plyometric
     training work best; light-load and isometric training much less (Llanos-Lagos and colleagues, 2024). One trial also found it
     made economy hold up better late in a long run (Zanini and colleagues, 2025) (*limited*). Periodize places two short sessions
-    a week on easy days, and none in the last two weeks before the goal race. [C]
+    a week on easy days, one a week in the race-specific phase, and none in the last two weeks before the goal race. [C]
 
 ## 6. The shape of a season
 
-33. **Load rises in steps, with lighter weeks.** [C] After three full weeks, the next is a down week at about three quarters of
-    the volume.
-34. **No periodisation model is proven best.** [R] (*moderate*) Successful elite systems differ sharply, and trials have not shown
+34. **Load rises in steps, with lighter weeks.** [C] After three full weeks, the next is a down week at about three quarters of
+    the volume. From age 50 (read from your Garmin profile) it comes after two full weeks instead: endurance performance declines
+    with age (Tanaka and Seals, 2008) [R] (*moderate*), and older runners are widely held to need longer recovery between hard
+    blocks [C].
+35. **No periodisation model is proven best.** [R] (*moderate*) Successful elite systems differ sharply, and trials have not shown
     one structure to be superior (Grivas and colleagues, 2026; Mølmen and colleagues, 2019). Periodize uses a simple build, down,
     specific and taper sequence, and adapts it to what you actually do. [P]
-35. **Taper by cutting volume, not intensity.** [R] (*strong*) Reducing volume by roughly 40 to 60% while keeping some fast running
+36. **Taper by cutting volume, not intensity.** [R] (*strong*) Reducing volume by roughly 40 to 60% while keeping some fast running
     and the usual number of runs improves performance (Bosquet and colleagues, 2007; Wang and colleagues, 2023). Among 158,000
     recreational marathoners, a disciplined three-week taper was linked with finishing about 2.6% faster than a minimal one (Smyth
     and Lawlor, 2021) (*moderate*). Periodize tapers over three weeks for the marathon and ultra (about 80%, then 65%, then race
     week) and two weeks for the half.
-36. **A race is followed by recovery.** [R] (*limited*) Easy running from two days after a marathon did not slow recovery
+37. **A race is followed by recovery.** [R] (*limited*) Easy running from two days after a marathon did not slow recovery
     compared with rest (Martínez-Navarro and colleagues, 2021). Periodize plans a recovery week at about half your usual volume
     after a race or a very long run, with no sessions. [C]
 
 ## 7. Is it working?
 
-37. **Faster at the same heart rate is the sign of aerobic progress.** [C] Periodize tracks your pace at fixed heart rates month by
+38. **Faster at the same heart rate is the sign of aerobic progress.** [C] Periodize tracks your pace at fixed heart rates month by
     month, and offers a stepped heart-rate test about every month.
-38. **Aerobic change is slow.** [C] Expect little after three weeks and clear change after six. Testing more often measures noise.
-39. **Hills are converted to their flat equivalent.** [R] (*strong*) The energy cost of running on a gradient has been measured
+39. **Aerobic change is slow.** [C] Expect little after three weeks and clear change after six. Testing more often measures noise.
+40. **Hills are converted to their flat equivalent.** [R] (*strong*) The energy cost of running on a gradient has been measured
     (Minetti and colleagues, 2002), and is used to compare hilly and flat runs.
-40. **Weeks are compared, not single runs.** [P] One run's pace for its heart rate swings with wind, heat, route and time of day.
-41. **Race times should spread predictably with distance.** [R] (*moderate*) Across world records and good runners, doubling the
+41. **Weeks are compared, not single runs.** [P] One run's pace for its heart rate swings with wind, heat, route and time of day.
+42. **Race times should spread predictably with distance.** [R] (*moderate*) Across world records and good runners, doubling the
     distance takes a little more than twice as long (Riegel, 1981): pace slows by about 4% each time the distance doubles, about
     15 seconds a mile at 6-minute pace. A much wider spread means endurance, not speed, is what limits you.
-42. **Aerobic drift.** [R] (*moderate*) On a long steady run, how far your pace per heartbeat fades in the second half is a sign
+43. **Aerobic drift.** [R] (*moderate*) On a long steady run, how far your pace per heartbeat fades in the second half is a sign
     of durability (Smyth and colleagues, 2022). Under 5% is a common rule of thumb. [C]
 
 ## 8. Training load
 
-43. **Load is minutes weighted by intensity.** [R] (*moderate*) Easy, moderate and hard minutes count 1, 2 and 3 (Lucia and
+44. **Load is minutes weighted by intensity.** [R] (*moderate*) Easy, moderate and hard minutes count 1, 2 and 3 (Lucia and
     colleagues, 2003).
-44. **Fitness and fatigue are both responses to load, on different time scales.** [R] (*moderate* as a concept) Fitness builds and
+45. **Fitness and fatigue are both responses to load, on different time scales.** [R] (*moderate* as a concept) Fitness builds and
     fades over weeks, fatigue over days; "form" is the difference (Banister, 1991). The model fits past data well but predicts an
     individual's future performance poorly (Hellard and colleagues, 2006), so Periodize shows it as a guide and never plans from
     it. The 42-day and 7-day time constants are convention. [C]
-45. **Execution is measured against the plan.** [P] A run is scored on how far its easy, moderate and hard minutes departed from
+46. **Execution is measured against the plan.** [P] A run is scored on how far its easy, moderate and hard minutes departed from
     the session set. Too much counts the same as too little.
 
 ## 9. Recovery and readiness
 
-46. **Sleep matters from a single night.** [R] (*strong*) One short night measurably reduces endurance performance the next day,
+47. **Sleep matters from a single night.** [R] (*strong*) One short night measurably reduces endurance performance the next day,
     mostly through how hard the effort feels (Lopes and colleagues, 2023; Craven and colleagues, 2022). Periodize reads last night
     on its own, and the last three nights together because sleep debt builds.
-47. **Heart-rate variability and resting heart rate are read as weekly trends.** [R] (*strong*) A single reading is noisy. A
+48. **Heart-rate variability and resting heart rate are read as weekly trends.** [R] (*strong*) A single reading is noisy. A
     7-day average against your own normal range is the established method, and a shift of about half your normal spread is the
     smallest change treated as real (Plews and colleagues, 2012, 2013). Garmin's overnight readings agree well enough with
     laboratory measures for trends, not single nights (Dial and colleagues, 2025) (*moderate*).
-48. **Expect small gains from readiness-based adjustment, not miracles.** [R] (*strong*) Training guided by heart-rate
+49. **Expect small gains from readiness-based adjustment, not miracles.** [R] (*strong*) Training guided by heart-rate
     variability gives small benefits and fewer non-responders compared with a fixed plan, not large gains (Düking and colleagues,
     2021; Manresa-Rocamora and colleagues, 2021).
-49. **Poor recovery eases the fast running, not the easy running.** [P] Each warning sign slows the day's fast paces by a small
-    fixed amount (about 1.2% to start, then learned from your own runs), up to four signs. With three or more, Periodize also
-    suggests swapping the day for an easy run.
-50. **Illness means rest, then a gradual return.** [C] While sick, no running. Afterwards, easy running for as many days as you
+50. **Poor recovery eases the fast running, not the easy running.** [P] Each warning sign slows the day's fast paces by a small
+    fixed amount (about 1.2% to start, then learned from your own runs), up to four signs.
+51. **When the signs persist or pile up, the session becomes an easy run.** [R] (*moderate*) In the trials of readiness-guided
+    training, a hard day was swapped for an easy one when the morning signs were poor, rather than only slowed (Düking and
+    colleagues, 2021). Periodize does this automatically on a morning with three or more warning signs, or when a sign has lasted
+    three mornings in a row; the watch gets the easy run, and the planned session is still shown. [P]
+52. **Illness means rest, then a gradual return.** [C] While sick, no running. Afterwards, easy running for as many days as you
     were out (up to seven), building from half distance.
 
 ## 10. Racing
 
-51. **Even effort is the fastest way to cover a course.** [R] (*moderate*) Recreational marathoners who start faster than they can
+53. **Even effort is the fastest way to cover a course.** [R] (*moderate*) Recreational marathoners who start faster than they can
     sustain are the ones who "hit the wall" (Smyth, 2021). Periodize gives a starting pace and asks for no faster in the first
     half. On a hilly course, even effort means slower uphill and faster downhill: a course file gives an even-effort split for
     every mile. [C]
-52. **Fuel long efforts.** [R] (*strong*) About 30 to 60 g of carbohydrate an hour for efforts of 1 to 2.5 hours, and up to 90 g
+54. **Fuel long efforts.** [R] (*strong*) About 30 to 60 g of carbohydrate an hour for efforts of 1 to 2.5 hours, and up to 90 g
     beyond that, using mixed sugars (Thomas and colleagues, 2016; Jeukendrup, 2014).
-53. **Practise fuelling in training.** [R] (*moderate*) The gut adapts to taking carbohydrate on the run (Costa and colleagues,
+55. **Practise fuelling in training.** [R] (*moderate*) The gut adapts to taking carbohydrate on the run (Costa and colleagues,
     2017). Periodize steps up the long-run fuelling target from 30 to 70 g an hour over the months before the race. [P]
-54. **Hilly races need hilly training.** [C] Weekly climb is raised toward the race's climb per mile over the final months.
-55. **Race results are compared across ages with age grading.** [R] (*moderate*) Performance declines with age at a known average
+56. **Race week follows the evidence, worked out for you.** [R] (*strong*) Before a marathon or longer, about 10 g of carbohydrate
+    per kg of body weight a day for the last two days (Thomas and colleagues, 2016), with the amount worked out from your Garmin
+    weight. On race day: caffeine at about 3 mg per kg improves endurance by a few per cent (Southward and colleagues, 2018), but
+    only if you have tried it in training; drink to thirst, because drinking too much is the serious risk for most runners
+    (Hew-Butler and colleagues, 2015); no ibuprofen or similar painkillers, which were linked with more serious problems during
+    marathons (Küster and colleagues, 2013) (*moderate*); and race in shoes you have already run in at race pace. [C]
+57. **Hilly races need hilly training.** [C] Weekly climb is raised toward the race's climb per mile over the final months.
+58. **Race results are compared across ages with age grading.** [R] (*moderate*) Performance declines with age at a known average
     rate (Tanaka and Seals, 2008); standards by age, sex and distance come from public-domain tables (Jones, 2025).
 
 ## 11. Measurement limits
 
-56. **Wrist heart rate is imperfect.** [R] (*moderate*) Wrist monitors agree less well with a medical ECG than chest straps do,
+59. **Wrist heart rate is imperfect.** [R] (*moderate*) Wrist monitors agree less well with a medical ECG than chest straps do,
     and in one comparison a Garmin wrist monitor agreed least well of the devices tested (Gillinov and colleagues, 2017). They are
     least reliable at high intensity and in the cold, so Periodize uses heart rate over minutes, never seconds, and a chest strap
     improves everything heart-rate based.
-57. **A watch's fitness estimates are approximate.** [R] (*moderate*) Garmin's VO2max estimate was within about 7% of laboratory
+60. **A watch's fitness estimates are approximate.** [R] (*moderate*) Garmin's VO2max estimate was within about 7% of laboratory
     values on average (Carrier and colleagues, 2025), and is thrown off by heat, terrain and a wrong maximum heart rate.
-58. **A watch's distance on a treadmill is a guess.** [P] Treadmill runs are judged by heart rate and time.
-59. **A watch's altitude can be wrong.** [P] Each watch's altitude is checked on runs that start and finish in the same place,
+61. **A watch's distance on a treadmill is a guess.** [P] Treadmill runs are judged by heart rate and time.
+62. **A watch's altitude can be wrong.** [P] Each watch's altitude is checked on runs that start and finish in the same place,
     and hills are only adjusted for when it proves reliable.
-60. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
+63. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
     measures built from watch data. They guide training; they do not diagnose anything.
 
 ## Known gaps: where Periodize does not yet follow the evidence
 
 Listed so they are not mistaken for principles.
 
-- **Fitness after a long break.** Aerobic fitness falls quickly when training stops, with much of a recent gain lost within a few
-  weeks (Mujika and Padilla, 2000). Periodize lets its fitness estimate fall by only 0.5% a week, so after several weeks off the
-  first paces back can be too fast. Run the first sessions back by feel.
 - **How you feel is not yet counted.** Self-reported fatigue, soreness and mood track the response to training at least as well as
   device measures (Saw and colleagues, 2016) (*strong*). Periodize can record them but does not yet use them.
-- **Return after a lighter week** is planned at 80% of your earlier level; the more cautious practice of building back from about
-  half, over as long as the break lasted, is not yet applied. [C]
-- **Heat** slows runners, and slower runners proportionally more (Ely and colleagues, 2007), but paces are not adjusted for it.
-- **Age and sex** do not yet change recovery spacing or the down-week rhythm.
+- **Heat** slows runners, and slower runners proportionally more (Ely and colleagues, 2007), but paces are not adjusted for it:
+  doing so would need a weather service, and Periodize talks to nothing but Garmin.
+- **Sex** does not change the plan, and from age 50 only the down-week rhythm changes, not the spacing of hard days.
 - **Low energy availability** (not eating enough for the training) harms health and performance (Mountjoy and colleagues, 2023);
   Periodize does not screen for it.
 
@@ -251,12 +265,14 @@ on a detail.
 - Grivas and colleagues (2026). Training variability and threshold density: a conceptual comparison of East African and Norwegian endurance training systems. *Front Physiol*.
 - Haugen T, Sandbakk Ø, Seiler S, Tønnessen E (2022). The training characteristics of world-class distance runners. *Sports Med Open* 8:46.
 - Hellard P and colleagues (2006). Assessing the limitations of the Banister model in monitoring training. *J Sports Sci* 24:509–520.
+- Hew-Butler T and colleagues (2015). Statement of the Third International Exercise-Associated Hyponatremia Consensus Development Conference. *Clin J Sport Med* 25:303–320.
 - Impellizzeri FM and colleagues (2020). Acute:chronic workload ratio: conceptual issues and fundamental pitfalls. *Int J Sports Physiol Perform*.
 - Jeukendrup A (2014). A step towards personalized sports nutrition: carbohydrate intake during exercise. *Sports Med*. *From memory.*
 - Jones A (2025). Road running age standards. Public domain (CC0).
 - Jones AM (2024). The fourth dimension: physiological resilience as an independent determinant of endurance exercise performance. *J Physiol* 602:4113–4128.
 - Joyner MJ, Coyle EF (2008). Endurance exercise performance: the physiology of champions. *J Physiol* 586:35–44.
 - Llanos-Lagos C, Ramirez-Campillo R, Moran J, Sáez de Villarreal E (2024). Effect of strength training programs in middle- and long-distance runners' economy at different running speeds: a systematic review with meta-analysis. *Sports Med* 54.
+- Küster M and colleagues (2013). Consumption of analgesics before a marathon and the incidence of cardiovascular, gastrointestinal and renal problems. *BMJ Open*.
 - Lopes TR and colleagues (2023). How much does sleep deprivation impair endurance performance? A systematic review and meta-analysis. *Eur J Sport Sci* 23:1279–1292.
 - Lucia A and colleagues (2003). Tour de France versus Vuelta a España: which is harder? *Med Sci Sports Exerc*. *From memory.*
 - Manresa-Rocamora A and colleagues (2021). Heart rate variability-guided training for enhancing cardiac-vagal modulation, aerobic fitness, and endurance performance. *Int J Environ Res Public Health*.
@@ -283,6 +299,7 @@ on a detail.
 - Smyth B (2021). How recreational marathon runners hit the wall. *PLoS One*.
 - Smyth B, Lawlor A (2021). Longer disciplined tapers improve marathon performance for recreational runners. *Front Sports Act Living*.
 - Smyth B and colleagues (2022). Decoupling of internal and external workload during a marathon: an analysis of durability in 82,303 recreational runners. *Sports Med*.
+- Southward K and colleagues (2018). The effect of acute caffeine ingestion on endurance performance: a systematic review and meta-analysis. *Sports Med*.
 - Stöggl T, Sperlich B (2014). Polarized training has greater impact on key endurance variables than threshold, high intensity, or high volume training. *Front Physiol* 5:33.
 - Tanaka H, Seals DR (2008). Endurance exercise performance in Masters athletes: age-associated changes and underlying physiological mechanisms. *J Physiol* 586:55–63.
 - Thomas DT, Erdman KA, Burke LM (2016). Nutrition and athletic performance: joint position statement. *Med Sci Sports Exerc* 48:543–568.
