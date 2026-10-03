@@ -1,5 +1,5 @@
 #!/bin/sh
-# Periodize installer for macOS and Raspberry Pi OS / DietPi (Debian).
+# Periodize My Run installer for macOS and Raspberry Pi OS / DietPi (Debian).
 # Creates a Python environment, then registers the app to start at boot and stay running.
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,30 +12,41 @@ echo "Creating Python environment..."
 "$DIR/.venv/bin/pip" install --quiet --upgrade pip
 "$DIR/.venv/bin/pip" install --quiet --require-hashes -r "$DIR/requirements.lock"   # exact versions, each checked against its published SHA-256
 
+# Coming from the app's old name (Periodize): stop the old service and move its data across, so nothing is lost or run twice.
+if [ "$(uname)" = "Darwin" ]; then
+  OLD="$HOME/Library/LaunchAgents/com.periodize.app.plist"
+  [ -f "$OLD" ] && { launchctl unload "$OLD" 2>/dev/null || true; rm -f "$OLD"; }
+elif [ -f /etc/systemd/system/periodize.service ]; then
+  sudo systemctl disable --now periodize.service || true
+  sudo rm -f /etc/systemd/system/periodize.service
+fi
+[ -d "$HOME/.periodize" ] && [ ! -e "$HOME/.periodize-my-run" ] && mv "$HOME/.periodize" "$HOME/.periodize-my-run"
+[ -d "$HOME/.config/periodize" ] && [ ! -e "$HOME/.config/periodize-my-run" ] && mv "$HOME/.config/periodize" "$HOME/.config/periodize-my-run"
+
 if [ "$(uname)" = "Darwin" ]; then
   HOST="${PERIODIZE_HOST:-127.0.0.1}"
-  PLIST="$HOME/Library/LaunchAgents/com.periodize.app.plist"
-  mkdir -p "$HOME/Library/LaunchAgents" "$HOME/.periodize/logs"
+  PLIST="$HOME/Library/LaunchAgents/com.periodizemyrun.app.plist"
+  mkdir -p "$HOME/Library/LaunchAgents" "$HOME/.periodize-my-run/logs"
   cat > "$PLIST" <<PL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>Label</key><string>com.periodize.app</string>
+  <key>Label</key><string>com.periodizemyrun.app</string>
   <key>ProgramArguments</key><array><string>$DIR/.venv/bin/python</string><string>$DIR/web.py</string><string>--host</string><string>$HOST</string><string>--port</string><string>$PORT</string></array>
   <key>RunAtLoad</key><true/><key>KeepAlive</key><true/>
-  <key>StandardOutPath</key><string>$HOME/.periodize/logs/service.out</string>
-  <key>StandardErrorPath</key><string>$HOME/.periodize/logs/service.err</string>
+  <key>StandardOutPath</key><string>$HOME/.periodize-my-run/logs/service.out</string>
+  <key>StandardErrorPath</key><string>$HOME/.periodize-my-run/logs/service.err</string>
 </dict></plist>
 PL
   launchctl unload "$PLIST" 2>/dev/null || true
   launchctl load "$PLIST"
-  echo "Periodize is running. Open http://localhost:$PORT"
+  echo "Periodize My Run is running. Open http://localhost:$PORT"
 else
   HOST="${PERIODIZE_HOST:-0.0.0.0}"
   # The app is reachable from other devices, so it needs a password and an encrypted connection before it starts.
   "$DIR/.venv/bin/python" "$DIR/web.py" --set-password
-  mkdir -p "$HOME/.periodize" "$HOME/.config/periodize" && chmod 700 "$HOME/.periodize" "$HOME/.config/periodize"
-  TLS="$HOME/.periodize/tls"
+  mkdir -p "$HOME/.periodize-my-run" "$HOME/.config/periodize-my-run" && chmod 700 "$HOME/.periodize-my-run" "$HOME/.config/periodize-my-run"
+  TLS="$HOME/.periodize-my-run/tls"
   if [ ! -f "$TLS/cert.pem" ] && command -v openssl >/dev/null 2>&1; then
     mkdir -p "$TLS" && chmod 700 "$TLS"
     IPADDR="$(hostname -I 2>/dev/null | awk '{print $1}')"
@@ -44,10 +55,10 @@ else
     chmod 600 "$TLS/key.pem"
     echo "Created a self-signed certificate. Your browser will warn once; that is expected."
   fi
-  UNIT=/etc/systemd/system/periodize.service
+  UNIT=/etc/systemd/system/periodize-my-run.service
   sudo tee "$UNIT" >/dev/null <<UN
 [Unit]
-Description=Periodize training planner
+Description=Periodize My Run training planner
 After=network-online.target
 Wants=network-online.target
 
@@ -61,7 +72,7 @@ RestartSec=10
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=$HOME/.periodize $HOME/.config/periodize
+ReadWritePaths=$HOME/.periodize-my-run $HOME/.config/periodize-my-run
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
@@ -75,8 +86,8 @@ UMask=0077
 WantedBy=multi-user.target
 UN
   sudo systemctl daemon-reload
-  sudo systemctl enable --now periodize.service
+  sudo systemctl enable --now periodize-my-run.service
   IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
-  SCHEME=http; [ -f "$HOME/.periodize/tls/cert.pem" ] && SCHEME=https
-  echo "Periodize is running. Open $SCHEME://${IP:-<this device>}:$PORT from any device on your network and log in with the app password."
+  SCHEME=http; [ -f "$HOME/.periodize-my-run/tls/cert.pem" ] && SCHEME=https
+  echo "Periodize My Run is running. Open $SCHEME://${IP:-<this device>}:$PORT from any device on your network and log in with the app password."
 fi

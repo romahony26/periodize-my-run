@@ -9,6 +9,7 @@ able to unlock its own secrets, so that is a limit of any self-hosted app. Full-
 
 No password is ever stored here, encrypted or not. Passwords are exchanged once for tokens and then dropped.
 """
+import contextlib
 import json
 import os
 
@@ -16,7 +17,12 @@ from cryptography.fernet import Fernet, InvalidToken
 
 import db
 
-KEY_FILE = os.path.expanduser(os.environ.get("PERIODIZE_KEY_FILE", "~/.config/periodize/vault.key"))
+KEY_FILE = os.path.expanduser(os.environ.get("PERIODIZE_KEY_FILE", "~/.config/periodize-my-run/vault.key"))
+OLD_KEY_DIR = os.path.expanduser("~/.config/periodize")       # the key's folder before the rename
+if "PERIODIZE_KEY_FILE" not in os.environ and not os.path.exists(KEY_FILE) and os.path.isfile(os.path.join(OLD_KEY_DIR, "vault.key")) \
+        and not os.path.exists(os.path.dirname(KEY_FILE)):
+    with contextlib.suppress(OSError):                        # move it once, so the stored Garmin login can still be read
+        os.rename(OLD_KEY_DIR, os.path.dirname(KEY_FILE))
 _fernet = None
 
 

@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.0.0 - 2026-10-03
+### Changed
+- Periodize is now **Periodize My Run**: in the app, the documents, the brochure and the GitHub project (github.com/romahony26/periodize-my-run).
+- The data folder is now `~/.periodize-my-run` and the key folder `~/.config/periodize-my-run`. They are moved from the old names automatically the first time the new version runs, or by the installer; nothing has to be done by hand.
+- The background service is now `periodize-my-run` on Linux, `com.periodizemyrun.app` on macOS and "Periodize My Run" on Windows. The installers stop and remove the old one.
+- Unchanged, so nothing breaks: the database and backup file names inside the folder, and the PZ prefix on workouts on your Garmin calendar.
+
 ## 1.21.0 - 2026-10-03
 ### Added
 - Windows support: an installer (install.ps1) that starts Periodize, hidden, every time you sign in, for that computer only; the app's one-copy-only lock now works on Windows too. Not yet tested on a real Windows machine.

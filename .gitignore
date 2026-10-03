@@ -1,4 +1,4 @@
-# Only what is needed to install and run Periodize is kept in this repository.
+# Only what is needed to install and run Periodize My Run is kept in this repository.
 
 # Python environment and caches
 .venv/
@@ -7,7 +7,7 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 
-# Your data never belongs here (it lives in ~/.periodize and ~/.config/periodize anyway)
+# Your data never belongs here (it lives in ~/.periodize-my-run and ~/.config/periodize-my-run anyway)
 *.db
 *.db-shm
 *.db-wal

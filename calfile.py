@@ -27,7 +27,7 @@ def ics(c, days=60):
     today = dt.date.today()
     tps = {r["monday"]: r["tp"] for r in db.rows("SELECT monday,tp FROM weeks")}
     esc = lambda s: str(s).replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
-    out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Periodize//Training plan//EN", "CALSCALE:GREGORIAN", "X-WR-CALNAME:Periodize training"]
+    out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Periodize My Run//Training plan//EN", "CALSCALE:GREGORIAN", "X-WR-CALNAME:Periodize My Run training"]
     for p in db.rows("SELECT * FROM plan WHERE date>=? AND date<=? ORDER BY date", (today.isoformat(), (today + dt.timedelta(days=days)).isoformat())):
         d = dt.date.fromisoformat(p["date"])
         ev = event(p, tps.get((d - dt.timedelta(days=d.weekday())).isoformat()), c)

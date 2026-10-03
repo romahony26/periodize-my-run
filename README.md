@@ -1,4 +1,4 @@
-# Periodize
+# Periodize My Run
 
 A training planner that runs on your own computer: macOS, Windows, or Linux
 (including a Raspberry Pi). It reads your Garmin history, builds a plan toward
@@ -74,7 +74,7 @@ It then reads your history and builds the plan, showing progress as it goes.
 - `tools/pull_backup.py`: run on another computer, it fetches a secret-free
   backup each day into a folder that a sync app uploads (Google Drive for
   desktop, iCloud Drive), so there is an off-site copy with no sign-in inside
-  Periodize.
+  Periodize My Run.
 - A calendar file for Apple Calendar, Outlook or Google Calendar.
 
 **Running it**
@@ -104,7 +104,7 @@ repository, then run the installer for your system from its folder.
 It starts at login and runs at http://localhost:8321, for this computer only.
 
 **Windows 10 or 11** (install Python from python.org first, ticking "Add
-python.exe to PATH"). In PowerShell, in the Periodize folder:
+python.exe to PATH"). In PowerShell, in the Periodize My Run folder:
 
     powershell -ExecutionPolicy Bypass -File .\install.ps1
 
@@ -130,9 +130,9 @@ is expected. To keep it to this computer only instead, run
     .venv/bin/python web.py                 # this computer only
     .venv/bin/python web.py --host 0.0.0.0  # your home network (needs an app password first)
 
-All data lives in `~/.periodize` (database, downloaded files, logs; on Windows
-`C:\Users\<you>\.periodize`), and the key that encrypts your Garmin login is
-in `~/.config/periodize/vault.key`. Delete both to start again.
+All data lives in `~/.periodize-my-run` (database, downloaded files, logs; on Windows
+`C:\Users\<you>\.periodize-my-run`), and the key that encrypts your Garmin login is
+in `~/.config/periodize-my-run/vault.key`. Delete both to start again.
 
 ### Have it as an app
 
@@ -151,13 +151,13 @@ It is a web page, but you can give it its own icon and window:
 
 **Locked out after wrong passwords.** Five wrong app passwords lock that
 device out for 15 minutes; wait, or restart the app to clear it
-(`sudo systemctl restart periodize` on Linux).
+(`sudo systemctl restart periodize-my-run` on Linux).
 
 **Forgot the app password.** Set a new one on the computer running the app:
 
     .venv/bin/python web.py --set-password
-    # Raspberry Pi installed as user dietpi in /opt/periodize:
-    sudo -u dietpi -H /opt/periodize/.venv/bin/python /opt/periodize/web.py --set-password
+    # Raspberry Pi installed as user dietpi in /opt/periodize-my-run:
+    sudo -u dietpi -H /opt/periodize-my-run/.venv/bin/python /opt/periodize-my-run/web.py --set-password
 
 It takes effect at once and signs every device out.
 
@@ -173,8 +173,8 @@ for seven days, the app warns you.
 **Different port.** Set `PERIODIZE_PORT` before running the installer, for
 example `PERIODIZE_PORT=8400 ./install.sh`.
 
-**Moving to a new computer.** Copy `~/.periodize` and
-`~/.config/periodize/vault.key` across, or restore a backup and connect Garmin
+**Moving to a new computer.** Copy `~/.periodize-my-run` and
+`~/.config/periodize-my-run/vault.key` across, or restore a backup and connect Garmin
 again. A backup never contains your Garmin login or app password.
 
 **Off-site backups.** Download backup in Settings gives a copy with no
@@ -187,13 +187,13 @@ On Linux the installer asks for the app password again (you can enter the same
 one); this signs other devices out.
 
 **Stopping or removing it.** macOS:
-`launchctl unload ~/Library/LaunchAgents/com.periodize.app.plist`. Windows:
-`Unregister-ScheduledTask -TaskName Periodize`. Linux:
-`sudo systemctl disable --now periodize`. Then delete the folder, and
-`~/.periodize` and `~/.config/periodize` if you want your data gone too.
+`launchctl unload ~/Library/LaunchAgents/com.periodizemyrun.app.plist`. Windows:
+`Unregister-ScheduledTask -TaskName 'Periodize My Run'`. Linux:
+`sudo systemctl disable --now periodize-my-run`. Then delete the folder, and
+`~/.periodize-my-run` and `~/.config/periodize-my-run` if you want your data gone too.
 
 **Logs.** The Log tab shows what the app has been doing. The file is
-`~/.periodize/logs/periodize.log`; passwords, tokens and email addresses are
+`~/.periodize-my-run/logs/periodize.log`; passwords, tokens and email addresses are
 filtered out, but check before sharing it.
 
 ## Privacy and security
@@ -203,8 +203,8 @@ filtered out, but check before sharing it.
   dropped; Garmin offers personal apps no sign-in that avoids typing it.
 - The Garmin tokens and the notification address are encrypted
   (Fernet: AES with an integrity check) before they are stored. The key is
-  in `~/.config/periodize/vault.key`, outside the data folder and readable
-  only by you. A copy of `~/.periodize` or of a backup contains no usable
+  in `~/.config/periodize-my-run/vault.key`, outside the data folder and readable
+  only by you. A copy of `~/.periodize-my-run` or of a backup contains no usable
   login.
 - Limit: anyone who can read all of your user account's files can read the
   key too. Use full-disk encryption on the computer.
@@ -240,7 +240,7 @@ data. Use a separate Windows account if others share the computer.
 
 ## Checks
 
-This repository holds only what is needed to install and run Periodize. The
+This repository holds only what is needed to install and run Periodize My Run. The
 test suite and the checks below are kept with the development copy and are
 not included here.
 
@@ -317,12 +317,12 @@ should be reported privately instead: see SECURITY.md.
 
 ## Support
 
-If Periodize helps your running, you can buy me a coffee:
+If Periodize My Run helps your running, you can buy me a coffee:
 https://buymeacoffee.com/romahony
 
 ## Licence and disclaimer
 
 MIT. See [LICENSE](LICENSE): free to use, change and share, with no warranty.
-Using Periodize also means accepting [DISCLAIMER.md](DISCLAIMER.md): it is not
+Using Periodize My Run also means accepting [DISCLAIMER.md](DISCLAIMER.md): it is not
 medical advice, you use it at your own risk, and its authors are not liable for
 any loss or injury, to the extent the law allows.

@@ -1,10 +1,22 @@
-"""SQLite storage. One file, ~/.periodize/periodize.db (override with PERIODIZE_HOME)."""
+"""SQLite storage. One file, ~/.periodize-my-run/periodize.db (override with PERIODIZE_HOME)."""
 import contextlib
 import json
 import os
 import sqlite3
 
-HOME = os.path.expanduser(os.environ.get("PERIODIZE_HOME", "~/.periodize"))
+HOME = os.path.expanduser(os.environ.get("PERIODIZE_HOME", "~/.periodize-my-run"))
+OLD_HOME = os.path.expanduser("~/.periodize")        # the folder's name before the app was renamed Periodize My Run
+
+
+def _move_old_home():
+    """Move the data folder from its old name, once, if this install has data there and nothing at the new name yet."""
+    if "PERIODIZE_HOME" in os.environ or os.path.exists(HOME) or not os.path.isdir(OLD_HOME):
+        return
+    with contextlib.suppress(OSError):        # a sandboxed service cannot rename in the home folder; the installer does it instead
+        os.rename(OLD_HOME, HOME)
+
+
+_move_old_home()
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
 CREATE TABLE IF NOT EXISTS activities (

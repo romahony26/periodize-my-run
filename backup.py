@@ -110,7 +110,7 @@ def portable():
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
             z.write(tmp, "periodize.db")
             z.writestr("plan.json", json.dumps(db.rows("SELECT date,type,label,miles,steps,strength,note,source FROM plan ORDER BY date"), indent=1))
-            z.writestr("README.txt", "Periodize backup. To restore: stop the app, copy periodize.db into ~/.periodize/, start the app and connect Garmin again.\n"
+            z.writestr("README.txt", "Periodize My Run backup. To restore: stop the app, copy periodize.db into ~/.periodize-my-run/, start the app and connect Garmin again.\n"
                                      "Garmin login tokens and the app password are not included.\n")
     finally:
         os.unlink(tmp)
@@ -167,7 +167,7 @@ def _insert(con, table, rows):
 def restore_config(data):
     """Put back settings, races, status periods, entered results and Aerobic tests. Training data, the plan and connections are untouched."""
     if not isinstance(data, dict) or data.get("kind") != "periodize-config" or not isinstance(data.get("settings"), dict):
-        raise ValueError("That is not a Periodize settings backup.")
+        raise ValueError("That is not a Periodize My Run settings backup.")
     allowed = set(db.DEFAULTS) | {"hrmax", "peak_miles_override"}
     with db.connect() as con:
         for k, v in data["settings"].items():
@@ -184,7 +184,7 @@ def restore_config(data):
 def restore_plan(data):
     """Put back the planned days from today on, the weeks and the athlete's moves. Past days and everything else are untouched."""
     if not isinstance(data, dict) or data.get("kind") != "periodize-plan" or not isinstance(data.get("plan"), list):
-        raise ValueError("That is not a Periodize plan backup.")
+        raise ValueError("That is not a Periodize My Run plan backup.")
     today = dt.date.today().isoformat()
     with db.connect() as con:
         con.execute("DELETE FROM plan WHERE date>=? AND garmin_id IS NULL AND strength_id IS NULL", (today,))
@@ -208,7 +208,7 @@ def _open_backup(path):
             raise ValueError("That backup is damaged.")
         need = {"settings", "activities", "plan", "races"}
         if not need <= {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}:
-            raise ValueError("That file is not a Periodize backup.")
+            raise ValueError("That file is not a Periodize My Run backup.")
         return con
     except sqlite3.DatabaseError:
         raise ValueError("That backup is damaged.") from None

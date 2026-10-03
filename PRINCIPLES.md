@@ -1,10 +1,10 @@
 # Running principles
 
-The training principles Periodize is built on, written in the project's own words.
+The training principles Periodize My Run is built on, written in the project's own words.
 
 This document holds ideas, findings and rules, not anyone's text, tables or training schedules. Each principle says what the
 planner actually does and why. Where the reason is published research, the study is named so it can be checked. Where it is a
-coaching convention, or a choice this project made, it says so. Where Periodize does not yet do what the evidence suggests, the
+coaching convention, or a choice this project made, it says so. Where Periodize My Run does not yet do what the evidence suggests, the
 last section says that too. Nothing here is medical advice.
 
 ## How to read the marks
@@ -22,7 +22,7 @@ Most of the research was done on trained recreational and sub-elite runners, ove
 rather than marathons. The evidence is thinnest at the two ends: 5K and 10K training rests on a handful of small trials, and
 ultramarathons and mountain races have almost no training trials at all, so sections 11 and 12 lean more on laboratory studies,
 race data and coaching practice, and say so. Women and older runners are under-represented. Averages hide wide individual
-differences in almost every finding. That is why Periodize keeps measuring the athlete against their own history.
+differences in almost every finding. That is why Periodize My Run keeps measuring the athlete against their own history.
 
 ## 1. Foundations
 
@@ -30,9 +30,9 @@ differences in almost every finding. That is why Periodize keeps measuring the a
    their planned training weeks were several times more likely to reach their performance goals than those who lost weeks to
    injury or illness (Raysmith and Drew, 2016). Every rule below leans toward the plan you can complete. When in doubt, do less.
 2. **Your own history is the yardstick.** [R] (*strong*) Sleep need, heart-rate variability, resting heart rate and the load a
-   body tolerates differ widely between people (Walsh and colleagues, 2021; Plews and colleagues, 2013). Periodize judges each
+   body tolerates differ widely between people (Walsh and colleagues, 2021; Plews and colleagues, 2013). Periodize My Run judges each
    reading against your own recent normal, never against a population table.
-3. **Trends, not single days.** [R] (*strong*) One night's heart-rate variability or one slow run is mostly noise. Periodize acts
+3. **Trends, not single days.** [R] (*strong*) One night's heart-rate variability or one slow run is mostly noise. Periodize My Run acts
    on averages over days and weeks (Plews and colleagues, 2012, 2013).
 4. **No single warning sign decides.** [R] (*strong*) Overreaching and overtraining have no single reliable marker; they are
    recognised when several signs agree and other causes are ruled out (Meeusen and colleagues, 2013). A recovery week is
@@ -61,7 +61,7 @@ differences in almost every finding. That is why Periodize keeps measuring the a
 11. **Longer races need endurance on top of speed.** [R] (*strong* for the association) Across 85 studies, weekly distance, the
     number of long runs and total hours were the most consistent training predictors of marathon time (Doherty and colleagues,
     2020). Simple formulas that scale a short race to a marathon are optimistic for recreational runners who lack that volume
-    (Vickers and Vertosick, 2016). Periodize slows a marathon prediction by up to 5% until the long runs, weekly volume and
+    (Vickers and Vertosick, 2016). Periodize My Run slows a marathon prediction by up to 5% until the long runs, weekly volume and
     race-pace running are in place. [P]
 
 ## 3. How hard, and how often
@@ -74,7 +74,7 @@ differences in almost every finding. That is why Periodize keeps measuring the a
     laboratory measures in short trials (Stöggl and Sperlich, 2014) but has not been shown to give better race results (Silva
     Oliveira and colleagues, 2024).
 14. **Easy means easy.** [R] (*moderate*) The best-documented training error is running easy days harder than intended and hard
-    days easier (Foster and colleagues, 2001). Periodize scores every run on how closely it matched the planned mix of easy,
+    days easier (Foster and colleagues, 2001). Periodize My Run scores every run on how closely it matched the planned mix of easy,
     moderate and hard minutes. [P]
 15. **Hard days are separated by easy days.** [C] No two hard days run back to back, and the long run counts as a hard day.
 16. **A week holds one long run and one or two sessions.** [C] Two sessions when you run five or more days, one otherwise. The
@@ -93,20 +93,20 @@ differences in almost every finding. That is why Periodize keeps measuring the a
 21. **The old "10% a week" rule is not what prevents injury.** [R] (*strong*) In a randomised trial, a gentler weekly build did
     not reduce injuries in new runners (Buist and colleagues, 2008), and ratios of this week's load to the last month's are not a
     reliable injury threshold (Impellizzeri and colleagues, 2020). Very large jumps, of more than about 30% over two weeks, were
-    linked with some injuries (Nielsen and colleagues, 2014). Periodize's steady 6% stays well clear of that.
+    linked with some injuries (Nielsen and colleagues, 2014). Periodize My Run's steady 6% stays well clear of that.
 22. **What matters most is the single longest run.** [R] (*moderate*) In a study of over 5,000 runners, a run more than 10% longer
     than the longest of the previous 30 days was linked with more overuse injuries, while week-to-week mileage change was not
-    (Schuster Brandt Frandsen and colleagues, 2025). Periodize never plans a long run more than 10% beyond your longest in the
+    (Schuster Brandt Frandsen and colleagues, 2025). Periodize My Run never plans a long run more than 10% beyond your longest in the
     last 30 days.
 23. **Your own history sets your limits.** [P] Peak weekly distance is the larger of your best eight-week block in the last three
     years plus 10% and your recent eight weeks plus 25%, up to 90 miles. Long-run length scales from that peak and from your goal
     distance.
 24. **Previous injury is the strongest known risk factor for the next one.** [R] (*strong*) (Saragiotto and colleagues, 2014;
-    van der Worp and colleagues, 2015) After an injury Periodize returns you on easy running for twice as long as you were out,
+    van der Worp and colleagues, 2015) After an injury Periodize My Run returns you on easy running for twice as long as you were out,
     up to 14 days. [P]
 25. **After any break, build back gradually.** [C] Two or more weeks well below your usual level, whatever the reason, are followed
     by a return lasting about as long as the break (up to four weeks): about half your usual volume first, then three quarters,
-    all easy. Periodize notices the break from your runs; nothing has to be entered.
+    all easy. Periodize My Run notices the break from your runs; nothing has to be entered.
 26. **Everyday walking is load too.** [P] Unusually heavy weeks on your feet count as a warning sign for the weekly plan.
 
 ## 5. The sessions
@@ -114,14 +114,14 @@ differences in almost every finding. That is why Periodize keeps measuring the a
 27. **Threshold running** raises the pace you can sustain. [R] (*limited*) It is done as repeats with short recoveries, run in
     control rather than to exhaustion. World-class runners and coaches describe this controlled, broken-up threshold work as
     central (Casado and colleagues, 2023; Tønnessen and colleagues, 2024), and more total work at slightly lower intensity
-    beat less work at higher intensity in a controlled trial (Seiler and colleagues, 2013). Periodize progresses it by adding
+    beat less work at higher intensity in a controlled trial (Seiler and colleagues, 2013). Periodize My Run progresses it by adding
     time at the pace, from 15 to 40 minutes, before the pace itself moves. [C]
 28. **Faster repeats** (around 10K and 5K pace) develop maximal aerobic capacity. [R] (*moderate*) Well-trained runners need
     high intensities to raise it further (Midgley and colleagues, 2006). For a 5K or 10K goal they are the main session; for a
     marathon they appear about one week in three once threshold work is established. [P]
 29. **Race-pace running becomes the centre of the final phase before a long race.** [R] (*limited*) World-class marathoners shift
     from faster intervals early in the season to marathon-pace work late (Haugen and colleagues, 2022). For the marathon,
-    Periodize builds midweek marathon-pace runs (4 to 8 miles) and, every second week or so, a long run with 8 to 14 miles at
+    Periodize My Run builds midweek marathon-pace runs (4 to 8 miles) and, every second week or so, a long run with 8 to 14 miles at
     marathon pace. [C]
 30. **Long runs are steady, not shuffled.** [C] Once fast running is established, the long run is run at a steady effort a
     little slower than marathon pace; early on, and for ultra goals, it is easy. Except for ultra goals, a long run is kept to
@@ -132,7 +132,7 @@ differences in almost every finding. That is why Periodize keeps measuring the a
 33. **Strength training improves running economy without harming aerobic fitness.** [R] (*strong*) Heavy-load and plyometric
     training work best; light-load and isometric training much less (Llanos-Lagos and colleagues, 2024). Explosive training cut 5K
     times by about 3% in nine weeks (Paavolainen and colleagues, 1999) (*moderate*), and one trial found strength work made economy
-    hold up better late in a long run (Zanini and colleagues, 2025) (*limited*). Periodize places two short sessions a week on easy
+    hold up better late in a long run (Zanini and colleagues, 2025) (*limited*). Periodize My Run places two short sessions a week on easy
     days, one heavy and one with plyometrics (hops, skips, bounds); one a week in the race-specific phase; none in the last two
     weeks before the goal race. [C]
 
@@ -143,22 +143,22 @@ differences in almost every finding. That is why Periodize keeps measuring the a
     with age (Tanaka and Seals, 2008) [R] (*moderate*), and older runners are widely held to need longer recovery between hard
     blocks [C].
 35. **No periodisation model is proven best.** [R] (*moderate*) Successful elite systems differ sharply, and trials have not shown
-    one structure to be superior (Grivas and colleagues, 2026; Mølmen and colleagues, 2019). Periodize uses a simple build, down,
+    one structure to be superior (Grivas and colleagues, 2026; Mølmen and colleagues, 2019). Periodize My Run uses a simple build, down,
     specific and taper sequence, and adapts it to what you actually do. [P]
 36. **Taper by cutting volume, not intensity.** [R] (*strong*) Reducing volume by roughly 40 to 60% while keeping some fast running
     and the usual number of runs improves performance (Bosquet and colleagues, 2007; Wang and colleagues, 2023). Among 158,000
     recreational marathoners, a disciplined three-week taper was linked with finishing about 2.6% faster than a minimal one (Smyth
-    and Lawlor, 2021) (*moderate*). Periodize tapers over three weeks for the marathon and ultra (about 80%, then 65%, then race
+    and Lawlor, 2021) (*moderate*). Periodize My Run tapers over three weeks for the marathon and ultra (about 80%, then 65%, then race
     week) and two weeks for the half (65%, then race week). For 5K and 10K, the week before race week drops to about 70%, keeping
     a short session: about 8 to 14 days in all, the range the meta-analysis found best. Taper length for ultras has never been
     tested; the marathon taper is borrowed.
 37. **A race is followed by recovery.** [R] (*limited*) Easy running from two days after a marathon did not slow recovery
-    compared with rest (Martínez-Navarro and colleagues, 2021). Periodize plans a recovery week at about half your usual volume
+    compared with rest (Martínez-Navarro and colleagues, 2021). Periodize My Run plans a recovery week at about half your usual volume
     after a race or a very long run, with no sessions. [C]
 
 ## 7. Is it working?
 
-38. **Faster at the same heart rate is the sign of aerobic progress.** [C] Periodize tracks your pace at fixed heart rates month by
+38. **Faster at the same heart rate is the sign of aerobic progress.** [C] Periodize My Run tracks your pace at fixed heart rates month by
     month, and offers a stepped heart-rate test about every month.
 39. **Aerobic change is slow.** [C] Expect little after three weeks and clear change after six. Testing more often measures noise.
 40. **Hills are converted to their flat equivalent.** [R] (*strong*) The energy cost of running on a gradient has been measured
@@ -167,7 +167,7 @@ differences in almost every finding. That is why Periodize keeps measuring the a
 42. **Fitness is three things, each with its own trend.** [R] (*moderate*) Speed (the threshold estimate) mostly decides 5K and
     10K; the endurance base (long runs, race-pace miles, weekly volume) matters more as the race gets longer; durability (how well
     pace holds against heart rate late in long runs) matters most for the marathon and longer. How much threshold speed falls
-    after prolonged running predicts marathon time (Hunter and Muniz-Pumares, 2025). Periodize shows each over the window that
+    after prolonged running predicts marathon time (Hunter and Muniz-Pumares, 2025). Periodize My Run shows each over the window that
     suits it: speed over 6 weeks, steady within 1%; the endurance base over 4 weeks; durability over the last six long runs;
     heart-rate variability, resting heart rate, sleep and steps as 7-day averages against your 60-day normal. The windows follow
     the research; the steady bands are this project's choice. [P]
@@ -183,7 +183,7 @@ differences in almost every finding. That is why Periodize keeps measuring the a
     colleagues, 2003).
 46. **Fitness and fatigue are both responses to load, on different time scales.** [R] (*moderate* as a concept) Fitness builds and
     fades over weeks, fatigue over days; "form" is the difference (Banister, 1991). The model fits past data well but predicts an
-    individual's future performance poorly (Hellard and colleagues, 2006), so Periodize shows it as a guide and never plans from
+    individual's future performance poorly (Hellard and colleagues, 2006), so Periodize My Run shows it as a guide and never plans from
     it. The 42-day and 7-day time constants are convention. [C]
 47. **Execution is measured against the plan.** [P] A run is scored on how far its easy, moderate and hard minutes departed from
     the session set. Too much counts the same as too little.
@@ -191,7 +191,7 @@ differences in almost every finding. That is why Periodize keeps measuring the a
 ## 9. Recovery and readiness
 
 48. **Sleep matters from a single night.** [R] (*strong*) One short night measurably reduces endurance performance the next day,
-    mostly through how hard the effort feels (Lopes and colleagues, 2023; Craven and colleagues, 2022). Periodize reads last night
+    mostly through how hard the effort feels (Lopes and colleagues, 2023; Craven and colleagues, 2022). Periodize My Run reads last night
     on its own, and the last three nights together because sleep debt builds.
 49. **Heart-rate variability and resting heart rate are read as weekly trends.** [R] (*strong*) A single reading is noisy. A
     7-day average against your own normal range is the established method, and a shift of about half your normal spread is the
@@ -204,7 +204,7 @@ differences in almost every finding. That is why Periodize keeps measuring the a
     fixed amount (about 1.2% to start, then learned from your own runs), up to four signs.
 52. **When the signs persist or pile up, the session becomes an easy run.** [R] (*moderate*) In the trials of readiness-guided
     training, a hard day was swapped for an easy one when the morning signs were poor, rather than only slowed (Düking and
-    colleagues, 2021). Periodize does this automatically on a morning with three or more warning signs, or when a sign has lasted
+    colleagues, 2021). Periodize My Run does this automatically on a morning with three or more warning signs, or when a sign has lasted
     three mornings in a row; the watch gets the easy run, and the planned session is still shown. [P]
 53. **Illness means rest, then a gradual return.** [C] While sick, no running. Afterwards, easy running for as many days as you
     were out (up to seven), building from half distance.
@@ -212,13 +212,13 @@ differences in almost every finding. That is why Periodize keeps measuring the a
 ## 10. Racing
 
 54. **Even effort is the fastest way to cover a course.** [R] (*moderate*) Recreational marathoners who start faster than they can
-    sustain are the ones who "hit the wall" (Smyth, 2021). Periodize gives a starting pace and asks for no faster in the first
+    sustain are the ones who "hit the wall" (Smyth, 2021). Periodize My Run gives a starting pace and asks for no faster in the first
     half. On a hilly course, even effort means slower uphill and faster downhill: a course file gives an even-effort split for
     every mile. [C]
 55. **Fuel long efforts.** [R] (*strong*) About 30 to 60 g of carbohydrate an hour for efforts of 1 to 2.5 hours, and up to 90 g
     beyond that, using mixed sugars (Thomas and colleagues, 2016; Jeukendrup, 2014).
 56. **Practise fuelling in training.** [R] (*moderate*) The gut adapts to taking carbohydrate on the run (Costa and colleagues,
-    2017). Periodize steps up the long-run fuelling target from 30 to 70 g an hour over the months before the race. [P]
+    2017). Periodize My Run steps up the long-run fuelling target from 30 to 70 g an hour over the months before the race. [P]
 57. **Race week follows the evidence, worked out for you.** [R] (*strong*) Before a marathon or longer, about 10 g of carbohydrate
     per kg of body weight a day for the last two days (Thomas and colleagues, 2016), with the amount worked out from your Garmin
     weight. On race day: caffeine at about 3 mg per kg improves endurance by a few per cent (Southward and colleagues, 2018), but
@@ -236,10 +236,10 @@ differences in almost every finding. That is why Periodize keeps measuring the a
     colleagues, 2007). The extra intensity a short race needs comes from intervals, not from harder easy days.
 61. **Intervals of a few minutes near 5K pace are the main session.** [R] (*strong*) Intervals of 2 to 4 minutes, between
     threshold and maximal aerobic pace, improve race performance more than all-out sprints (Rosenblat and colleagues, 2020).
-    For a 5K or 10K goal Periodize alternates 5K-pace and 10K-pace intervals week by week, with threshold work alongside. [C]
+    For a 5K or 10K goal Periodize My Run alternates 5K-pace and 10K-pace intervals week by week, with threshold work alongside. [C]
 62. **Short all-out efforts help only if volume holds.** [R] (*moderate*) Repeated 30-second sprints improved 10K time when
     weekly volume fell by a quarter, but not when it fell by two thirds (Bangsbo and colleagues, 2009; Iaia and colleagues, 2009).
-    Periodize keeps volume and uses relaxed 200 m repeats and strides for speed instead.
+    Periodize My Run keeps volume and uses relaxed 200 m repeats and strides for speed instead.
 
 ## 12. Ultras and hilly trail races
 
@@ -251,7 +251,7 @@ of ultra training, so read these as the best available reasoning, not proven met
     harder; downhill running loads the thighs as they lengthen, which is what damages them (Vernillo and colleagues, 2017).
 64. **Practise descending.** [R] (*strong* that it protects; *limited* on how often) One session of downhill running reduces the
     muscle damage from the next, for up to about nine weeks; eccentric and plyometric strength work gives a smaller version of the
-    same protection (Bontemps and colleagues, 2020). For a hilly goal race, Periodize adds 15 to 30 minutes of steady downhill
+    same protection (Bontemps and colleagues, 2020). For a hilly goal race, Periodize My Run adds 15 to 30 minutes of steady downhill
     running to the long run every third week of the specific phase. [P]
 65. **Train on ground like the race.** [C] Weekly climb rises toward the race's climb per mile over the final months; an injury
     review also linked low yearly climbing and mostly-asphalt training with more injury in trail runners (*limited*).
@@ -271,13 +271,13 @@ of ultra training, so read these as the best available reasoning, not proven met
     the rate of acute kidney injury from 34% to 52% (Lipman and colleagues, 2017).
 71. **Plan for the night.** [R] (*limited*) In races through the night most runners nap, usually for under 30 minutes, and most bank
     extra sleep in the week before; four in five report symptoms of sleep loss, including falls and hallucinations (Martin and
-    colleagues, 2018). Periodize adds these points to the race-day notes when the predicted time is 18 hours or more.
+    colleagues, 2018). Periodize My Run adds these points to the race-day notes when the predicted time is 18 hours or more.
 
 ## 13. Measurement limits
 
 72. **Wrist heart rate is imperfect.** [R] (*moderate*) Wrist monitors agree less well with a medical ECG than chest straps do,
     and in one comparison a Garmin wrist monitor agreed least well of the devices tested (Gillinov and colleagues, 2017). They are
-    least reliable at high intensity and in the cold, so Periodize uses heart rate over minutes, never seconds, and a chest strap
+    least reliable at high intensity and in the cold, so Periodize My Run uses heart rate over minutes, never seconds, and a chest strap
     improves everything heart-rate based.
 73. **A watch's fitness estimates are approximate.** [R] (*moderate*) Garmin's VO2max estimate was within about 7% of laboratory
     values on average (Carrier and colleagues, 2025), and is thrown off by heat, terrain and a wrong maximum heart rate.
@@ -287,14 +287,14 @@ of ultra training, so read these as the best available reasoning, not proven met
 76. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
     measures built from watch data. They guide training; they do not diagnose anything.
 
-## Known gaps: where Periodize does not yet follow the evidence
+## Known gaps: where Periodize My Run does not yet follow the evidence
 
 Listed so they are not mistaken for principles.
 
 - **How you feel is not yet counted.** Self-reported fatigue, soreness and mood track the response to training at least as well as
-  device measures (Saw and colleagues, 2016) (*strong*). Periodize can record them but does not yet use them.
+  device measures (Saw and colleagues, 2016) (*strong*). Periodize My Run can record them but does not yet use them.
 - **Heat** slows runners, and slower runners proportionally more (Ely and colleagues, 2007), but paces are not adjusted for it:
-  doing so would need a weather service, and Periodize talks to nothing but Garmin.
+  doing so would need a weather service, and Periodize My Run talks to nothing but Garmin.
 - **Sex** does not change the plan, and from age 50 only the down-week rhythm changes, not the spacing of hard days.
 - **Ultra and trail training is still measured in distance.** Time on feet and climbing matter more than distance on the
   mountain, but the plan, the watch and the long-run limits still count miles. Hiking and pole practice, night running, heat
@@ -302,7 +302,7 @@ Listed so they are not mistaken for principles.
 - **Ultra predictions** come from road fitness and ignore terrain, heat, night and altitude; for ultras the pacing plan shows how
   to spread effort, not times to hit.
 - **Low energy availability** (not eating enough for the training) harms health and performance (Mountjoy and colleagues, 2023);
-  Periodize does not screen for it.
+  Periodize My Run does not screen for it.
 
 ## References
 

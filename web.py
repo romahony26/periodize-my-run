@@ -1,4 +1,4 @@
-"""Periodize web app. Start with:  python web.py   then open http://localhost:8321
+"""Periodize My Run web app. Start with:  python web.py   then open http://localhost:8321
 
 Runs on a Mac or a Raspberry Pi. One athlete per install. The scheduler
 thread keeps the plan and the watch up to date every day.
@@ -979,7 +979,7 @@ def shoe_delete(sid):
 def notify_test():
     if not vault.get("notify_url"):
         return jsonify(error="Save a daily message address first."), 400
-    jobs.notify(jobs.today_message() or "Periodize test message: this is where your morning session will arrive.")
+    jobs.notify(jobs.today_message() or "Periodize My Run test message: this is where your morning session will arrive.")
     return jsonify(ok=True)
 
 
@@ -1329,7 +1329,7 @@ def main():
     try:
         _lock_file(lock)                                     # one copy only, or workouts would be sent twice
     except OSError:
-        sys.exit("Periodize is already running.")
+        sys.exit("Periodize My Run is already running.")
     if a.host not in ("127.0.0.1", "localhost", "::1") and not db.get("app_password"):
         sys.exit("Refusing to listen on the network without an app password. Run: python web.py --set-password")
     key = vault.get("secret_key")          # the key that signs login cookies is kept encrypted, like the other secrets
@@ -1344,7 +1344,7 @@ def main():
                       PERMANENT_SESSION_LIFETIME=SESSION_LIFETIME, MAX_CONTENT_LENGTH=512 * 1024)
     threading.Thread(target=jobs.scheduler, daemon=True).start()
     from cheroot.wsgi import Server
-    server = Server((a.host, a.port), app, numthreads=8, server_name="periodize")
+    server = Server((a.host, a.port), app, numthreads=8, server_name="periodize-my-run")
     if tls:
         import ssl
 
@@ -1352,7 +1352,7 @@ def main():
         server.ssl_adapter = BuiltinSSLAdapter(cert, pkey)
         server.ssl_adapter.context.minimum_version = ssl.TLSVersion.TLSv1_2
         server.ssl_adapter.context.set_ciphers("ECDHE+AESGCM:ECDHE+CHACHA20")   # TLS 1.2 with forward secrecy and AEAD only: no CBC (LUCKY13)
-    log.info("Periodize started on %s://%s:%d", "https" if tls else "http", a.host, a.port)
+    log.info("Periodize My Run started on %s://%s:%d", "https" if tls else "http", a.host, a.port)
     try:
         server.start()
     except KeyboardInterrupt:

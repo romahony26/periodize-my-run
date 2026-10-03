@@ -20,8 +20,8 @@ let fastT=null;
 async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV){S=s;return}if(document.querySelector('.day.drag'))return;S=s;render();clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';
-  if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize cannot be opened from another device yet.</p><p class="small">On the computer running Periodize, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}
-  $('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize</h1><div class="mute">Enter the app password</div></div><div class="card c12"><div class="row"><input id="pw" type="password" aria-label="App password" autocomplete="current-password" style="flex:1"><button class="btn" id="go">Continue</button></div><p id="e" class="red small"></p></div></div>`;
+  if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize My Run cannot be opened from another device yet.</p><p class="small">On the computer running Periodize My Run, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}
+  $('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1><div class="mute">Enter the app password</div></div><div class="card c12"><div class="row"><input id="pw" type="password" aria-label="App password" autocomplete="current-password" style="flex:1"><button class="btn" id="go">Continue</button></div><p id="e" class="red small"></p></div></div>`;
   const go=async()=>{const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'periodize'},body:JSON.stringify({password:$('#pw').value})});
     if(r.ok)load();else $('#e').textContent=(await r.json()).error};
   $('#go').onclick=go;$('#pw').onkeydown=e=>{if(e.key==='Enter')go()};
@@ -273,10 +273,10 @@ function md(t){return E(t||'').split(/\n\n+/).map(b=>{b=b.trim();if(!b||b==='---
   return `<p class="small" style="margin:6px 0">${bold(lines.join(' '))}</p>`}).join('')}
 function termsBox(id){return `<details id="${id}" class="small" style="margin:10px 0 0" ${TOPEN[id]?'open':''}><summary>Read the terms of use and disclaimer</summary><div style="max-height:46vh;overflow:auto;padding:4px 2px 0">${TERMS?md(TERMS.text):'<span class="spin"></span>Loading'}</div></details>`}
 function termsNotice(){if(!S.setup_done||S.terms_ok)return '';
-  return `<div class="card c12" id="termsnote" style="margin-bottom:18px"><p class="eyebrow">Terms of use</p><p class="small" style="margin:0">Periodize is a training tool, not medical advice. You run at your own risk, your data and its security are yours to look after, and the app must not be put on the internet. Please read and accept the terms once.</p>
+  return `<div class="card c12" id="termsnote" style="margin-bottom:18px"><p class="eyebrow">Terms of use</p><p class="small" style="margin:0">Periodize My Run is a training tool, not medical advice. You run at your own risk, your data and its security are yours to look after, and the app must not be put on the internet. Please read and accept the terms once.</p>
     ${termsBox('tbox2')}<p style="margin:12px 0 0"><label class="small"><input type="checkbox" id="tok2"> I have read and accept the terms of use</label> <button class="btn" id="taccept" style="margin-left:10px">Accept</button></p></div>`}
 function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" target="_blank" rel="noopener noreferrer">${t}</a>`;
-  return `<div class="card c12" id="aboutcard"><p class="eyebrow">About Periodize</p>
+  return `<div class="card c12" id="aboutcard"><p class="eyebrow">About Periodize My Run</p>
     <p class="small" style="margin:0">Version <b class="num">${E(S.version)}</b> · <a href="#" id="tochanges">What changed</a>${P.url?' · '+x(P.url,'Source code'):''}</p>
     <ul class="clist">
       <li><b>Licence:</b> MIT. Free to use, change and share, with no warranty${P.url?' ('+x(P.url+'/blob/main/LICENSE','read the licence')+')':''}.</li>
@@ -284,7 +284,7 @@ function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" ta
       <li><b>A security problem?</b> Please report it privately, not in a public issue${P.url?': '+x(P.url+'/security/advisories/new','private security report'):''}. See SECURITY.md.</li>
       ${P.support?`<li><b>Like it?</b> ${x(P.support,'Buy me a coffee')} ☕</li>`:''}
     </ul>${termsBox('tbox3')}
-    <p class="xs mute" style="margin:8px 0 0">Periodize is a training tool, not medical advice; you use it at your own risk. Keep it off the internet: it is for your own computer or home network. It is not affiliated with Garmin.</p></div>`}
+    <p class="xs mute" style="margin:8px 0 0">Periodize My Run is a training tool, not medical advice; you use it at your own risk. Keep it off the internet: it is for your own computer or home network. It is not affiliated with Garmin.</p></div>`}
 function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="chip ${ok?'green':warn?'amber':'unknown'}"><i></i>${ok?yes:no}</span>`;
   const head=(icon,name,c)=>`<div class="chead"><span class="cicon" aria-hidden="true">${icon}</span><b>${name}</b><span style="margin-left:auto">${c}</span></div>`;
   return `<div class="c12 sechead"><h2>Connections</h2><p class="small mute">Where your data comes from and where copies go. Tokens are kept encrypted on this computer; no passwords are stored.</p></div>
@@ -421,7 +421,7 @@ async function loadAbout(){ABOUT=(await api('about')).sections;if(view==='about'
 async function loadLogs(){logs=(await api('logs')).lines;if(view==='log')render()}
 
 function wizard(){
-  const j=S.job, p=S.profile, N=5; let h=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize</h1><div class="mute">Training that adapts to you, every day</div></div><div class="card c12">`;
+  const j=S.job, p=S.profile, N=5; let h=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1><div class="mute">Training that adapts to you, every day</div></div><div class="card c12">`;
   const stepper=n=>`<div class="stepper" role="progressbar" aria-valuemin="1" aria-valuemax="${N}" aria-valuenow="${n}" aria-label="Setup step ${n} of ${N}">${Array.from({length:N},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`;
   const nav=(back,next,label)=>`<p style="margin:18px 0 0">${back?`<button class="ghost" id="${back}">Back</button> `:''}<button class="btn" id="${next}">${label||'Next'}</button></p>`;
   if(wiz.step===6&&!j.running&&S.fitness){
@@ -438,7 +438,7 @@ function wizard(){
     if(p)h+=`<div class="stats"><div class="stat"><div class="v num">${p.runs.toLocaleString()}</div><div class="k">runs found</div></div><div class="stat"><div class="v num">${p.first_run.slice(0,4)}</div><div class="k">running since</div></div><div class="stat"><div class="v num">${dU(p.miles)}</div><div class="k">lifetime</div></div></div>`;
     if(j.error)h+=`<div class="alert err" style="margin-top:14px">${E(j.error)}</div><button class="btn" id="retry">Try again</button>`;
   }else if(wiz.step===1){
-    h+=stepper(1)+`<p class="h">Welcome</p><p class="small">Periodize builds a running plan from your own Garmin history and keeps adjusting it from what you do. Setup takes a few minutes of your time, then 10 to 30 minutes of its own.</p>
+    h+=stepper(1)+`<p class="h">Welcome</p><p class="small">Periodize My Run builds a running plan from your own Garmin history and keeps adjusting it from what you do. Setup takes a few minutes of your time, then 10 to 30 minutes of its own.</p>
       <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except Garmin.</li>
       <li><b>No passwords are kept.</b> Your Garmin password is used once to sign in; only an access token is stored, encrypted.</li>
       <li><b>No AI is used.</b> The plan comes from fixed rules and your data, and every decision is explained.</li>

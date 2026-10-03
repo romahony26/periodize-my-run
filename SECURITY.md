@@ -1,6 +1,6 @@
 # Security
 
-Periodize holds health data and tokens for your Garmin account. This page says what it protects, what it does not, and how to report a problem.
+Periodize My Run holds health data and tokens for your Garmin account. This page says what it protects, what it does not, and how to report a problem.
 
 ## What it is designed for
 
@@ -26,7 +26,7 @@ One athlete, on a computer they control (a Mac or a Raspberry Pi), reached from 
 - **Other people or programs on the same computer.** By default a request from the computer itself needs no password, and anyone who can read your user's files can read the database and the key. Use `--always-login on` on a shared machine, and full-disk encryption.
 - **Exposure to the internet.** There is no rate limiting beyond the login lockout, no multi-factor login, and no audit by a third party.
 - **Garmin's side.** Garmin access uses an unofficial library; if Garmin changes or blocks it, syncing stops.
-- **A lost key file.** `~/.config/periodize/vault.key` is not in backups. Without it the stored tokens cannot be read and you sign in to Garmin again.
+- **A lost key file.** `~/.config/periodize-my-run/vault.key` is not in backups. Without it the stored tokens cannot be read and you sign in to Garmin again.
 - **A changing address between check and use.** The notification address is checked when saved and again when used; a name that changes where it points in between is a small remaining risk.
 
 ## Checks

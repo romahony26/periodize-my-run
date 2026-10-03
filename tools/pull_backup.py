@@ -1,9 +1,9 @@
-"""Copy a backup of a Periodize running on another computer (a Raspberry Pi, say) into a folder on this one, once a day.
+"""Copy a backup of a Periodize My Run running on another computer (a Raspberry Pi, say) into a folder on this one, once a day.
 
 Point it at a folder that a sync app uploads, such as Google Drive for desktop or iCloud Drive, and the backups reach the cloud
-with no Google Cloud project and no sign-in inside Periodize: the sync app holds the login.
+with no Google Cloud project and no sign-in inside Periodize My Run: the sync app holds the login.
 
-    python tools/pull_backup.py pi@raspberrypi.local                 # into Google Drive for desktop's "My Drive/Periodize backups"
+    python tools/pull_backup.py pi@raspberrypi.local                 # into Google Drive for desktop's "My Drive/Periodize My Run backups"
     python tools/pull_backup.py pi@raspberrypi.local --to ~/Backups  # or any folder
 
 Each copy is the same file as Download backup: the database with every login secret removed, plus the plan. Copies are thinned
@@ -37,9 +37,9 @@ def google_drive():
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("host", help="ssh destination, e.g. pi@raspberrypi.local")
-    ap.add_argument("--to", help="folder to copy into (default: Google Drive for desktop, My Drive/Periodize backups)")
-    ap.add_argument("--app", default="/opt/periodize", help="where Periodize is installed there")
-    ap.add_argument("--user", default="dietpi", help="the user Periodize runs as there")
+    ap.add_argument("--to", help="folder to copy into (default: Google Drive for desktop, My Drive/Periodize My Run backups)")
+    ap.add_argument("--app", default="/opt/periodize-my-run", help="where Periodize My Run is installed there")
+    ap.add_argument("--user", default="dietpi", help="the user Periodize My Run runs as there")
     a = ap.parse_args()
     to = os.path.expanduser(a.to) if a.to else None
     if not to:
@@ -47,7 +47,7 @@ def main():
         if not root:
             print("Google Drive for desktop is not installed or not signed in yet; nothing copied.")
             return 0
-        to = os.path.join(root, "Periodize backups")
+        to = os.path.join(root, "Periodize My Run backups")
     os.makedirs(to, exist_ok=True)
     cmd = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", a.host,
            f"cd {shlex.quote(a.app)} && sudo -u {shlex.quote(a.user)} -H {shlex.quote(a.app + '/.venv/bin/python')} -c {shlex.quote(EXPORT)}"]

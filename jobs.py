@@ -113,7 +113,7 @@ def notify(text):
         return
     try:
         import requests
-        requests.post(url, data=text.encode(), headers={"Title": "Periodize", "Content-Type": "text/plain; charset=utf-8"}, timeout=15, allow_redirects=False)
+        requests.post(url, data=text.encode(), headers={"Title": "Periodize My Run", "Content-Type": "text/plain; charset=utf-8"}, timeout=15, allow_redirects=False)
         log.info("Notification sent")
     except Exception as e:
         log.warning("Notification failed: %s", type(e).__name__)
