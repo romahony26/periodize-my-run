@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.16.1 - 2026-10-03
+### Added
+- An MIT licence (LICENSE), so anyone may use, change and share Periodize.
+
 ## 1.16.0 - 2026-10-03
 ### Added
 - A second red-team suite (`tests/test_owasp_more.py`, 46 attacks): the two categories new in the OWASP Top 10 (2025), the OWASP API Security Top 10 (2023), and the OWASP Web Security Testing Guide areas that CREST-accredited testers follow.

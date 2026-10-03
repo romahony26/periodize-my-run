@@ -202,3 +202,7 @@ real Garmin login is not covered by the suite.
   goals use simpler session rules. Ultra predictions ignore terrain.
 - No run/walk plans for complete beginners.
 - This is a training tool, not medical advice.
+
+## Licence
+
+MIT. See [LICENSE](LICENSE): free to use, change and share, with no warranty.
