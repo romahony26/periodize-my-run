@@ -179,29 +179,29 @@ the app in a browser. The installer makes a private Python environment inside
 the app's folder, downloads the libraries it needs, and sets the app to start
 by itself. It changes nothing else on the computer.
 
-### The quick way: download a package
+### The quick way: download the ZIP and double-click
 
-Ready-made packages for each system are on the releases page:
-<https://github.com/romahony26/periodize-my-run/releases/latest>. Download the
-one for your computer:
+Nothing needs building and nothing else needs installing first.
 
-| System | File | What you do |
+1. Go to <https://github.com/romahony26/periodize-my-run>, choose **Code**,
+   then **Download ZIP**, and unzip it where the app should live. Keep the
+   folder there: the app runs from it.
+2. Start the installer for your computer:
+
+| System | Double-click | First time only |
 | --- | --- | --- |
-| Mac (Apple silicon) | `Periodize-My-Run-<version>-mac.zip`, about 40 MB | Unzip, drag the app to Applications, open it. Nothing is downloaded: the app holds its own Python and libraries. It starts at login and opens the planner in the browser. |
-| Windows 10 or 11 | `Periodize-My-Run-<version>-windows.zip`, about 2 MB | Unzip, double-click `Install.bat`. It downloads Python if there is none, and the libraries. |
-| Linux, Raspberry Pi | `Periodize-My-Run-<version>-linux.tar.gz`, about 2 MB | Unpack, run `./install.sh`. It downloads Python if there is none, and the libraries. |
+| Mac (Apple silicon) | `Install.command` | macOS says it cannot check the file: right-click it, choose Open, then Open again. |
+| Windows 10 or 11 | `Install.bat` | Windows may show "Windows protected your PC": More info, Run anyway. |
+| Linux, Raspberry Pi | run `./install.sh` in a terminal | It asks for an app password. |
 
-Each holds a `READ ME FIRST.txt` with the steps and how to remove it. The Mac
-app is not signed with an Apple Developer ID, so the first time it is opened
-macOS asks for confirmation: System Settings, Privacy & Security, Open Anyway.
-Windows may show "Windows protected your PC": More info, Run anyway. There is
-no package for Intel Macs, because one library the app needs no longer
-publishes a ready-built file for them; on an Intel Mac, follow the steps below.
-`SHA256SUMS.txt` on the same page lists each file's SHA-256, if you want to
-check a download.
+The installer downloads Python if the computer has none, and the libraries the
+app uses, then opens the planner at <http://localhost:8321>. On an Intel Mac,
+install Python 3.12 or later first (one library the app needs no longer
+publishes a ready-built file for Intel Macs), then double-click
+`Install.command`.
 
-Then go to [Set it up](#3-set-it-up). The steps below are the other way to
-install: from the source files.
+Then go to [Set it up](#3-set-it-up). The steps below are the same install in
+more detail, or by `git clone`.
 
 ### 1. Get the files
 
@@ -265,11 +265,6 @@ It starts at boot. The browser warns once about the self-made certificate; that
 is expected. To keep it to this computer only instead, run
 `PERIODIZE_HOST=127.0.0.1 ./install.sh`.
 
-### Building the packages
-
-`python tools/package.py` (a development tool, not part of the download) builds
-the three packages on the releases page, and their `SHA256SUMS.txt`.
-
 ### 3. Set it up
 
 The first page is a three-step wizard: connect your watch, add a goal race,
@@ -290,6 +285,22 @@ minutes.
 | The app | the folder you unpacked | the folder you unpacked |
 | Your data, backups and logs | `~/.periodize-my-run` | `C:\Users\<you>\.periodize-my-run` |
 | The key to your stored Garmin login | `~/.config/periodize-my-run/vault.key` | `C:\Users\<you>\.config\periodize-my-run\vault.key` |
+
+## Updates: stable and beta
+
+The app checks GitHub once a day and tells you when a new version is out;
+**Settings, About** (Updates) installs it in one click after backing up your
+data, and can switch back to an earlier version.
+
+There are two channels, chosen in the same place:
+
+- **Stable** (the default): tested releases only, such as `2.9.0`.
+- **Beta**: also offers early versions, such as `2.9.1-beta.2`, which carry new
+  fixes and features before they are released. They may have rough edges. You
+  can go back to a release at any time.
+
+On GitHub, the `main` branch is the stable release and the `beta` branch is
+where the next version is tried first.
 
 ## Uninstall
 

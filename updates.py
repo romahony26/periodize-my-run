@@ -36,12 +36,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 VERSIONS = os.path.join(db.HOME, "versions")
 POINTER = os.path.join(VERSIONS, "current")
 MAX_ARCHIVE = 30 * 1024 * 1024
-VERSION_RE = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}$")
+VERSION_RE = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}(-beta\.\d{1,3})?$")      # 2.9.0 is a release; 2.9.1-beta.2 is a beta
 FIRST_UPDATABLE = "2.4.0"      # earlier versions have no updater, so switching to one would leave no way back from the app
 
 
 def vkey(v):
-    return tuple(int(x) for x in v.split("."))
+    """Sort key: 2.9.0-beta.1 < 2.9.0-beta.2 < 2.9.0 < 2.9.1-beta.1."""
+    core, _, beta = v.partition("-beta.")
+    return (*(int(x) for x in core.split(".")), 0 if beta else 1, int(beta or 0))
+
+
+def is_beta(v):
+    return "-beta." in v
+
+
+def channel():
+    """Which versions to offer: "stable" (releases only, the default) or "beta" (releases and betas)."""
+    return "beta" if db.get("update_channel") == "beta" else "stable"
 
 
 def running_version():
@@ -102,6 +113,7 @@ def check():
     """Ask GitHub for the newest version. Saves and returns the update state."""
     st = dict(db.get("update_info") or {})
     st["checked"] = dt.datetime.now().isoformat(timespec="minutes")
+    st["channel"] = ch = channel()
     try:
         r = requests.get(TAGS, params={"per_page": 50}, timeout=20, headers={"Accept": "application/vnd.github+json"}, allow_redirects=True)
         if r.status_code == 404:
@@ -110,7 +122,8 @@ def check():
             st.update({"status": f"GitHub answered {r.status_code}"})
         else:
             vs = sorted({t["name"][1:] for t in r.json() if isinstance(t, dict) and isinstance(t.get("name"), str)
-                         and t["name"].startswith("v") and VERSION_RE.match(t["name"][1:]) and vkey(t["name"][1:]) >= vkey(FIRST_UPDATABLE)}, key=vkey)
+                         and t["name"].startswith("v") and VERSION_RE.match(t["name"][1:]) and vkey(t["name"][1:]) >= vkey(FIRST_UPDATABLE)
+                         and (ch == "beta" or not is_beta(t["name"][1:]))}, key=vkey)
             st.update({"status": "ok", "latest": vs[-1] if vs else None, "available": vs[-15:]})
     except (requests.RequestException, ValueError) as e:
         st.update({"status": f"could not reach GitHub ({type(e).__name__})"})
@@ -122,9 +135,9 @@ def check():
 def state():
     st = dict(db.get("update_info") or {})
     now = running_version()
-    latest = st.get("latest")
+    latest = st.get("latest") if st.get("channel", "stable") == channel() else None      # an answer for the other channel is not an answer
     newer = bool(latest and vkey(latest) > vkey(now))
-    return {"running": now, "base": base_version(), "latest": latest, "newer": newer, "status": st.get("status"), "checked": st.get("checked"),
+    return {"running": now, "base": base_version(), "latest": latest, "channel": channel(), "beta": is_beta(now), "newer": newer, "status": st.get("status"), "checked": st.get("checked"),
             "dismissed": newer and db.get("update_dismissed") == latest, "installed": installed(), "available": st.get("available") or []}
 
 

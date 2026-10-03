@@ -286,10 +286,12 @@ function updatesBox(){const u=S.update;
   if(!S.update_check)return `<p class="small" style="margin:12px 0 0"><b>Updates:</b> not checked automatically. <label class="small" style="margin-left:6px"><input type="checkbox" id="updchk"> Check GitHub once a day</label></p>`;
   if(!u)return '';
   const st=u.status==='not public'?'Update checks start once the project is public on GitHub.':u.status&&u.status!=='ok'?'Last check: '+E(u.status)+'.':u.latest?(u.newer?`Version <b>${E(u.latest)}</b> is available.`:'You have the newest version.'):'';
-  const vs=[...new Set([u.base,...(u.installed||[])])].sort((a,b)=>a.split('.').map(Number).reduce((x,y,i)=>x||y-b.split('.').map(Number)[i],0));
+  const vk=v=>{const[c,b]=v.split('-beta.');return[...c.split('.').map(Number),b?0:1,+(b||0)]}, vs=[...new Set([u.base,...(u.installed||[])])].sort((a,b)=>vk(a).reduce((x,y,i)=>x||y-vk(b)[i],0));
   return `<div style="margin-top:12px"><p class="small" style="margin:0"><b>Updates:</b> ${st} ${u.checked?`<span class="mute xs">Checked ${E(u.checked.replace('T',' '))}.</span>`:''}</p>
     <p style="margin:8px 0 0"><button class="ghost" data-upd="check">Check now</button>${u.newer?` <button class="btn" data-upd="install" data-v="${E(u.latest)}">Update to ${E(u.latest)}</button>`:''}</p>
     ${vs.length>1?`<label for="updver">Switch version</label><div class="copyrow"><select id="updver">${vs.map(v=>`<option value="${E(v)}" ${v===u.running?'selected':''}>${E(v)}${v===u.base?' (installed)':''}${v===u.running?' (running now)':''}</option>`).join('')}</select><button class="ghost" id="updgo">Switch</button></div><p class="xs mute">Go back to an earlier version, or forward again. A backup is made first; the app restarts.</p>`:''}
+    <label for="updch">Update channel</label><select id="updch"><option value="stable" ${u.channel==='stable'?'selected':''}>Stable (recommended): tested releases only</option><option value="beta" ${u.channel==='beta'?'selected':''}>Beta: early fixes and features, rougher edges</option></select>
+    ${u.channel==='beta'?'<p class="xs mute" style="margin:6px 0 0">Betas are tried here before they are released. Your data is backed up before every update, and you can switch back to a release at any time.</p>':''}
     <label class="small" style="display:block;margin-top:8px"><input type="checkbox" id="updchk" checked> Check GitHub for new versions once a day (nothing about you is sent)</label></div>`}
 function termsNotice(){if(!S.setup_done||S.terms_ok)return '';
   return `<div class="card c12" id="termsnote" style="margin-bottom:18px"><p class="eyebrow">Terms of use</p><p class="small" style="margin:0">Periodize My Run is a training tool, not medical advice. You run at your own risk, your data and its security are yours to look after, and the app must not be put on the internet. Please read and accept the terms once.</p>
@@ -583,6 +585,7 @@ function bind(){
     b.disabled=true;try{const r=await api('updates',{action:act,version:v});if(r.restarting)return restartWait();toast(act==='dismiss'?'Dismissed until the next version':'Checked');await load()}catch(e){b.disabled=false}});
   on('#updgo',async()=>{const v=$('#updver').value;if(v===S.update.running)return toast('That version is already running.');if(!confirm('Switch to version '+v+'? A backup is made first; the app restarts.'))return;
     const r=await api('updates',{action:'choose',version:v});if(r.restarting)restartWait()});
+  if($('#updch'))$('#updch').onchange=async()=>{await api('settings',{update_channel:$('#updch').value});toast($('#updch').value==='beta'?'Betas will be offered':'Only releases will be offered');await load()};
   if($('#updchk'))$('#updchk').onchange=async()=>{await api('settings',{update_check:$('#updchk').checked});toast($('#updchk').checked?'Update checks on':'Update checks off');await load()};
   on('#gmdis',async()=>{if(!confirm('Disconnect Garmin? The plan stops updating until you connect again.'))return;await api('garmin/disconnect',{});toast('Garmin disconnected');await load()});
   $$('.gpx').forEach(inp=>inp.onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const pts=await readGpx(f);await api('races/'+inp.dataset.race+'/course',{points:pts});toast('Course added');await load()}catch(x){if(x&&x.message&&x.message!=='undefined')toast(x.message,'err')}});

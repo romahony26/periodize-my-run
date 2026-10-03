@@ -622,12 +622,19 @@ def settings():
         db.put("map_tiles", bool(j["map_tiles"]))
     if "update_check" in j:
         db.put("update_check", bool(j["update_check"]))
+    if "update_channel" in j:
+        if j["update_channel"] not in ("stable", "beta"):
+            return jsonify(error="The update channel is stable or beta."), 400
+        db.put("update_channel", j["update_channel"])
+        log.info("Update channel: %s", j["update_channel"])
+        if db.get("update_check", True):
+            updates.check()
     if "heat_adjust" in j:
         db.put("heat_adjust", bool(j["heat_adjust"]))
         log.info("Weather switched %s", "on" if j["heat_adjust"] else "off")
         if db.get("setup_done"):
             jobs.start("readiness")
-    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust", "update_check"}:
+    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust", "update_check", "update_channel"}:
         return jsonify(ok=True)       # nothing here changes the plan
     sr = j.get("seed_race")
     if isinstance(sr, dict) and _is_num(sr.get("miles"), 0.5, 200) and _is_num(sr.get("time_s"), 120, 400_000):

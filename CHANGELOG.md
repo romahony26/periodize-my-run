@@ -3,6 +3,15 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.0 - 2026-10-04
+### Added
+- Release and beta channels for updates. Settings, About, Updates now has an Update channel: **Stable** (the default) offers tested releases only; **Beta** also offers early versions (`2.9.1-beta.1` and so on) that carry fixes before they are released. A beta sorts before its release, so a release always replaces the beta it came from. Installs from before this version ignore beta versions, so only people who choose Beta ever see one.
+- Double-click installers inside the project itself: `Install.command` (Mac) and `Install.bat` (Windows), with matching uninstallers, beside the existing `install.sh`.
+### Changed
+- Installing no longer needs a ready-made package. Download the ZIP of the project from GitHub (Code, Download ZIP) and double-click the installer for your computer. Nothing has to be built for each release, so the packages are no longer published. The README's install section is rewritten to match.
+### Removed
+- The self-contained Mac app and the Windows and Linux archives that were attached to releases. The Mac installer now does what the other systems do: it downloads Python if the Mac has none, and the libraries.
+
 ## 2.8.6 - 2026-10-03
 ### Changed
 - COROS has its own card in Settings, Connections, next to Garmin's, with its sign-in always showing. Before, it could only be found by choosing it in the "Source" list of the "Where your runs come from" card, which showed "Garmin" and sat far down the page, so it looked as if there were no COROS option.
