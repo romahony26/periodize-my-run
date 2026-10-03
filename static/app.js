@@ -309,10 +309,13 @@ function watchCard(head,chip){const w=S.watch||{source:'garmin'}, opt=(v,t)=>`<o
     <label for="wsrc">Source</label><select id="wsrc">${opt('garmin','Garmin (runs, sleep, HRV, workouts to the watch)')}${opt('fitfolder','FIT files from a folder (any watch, runs only)')}${opt('coros','COROS (runs only)')}</select>
     <div id="wfit" ${w.source==='fitfolder'?'':'hidden'}><p class="small" style="margin:10px 0 4px">Export your runs as .fit files (COROS, Polar, Suunto, Wahoo or any watch) into one folder, or point this at a folder a sync app fills. New files are read at every sync; runs only, so there is no day-by-day easing from sleep or HRV, and workouts are not sent to the watch.</p>
       ${w.local?`<label for="wfolder">Folder on this computer</label><div class="copyrow"><input id="wfolder" style="flex:1;min-width:0" value="${E(w.fit_folder||'')}" placeholder="/Users/you/FIT files"><button class="ghost" id="wfsave">Use this folder</button></div>`:`<p class="xs mute">${w.fit_folder?'Folder: <code>'+E(w.fit_folder)+'</code>. ':''}The folder can only be chosen on the computer Periodize My Run runs on.</p>`}</div>
-    <div id="wcor" ${w.source==='coros'?'':'hidden'}><p class="small" style="margin:10px 0 4px">It reads your runs through COROS's unofficial web interface, which COROS can change or block at any time. Runs only: no sleep or HRV, and nothing is ever sent to your COROS account or watch. Your region (Europe, USA or China) is found automatically.</p>
-      ${w.coros?`<p class="cact"><button class="ghost" id="cordis">Disconnect COROS</button></p>`:`<label for="cem">COROS email</label><input id="cem" style="width:100%" autocomplete="username"><label for="cpw">COROS password</label><input id="cpw" type="password" style="width:100%" autocomplete="current-password">
-      <p class="xs mute">Sent once to COROS and never stored; only the access token is kept, encrypted.</p><p class="cact"><button class="btn" id="corgo">Sign in to COROS</button></p>`}</div>
     ${w.source==='garmin'?'':`<p class="xs mute" style="margin:10px 0 0">Garmin stays connected if it was, but the plan is not sent to it while another source is chosen.</p>`}</div>`}
+function corosCard(head,chip){const w=S.watch||{source:'garmin'};
+  return `<div class="card c6 conn" id="ccoros">${head('⌚','COROS',chip(w.coros,w.source==='coros'?'In use':'Connected','Not connected',false))}
+    <p class="small">${w.coros?'Signed in to COROS.'+(w.source==='coros'?' Your runs come from COROS.':' Choose COROS as the source below to use it.'):'Use a COROS watch instead of Garmin: sign in here and your runs come from COROS.'}</p>
+    <ul class="clist"><li>Reads your runs through COROS's unofficial web interface, which COROS can change or block at any time. Your region (Europe, USA or China) is found automatically.</li><li>Runs only: no sleep or HRV, so sessions are not adjusted day by day. Nothing is ever sent to your COROS account or watch.</li></ul>
+    ${w.coros?`<p class="cact"><button class="ghost" id="cordis">Disconnect COROS</button></p>`:`<label for="cem">COROS email</label><input id="cem" type="email" style="width:100%" autocomplete="username"><label for="cpw">COROS password</label><input id="cpw" type="password" style="width:100%" autocomplete="current-password">
+    <p class="xs mute">Sent once to COROS and never stored; only the access token is kept, encrypted.</p><p class="cact"><button class="btn" id="corgo">Sign in to COROS</button></p>`}</div>`}
 function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="chip ${ok?'green':warn?'amber':'unknown'}"><i></i>${ok?yes:no}</span>`;
   const head=(icon,name,c)=>`<div class="chead"><span class="cicon" aria-hidden="true">${icon}</span><b>${name}</b><span style="margin-left:auto">${c}</span></div>`;
   return `<div class="c12 sechead"><h2>Connections</h2><p class="small mute">Where your data comes from and where copies go. Tokens are kept encrypted on this computer; no passwords are stored.</p></div>
@@ -320,6 +323,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
     <p class="small">${gm.connected?'Signed in'+(gm.name?' as <b>'+E(gm.name)+'</b>':'')+'.':'Not connected. The plan cannot sync without it.'}</p>
     <ul class="clist"><li>Reads your runs, sleep, HRV, resting heart rate and steps once a day.</li><li>${S.settings.push_enabled?`Sends the next ${S.settings.push_days} days of workouts to your watch, and checks every four hours that they are still there.`:'Sending workouts to your watch is switched off (How you train, above).'}</li><li>Your password was used once to sign in and was not stored.</li></ul>
     ${gm.connected?'<p class="cact"><button class="ghost" id="gmdis">Disconnect Garmin</button></p><p class="xs mute">To revoke access everywhere, change your Garmin password.</p>':''}</div>
+  ${corosCard(head,chip)}
   ${watchCard(head,chip)}
   <div class="card c6 conn" id="ccal">${head('▦','Calendar file',chip(true,'Ready',''))}
     <p class="small">The next sessions as a file for Apple Calendar, Outlook or Google Calendar. Import it by hand; nothing is sent anywhere.</p>
@@ -566,7 +570,8 @@ function bind(){
   $$('[data-hdel]').forEach(b=>b.onclick=async()=>{await api('aerobic/'+b.dataset.hdel,null,'DELETE');await load()});
   if($('#ximp'))$('#ximp').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const r=await api('results/import',{csv:await f.text()});toast(`Imported: ${r.added} added, ${r.updated} matched to Garmin, ${r.skipped} skipped`);await load()}catch(x){}};
   on('#tochanges',()=>{view='changes';loadChanges();render();scrollTo({top:0})});
-  if($('#wsrc'))$('#wsrc').onchange=async()=>{const v=$('#wsrc').value;$('#wfit').hidden=v!=='fitfolder';$('#wcor').hidden=v!=='coros';
+  if($('#wsrc'))$('#wsrc').onchange=async()=>{const v=$('#wsrc').value;$('#wfit').hidden=v!=='fitfolder';
+    if(v==='coros'&&!S.watch.coros){toast('Sign in to COROS first, in the COROS card above.');$('#ccoros').scrollIntoView({block:'center'});$('#cem').focus();return}
     if(v==='garmin'||(v==='fitfolder'&&S.watch.fit_folder)||(v==='coros'&&S.watch.coros)){try{await api('watch',{source:v});toast('Runs now come from '+$('#wsrc').selectedOptions[0].text.split(' (')[0]);await load()}catch(e){}}};
   on('#wfsave',async()=>{await api('watch',{source:'fitfolder',fit_folder:$('#wfolder').value});toast('Folder set. Reading it now.');await load()});
   on('#corgo',async()=>{await api('coros/login',{email:$('#cem').value,password:$('#cpw').value});$('#cpw').value='';toast('COROS connected');await api('watch',{source:'coros'});await load()});

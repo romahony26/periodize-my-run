@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.8.6 - 2026-10-03
+### Changed
+- COROS has its own card in Settings, Connections, next to Garmin's, with its sign-in always showing. Before, it could only be found by choosing it in the "Source" list of the "Where your runs come from" card, which showed "Garmin" and sat far down the page, so it looked as if there were no COROS option.
+
 ## 2.8.5 - 2026-10-03
 ### Added
 - Setup now asks which watch you use, Garmin or COROS, and signs in to the one you choose. Before, COROS could only be chosen afterwards in Settings. The welcome page and the "building your plan" page no longer assume Garmin.
