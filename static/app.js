@@ -17,7 +17,7 @@ async function api(path, body, method){
   return j;
 }
 let fastT=null;
-async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV){S=s;return}if(document.querySelector('.day.drag'))return;S=s;render();clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
+async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';
   if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize My Run cannot be opened from another device yet.</p><p class="small">On the computer running Periodize My Run, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}

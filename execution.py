@@ -173,14 +173,16 @@ def history(c, L, weeks=12):
     start = today - dt.timedelta(weeks=weeks)
     tps = {r["monday"]: r["tp"] for r in db.rows("SELECT monday,tp FROM weeks")}
     runs = {}
-    for r in assess.load_runs(start, today):
+    for r in assess.load_runs(start, today + dt.timedelta(days=1)):
         runs.setdefault(r["date"].isoformat(), []).append(r)
     out = []
     moved = db.get("reshuffled") or {}
-    for p in db.rows("SELECT * FROM plan WHERE date>=? AND date<? ORDER BY date DESC", (start.isoformat(), today.isoformat())):
+    for p in db.rows("SELECT * FROM plan WHERE date>=? AND date<=? ORDER BY date DESC", (start.isoformat(), today.isoformat())):
         d = dt.date.fromisoformat(p["date"])
         tp = tps.get((d - dt.timedelta(days=d.weekday())).isoformat())
         rs = runs.get(p["date"], [])
+        if d == today and not rs:
+            continue                 # today counts as soon as its run is in; until then it is not a missed day
         s = score(p, rs, tp, L)
         pd = dict(p, steps=json.loads(p["steps"]) if p["steps"] else None)
         done = None
