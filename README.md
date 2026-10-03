@@ -116,9 +116,12 @@ It then reads your history and builds the plan, showing progress as it goes.
 - FIT files from a folder: exports from COROS, Polar, Suunto, Wahoo or any
   watch, or a folder a sync app fills. Runs only, so there is no day-by-day
   easing from sleep or HRV and nothing is sent to the watch.
-- COROS, **experimental**: runs read from your COROS account through COROS's
-  unofficial web interface. Written without a COROS watch to test against, so
-  it may not work; it never sends anything to COROS. Reports welcome.
+- COROS: runs read from your COROS account through COROS's unofficial web
+  interface (the one its Training Hub website uses). Checked against a real
+  COROS account in Europe: sign-in, the list of runs, the .fit download and
+  reading it. Europe, the USA and China are each tried, so it finds your
+  account's region itself. Runs only, like a folder of FIT files. It never sends
+  anything to COROS. COROS can change or block this interface at any time.
 
 **Your watch**
 - The next 21 days (or 7 or 14) kept on the Garmin calendar as structured

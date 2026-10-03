@@ -6,8 +6,8 @@ Three sources:
   - garmin: the full connection (runs, sleep, heart-rate variability, resting heart rate, steps, and workouts sent to the watch).
   - fitfolder: .fit files from a folder you choose (exports from COROS, Polar, Suunto, Wahoo or any watch, or a folder a sync app
     fills). Runs only: no sleep or heart-rate variability, and nothing is sent to the watch.
-  - coros: EXPERIMENTAL. Runs from COROS through COROS's unofficial web interface. Written without a COROS watch to test against,
-    tested only with stand-in data, off unless chosen, and it sends nothing to the watch.
+  - coros: runs from COROS through COROS's unofficial web interface. Checked against one real COROS account (Europe) and
+    stand-in data, off unless chosen, and it sends nothing to the watch.
 """
 import datetime as dt
 import hashlib
@@ -21,7 +21,7 @@ from log import log
 
 GaveUp = garmin.GaveUp
 SOURCES = ("garmin", "fitfolder", "coros")
-NAMES = {"garmin": "Garmin", "fitfolder": "FIT files from a folder", "coros": "COROS (experimental)"}
+NAMES = {"garmin": "Garmin", "fitfolder": "FIT files from a folder", "coros": "COROS"}
 
 
 def name():

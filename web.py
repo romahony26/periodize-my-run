@@ -937,8 +937,8 @@ def coros_login():
     except ValueError as e:
         return jsonify(error=str(e)), 400
     except (coros.Unrecognised, requests.RequestException) as e:
-        log.error("COROS (experimental) sign-in failed: %s", type(e).__name__)
-        return jsonify(error="COROS did not accept the sign-in. This connection is experimental and may not work."), 400
+        log.error("COROS sign-in failed: %s", type(e).__name__)
+        return jsonify(error="COROS did not accept the sign-in. Check the email and password, and that the account has signed in to COROS's Training Hub before."), 400
 
 
 @app.post("/api/coros/disconnect")

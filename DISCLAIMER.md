@@ -49,8 +49,8 @@ service, hold your data, or owe you support, updates or fixes.
 ## 5. Garmin, COROS and other services
 
 Periodize My Run is independent. It is not made, endorsed or supported by Garmin, COROS or any other company. It reaches Garmin, and
-COROS if you choose the experimental COROS connection, through unofficial interfaces that those companies can change or block at
-any time; the COROS connection has not been tested with a real COROS account and may not work. You are responsible for following
+COROS if you choose the COROS connection, through unofficial interfaces that those companies can change or block at
+any time; the COROS connection has been checked with one real COROS account only and may not work for every account. You are responsible for following
 each company's own terms for your account. Periodize My Run adds workouts to your Garmin calendar and removes only the ones it created, but the authors are not responsible
 for any change, loss or problem with your Garmin account, devices or data.
 

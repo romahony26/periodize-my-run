@@ -1,7 +1,7 @@
-"""EXPERIMENTAL: runs from a COROS account, through COROS's unofficial web interface (the one its Training Hub website uses).
+"""Runs from a COROS account, through COROS's unofficial web interface (the one its Training Hub website uses).
 
-Written without a COROS watch to test against and tested only with stand-in data, so it may not work at all, and COROS can change
-or block this interface at any time. COROS offers no public interface for personal apps. What it does:
+Checked against one real COROS account (Europe: sign-in, the activity list, the .fit download, reading the file) and stand-in data;
+COROS can change or block this interface at any time. COROS offers no public interface for personal apps. What it does:
 
   - Sign in once with your COROS email and password. COROS expects the password as an MD5 hash; the hash is sent once and never
     stored. Only the access token COROS returns is kept, encrypted in the vault.
@@ -11,6 +11,7 @@ or block this interface at any time. COROS offers no public interface for person
 The interface follows the open-source projects that read COROS data the same way; if COROS replies in a shape this code does not
 recognise, it stops and logs the problem instead of guessing.
 """
+import datetime
 import hashlib
 import os
 import tempfile
@@ -21,7 +22,7 @@ import db
 import vault
 from log import log
 
-BASE = "https://teamapi.coros.com"
+BASES = ["https://teameuapi.coros.com", "https://teamapi.coros.com", "https://teamcnapi.coros.com"]     # Europe, USA, China: a token only works on its own region's server
 RUN_TYPES = {100, 101, 102, 103}       # outdoor run, indoor run, trail run, track run
 TIMEOUT = 30
 
@@ -45,21 +46,28 @@ def _ok(r):
 
 
 def login(email, password):
-    """Sign in once; keep only the token."""
+    """Sign in once; keep only the token and the regional server that accepted it."""
     if not email or not password:
         raise ValueError("Enter your COROS email and password.")
     h = hashlib.md5(usedforsecurity=False)       # COROS's own site sends this hash; it is a protocol detail, not protection, and is never stored
     h.update(password.encode())
     pwd = h.hexdigest()
-    r = requests.post(f"{BASE}/account/login", json={"account": email, "accountType": 2, "pwd": pwd}, timeout=TIMEOUT)
-    data = _ok(r)
-    token = data.get("accessToken")
-    if not token:
-        raise Unrecognised("no access token in the reply")
-    vault.put("coros", {"token": token, "user": str(data.get("userId") or "")})
-    db.put("watch_source", "coros")
-    log.info("COROS (experimental) connected; token stored encrypted")
-    return "ok"
+    last = Unrecognised("no COROS server accepted the sign-in")
+    for base in BASES:
+        try:
+            data = _ok(requests.post(f"{base}/account/login", json={"account": email, "accountType": 2, "pwd": pwd}, timeout=TIMEOUT))
+            token = data.get("accessToken")
+            if not token:
+                raise Unrecognised("no access token in the reply")
+            _ok(requests.get(f"{base}/activity/query", params=_query(1, 1), headers={"accesstoken": token}, timeout=TIMEOUT))     # does this region accept the token?
+        except (Unrecognised, requests.RequestException) as e:
+            last = e if isinstance(e, Unrecognised) else Unrecognised(type(e).__name__)
+            continue
+        vault.put("coros", {"token": token, "user": str(data.get("userId") or ""), "base": base})
+        db.put("watch_source", "coros")
+        log.info("COROS connected through %s; token stored encrypted", base.split("//")[1])
+        return "ok"
+    raise last
 
 
 def disconnect():
@@ -69,6 +77,10 @@ def disconnect():
     log.info("COROS disconnected; token deleted")
 
 
+def _base():
+    return (vault.get("coros") or {}).get("base") or BASES[0]
+
+
 def _head():
     t = (vault.get("coros") or {}).get("token")
     if not t:
@@ -76,8 +88,13 @@ def _head():
     return {"accesstoken": t}
 
 
+def _query(page, size):
+    # COROS wants a date range as well as the page
+    return {"size": size, "pageNumber": page, "modeList": "", "startDay": "20100101", "endDay": datetime.date.today().strftime("%Y%m%d")}
+
+
 def activities(page, size=50):
-    r = requests.get(f"{BASE}/activity/query", params={"size": size, "pageNumber": page, "modeList": ""}, headers=_head(), timeout=TIMEOUT)
+    r = requests.get(f"{_base()}/activity/query", params=_query(page, size), headers=_head(), timeout=TIMEOUT)
     data = _ok(r)
     items = data.get("dataList")
     if not isinstance(items, list):
@@ -86,7 +103,7 @@ def activities(page, size=50):
 
 
 def download(label_id, sport_type):
-    r = requests.post(f"{BASE}/activity/detail/download", params={"labelId": label_id, "sportType": sport_type, "fileType": 4},
+    r = requests.post(f"{_base()}/activity/detail/download", params={"labelId": label_id, "sportType": sport_type, "fileType": 4},
                       headers=_head(), timeout=TIMEOUT)
     url = _ok(r).get("fileUrl")
     if not url or not str(url).startswith("https://"):
@@ -129,8 +146,8 @@ def sync(full=False, progress=lambda m: None):
                 break
             page += 1
     except Unrecognised as e:
-        log.error("COROS (experimental) stopped: %s. Nothing was guessed; the runs already read are kept.", e)
+        log.error("COROS stopped: %s. Nothing was guessed; the runs already read are kept.", e)
     except requests.RequestException as e:
-        log.error("COROS (experimental) could not be reached: %s", type(e).__name__)
-    log.info("COROS (experimental): %d new runs", new)
+        log.error("COROS could not be reached: %s", type(e).__name__)
+    log.info("COROS: %d new runs", new)
     return new

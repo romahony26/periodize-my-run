@@ -42,3 +42,4 @@ docs/
 .vscode/
 *.swp
 *~
+tools/coros_probe.py

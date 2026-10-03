@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.8.4 - 2026-10-03
+### Fixed
+- COROS: the connection now works. Checked against a real COROS account (Europe): sign-in, the list of runs, the .fit download and reading the file all succeed. Two things were wrong. COROS has a separate server for Europe, the USA and China, and a sign-in token works only on its own region's server; the app now tries each and keeps the one that accepts the token. And COROS's list of activities needs a date range, which was not sent.
+### Changed
+- COROS is no longer labelled experimental. It still uses COROS's unofficial web interface, which COROS can change or block, and it still reads runs only and never sends anything to COROS. The README, disclaimer and Settings say so.
+- The message after a failed COROS sign-in now says what to check.
+
 ## 2.8.3 - 2026-10-03
 ### Fixed
 - Explain my plan could not be read on a phone in dark mode: the pop-up took the browser's own text colour, black, on the app's near-black background. It now uses the app's colours in both light and dark mode, and a test checks the contrast.
