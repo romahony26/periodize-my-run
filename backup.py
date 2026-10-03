@@ -118,7 +118,7 @@ def portable():
 
 
 # ---------------------------------------------------------------- parts of a backup, for partial restores
-INTERNAL = ("profile", "model", "readiness", "forecast_log", "altitude_trust", "notified", "drive_last", "setup_done", "garmin_name", "vo2max_backfilled", "aero_peak_hr", "jitter_seed", "readiness_log")
+INTERNAL = ("profile", "model", "readiness", "forecast_log", "altitude_trust", "notified", "drive_last", "setup_done", "garmin_name", "vo2max_backfilled", "aero_peak_hr", "jitter_seed", "readiness_log", "terms_accepted")
 
 
 def _tables(con, names):

@@ -1,9 +1,21 @@
 # Periodize
 
-A training planner that runs on your own computer (Mac or Raspberry Pi). It
-reads your Garmin history, builds a plan toward your goal race, and keeps
-adjusting it from what you actually do. No AI is used when it runs: the
-rules are ordinary code in `engine.py` and `assess.py`.
+A training planner that runs on your own computer: macOS, Windows, or Linux
+(including a Raspberry Pi). It reads your Garmin history, builds a plan toward
+your goal race, and keeps adjusting it from what you actually do. No AI is
+used when it runs: the rules are ordinary code in `engine.py` and `assess.py`.
+
+> **Before you use it**
+> - **Not medical advice.** It is a training tool. See a doctor before starting
+>   or changing training, and stop for chest pain, fainting or illness with a
+>   fever. You run, and follow any plan from it, **at your own risk**.
+> - **Not for the internet.** Run it on your own computer or your home network
+>   only. Never forward a router port to it or put it on a public address.
+> - **Your data is yours.** Everything stays on your computer, and keeping that
+>   computer, your backups and the app password safe is up to you.
+> - **No warranty.** It is free software provided as is (see LICENSE), it can be
+>   wrong, and Garmin can break the connection at any time. Read
+>   [DISCLAIMER.md](DISCLAIMER.md); the app asks you to accept it once.
 
 ## Features
 
@@ -82,24 +94,107 @@ It then reads your history and builds the plan, showing progress as it goes.
 
 ## Install
 
-Needs Python 3.12 or later.
+Needs Python 3.12 or later and a Garmin account. Download or clone this
+repository, then run the installer for your system from its folder.
+
+**macOS**
 
     ./install.sh
 
-On a Mac it then runs at login at http://localhost:8321, for this computer
-only. On a Raspberry Pi the installer asks you to choose an app password,
-creates a certificate, and starts the app at boot; open
-`https://<pi address>:8321` from any device on your network. The browser
-warns once about the self-made certificate.
+It starts at login and runs at http://localhost:8321, for this computer only.
 
-To run it by hand instead:
+**Windows 10 or 11** (install Python from python.org first, ticking "Add
+python.exe to PATH"). In PowerShell, in the Periodize folder:
 
-    python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+    powershell -ExecutionPolicy Bypass -File .\install.ps1
+
+It starts, hidden, every time you sign in, at http://localhost:8321, for this
+computer only. The Windows installer has not yet been tested on a real Windows
+machine; please report any problem.
+
+**Linux and Raspberry Pi** (Debian, Ubuntu, Raspberry Pi OS, DietPi, or any
+system with systemd)
+
+    ./install.sh
+
+It asks you to choose an app password, creates a certificate, and starts the
+app at boot, reachable from your home network at `https://<computer's
+address>:8321`. The browser warns once about the self-made certificate; that
+is expected. To keep it to this computer only instead, run
+`PERIODIZE_HOST=127.0.0.1 ./install.sh`.
+
+**By hand, on any system**
+
+    python3 -m venv .venv
+    .venv/bin/pip install --require-hashes -r requirements.lock   # Windows: .venv\Scripts\pip
     .venv/bin/python web.py                 # this computer only
-    .venv/bin/python web.py --host 0.0.0.0  # reachable on your network
+    .venv/bin/python web.py --host 0.0.0.0  # your home network (needs an app password first)
 
-All data lives in `~/.periodize` (database, downloaded files, Garmin login
-tokens, logs). Delete that folder to start again.
+All data lives in `~/.periodize` (database, downloaded files, logs; on Windows
+`C:\Users\<you>\.periodize`), and the key that encrypts your Garmin login is
+in `~/.config/periodize/vault.key`. Delete both to start again.
+
+### Have it as an app
+
+It is a web page, but you can give it its own icon and window:
+
+- **Mac:** open it in Safari and choose File > Add to Dock (macOS 14 or later),
+  or in Chrome choose the install icon in the address bar.
+- **Windows:** open it in Edge (... > Apps > Install this site as an app) or
+  Chrome (the install icon in the address bar), then pin it to the taskbar or
+  Start.
+- **Phone:** open it in the browser and choose Add to Home Screen from the
+  share or menu button. The phone must be on your home network, and the app
+  must be installed for your network (the Linux or Raspberry Pi set-up).
+
+## Tips and fixes
+
+**Locked out after wrong passwords.** Five wrong app passwords lock that
+device out for 15 minutes; wait, or restart the app to clear it
+(`sudo systemctl restart periodize` on Linux).
+
+**Forgot the app password.** Set a new one on the computer running the app:
+
+    .venv/bin/python web.py --set-password
+    # Raspberry Pi installed as user dietpi in /opt/periodize:
+    sudo -u dietpi -H /opt/periodize/.venv/bin/python /opt/periodize/web.py --set-password
+
+It takes effect at once and signs every device out.
+
+**Opening the app by a name** (for example `http://raspberrypi.local:8321`)
+gives "This address is not allowed" until you allow it once:
+`python web.py --allow-host raspberrypi.local`. Addresses like `192.168.1.20`
+always work.
+
+**Garmin stopped updating.** Garmin sometimes ends the sign-in. Go to Settings,
+Connections, Garmin, disconnect and connect again. If the plan has not updated
+for seven days, the app warns you.
+
+**Different port.** Set `PERIODIZE_PORT` before running the installer, for
+example `PERIODIZE_PORT=8400 ./install.sh`.
+
+**Moving to a new computer.** Copy `~/.periodize` and
+`~/.config/periodize/vault.key` across, or restore a backup and connect Garmin
+again. A backup never contains your Garmin login or app password.
+
+**Off-site backups.** Download backup in Settings gives a copy with no
+secrets. `tools/pull_backup.py`, run on another computer, fetches one every
+day into a folder that Google Drive for desktop or iCloud Drive uploads.
+
+**Updating.** Download the new version over the old folder (or `git pull`),
+then run the installer again. Your data is kept; the database upgrades itself.
+On Linux the installer asks for the app password again (you can enter the same
+one); this signs other devices out.
+
+**Stopping or removing it.** macOS:
+`launchctl unload ~/Library/LaunchAgents/com.periodize.app.plist`. Windows:
+`Unregister-ScheduledTask -TaskName Periodize`. Linux:
+`sudo systemctl disable --now periodize`. Then delete the folder, and
+`~/.periodize` and `~/.config/periodize` if you want your data gone too.
+
+**Logs.** The Log tab shows what the app has been doing. The file is
+`~/.periodize/logs/periodize.log`; passwords, tokens and email addresses are
+filtered out, but check before sharing it.
 
 ## Privacy and security
 
@@ -134,7 +229,14 @@ tokens, logs). Delete that folder to start again.
 - The downloadable backup, and the copies `tools/pull_backup.py` makes,
   contain no secrets.
 
-Do not expose the app to the internet. It is built for a home network.
+**Do not expose the app to the internet.** It is built for your own computer
+or a home network. Do not forward a router port to it or give it a public
+address; for access away from home, use a private network such as Tailscale
+and keep the app password set.
+
+On Windows, the app cannot restrict file permissions the way it does on macOS
+and Linux, so anyone who can sign in to your Windows account can read its
+data. Use a separate Windows account if others share the computer.
 
 ## Checks
 
@@ -218,6 +320,9 @@ should be reported privately instead: see SECURITY.md.
 If Periodize helps your running, you can buy me a coffee:
 https://buymeacoffee.com/romahony
 
-## Licence
+## Licence and disclaimer
 
 MIT. See [LICENSE](LICENSE): free to use, change and share, with no warranty.
+Using Periodize also means accepting [DISCLAIMER.md](DISCLAIMER.md): it is not
+medical advice, you use it at your own risk, and its authors are not liable for
+any loss or injury, to the extent the law allows.

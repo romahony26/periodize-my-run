@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.21.0 - 2026-10-03
+### Added
+- Windows support: an installer (install.ps1) that starts Periodize, hidden, every time you sign in, for that computer only; the app's one-copy-only lock now works on Windows too. Not yet tested on a real Windows machine.
+- Terms of use and disclaimer (DISCLAIMER.md): not medical advice, use at your own risk, your data and its security are yours, not for the internet, no promises about accuracy, Garmin's interface is unofficial, and a limitation of liability. New installs accept it in the setup wizard; existing installs see a one-time notice on the Plan page. It can be read any time under Settings, About Periodize.
+- README: installing on macOS, Windows and Linux; having it as an app with its own icon on a Mac, on Windows and on a phone; tips and fixes (locked out, forgotten app password, opening it by name, Garmin stopped updating, moving computer, updating, removing it, logs); clear notices that it is not medical advice, not for the internet and used at your own risk.
+### Changed
+- The season outline always labels its last week, so the latest date sits at the right-hand end.
+
 ## 1.20.2 - 2026-10-03
 ### Removed
 - The "On your phone" card in Settings. Its Send a test message button now sits under the daily message address in Advanced.

@@ -5,7 +5,6 @@ thread keeps the plan and the watch up to date every day.
 """
 import argparse
 import datetime as dt
-import fcntl
 import hashlib
 import hmac
 import io
@@ -272,6 +271,16 @@ def crashed(e):
     return jsonify(error="Something went wrong. The detail is in the log."), 500
 
 
+def _lock_file(f):
+    """Hold an exclusive lock on an open file for the life of the process, on macOS, Linux or Windows."""
+    if os.name == "nt":
+        import msvcrt
+        msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
 def set_password():
     import getpass
     a = getpass.getpass("Choose an app password (8+ characters): ")
@@ -525,7 +534,7 @@ def state():
              "miles_week": round(sp["week"] * 7 * 0.75 / assess.MI, 1)} if sp else None
     lo = jobs.last_ok()
     return jsonify(
-        version=changelog()[0]["version"], project=PROJECT, climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=insights.warnings(today, c["units"]) if db.get("setup_done") else [], shoes=insights.shoes(c["units"]),
+        version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=insights.warnings(today, c["units"]) if db.get("setup_done") else [], shoes=insights.shoes(c["units"]),
         drift=insights.drift_history(today) if db.get("setup_done") else [], best_grade=best_grade, about_you={"sex": c.get("sex"), "birth_date": c.get("birth_date"), "gel_carbs_g": c.get("gel_carbs_g")},
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
@@ -991,6 +1000,28 @@ def changelog():
     return out
 
 
+TERMS_VERSION = 1
+
+
+def terms_accepted():
+    return (db.get("terms_accepted") or {}).get("version") == TERMS_VERSION
+
+
+@app.get("/api/terms")
+def terms_text():
+    with open(os.path.join(HERE, "DISCLAIMER.md"), encoding="utf-8") as f:
+        return jsonify(version=TERMS_VERSION, accepted=terms_accepted(), text=f.read())
+
+
+@app.post("/api/terms")
+def terms_accept():
+    if (request.json or {}).get("accept") is not True:
+        return jsonify(error="Tick the box to accept the terms."), 400
+    db.put("terms_accepted", {"version": TERMS_VERSION, "at": dt.datetime.now().isoformat(timespec="seconds")})
+    log.info("Terms of use version %d accepted", TERMS_VERSION)
+    return jsonify(ok=True)
+
+
 @app.get("/api/changelog")
 def changelog_page():
     return jsonify(versions=changelog())
@@ -1296,7 +1327,7 @@ def main():
     setup(db.HOME)
     lock = open(os.path.join(db.HOME, "app.lock"), "w")  # noqa: SIM115 - held open for the life of the process
     try:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)     # one copy only, or workouts would be sent twice
+        _lock_file(lock)                                     # one copy only, or workouts would be sent twice
     except OSError:
         sys.exit("Periodize is already running.")
     if a.host not in ("127.0.0.1", "localhost", "::1") and not db.get("app_password"):

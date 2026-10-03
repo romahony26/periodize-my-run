@@ -53,7 +53,7 @@ function stepList(text){return text?`<ul class="steps">${text.split('; ').map(x=
 function planView(){
   const f=S.fitness, r=S.readiness, t=S.days.find(d=>d.today)||{};
   const lev={green:'Recovered',amber:'A bit tired',red:'Not recovered',unknown:'Waiting for watch sync'};
-  let h='<div class="grid">';
+  let h='<div class="grid">'+termsNotice();
   if(f&&f.goal){const g=f.goal, wk=f.week.weeks_to_race||0;
     h+=`<div class="card hero c6">${ring(Math.max(0.03,Math.min(1,1-g.days/252)),wk+'w')}<p class="eyebrow">Goal</p><p class="h">${E(g.name)}</p>
       <div class="mute small">${nice(g.date)} · ${g.days} days to go</div>
@@ -117,7 +117,7 @@ function planView(){
     h+=`<div class="grid" style="margin-top:22px"><div class="card c12" id="season"><p class="eyebrow">Season outline · ${S.season.length} weeks to ${E(f&&f.goal?f.goal.name:'your goal')}</p>
       <div class="sout" role="list" aria-label="Weekly distance for each week of the season">${S.season.map((x,i)=>{const rc=(x.races||[]);const tip='Week of '+nice(x.monday)+': '+x.mode+', '+x.total+' '+U()+', long run '+x.long+' '+U()+(rc.length?'. Race: '+rc.map(r=>r.name).join(', '):'');
         return `<div class="sw" role="listitem" tabindex="0" title="${E(tip)}" aria-label="${E(tip)}"><span class="sv num">${x.total}</span><div class="sbar"><i style="height:${Math.max(4,Math.round(100*x.total/mx))}%;${col[x.mode]?'background:'+col[x.mode]:''}"></i></div>
-          <span class="sr">${rc.map(r=>`<b class="${r.priority==='A'?'ra':'rb'}" title="${E(r.name)}">${r.priority==='A'?'★':'●'}</b>`).join('')}</span><span class="sd">${i%4===0?nice(x.monday):''}</span></div>`}).join('')}</div>
+          <span class="sr">${rc.map(r=>`<b class="${r.priority==='A'?'ra':'rb'}" title="${E(r.name)}">${r.priority==='A'?'★':'●'}</b>`).join('')}</span><span class="sd">${(i===S.season.length-1||(i%4===0&&i<S.season.length-3))?nice(x.monday):''}</span></div>`}).join('')}</div>
       ${races.length?`<ul class="clist" style="margin-top:10px;list-style:none;padding-left:0">${races.map(r=>`<li><b class="${r.priority==='A'?'ra':'rb'}">${r.priority==='A'?'★':'●'}</b> ${E(r.name)} · ${nice(r.date)} · ${r.priority==='A'?'goal race':'tune-up'} · week ${r.week} of ${S.season.length}</li>`).join('')}</ul>`:''}
       <p class="xs mute" style="margin:8px 0 0">Weekly distance in ${U()==='mi'?'miles':'km'} above each bar; ★ goal race, ● tune-up race. Grey: lighter weeks · amber: taper and tune-up race weeks · red: race week. Only this week is fixed; each later week assumes the one before goes to plan, and all are redrawn at every weekly review.</p></div></div>`}
   if(f)h+=`<div class="grid" style="margin-top:22px"><div class="card c12"><p class="eyebrow">Why this week looks like this</p><ul class="why">${f.week.why.map(w=>`<li>${E(w)}</li>`).join('')||'<li>Nothing unusual.</li>'}</ul></div></div>`;
@@ -264,6 +264,17 @@ function settingsView(){const s=S.settings;
     <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button></p></div>
   ${connections()}
   ${aboutCard()}</div>`}
+let TERMS=null, TOPEN={};
+async function loadTerms(){try{TERMS=await api('terms')}catch(e){TERMS={text:''}}render()}
+function md(t){return E(t||'').split(/\n\n+/).map(b=>{b=b.trim();if(!b||b==='---')return '';if(b.startsWith('# '))return '';
+  if(b.startsWith('## '))return `<p class="lab2" style="margin:14px 0 4px">${b.slice(3)}</p>`;
+  const bold=x=>x.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  const lines=b.split('\n');if(lines.every(l=>/^\s*- /.test(l)||/^\s{2,}\S/.test(l))){const items=[];lines.forEach(l=>{if(/^\s*- /.test(l))items.push(l.replace(/^\s*- /,''));else items[items.length-1]+=' '+l.trim()});return `<ul class="clist">${items.map(i=>`<li>${bold(i)}</li>`).join('')}</ul>`}
+  return `<p class="small" style="margin:6px 0">${bold(lines.join(' '))}</p>`}).join('')}
+function termsBox(id){return `<details id="${id}" class="small" style="margin:10px 0 0" ${TOPEN[id]?'open':''}><summary>Read the terms of use and disclaimer</summary><div style="max-height:46vh;overflow:auto;padding:4px 2px 0">${TERMS?md(TERMS.text):'<span class="spin"></span>Loading'}</div></details>`}
+function termsNotice(){if(!S.setup_done||S.terms_ok)return '';
+  return `<div class="card c12" id="termsnote" style="margin-bottom:18px"><p class="eyebrow">Terms of use</p><p class="small" style="margin:0">Periodize is a training tool, not medical advice. You run at your own risk, your data and its security are yours to look after, and the app must not be put on the internet. Please read and accept the terms once.</p>
+    ${termsBox('tbox2')}<p style="margin:12px 0 0"><label class="small"><input type="checkbox" id="tok2"> I have read and accept the terms of use</label> <button class="btn" id="taccept" style="margin-left:10px">Accept</button></p></div>`}
 function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" target="_blank" rel="noopener noreferrer">${t}</a>`;
   return `<div class="card c12" id="aboutcard"><p class="eyebrow">About Periodize</p>
     <p class="small" style="margin:0">Version <b class="num">${E(S.version)}</b> · <a href="#" id="tochanges">What changed</a>${P.url?' · '+x(P.url,'Source code'):''}</p>
@@ -272,8 +283,8 @@ function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" ta
       <li><b>Found a problem or have an idea?</b> ${P.url?x(P.url+'/issues/new','Open an issue')+'. Say what you did, what happened and what you expected; the Log tab often helps, but check it for anything personal before pasting.':'See the README.'}</li>
       <li><b>A security problem?</b> Please report it privately, not in a public issue${P.url?': '+x(P.url+'/security/advisories/new','private security report'):''}. See SECURITY.md.</li>
       ${P.support?`<li><b>Like it?</b> ${x(P.support,'Buy me a coffee')} ☕</li>`:''}
-    </ul>
-    <p class="xs mute" style="margin:8px 0 0">Periodize is a training tool, not medical advice. It is not affiliated with Garmin.</p></div>`}
+    </ul>${termsBox('tbox3')}
+    <p class="xs mute" style="margin:8px 0 0">Periodize is a training tool, not medical advice; you use it at your own risk. Keep it off the internet: it is for your own computer or home network. It is not affiliated with Garmin.</p></div>`}
 function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="chip ${ok?'green':warn?'amber':'unknown'}"><i></i>${ok?yes:no}</span>`;
   const head=(icon,name,c)=>`<div class="chead"><span class="cicon" aria-hidden="true">${icon}</span><b>${name}</b><span style="margin-left:auto">${c}</span></div>`;
   return `<div class="c12 sechead"><h2>Connections</h2><p class="small mute">Where your data comes from and where copies go. Tokens are kept encrypted on this computer; no passwords are stored.</p></div>
@@ -433,6 +444,7 @@ function wizard(){
       <li><b>No AI is used.</b> The plan comes from fixed rules and your data, and every decision is explained.</li>
       <li><b>It is not medical advice.</b> For pain that changes your stride, chest symptoms or illness with fever, stop and see a clinician.</li></ul>
       ${S.remote?'':(S.has_password?'':'<p class="xs mute">To open the app from another device later, set an app password on this computer with <code>python web.py --set-password</code>.</p>')}
+      ${termsBox('tbox1')}<p style="margin:12px 0 0"><label class="small"><input type="checkbox" id="wterms"> I have read and accept the terms of use, including that this is not medical advice and that I run at my own risk</label></p>
       ${nav(null,'w1','Get started')}`;
   }else if(wiz.step===2){
     h+=stepper(2)+`<p class="h">Connect Garmin</p>`;
@@ -460,7 +472,10 @@ function bind(){
   const on=(id,fn)=>{const e=$(id);if(e)e.onclick=async ev=>{ev.preventDefault();try{await fn()}catch(x){}}};
   on('#gl',async()=>{const r=await api('garmin/login',{email:$('#em').value,password:$('#pw').value});if(r.result==='needs_mfa')wiz.mfa=true;await load()});
   on('#mfa',async()=>{await api('garmin/mfa',{code:$('#code').value});wiz.mfa=false;await load()});
-  [['#w1',2],['#w2',3],['#w3',4],['#wb1',1],['#wb2',2],['#wb3',3],['#wb4',4]].forEach(([id,n])=>on(id,()=>{if(id==='#w4')return;wiz.step=n;render()}));
+  on('#w1',async()=>{if(!$('#wterms').checked)return toast('Please read and accept the terms of use first.','err');await api('terms',{accept:true});wiz.step=2;render()});
+  if($('#taccept'))$('#taccept').onclick=async()=>{if(!$('#tok2').checked)return toast('Tick the box to accept the terms.','err');await api('terms',{accept:true});toast('Thank you');await load()};
+  $$('details[id^=tbox]').forEach(d=>d.ontoggle=()=>{TOPEN[d.id]=d.open;if(d.open&&!TERMS)loadTerms()});
+  [['#w2',3],['#w3',4],['#wb1',1],['#wb2',2],['#wb3',3],['#wb4',4]].forEach(([id,n])=>on(id,()=>{if(id==='#w4')return;wiz.step=n;render()}));
   on('#w4',()=>{const p=prefsRead();if(p.blocked_days.includes(p.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
     if($('#sd').value&&hmsIn($('#st').value))p.seed_race={miles:+$('#sd').value,time_s:hmsIn($('#st').value)};wiz.prefs=p;wiz.step=5;render()});
   on('#start',async()=>{const hd=$('#wh').value==='1';await api('settings',Object.assign({},wiz.prefs||{}, {aero_test:hd,aero_runs:hd}));await api('settings',{auto_backup:$('#abk').value==='1'});
@@ -525,4 +540,4 @@ function bind(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(SEL||DAY||PACE||TRV)){SEL=null;DAY=null;PACE=null;TRV=null;render()}});
 load();
-setInterval(()=>{const a=document.activeElement;if(a&&['INPUT','SELECT'].includes(a.tagName))return;if(document.querySelector('.day.drag'))return;load()},6000);
+setInterval(()=>{const a=document.activeElement;if(a&&['INPUT','SELECT'].includes(a.tagName))return;if(document.querySelector('details[id^=tbox][open]'))return;if(document.querySelector('.day.drag'))return;load()},6000);
