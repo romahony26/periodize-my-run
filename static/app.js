@@ -101,6 +101,7 @@ function planView(){
     ${a?`<p class="lab2">Tuned for today <span class="chip amber" style="margin-left:6px"><i></i>paces eased ${(a.slow*100).toFixed(1)}%</span></p>${stepList(sd.text)}
       <p class="small" style="margin:8px 0 0">Why: ${E((a.reasons||[]).join('; '))}. ${E(a.advice||'')}</p>`
      :sd.type&&sd.type!=='Rest'&&!sd.past?`<p class="small mute" style="margin:8px 0 0">${sd.today?(b?'Not tuned: last night’s sleep and your HRV and resting heart rate trends are normal, so it stands as planned.':'Not tuned yet: waiting for last night’s data from your watch.'):'Tuning happens on the morning of the session, from the night before and your recent trends.'}</p>`:''}
+    ${sd.purpose?`<p class="small" id="purpose" style="margin:8px 0 0"><b>What it is for.</b> ${E(sd.purpose)}</p>`:''}
     ${sd.note?`<p class="small mute" style="margin:8px 0 0">${E(sd.note)}</p>`:''}${sd.strength?`<p class="xs" style="margin:8px 0 0"><span class="tag">+ ${E(sd.strength)}</span></p>`:''}
     ${b?`<p class="lab2">Recovery markers</p><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(118px,1fr));margin-top:6px">
       <div class="stat"><div class="v num ${fc(b.fresh)}">${b.fresh}</div><div class="k">Freshness</div></div>
@@ -122,7 +123,7 @@ function planView(){
           <span class="sr">${rc.map(r=>`<b class="${r.priority==='A'?'ra':'rb'}" title="${E(r.name)}">${r.priority==='A'?'★':'●'}</b>`).join('')}</span><span class="sd">${(i===S.season.length-1||(i%4===0&&i<S.season.length-3))?nice(x.monday):''}</span></div>`}).join('')}</div>
       ${races.length?`<ul class="clist" style="margin-top:10px;list-style:none;padding-left:0">${races.map(r=>`<li><b class="${r.priority==='A'?'ra':'rb'}">${r.priority==='A'?'★':'●'}</b> ${E(r.name)} · ${nice(r.date)} · ${r.priority==='A'?'goal race':'tune-up'} · week ${r.week} of ${S.season.length}</li>`).join('')}</ul>`:''}
       <p class="xs mute" style="margin:8px 0 0">Weekly distance in ${U()==='mi'?'miles':'km'} above each bar; ★ goal race, ● tune-up race. Grey: lighter weeks · amber: taper and tune-up race weeks · red: race week. Only this week is fixed; each later week assumes the one before goes to plan, and all are redrawn at every weekly review.</p></div></div>`}
-  if(f)h+=`<div class="grid" style="margin-top:22px"><div class="card c12"><p class="eyebrow">Why this week looks like this</p><ul class="why">${f.week.why.map(w=>`<li>${E(w)}</li>`).join('')||'<li>Nothing unusual.</li>'}</ul></div></div>`;
+  if(f)h+=`<div class="grid" style="margin-top:22px"><div class="card c12"><button class="btn" id="explain" style="float:right;margin:0 0 8px 12px">Explain my plan</button><p class="eyebrow">Why this week looks like this</p><ul class="why">${f.week.why.map(w=>`<li>${E(w)}</li>`).join('')||'<li>Nothing unusual.</li>'}</ul></div></div>`;
   return h;
 }
 function youView(){
@@ -330,7 +331,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
     <label for="mapsw">Show runs on a real map</label>${yn('mapsw',S.map_tiles)}</div>`}
 function aboutView(){if(!ABOUT)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
-  return '<div class="grid">'+ABOUT.map(s=>`<div class="card c6"><p class="eyebrow">${E(s.title)}</p><ul class="why" style="margin:0">${s.items.map(i=>`<li>${E(i)}</li>`).join('')}</ul></div>`).join('')+'</div>'}
+  return '<div class="grid">'+refsCard()+ABOUT.map(s=>`<div class="card c6"><p class="eyebrow">${E(s.title)}</p><ul class="why" style="margin:0">${s.items.map(i=>`<li>${E(i)}</li>`).join('')}</ul></div>`).join('')+'</div>'}
 function logView(){return `<div class="grid"><div class="card c12"><p class="eyebrow">Activity log <button class="ghost" id="lr">Refresh</button></p><pre>${E(logs.join(''))||'Loading…'}</pre></div></div>`}
 function histView(){
   if(!HIST)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
@@ -456,7 +457,22 @@ function changesView(){if(!CHANGES)return '<div class="grid"><div class="card c1
     ${CHANGES.map((v,i)=>`<div class="card c12 ver"><p class="h" style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="num">${E(v.version)}</span><span class="mute small" style="font-weight:500">${v.date?new Date(v.date+'T12:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):''}</span>${i===0?'<span class="tag green">current</span>':''}</p>
       ${v.sections.map(s=>`<p class="lab2"><span class="chip ${col[s.title]||'unknown'}"><i></i>${E(s.title)}</span></p><ul class="why">${s.items.map(x=>`<li>${E(x)}</li>`).join('')}</ul>`).join('')}</div>`).join('')}</div>`}
 async function loadChanges(){CHANGES=(await api('changelog')).versions;if(view==='changes')render()}
-async function loadAbout(){ABOUT=(await api('about')).sections;if(view==='about')render()}
+async function loadAbout(){ABOUT=(await api('about')).sections;REFS=await api('references');if(view==='about')render()}
+let REFS=null;
+function refsCard(){if(!REFS)return '';const li=x=>`<li>${E(x.text)}${x.used.length?` <span class="mute xs">Used in principle${x.used.length>1?'s':''} ${x.used.join(', ')}.</span>`:''}</li>`;
+  return `<div class="card c12" id="refs"><p class="eyebrow">The research behind the plan</p><p class="small">${REFS.papers.length} peer-reviewed studies are used. Only their findings are used: no text, tables or figures are copied. The numbered principles are in PRINCIPLES.md, which comes with the app.</p>
+    <details><summary class="small"><b>Peer-reviewed studies (${REFS.papers.length})</b></summary><ul class="why">${REFS.papers.map(li).join('')}</ul></details>
+    ${REFS.other.length?`<details><summary class="small"><b>Other sources, not peer-reviewed (${REFS.other.length})</b></summary><ul class="why">${REFS.other.map(li).join('')}</ul></details>`:''}</div>`}
+async function openExplain(){let d=$('#explaindlg');if(!d){d=document.createElement('dialog');d.id='explaindlg';d.className='card';d.setAttribute('aria-label','Explain my plan');
+    d.style.cssText='max-width:760px;width:calc(100% - 32px);max-height:86vh;overflow:auto;padding:22px;border:0';document.body.appendChild(d);
+    d.addEventListener('click',e=>{if(e.target===d||e.target.id==='explainclose')d.close()})}
+  d.innerHTML='<span class="spin"></span>Loading';d.showModal();
+  try{const x=await api('explain');
+    d.innerHTML=`<button class="ghost" id="explainclose" style="float:right">Close</button><p class="eyebrow">Explain my plan</p>
+      <p class="small">This plan is written for you. Each decision below shows what was decided, what in your own data led to it, and where the rule comes from.</p>
+      ${x.sections.map(s=>`<div style="margin:16px 0 0"><p class="h" style="font-size:1.05rem;margin:0">${E(s.title)}</p><p style="margin:4px 0"><b>${E(s.decision)}</b></p>
+        <p class="small" style="margin:4px 0"><b>From your data.</b> ${E(s.because)}</p><p class="small mute" style="margin:4px 0"><b>Where the rule comes from.</b> ${E(s.evidence)}</p></div>`).join('')||'<p class="small mute">The plan has not been built yet. Sync first.</p>'}`}
+  catch(e){d.innerHTML='<button class="ghost" id="explainclose" style="float:right">Close</button><p class="small">Could not load the explanation.</p>'}}
 async function loadLogs(){logs=(await api('logs')).lines;if(view==='log')render()}
 
 function wizard(){
@@ -529,7 +545,7 @@ function bind(){
   $$('[data-sdel]').forEach(b=>b.onclick=async()=>{await api('status/'+b.dataset.sdel,null,'DELETE');await load()});
   on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
     s.hrmax=+$('#hrmax').value||null;s.peak_miles_override=+$('#peak').value||null;s.push_days=+$('#push_days').value;s.weeks_ahead=+$('#weeks_ahead').value;s.forecast_completion=$('#forecast_completion').value?+$('#forecast_completion').value/100:null;s.aero_test=+$('#aero_test_weeks').value>0;if(s.aero_test)s.aero_test_weeks=+$('#aero_test_weeks').value;s.aero_runs=$('#aero_runs').value==='1';s.aero_format=$('#aero_format').value;s.notify_url=$('#notify').value.trim();await api('settings',s);toast('Saved. Replanning.');await load()});
-  on('#run',async()=>{await api('run',{kind:'daily'});toast('Updating from Garmin');await load()});on('#lr',loadLogs);
+  on('#explain',openExplain);on('#run',async()=>{await api('run',{kind:'daily'});toast('Syncing');await load()});on('#lr',loadLogs);
   on('#xadd',async()=>{const t=hmsIn($('#xt').value);if(!t)return toast('Enter the time as h:mm:ss or mm:ss.','err');let mi=$('#xm').value==='c'?(+$('#xo').value)/(U()==='mi'?1:KM):+$('#xm').value;if(!mi)return toast('Enter the distance.','err');await api('results',{name:$('#xn').value,date:$('#xd').value,miles:mi,time_s:t,off_road:$('#xs').value==='1'});toast('Result added');await load()});
   if($('#xm'))$('#xm').onchange=()=>{$('#xow').style.display=$('#xm').value==='c'?'':'none'};
   $$('[data-redit]').forEach(b=>b.onclick=async()=>{const x=S.results.find(r=>r.id==b.dataset.redit);const name=prompt('Race name',x.name);if(name===null)return;const t=prompt('Official time (h:mm:ss)',fmt(x.time_s));if(t===null||!hmsIn(t))return;

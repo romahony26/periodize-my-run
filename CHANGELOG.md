@@ -3,6 +3,17 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.6.0 - 2026-10-03
+### Added
+- Explain my plan. A button on the plan page opens a panel that lists every decision shaping your plan: what you are building toward, your peak week, how fast the miles build, the long run, how many hard sessions and which kinds, your taper, down weeks, day-to-day tuning, and what stands between you and your goal. Each one shows the decision, the numbers from your own data that led to it, and where the rule comes from: a named study, a coaching convention, or this project's own choice.
+- What each run is for. Every planned day now says its purpose in a sentence or two, including rest days and a session that was changed to an easy run.
+- Your own response, learned from your whole history, with nothing to enter. Your taper: for each past race of 15 km or more, how deeply the last week was cut is set against how close the race was to your best level of the time; with six or more races and a clear pattern the taper moves 5 points deeper or lighter, inside the range the research supports. Miles or hard running: across the eight-week blocks in your history, the change in your watch's fitness estimate is compared with the miles and hard runs in each; if miles clearly matter more, every other week before the race-specific phase has one hard session, not two, at the same distance. Both show their sample size and say "not clear" unless the pattern is strong.
+- What stands between you and your goal: whether the gap to your goal time is mostly speed or mostly endurance, and which part of your endurance is furthest from full.
+- The research behind the plan, on the How it works page: every peer-reviewed study used, with the principles that rely on it, and separately the few sources that are not peer-reviewed. Only findings are used; no text, tables or figures are copied.
+- Principles: a new section 15 (individual response, taper, what decides a marathon time and why runners stall, purpose and explanation), and a principle on what a watch can and cannot measure about sleep.
+### Fixed
+- The message shown after pressing Sync said "Updating from Garmin"; it now says "Syncing".
+
 ## 2.5.0 - 2026-10-03
 ### Changed
 - Your peak week now comes from what you have held without breaking down, not from your recent average. It is taken from your best eight-week block that was followed by six sound weeks (no two weeks in a row under 35% of the block, and no time recorded as sick or injured; rest after a race, a very long run or a holiday does not count against it): the larger of that block from all your history and 110% of that block from the last three years. A high recent average no longer raises it. With too little history, the old rule (your last eight weeks plus 25%) still applies.

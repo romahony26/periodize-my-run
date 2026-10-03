@@ -174,6 +174,36 @@ def break_return(wk):
             "Fitness fades during a break, so the paces have been eased too.")
 
 
+PURPOSE = {
+    "Long run": "Endurance: the long run builds the fuel stores, the fat burning and the leg resilience that decide the last third of a long race. Easy enough to talk.",
+    "Long run with marathon pace": "Race rehearsal: marathon pace on legs that are already tired, with race fuelling. The most specific session for a marathon, so it is rare and well spaced.",
+    "Threshold": "Raises the pace you can hold for about an hour, the best single predictor of race times from 10K to the marathon. Comfortably hard: you could say a short sentence.",
+    "Intervals": "Raises your aerobic ceiling and makes race pace feel easier. Hard but even: the last repeat should be as fast as the first.",
+    "200s": "Speed without strain: quick, relaxed running to improve economy. Never a race; the easy 200s keep it aerobic.",
+    "Marathon pace": "Teaches the pace and the effort of the race itself, and how it should feel early on: controlled, almost easy.",
+    "Half marathon pace": "Teaches the pace and the effort of the race itself. Firm and steady, not a time trial.",
+    "Steady finish": "A small step up at the end of an easy run: aerobic work a little above easy pace, without the cost of a hard session.",
+    "Aerobic run by heart rate": "Builds the aerobic base at a fixed heart rate below threshold. The measure of progress is the pace at that heart rate rising over the weeks.",
+    "Aerobic test": "A measurement, not a workout: the same heart rates each time, to see whether the pace at each has improved. Run it rested.",
+    "Sharpener": "Keeps the legs used to race pace during a taper without adding fatigue. Short, and it should feel easy.",
+    "Easy + strides": "Recovery and volume, plus a few short relaxed sprints to keep the legs quick. The strides are fast but never straining.",
+    "Easy": "Recovery and aerobic volume. Easy miles are where most of the adaptation to training happens, and they only work if they are truly easy.",
+    "Back-to-back: medium easy": "Tired-legs practice for an ultra: this run makes tomorrow's long run start on used legs, at far less risk than one very long run.",
+    "Return: easy": "Getting the routine back after a break. Short and easy on purpose: the aim is to finish wanting more.",
+    "Rest": "Adaptation happens between sessions, not during them. A rest day is part of the training.",
+}
+
+
+def purpose(day):
+    """One or two sentences on what a planned day is for. `day` needs type and label."""
+    label, kind = day.get("label") or "", day.get("type") or ""
+    if kind == "Race":
+        return "The race. Everything in the plan points here: start at the pace given and no faster."
+    if (day.get("adjust") or {}).get("easy"):
+        return "Changed to an easy run today because your recovery signs are poor. Absorbing the training already done is worth more than adding to it today."
+    return PURPOSE.get(label) or next((v for k, v in PURPOSE.items() if label.startswith(k)), None) or PURPOSE.get({"Long": "Long run", "Key": "Threshold"}.get(kind, "Easy"), "")
+
+
 def age_on(birth, day):
     try:
         b = dt.date.fromisoformat(str(birth)[:10])
@@ -262,7 +292,10 @@ def plan(st, c, L, races):
     else:
         target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": comeback[0] if comeback else 0.80 * prior3,
                   "postrace": min(0.5 * ref, 25), "tuneup": 0.75 * ref,
-                  "taper": (0.80 if wtr == 3 else 0.65 if gtype in ("marathon", "ultra", "half") else 0.70) * max(ref, 0.9 * max(wk[-6:] or [0])), "race": 0.4 * ref}[mode]
+                  "taper": ((0.80 if wtr == 3 else 0.65 if gtype in ("marathon", "ultra", "half") else 0.70) - (L.get("taper_shift") or 0.0)) * max(ref, 0.9 * max(wk[-6:] or [0])),
+                  "race": 0.4 * ref}[mode]
+        if mode == "taper" and L.get("taper_shift"):
+            why.append(f"Taper cut {'deeper' if L['taper_shift'] > 0 else 'lighter'} than the usual by {abs(L['taper_shift']):.0%} of your normal week: across your past races you raced better that way.")
     target = max(target, c["min_miles"])
 
     # ---- layout ----
@@ -399,6 +432,12 @@ def plan(st, c, L, races):
             why.append("200s: quick but relaxed running with equal easy running between, to practise moving fast without hard effort. Keep the gap between fast and easy; do not race it.")
         else:
             key2_day = threshold_day()
+    # an athlete whose fitness has followed miles more than hard running: before the race-specific phase, every other week swaps the
+    # second session for an easy run. The week's distance is unchanged.
+    if L.get("emphasis") == "miles" and key2_day and mode == "build" and not specific and week_no % 2 == 0:
+        key2_day = None
+        why.append("One hard session this week, not two: over your history your fitness has risen with miles more than with hard running, "
+                   "so before the race-specific phase every other week puts that day into easy running. The week's distance is unchanged.")
     # the monthly Aerobic test replaces the second session (or the first, with one session a week): rested, flat, windless if possible
     test_due = c.get("aero_test", True) and mode in ("build", "down") and (mon.toordinal() // 7) % max(int(c.get("aero_test_weeks", 4)), 2) == 0
     if test_due and target >= 15:

@@ -29,6 +29,8 @@ import calibrate
 import db
 import engine
 import execution
+import explain
+import respond
 import course
 import functools
 import mimetypes
@@ -404,6 +406,7 @@ def _days(c, today, L=None):
             item.update({"type": day["type"], "label": day["label"], "dist": engine.dist(p["miles"], c["units"]) if p["miles"] else "", "miles": p["miles"] or 0,
                          "short": engine.short(day, c["units"]), "week": (d - dt.timedelta(days=d.weekday())).isoformat(),
                          "text": engine.describe(day, tp, c["units"], (adj or {}).get("slow", 0.0)) if tp and day["steps"] else "",
+                         "purpose": engine.purpose({"type": day["type"], "label": p["label"], "adjust": adj}),
                          "note": p["note"], "strength": p["strength"], "source": p["source"], "adjust": adj, "on_watch": bool(p["pushed_hash"]),
                          "original": engine.describe(planned, tp, c["units"], 0.0) if tp and day["steps"] and adj and (adj.get("slow") or adj.get("easy")) else "",
                          "sync": _sync_status(p, day, tp, adj, c, d, today)})
@@ -1150,6 +1153,41 @@ def day_detail(date):
         return jsonify(error="No data yet."), 404
     goal = db.rows("SELECT miles FROM races WHERE priority='A' AND date>=? ORDER BY date LIMIT 1", (dt.date.today().isoformat(),))
     return jsonify(execution.day(date, c, profile.limits(prof, c, goal[0]["miles"] if goal else None)))
+
+
+@app.get("/api/explain")
+def explain_plan():
+    """Every decision behind the plan, with the athlete's own numbers and the evidence for the rule."""
+    c, prof, rs, L = jobs.context()
+    if not prof or not L:
+        return jsonify(sections=[], response=None)
+    if not db.get("response"):
+        respond.derive(c.get("hrmax") or prof.get("hrmax_observed"))
+    return jsonify(sections=explain.build(c, prof, rs, L), response=db.get("response"))
+
+
+def references():
+    """The sources named in PRINCIPLES.md, with the principles that use each: (peer-reviewed, other)."""
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "PRINCIPLES.md"), encoding="utf-8") as f:
+        text = f.read()
+    body, _, refs = text.partition("## References")
+    rules = re.findall(r"^(\d+)\. (.+?)(?=^\d+\. |^## |\Z)", body, re.S | re.M)
+    papers, other = [], []
+    for line in refs.splitlines():
+        m = re.match(r"- (.+?) \((\d{4})\)\. (.+)", line)
+        if not m:
+            continue
+        name = re.split(r"[ ,]", m.group(1))[0]
+        used = [int(n) for n, t in rules if re.search(rf"{re.escape(name)}[^()]*?,? {m.group(2)}|{re.escape(name)}[^)]{{0,80}}{m.group(2)}", t)]
+        item = {"text": line[2:].replace("*", ""), "used": used}
+        (other if re.search(r"book|manual|Human Kinetics|public-domain|Not peer-reviewed", line, re.I) else papers).append(item)
+    return papers, other
+
+
+@app.get("/api/references")
+def references_api():
+    papers, other = references()
+    return jsonify(papers=papers, other=other)
 
 
 @app.get("/api/about")

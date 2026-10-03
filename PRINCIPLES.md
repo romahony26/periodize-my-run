@@ -303,6 +303,9 @@ of ultra training, so read these as the best available reasoning, not proven met
 76. **A watch's distance on a treadmill is a guess.** [P] Treadmill runs are judged by heart rate and time.
 77. **A watch's altitude can be wrong.** [P] Each watch's altitude is checked on runs that start and finish in the same place,
     and hills are only adjusted for when it proves reliable.
+78a. **A watch measures how long and when you slept well, but not the stages of sleep.** [R] (*moderate*) Against laboratory
+    sleep recordings, six wearable devices including a Garmin were valid for the timing and duration of sleep, and all needed
+    improvement for sleep stages (Miller and colleagues, 2022). Periodize My Run's decisions use sleep duration and timing only.
 78. **Every score here is an estimate.** [P] Freshness, form, the execution score and the forecasts are this project's own
     measures built from watch data. They guide training; they do not diagnose anything.
 
@@ -338,6 +341,39 @@ of ultra training, so read these as the best available reasoning, not proven met
     2020) (*strong*). So Periodize My Run keeps the same plan structure for everyone, presses the patient start harder for men in
     long races, and adds what a bone stress injury feels like to a woman's warning about a jump in run length. [P]
 
+## 15. Your own response, and an explanation for everything
+
+84. **People respond differently to the same training, so the plan learns from your own record.** [R] (*moderate*) The spread in
+    how people respond to identical training is real, though much of what looks like it is measurement noise (Hecksteden and
+    colleagues, 2015), and people who do not improve on one dose do improve on a larger one (Montero and Lundby, 2017).
+    Periodize My Run reads your whole history for two patterns, and lets each move the plan only a little and only when it is
+    clear. Both are associations in one person's record, not experiments, and are shown with their sample size. [P]
+85. **Your taper is set from your own races, inside the range the research supports.** [R] (*strong*) Across trials the largest
+    gains came from a two-week taper with volume cut by 41 to 60% and the fast running kept (Bosquet and colleagues, 2007). In
+    158,000 recreational marathon runners, three weeks of steadily falling volume went with a 2.6% faster time than a minimal
+    taper (Smyth and Lawlor, 2021) (*moderate*). For each of your past races of 15 km or more, Periodize My Run compares how
+    deeply the last week was cut with how close the race was to your best level of the time. With six or more races and a clear
+    pattern (a rank correlation of 0.4 or more), the taper is cut 5 points deeper or lighter; otherwise the research average
+    stands. A deep taper may simply mark the races you cared about, so this is a hint, not proof. [P]
+86. **Miles or hard running: which has raised your fitness.** [P] Across the eight-week blocks in your history, the change in
+    your watch's fitness estimate is compared with the miles and the number of hard runs in each block, after allowing for the
+    level you started from. If miles clearly matter more, then before the race-specific phase every other week has one hard
+    session, not two, with the same distance. If hard running matters more, both sessions stay. The watch's estimate is
+    approximate (principle 75), which is why the pattern has to be strong before it counts.
+87. **What decides a marathon time, and why runners stall.** [R] (*moderate*) Marathon pace is set by aerobic capacity, the
+    fraction of it that can be held, and running economy (Joyner and Coyle, 2008), and by how well those hold up over hours
+    (Jones, 2024). Faster runners hold a higher fraction of their critical speed: 93% for a 2:30 marathon against 79% for a 6:00
+    one (Smyth and Muniz-Pumares, 2020). What separates faster runners in training is volume: weekly distance, runs per week,
+    the number of runs of 20 miles or more, and the longest run all go with faster times (Doherty and colleagues, 2020), and the
+    extra volume is almost all easy running, while a larger share of moderate and hard running goes with slower times
+    (Muniz-Pumares and colleagues, 2024). These are comparisons between runners, not trials. They point to the usual reasons a
+    runner stalls short of a time such as three hours: volume that has stopped rising, too much of it at a moderate effort, too
+    little long running to hold pace late, and a first half run faster than can be sustained (Smyth, 2021). Periodize My Run
+    shows which of speed and endurance your own gap is made of. [P]
+88. **Every run has a stated purpose, and every decision an explanation.** [P] Each planned day says what it is for. "Explain my
+    plan" lists each decision that shapes the plan, the numbers from your own data that led to it, and whether the rule behind
+    it is research, coaching convention or this project's choice.
+
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
 Listed so they are not mistaken for principles.
@@ -362,7 +398,7 @@ Listed so they are not mistaken for principles.
 
 ## References
 
-Research named above. Only findings are used; no text or tables are reproduced. Each was checked against its published record
+Research named above. Only findings are used; no text, tables or figures are reproduced, and nothing here depends on material that may not be cited. The app lists the same sources, with the principles that use each, under How it works. Each was checked against its published record
 (title, authors, journal and main finding) in October 2026 unless marked *from memory*; for those, check the paper before relying
 on a detail.
 
@@ -377,6 +413,7 @@ on a detail.
 - Costa RJS and colleagues (2017). Gut-training: the impact of two weeks repetitive gut-challenge during exercise. *Appl Physiol Nutr Metab*.
 - Craven J and colleagues (2022). Effects of acute sleep loss on physical performance: a systematic and meta-analytical review. *Sports Med* 52:2669–2690.
 - Damsted C, Parner ET, Sørensen H, Malisoux L, Hulme A, Nielsen RO (2019). The association between changes in weekly running distance and running-related injury: preparing for a half marathon. *J Orthop Sports Phys Ther* 49:230–238. *Abstract read.*
+- Daniels J, Gilbert J (1979). *Oxygen Power: Performance Tables for Distance Runners*. A book; only its two published equations (the oxygen cost of running at a speed, and the fraction of capacity held for a given time) are used, not its tables. Not peer-reviewed.
 - Deaner RO, Carter RE, Joyner MJ, Hunter SK (2015). Men are more likely than women to slow in the marathon. *Med Sci Sports Exerc*. *Abstract read.*
 - Desai P, Jungmalm J, Börjesson M, Karlsson J, Grau S (2021). Recreational runners with a history of injury are twice as likely to sustain a running-related injury as runners with no history of injury: a 1-year prospective cohort study. *J Orthop Sports Phys Ther* 51:144–150. *Abstract read.*
 - Dial MB and colleagues (2025). Validation of nocturnal resting heart rate and heart rate variability in consumer wearables. *Physiol Rep*.
@@ -392,6 +429,7 @@ on a detail.
 - Giovanelli N, Ortiz ALR, Henninger K, Kram R (2016). Energetics of vertical kilometer foot races; is steeper cheaper? *J Appl Physiol* 120:370–375.
 - Grivas and colleagues (2026). Training variability and threshold density: a conceptual comparison of East African and Norwegian endurance training systems. *Front Physiol*.
 - Haugen T, Sandbakk Ø, Seiler S, Tønnessen E (2022). The training characteristics of world-class distance runners. *Sports Med Open* 8:46.
+- Hecksteden A and colleagues (2015). Individual response to exercise training: a statistical perspective. *J Appl Physiol*. *Abstract read.*
 - Hellard P and colleagues (2006). Assessing the limitations of the Banister model in monitoring training. *J Sports Sci* 24:509–520.
 - Hew-Butler T and colleagues (2015). Statement of the Third International Exercise-Associated Hyponatremia Consensus Development Conference. *Clin J Sport Med* 25:303–320.
 - Hollander K and colleagues (2021). Sex-specific differences in running injuries: a systematic review with meta-analysis and meta-regression. *Sports Med*. *Abstract read.*
@@ -417,8 +455,10 @@ on a detail.
 - McNulty KL and colleagues (2020). The effects of menstrual cycle phase on exercise performance in eumenorrheic women: a systematic review and meta-analysis. *Sports Med*. *Abstract's conclusion read; authors and year from memory.*
 - Meeusen R and colleagues (2013). Prevention, diagnosis, and treatment of the overtraining syndrome: joint consensus statement of the ECSS and the ACSM. *Med Sci Sports Exerc* 45:186–205.
 - Midgley AW, McNaughton LR, Wilkinson M (2006). Is there an optimal training intensity for enhancing the maximal oxygen uptake of distance runners? *Sports Med* 36:117–132.
+- Miller DJ, Sargent C, Roach GD (2022). A validation of six wearable devices for estimating sleep, heart rate and heart rate variability in healthy adults. *Sensors*. *Abstract read.*
 - Minetti AE and colleagues (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *J Appl Physiol*. *From memory.*
 - Mølmen KS, Øfsteng SJ, Rønnestad BR (2019). Block periodization of endurance training: a systematic review and meta-analysis. *Open Access J Sports Med*.
+- Montero D, Lundby C (2017). Refuting the myth of non-response to exercise training: 'non-responders' do respond to higher dose of training. *J Physiol*. *Abstract read.*
 - Mountjoy M and colleagues (2023). 2023 International Olympic Committee's consensus statement on Relative Energy Deficiency in Sport (REDs). *Br J Sports Med*.
 - Mujika I, Padilla S (2000). Detraining: loss of training-induced physiological and performance adaptations. Parts I and II. *Sports Med* 30:79–87 and 145–154.
 - Muniz-Pumares D and colleagues (2024). The training intensity distribution of marathon runners across performance levels. *Sports Med*.
@@ -441,6 +481,7 @@ on a detail.
 - Smyth B (2021). How recreational marathon runners hit the wall. *PLoS One*.
 - Smyth B and colleagues (2022). Decoupling of internal and external workload during a marathon: an analysis of durability in 82,303 recreational runners. *Sports Med*.
 - Smyth B, Lawlor A (2021). Longer disciplined tapers improve marathon performance for recreational runners. *Front Sports Act Living*.
+- Smyth B, Muniz-Pumares D (2020). Calculation of critical speed from raw training data in recreational marathon runners. *Med Sci Sports Exerc*. *Abstract read.*
 - Southward K and colleagues (2018). The effect of acute caffeine ingestion on endurance performance: a systematic review and meta-analysis. *Sports Med*.
 - Stöggl T, Sperlich B (2014). Polarized training has greater impact on key endurance variables than threshold, high intensity, or high volume training. *Front Physiol* 5:33.
 - Stults-Kolehmainen MA, Bartholomew JB, Sinha R (2014). Chronic psychological stress impairs recovery of muscular function and somatic sensations over a 96-hour period. *J Strength Cond Res*. *Abstract read.*

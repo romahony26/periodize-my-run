@@ -153,6 +153,8 @@ def limits(prof, c, goal_miles):
     return {
         "peak_why": "the peak week you set" if c.get("peak_miles_override") else peak_why,
         "weeks_unbroken": prof.get("weeks_unbroken"),
+        "taper_shift": ((db.get("response") or {}).get("taper") or {}).get("shift", 0.0),       # the athlete's own record, see respond.py
+        "emphasis": ((db.get("response") or {}).get("emphasis") or {}).get("kind"),
         "proven_miles": prof.get("proven8_year") or prof.get("proven8_3y") or prof.get("best8_3y") or prof["recent8"],
         "peak_miles": c.get("peak_miles_override") or peak, "base_cap_miles": round(0.9 * (c.get("peak_miles_override") or peak)),
         "long_run_cap_specific": round(long_spec), "long_run_cap_base": round(long_spec) - 3, "long_run_floor": max(round(0.45 * long_spec), 5),

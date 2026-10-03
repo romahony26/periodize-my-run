@@ -19,6 +19,7 @@ import profile
 import push
 import results
 import trends
+import respond
 import updates
 import watch
 import vault
@@ -303,10 +304,12 @@ def run(kind):
         if kind in ("setup", "daily"):
             _progress("Reading your activity history")
             watch.sync(kind, _progress)
-            profile.derive()
+            prof_ = profile.derive()
             found = results.detect()
             if found:
                 log.info("Race results found in your history: %d new", found)
+            if prof_:        # after the results, because the taper is learned from them
+                respond.derive(db.get("hrmax") or prof_.get("hrmax_observed"))
         if kind in ("setup", "daily", "readiness"):
             watch.sync_rest(kind, c, _progress)
         if kind in ("setup", "daily", "replan"):
