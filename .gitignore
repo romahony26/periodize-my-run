@@ -1,0 +1,41 @@
+# Only what is needed to install and run Periodize is kept in this repository.
+
+# Python environment and caches
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+
+# Your data never belongs here (it lives in ~/.periodize and ~/.config/periodize anyway)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.fit
+*.zip
+*.pem
+*.key
+vault.key
+.env
+.env.*
+backups/
+logs/
+tls/
+
+# Development and test tooling: not needed to run the app
+tests/
+check.sh
+requirements-dev.txt
+ruff.toml
+tools/brochure.py
+tools/lock.py
+tools/live_scan.sh
+docs/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
