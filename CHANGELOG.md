@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.6.1 - 2026-10-03
+### Fixed
+- The lists of studies on the How it works page closed by themselves a few seconds after being opened, because the page refreshes every six seconds. An open list now stays open, and the refresh waits while any expandable section is open (this also fixes "Enter a test by hand" on the Fitness page).
+
 ## 2.6.0 - 2026-10-03
 ### Added
 - Explain my plan. A button on the plan page opens a panel that lists every decision shaping your plan: what you are building toward, your peak week, how fast the miles build, the long run, how many hard sessions and which kinds, your taper, down weeks, day-to-day tuning, and what stands between you and your goal. Each one shows the decision, the numbers from your own data that led to it, and where the rule comes from: a named study, a coaching convention, or this project's own choice.

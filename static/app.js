@@ -461,8 +461,8 @@ async function loadAbout(){ABOUT=(await api('about')).sections;REFS=await api('r
 let REFS=null;
 function refsCard(){if(!REFS)return '';const li=x=>`<li>${E(x.text)}${x.used.length?` <span class="mute xs">Used in principle${x.used.length>1?'s':''} ${x.used.join(', ')}.</span>`:''}</li>`;
   return `<div class="card c12" id="refs"><p class="eyebrow">The research behind the plan</p><p class="small">${REFS.papers.length} peer-reviewed studies are used. Only their findings are used: no text, tables or figures are copied. The numbered principles are in PRINCIPLES.md, which comes with the app.</p>
-    <details><summary class="small"><b>Peer-reviewed studies (${REFS.papers.length})</b></summary><ul class="why">${REFS.papers.map(li).join('')}</ul></details>
-    ${REFS.other.length?`<details><summary class="small"><b>Other sources, not peer-reviewed (${REFS.other.length})</b></summary><ul class="why">${REFS.other.map(li).join('')}</ul></details>`:''}</div>`}
+    <details id="refs-papers" ${TOPEN['refs-papers']?'open':''}><summary class="small" style="cursor:pointer"><b>Peer-reviewed studies (${REFS.papers.length})</b></summary><ul class="why">${REFS.papers.map(li).join('')}</ul></details>
+    ${REFS.other.length?`<details id="refs-other" ${TOPEN['refs-other']?'open':''}><summary class="small" style="cursor:pointer"><b>Other sources, not peer-reviewed (${REFS.other.length})</b></summary><ul class="why">${REFS.other.map(li).join('')}</ul></details>`:''}</div>`}
 async function openExplain(){let d=$('#explaindlg');if(!d){d=document.createElement('dialog');d.id='explaindlg';d.className='card';d.setAttribute('aria-label','Explain my plan');
     d.style.cssText='max-width:760px;width:calc(100% - 32px);max-height:86vh;overflow:auto;padding:22px;border:0';document.body.appendChild(d);
     d.addEventListener('click',e=>{if(e.target===d||e.target.id==='explainclose')d.close()})}
@@ -530,6 +530,7 @@ function bind(){
   on('#w1',async()=>{if(!$('#wterms').checked)return toast('Please read and accept the terms of use first.','err');await api('terms',{accept:true});wiz.step=2;render()});
   if($('#taccept'))$('#taccept').onclick=async()=>{if(!$('#tok2').checked)return toast('Tick the box to accept the terms.','err');await api('terms',{accept:true});toast('Thank you');await load()};
   $$('details[id^=tbox]').forEach(d=>d.ontoggle=()=>{TOPEN[d.id]=d.open;if(d.open&&!TERMS)loadTerms()});
+  $$('details[id^=refs-]').forEach(d=>d.ontoggle=()=>{TOPEN[d.id]=d.open});
   [['#w2',3],['#w3',4],['#wb1',1],['#wb2',2],['#wb3',3],['#wb4',4]].forEach(([id,n])=>on(id,()=>{if(id==='#w4')return;wiz.step=n;render()}));
   on('#w4',()=>{const p=prefsRead();if(p.blocked_days.includes(p.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
     if($('#sd').value&&hmsIn($('#st').value))p.seed_race={miles:+$('#sd').value,time_s:hmsIn($('#st').value)};wiz.prefs=p;wiz.step=5;render()});
@@ -608,4 +609,4 @@ function bind(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(SEL||DAY||PACE||TRV)){SEL=null;DAY=null;PACE=null;TRV=null;render()}});
 load();
-setInterval(()=>{const a=document.activeElement;if(a&&['INPUT','SELECT'].includes(a.tagName))return;if(document.querySelector('details[id^=tbox][open]'))return;if(document.querySelector('.day.drag'))return;load()},6000);
+setInterval(()=>{const a=document.activeElement;if(a&&['INPUT','SELECT'].includes(a.tagName))return;if(document.querySelector('details[open]'))return;if(document.querySelector('.day.drag'))return;load()},6000);
