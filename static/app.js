@@ -35,10 +35,10 @@ function render(){
   $$('#nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})});
   const j=S.job;
   $('#sync').innerHTML=j.running?`<span class="dot busy"></span>${E(j.progress||'Working')}…`
-    :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?'Updated '+E(S.last_run.slice(5).replace('T',' ')):'Not updated yet'} <button class="ghost" id="run">Update</button>`;
+    :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?'Synced '+E(S.last_run.slice(5).replace('T',' ')):'Not synced yet'} <button class="ghost" id="run">Sync</button>`;
   let h='';
-  if(j.error&&!j.running)h+=`<div class="alert err">The last update had a problem: ${E(j.error)}</div>`;
-  if(S.stale)h+=`<div class="alert">No successful update in 7 days. Check the Log tab, then press Update.</div>`;
+  if(j.error&&!j.running)h+=`<div class="alert err">The last sync had a problem: ${E(j.error)}</div>`;
+  if(S.stale)h+=`<div class="alert">No successful sync in 7 days. Check the Log tab, then press Sync.</div>`;
   $('#main').innerHTML=h+({plan:planView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])();
   bind();bindCharts();
 }
@@ -230,13 +230,13 @@ function prefs(s){return `<div class="row"><div><label for="units">Distances in<
   <div><label for="run_days">Running days a week</label><select id="run_days">${[3,4,5,6].map(n=>opt(n,n,s.run_days)).join('')}</select></div>
   <div><label for="long_day">Long run day</label><select id="long_day">${DOW.map((d,i)=>opt(i,d,s.long_day)).join('')}</select></div>
   <div><label for="week_start">Week starts on</label><select id="week_start">${DOW.map((d,i)=>opt(i,d,s.week_start)).join('')}</select></div>
-  <div><label for="run_time">Daily update time</label><input id="run_time" type="time" value="${s.run_time}"></div></div>
+  <div><label for="run_time">Daily sync time</label><input id="run_time" type="time" value="${s.run_time}"></div></div>
   <div class="lab" id="bl">Days you cannot run</div><div id="blocked" class="checks" role="group" aria-labelledby="bl">${DOW.map((d,i)=>`<label><input type="checkbox" value="${i}" ${(s.blocked_days||[]).includes(i)?'checked':''}>${d.slice(0,3)}</label>`).join('')}</div>
   <div class="row"><div><label for="push_enabled">Send workouts to my watch</label>${yn('push_enabled',s.push_enabled)}</div>
   <div><label for="daily_adjust">Ease paces on poor recovery</label>${yn('daily_adjust',s.daily_adjust)}</div>
   <div><label for="strength">Strength sessions</label>${yn('strength',s.strength)}</div>
   <div><label for="easy_target">Easy runs on the watch</label><select id="easy_target">${opt('none','No pace alerts',s.easy_target)}${opt('pace','Pace range alerts',s.easy_target)}</select></div></div>
-  <p class="xs mute">Set the update time for after you usually wake and your watch has synced, so last night's sleep is counted.</p>`}
+  <p class="xs mute">Set the sync time for after you usually wake and your watch has synced, so last night's sleep is counted.</p>`}
 function prefsRead(){return {week_start:+$('#week_start').value,units:$('#units').value,run_days:+$('#run_days').value,long_day:+$('#long_day').value,run_time:$('#run_time').value,push_enabled:$('#push_enabled').value==='1',
   blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
 function settingsView(){const s=S.settings;
@@ -303,7 +303,7 @@ function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" ta
 function watchCard(head,chip){const w=S.watch||{source:'garmin'}, opt=(v,t)=>`<option value="${v}" ${w.source===v?'selected':''}>${t}</option>`;
   return `<div class="card c6 conn" id="cwatch">${head('⇄','Where your runs come from',chip(w.connected,E(w.name||'Garmin'),'Not connected',w.source!=='garmin'))}
     <label for="wsrc">Source</label><select id="wsrc">${opt('garmin','Garmin (runs, sleep, HRV, workouts to the watch)')}${opt('fitfolder','FIT files from a folder (any watch, runs only)')}${opt('coros','COROS (experimental, runs only)')}</select>
-    <div id="wfit" ${w.source==='fitfolder'?'':'hidden'}><p class="small" style="margin:10px 0 4px">Export your runs as .fit files (COROS, Polar, Suunto, Wahoo or any watch) into one folder, or point this at a folder a sync app fills. New files are read at every update; runs only, so there is no day-by-day easing from sleep or HRV, and workouts are not sent to the watch.</p>
+    <div id="wfit" ${w.source==='fitfolder'?'':'hidden'}><p class="small" style="margin:10px 0 4px">Export your runs as .fit files (COROS, Polar, Suunto, Wahoo or any watch) into one folder, or point this at a folder a sync app fills. New files are read at every sync; runs only, so there is no day-by-day easing from sleep or HRV, and workouts are not sent to the watch.</p>
       ${w.local?`<label for="wfolder">Folder on this computer</label><div class="copyrow"><input id="wfolder" style="flex:1;min-width:0" value="${E(w.fit_folder||'')}" placeholder="/Users/you/FIT files"><button class="ghost" id="wfsave">Use this folder</button></div>`:`<p class="xs mute">${w.fit_folder?'Folder: <code>'+E(w.fit_folder)+'</code>. ':''}The folder can only be chosen on the computer Periodize My Run runs on.</p>`}</div>
     <div id="wcor" ${w.source==='coros'?'':'hidden'}><p class="small" style="margin:10px 0 4px"><span class="tag">Experimental</span> Written without a COROS watch to test against, through COROS's unofficial web interface, which COROS can change or block at any time. It reads runs only and never sends anything to your COROS account or watch.</p>
       ${w.coros?`<p class="cact"><button class="ghost" id="cordis">Disconnect COROS</button></p>`:`<label for="cem">COROS email</label><input id="cem" style="width:100%" autocomplete="username"><label for="cpw">COROS password</label><input id="cpw" type="password" style="width:100%" autocomplete="current-password">
@@ -313,7 +313,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
   const head=(icon,name,c)=>`<div class="chead"><span class="cicon" aria-hidden="true">${icon}</span><b>${name}</b><span style="margin-left:auto">${c}</span></div>`;
   return `<div class="c12 sechead"><h2>Connections</h2><p class="small mute">Where your data comes from and where copies go. Tokens are kept encrypted on this computer; no passwords are stored.</p></div>
   <div class="card c6 conn" id="cgarmin">${head('⌚','Garmin',chip(gm.connected,'Connected','Not connected'))}
-    <p class="small">${gm.connected?'Signed in'+(gm.name?' as <b>'+E(gm.name)+'</b>':'')+'.':'Not connected. The plan cannot update without it.'}</p>
+    <p class="small">${gm.connected?'Signed in'+(gm.name?' as <b>'+E(gm.name)+'</b>':'')+'.':'Not connected. The plan cannot sync without it.'}</p>
     <ul class="clist"><li>Reads your runs, sleep, HRV, resting heart rate and steps once a day.</li><li>${S.settings.push_enabled?`Sends the next ${S.settings.push_days} days of workouts to your watch, and checks every four hours that they are still there.`:'Sending workouts to your watch is switched off (How you train, above).'}</li><li>Your password was used once to sign in and was not stored.</li></ul>
     ${gm.connected?'<p class="cact"><button class="ghost" id="gmdis">Disconnect Garmin</button></p><p class="xs mute">To revoke access everywhere, change your Garmin password.</p>':''}</div>
   ${watchCard(head,chip)}
@@ -323,7 +323,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
   <div class="card c12 conn" id="cheat">${head('☀','Heat adjustment (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
     <p class="small">Eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only thing sent is your rough location, rounded to about 10 km, taken from your latest outdoor run. Off unless you switch it on.</p>
     <label for="heatsw">Adjust for heat</label>${yn('heatsw',S.heat&&S.heat.on)}
-    ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next update, once a run with GPS is found.</p>':''}</div>
+    ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
     <label for="mapsw">Show runs on a real map</label>${yn('mapsw',S.map_tiles)}</div>`}

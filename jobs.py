@@ -417,7 +417,7 @@ def _update_due(now):
 
 
 def daily_due(now):
-    """When today's daily update is due: the chosen time, moved by today's jitter."""
+    """When today's daily sync is due: the chosen time, moved by today's jitter."""
     hh, mm = (int(x) for x in db.get("run_time").split(":"))
     return now.replace(hour=hh, minute=mm, second=0, microsecond=0) + jitter("daily " + now.date().isoformat())
 

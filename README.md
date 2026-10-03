@@ -96,7 +96,7 @@ It then reads your history and builds the plan, showing progress as it goes.
 
 **Running it**
 - Installer for macOS and Raspberry Pi; starts at boot and stays running.
-- Catches up after downtime; warns after 7 days without an update.
+- Catches up after downtime; warns after 7 days without a sync.
 - Password, login limits and HTTPS for access from other devices.
 
 ## How much history it uses
@@ -183,8 +183,8 @@ gives "This address is not allowed" until you allow it once:
 `python web.py --allow-host raspberrypi.local`. Addresses like `192.168.1.20`
 always work.
 
-**Garmin stopped updating.** Garmin sometimes ends the sign-in. Go to Settings,
-Connections, Garmin, disconnect and connect again. If the plan has not updated
+**Garmin stopped syncing.** Garmin sometimes ends the sign-in. Go to Settings,
+Connections, Garmin, disconnect and connect again. If the plan has not synced
 for seven days, the app warns you.
 
 **Different port.** Set `PERIODIZE_PORT` before running the installer, for

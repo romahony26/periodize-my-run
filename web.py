@@ -373,7 +373,7 @@ def _sync_status(p, day, tp, adj, c, d, today):
     if p["garmin_id"] and h == p["pushed_hash"]:
         return {"state": "synced", "text": "On your Garmin calendar and up to date" + (", with today's eased paces." if (adj or {}).get("slow") else ".") + " It reaches the watch at its next sync."}
     if p["garmin_id"]:
-        return {"state": "pending", "text": "On your Garmin calendar, but it has changed since. The update goes at the next sync with Garmin."}
+        return {"state": "pending", "text": "On your Garmin calendar, but it has changed since. The change goes at the next sync with Garmin."}
     return {"state": "pending", "text": "Not on your Garmin calendar yet. It goes at the next sync with Garmin."}
 
 
@@ -1210,7 +1210,7 @@ def about():
         ]),
         ("What it has learned about you", learned(c, L)),
         ("Race-day forecast", [
-            "The forecast is where you are likely to be on race day, not where you are today. It is recalculated at every update, so it moves with what you actually do.",
+            "The forecast is where you are likely to be on race day, not where you are today. It is recalculated at every sync, so it moves with what you actually do.",
             "It starts from your current fitness and moves toward your proven level: the best you have shown in race results in the last three years, adjusted for distance using your own record.",
             f"How far it gets depends on the training you complete. Each {forecast.TAU:g} weeks of completed training closes about 63% of the remaining gap; the last {forecast.TAPER_WEEKS} weeks are taper and do not count. This rate is a general rule, not learned from you.",
             "It does not assume you do everything. It uses the share of training you have historically delivered: each of your last 104 weeks is compared with the six weeks before it, and missed or cut weeks pull the average down.",
@@ -1333,7 +1333,7 @@ def about():
             "The windows come from the research. The exact point values are the app's own choice.",
             f"Each point eases today's fast running by {calibrate.value('slow_per_point'):.1%}, up to four points. Easy running is not changed.",
             "At 3+ points, or a point or more on three mornings running, the session becomes an easy run of the same distance, on the watch too. The planned session is still shown, and comes back once you have recovered.",
-            "Every scheduled contact with Garmin (the daily update and the four-hourly watch check) is moved by its own random amount, up to 30 minutes either way, so installs do not all reach Garmin at the same moment.",
+            "Every scheduled contact with Garmin (the daily sync and the four-hourly watch check) is moved by its own random amount, up to 30 minutes either way, so installs do not all reach Garmin at the same moment.",
             "The easing per point is measured from your own runs once there are enough; see What it has learned about you.",
         ]),
         ("Holidays", [
@@ -1359,9 +1359,9 @@ def about():
             "Your moves are kept when the plan is recalculated: they are replayed onto the new plan. Undo reverses the last move.",
         ]),
         ("Keeping itself running", [
-            "Checks every 5 minutes whether today's update has happened; catches up after the computer was off; retries failed Garmin requests with growing waits.",
+            "Checks every 5 minutes whether today's sync has happened; catches up after the computer was off; retries failed Garmin requests with growing waits.",
             f"Requests to Garmin are spaced {c['pause_min_s']:g}–{c['pause_max_s']:g} seconds apart at random. Everything downloaded is cached.",
-            "The plan page warns when there has been no successful update for 7 days.",
+            "The plan page warns when there has been no successful sync for 7 days.",
         ]),
         ("Fuelling", [
             "Marathon and longer: practise taking carbohydrate on long runs, building from 30 g an hour early in the plan to 60–70 g an hour in the last ten weeks. The long run note shows the week's target.",

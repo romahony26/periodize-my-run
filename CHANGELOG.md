@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.4.1 - 2026-10-03
+### Changed
+- The Update button at the top of every page is now called Sync, and the wording follows it everywhere: "Synced" with the time, "Daily sync time" in Settings, and the warnings about a failed or overdue sync. "Update" now only ever means a new version of the app.
+
 ## 2.4.0 - 2026-10-03
 ### Added
 - Updates from the app. Once the project is public on GitHub, the app checks once a day, at a random time, for a newer version (nothing about you is sent) and shows a notice: Update now, or Dismiss until the next version. Settings, About shows the update status, a Check now button, and a list of versions to switch between, so you can go back to an earlier one and forward again.
