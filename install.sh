@@ -4,9 +4,29 @@
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 PY="${PYTHON:-python3}"
+[ -x "$DIR/.python/bin/python3" ] && PY="$DIR/.python/bin/python3"      # the private copy a previous install downloaded
 PORT="${PERIODIZE_PORT:-8321}"
 
-"$PY" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)' || { echo "Python 3.12 or later is needed (found $($PY --version))."; exit 1; }
+# Python 3.12 or later, able to make an environment. If this computer has none, a private copy is downloaded into the app's own
+# folder (from python-build-standalone, checked against the SHA-256 in runtime.lock). Nothing is installed system-wide.
+if ! "$PY" -c 'import sys, venv, ensurepip; sys.exit(0 if sys.version_info >= (3, 12) else 1)' 2>/dev/null; then
+  case "$(uname -s)-$(uname -m)" in
+    Linux-x86_64) BUILD=x86_64-unknown-linux-gnu ;;
+    Linux-aarch64|Linux-arm64) BUILD=aarch64-unknown-linux-gnu ;;
+    Darwin-arm64) BUILD=aarch64-apple-darwin ;;
+    *) echo "Python 3.12 or later is needed, and there is no ready-made copy for this kind of computer. Install Python, then run this again."; exit 1 ;;
+  esac
+  LINE="$(grep " $BUILD " "$DIR/runtime.lock")" || { echo "runtime.lock has no Python for $BUILD."; exit 1; }
+  SUM="${LINE%% *}"; URL="${LINE##* }"
+  echo "Python 3.12 or later was not found. Downloading a private copy for this app (about 30 MB)..."
+  TMP="$DIR/.python.tar.gz"
+  if command -v curl >/dev/null 2>&1; then curl -fsSL "$URL" -o "$TMP"; else wget -q "$URL" -O "$TMP"; fi
+  GOT="$( (sha256sum "$TMP" 2>/dev/null || shasum -a 256 "$TMP") | cut -d' ' -f1)"
+  [ "$GOT" = "$SUM" ] || { rm -f "$TMP"; echo "The download did not match its published checksum, so it was not used. Nothing was installed."; exit 1; }
+  rm -rf "$DIR/.python" && mkdir "$DIR/.python"
+  tar xzf "$TMP" -C "$DIR/.python" --strip-components 1 && rm -f "$TMP"
+  PY="$DIR/.python/bin/python3"
+fi
 echo "Creating Python environment..."
 "$PY" -m venv "$DIR/.venv"
 "$DIR/.venv/bin/pip" install --quiet --upgrade pip

@@ -5,6 +5,8 @@ The app's Change log page is drawn from this file.
 
 ## 2.8.0 - 2026-10-03
 ### Added
+- Installers no longer need Python to be installed first. If the computer has no Python 3.12 or later, the installer downloads a private copy into the app's own folder (about 30 MB, checked against a pinned SHA-256 in `runtime.lock`; a download that does not match is refused). Nothing is installed system-wide, and the uninstaller removes it. Works on Windows (64-bit), Linux (x86-64 and 64-bit ARM) and Apple-silicon Macs.
+- Packages to send to someone, built by `tools/package.py`: a self-contained Mac app ("Periodize My Run.app", Apple silicon, holding its own Python and every library, so nothing is downloaded), and small Windows and Linux archives with a double-click installer that downloads what the computer lacks.
 - An uninstaller for every system: `./uninstall.sh` on macOS and Linux, `uninstall.ps1` on Windows. It stops the app, stops it starting by itself and removes its Python environment. Your data is kept unless you add `--data` (Windows: `-Data`), which asks you to type "delete" first.
 ### Changed
 - The README's install section is rewritten as numbered steps for macOS, Windows and Linux (including Raspberry Pi), with where to get the files, where things are kept on each system, and a new Uninstall section. Both installers now end by saying how to remove the app.

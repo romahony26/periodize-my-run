@@ -25,10 +25,8 @@ Get-CimInstance Win32_Process -Filter "Name='pythonw.exe' OR Name='python.exe'" 
     Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith("$Dir\.venv", [StringComparison]::OrdinalIgnoreCase) } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 
-if (Test-Path "$Dir\.venv") {
-    Remove-Item -Recurse -Force "$Dir\.venv"
-    Write-Host "Removed the Python environment."
-}
+foreach ($p in @("$Dir\.venv", "$Dir\.python")) { if (Test-Path $p) { Remove-Item -Recurse -Force $p } }
+Write-Host "Removed the Python environment."
 
 if ($Data) {
     Write-Host "This deletes your training data, backups and stored Garmin login for good:"

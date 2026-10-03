@@ -125,8 +125,9 @@ It then reads your history and builds the plan, showing progress as it goes.
 ## Install
 
 It runs on **macOS**, **Windows 10 and 11**, and **Linux** (Debian, Ubuntu,
-Raspberry Pi OS, DietPi, or any system with systemd). You need Python 3.12 or
-later, and a Garmin account or a folder of FIT files.
+Raspberry Pi OS, DietPi, or any system with systemd). You need a Garmin account
+or a folder of FIT files, and the internet for the install. Python 3.12 or later
+is used if you have it and downloaded for the app if you do not.
 
 The steps are the same on every system: get the files, run the installer, open
 the app in a browser. The installer makes a private Python environment inside
@@ -147,8 +148,9 @@ Keep the folder where you put it: the app runs from there.
 
 **macOS**
 
-1. Check Python: open Terminal and type `python3 --version`. If it is older
-   than 3.12 or missing, install it from <https://www.python.org/downloads/>.
+1. Nothing to prepare on an Apple-silicon Mac: if there is no Python 3.12 or
+   later, the installer downloads a private copy for the app. On an Intel Mac,
+   install Python 3.12 or later from <https://www.python.org/downloads/> first.
 2. In Terminal, go to the folder and run the installer:
 
        cd periodize-my-run
@@ -161,8 +163,8 @@ password.
 
 **Windows 10 or 11**
 
-1. Install Python 3.12 or later from <https://www.python.org/downloads/>, and
-   tick "Add python.exe to PATH" on the first screen.
+1. Nothing to prepare: if there is no Python 3.12 or later, the installer
+   downloads a private copy for the app.
 2. Open the folder in File Explorer, click the address bar, type `powershell`
    and press Enter.
 3. Run the installer:
@@ -177,8 +179,9 @@ yet been tested on a real Windows machine; please report any problem.
 
 **Linux and Raspberry Pi**
 
-1. Check Python: `python3 --version`. On Debian, Ubuntu or Raspberry Pi OS,
-   `sudo apt install python3 python3-venv openssl` installs what is needed.
+1. Make sure `openssl` and `curl` are there (`sudo apt install openssl curl`).
+   If there is no Python 3.12 or later, the installer downloads a private copy
+   for the app.
 2. Go to the folder and run the installer as the user the app should run as
    (not as root; it asks for `sudo` when it needs it):
 
@@ -192,6 +195,24 @@ yet been tested on a real Windows machine; please report any problem.
 It starts at boot. The browser warns once about the self-made certificate; that
 is expected. To keep it to this computer only instead, run
 `PERIODIZE_HOST=127.0.0.1 ./install.sh`.
+
+### Sending it to someone
+
+`python tools/package.py` (a development tool, not part of the download) builds
+three files to give to someone who will not use git:
+
+| System | File | What they do |
+| --- | --- | --- |
+| Mac (Apple silicon) | `Periodize-My-Run-<version>-mac.zip`, about 40 MB | Unzip, drag the app to Applications, open it. Nothing is downloaded: the app holds its own Python and libraries. It starts at login and opens the planner in the browser. |
+| Windows 10 or 11 | `Periodize-My-Run-<version>-windows.zip`, under 1 MB | Unzip, double-click `Install.bat`. It downloads Python if there is none, and the libraries. |
+| Linux, Raspberry Pi | `Periodize-My-Run-<version>-linux.tar.gz`, under 1 MB | Unpack, run `./install.sh`. It downloads Python if there is none, and the libraries. |
+
+Each holds a `READ ME FIRST.txt` with the steps and how to remove it. The Mac
+app is not signed with an Apple Developer ID, so the first time it is opened
+macOS asks for confirmation: System Settings, Privacy & Security, Open Anyway.
+Windows may show "Windows protected your PC": More info, Run anyway. There is
+no package for Intel Macs, because one library the app needs no longer
+publishes a ready-built file for them.
 
 ### 3. Set it up
 

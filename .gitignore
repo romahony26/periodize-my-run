@@ -2,6 +2,8 @@
 
 # Python environment and caches
 .venv/
+.python/
+.python.tar.gz
 __pycache__/
 *.py[cod]
 .ruff_cache/
@@ -31,6 +33,7 @@ ruff.toml
 tools/brochure.py
 tools/lock.py
 tools/live_scan.sh
+tools/package.py
 docs/
 
 # Editors and operating systems

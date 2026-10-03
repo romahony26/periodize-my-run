@@ -37,8 +37,8 @@ else
   fi
 fi
 
-if [ -d "$DIR/.venv" ]; then
-  rm -rf "$DIR/.venv"
+if [ -d "$DIR/.venv" ] || [ -d "$DIR/.python" ]; then
+  rm -rf "$DIR/.venv" "$DIR/.python"
   echo "Removed the Python environment."
 fi
 

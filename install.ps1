@@ -18,10 +18,28 @@ foreach ($c in @("py -3", "python")) {
         if ($v -eq "True") { $Py = $c; break }
     } catch { }
 }
-if (-not $Py) { Write-Host "Python 3.12 or later is needed: install it from https://www.python.org/downloads/ and tick 'Add python.exe to PATH'."; exit 1 }
+# None on this computer: download a private copy into the app's own folder (from python-build-standalone, checked against the
+# SHA-256 in runtime.lock). Nothing is installed system-wide.
+if (Test-Path "$Dir\.python\python.exe") { $Py = """$Dir\.python\python.exe""" }
+if (-not $Py) {
+    $Line = Get-Content "$Dir\runtime.lock" | Where-Object { $_ -match " x86_64-pc-windows-msvc " } | Select-Object -First 1
+    if (-not $Line -or $env:PROCESSOR_ARCHITECTURE -ne "AMD64") { Write-Host "Python 3.12 or later is needed: install it from https://www.python.org/downloads/ and tick 'Add python.exe to PATH', then run this again."; exit 1 }
+    $Sum = $Line.Split(" ")[0]; $Url = $Line.Split(" ")[-1]
+    Write-Host "Python 3.12 or later was not found. Downloading a private copy for this app (about 25 MB)..."
+    $Tmp = "$Dir\.python.tar.gz"
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    Invoke-WebRequest -Uri $Url -OutFile $Tmp -UseBasicParsing
+    if ((Get-FileHash $Tmp -Algorithm SHA256).Hash.ToLower() -ne $Sum) { Remove-Item $Tmp -Force; Write-Host "The download did not match its published checksum, so it was not used. Nothing was installed."; exit 1 }
+    if (Test-Path "$Dir\.python") { Remove-Item -Recurse -Force "$Dir\.python" }
+    New-Item -ItemType Directory "$Dir\.python" | Out-Null
+    & tar.exe -xzf $Tmp -C "$Dir\.python" --strip-components 1
+    Remove-Item $Tmp -Force
+    $Py = """$Dir\.python\python.exe"""
+}
 
 Write-Host "Creating Python environment..."
 & cmd /c "$Py -m venv ""$Dir\.venv"""
+if (-not (Test-Path "$Dir\.venv\Scripts\pythonw.exe")) { Write-Host "The Python environment could not be created."; exit 1 }
 & "$Dir\.venv\Scripts\python.exe" -m pip install --quiet --upgrade pip
 & "$Dir\.venv\Scripts\python.exe" -m pip install --quiet --require-hashes -r "$Dir\requirements.lock"   # exact versions, each checked against its published SHA-256
 
