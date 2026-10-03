@@ -1,5 +1,5 @@
 #!/bin/sh
-# Periodize My Run installer for macOS and Raspberry Pi OS / DietPi (Debian).
+# Periodize My Run installer for macOS and Linux (Debian, Ubuntu, Raspberry Pi OS, DietPi, or any system with systemd).
 # Creates a Python environment, then registers the app to start at boot and stay running.
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -41,6 +41,7 @@ PL
   launchctl unload "$PLIST" 2>/dev/null || true
   launchctl load "$PLIST"
   echo "Periodize My Run is running. Open http://localhost:$PORT"
+  echo "To remove it later: ./uninstall.sh (your data is kept unless you add --data)"
 else
   HOST="${PERIODIZE_HOST:-0.0.0.0}"
   # The app is reachable from other devices, so it needs a password and an encrypted connection before it starts.
@@ -90,4 +91,5 @@ UN
   IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
   SCHEME=http; [ -f "$HOME/.periodize-my-run/tls/cert.pem" ] && SCHEME=https
   echo "Periodize My Run is running. Open $SCHEME://${IP:-<this device>}:$PORT from any device on your network and log in with the app password."
+  echo "To remove it later: ./uninstall.sh (your data is kept unless you add --data)"
 fi

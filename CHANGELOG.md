@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.8.0 - 2026-10-03
+### Added
+- An uninstaller for every system: `./uninstall.sh` on macOS and Linux, `uninstall.ps1` on Windows. It stops the app, stops it starting by itself and removes its Python environment. Your data is kept unless you add `--data` (Windows: `-Data`), which asks you to type "delete" first.
+### Changed
+- The README's install section is rewritten as numbered steps for macOS, Windows and Linux (including Raspberry Pi), with where to get the files, where things are kept on each system, and a new Uninstall section. Both installers now end by saying how to remove the app.
+- The README's feature list now covers weather, Explain my plan, the purpose of each run and what is learned from your own history.
+
 ## 2.7.4 - 2026-10-03
 ### Added
 - The History tab shows the trend of your execution score over time: a line of the average of your last five scored sessions, session by session, with each session's own score on hover. It appears once three sessions have been scored, so it no longer waits for a second full week. The weekly bars are still shown once there are two weeks.

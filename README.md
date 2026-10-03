@@ -49,11 +49,24 @@ It then reads your history and builds the plan, showing progress as it goes.
 - Counts steps taken outside your runs as background load.
 - Optional daily message with today's session.
 
-**Heat (optional)**
-- Switch on heat adjustment and fast paces are eased on hot, humid days, a
-  dangerously hot day becomes an easy run, and the race-day forecast appears
-  for your goal race. The weather comes from Open-Meteo, which receives only
-  your rough location.
+**Weather (optional)**
+- Switch on weather and every outdoor run is given the temperature, humidity,
+  wind and rain it was run in. Fitness, the aerobic tests and the prediction
+  check are then judged on what each run was worth in neutral weather.
+- Fast paces are eased on hot, humid days, a dangerously hot day becomes an
+  easy run, and the race-day forecast appears for your goal race.
+- The weather comes from Open-Meteo, which receives only the rough locations
+  (to about 10 km) and dates of your runs.
+
+**Explained, and yours**
+- "Explain my plan" lists every decision behind the plan, the numbers from
+  your own data that led to it, and where the rule comes from.
+- Every planned day says what it is for.
+- Your peak week comes from what you have held without breaking down, and your
+  taper and the balance of miles against hard sessions are learned from your
+  own history.
+- Every peer-reviewed study used is listed in the app with the principles
+  that rely on it (see [PRINCIPLES.md](PRINCIPLES.md)).
 
 **Where your runs come from**
 - Garmin (the full connection: runs, sleep, HRV, resting heart rate, steps,
@@ -111,45 +124,128 @@ It then reads your history and builds the plan, showing progress as it goes.
 
 ## Install
 
-Needs Python 3.12 or later and a Garmin account. Download or clone this
-repository, then run the installer for your system from its folder.
+It runs on **macOS**, **Windows 10 and 11**, and **Linux** (Debian, Ubuntu,
+Raspberry Pi OS, DietPi, or any system with systemd). You need Python 3.12 or
+later, and a Garmin account or a folder of FIT files.
+
+The steps are the same on every system: get the files, run the installer, open
+the app in a browser. The installer makes a private Python environment inside
+the app's folder, downloads the libraries it needs, and sets the app to start
+by itself. It changes nothing else on the computer.
+
+### 1. Get the files
+
+Either download the ZIP from
+<https://github.com/romahony26/periodize> (Code, Download ZIP) and unpack it
+where you want the app to live, or:
+
+    git clone https://github.com/romahony26/periodize.git periodize-my-run
+
+Keep the folder where you put it: the app runs from there.
+
+### 2. Run the installer
 
 **macOS**
 
-    ./install.sh
+1. Check Python: open Terminal and type `python3 --version`. If it is older
+   than 3.12 or missing, install it from <https://www.python.org/downloads/>.
+2. In Terminal, go to the folder and run the installer:
 
-It starts at login and runs at http://localhost:8321, for this computer only.
+       cd periodize-my-run
+       ./install.sh
 
-**Windows 10 or 11** (install Python from python.org first, ticking "Add
-python.exe to PATH"). In PowerShell, in the Periodize My Run folder:
+3. Open <http://localhost:8321>.
 
-    powershell -ExecutionPolicy Bypass -File .\install.ps1
+It starts at login and is reachable from this computer only, so it needs no
+password.
 
-It starts, hidden, every time you sign in, at http://localhost:8321, for this
-computer only. The Windows installer has not yet been tested on a real Windows
-machine; please report any problem.
+**Windows 10 or 11**
 
-**Linux and Raspberry Pi** (Debian, Ubuntu, Raspberry Pi OS, DietPi, or any
-system with systemd)
+1. Install Python 3.12 or later from <https://www.python.org/downloads/>, and
+   tick "Add python.exe to PATH" on the first screen.
+2. Open the folder in File Explorer, click the address bar, type `powershell`
+   and press Enter.
+3. Run the installer:
 
-    ./install.sh
+       powershell -ExecutionPolicy Bypass -File .\install.ps1
 
-It asks you to choose an app password, creates a certificate, and starts the
-app at boot, reachable from your home network at `https://<computer's
-address>:8321`. The browser warns once about the self-made certificate; that
+4. Open <http://localhost:8321>.
+
+It starts, hidden, every time you sign in, and is reachable from this computer
+only, so it needs no password. The Windows installer and uninstaller have not
+yet been tested on a real Windows machine; please report any problem.
+
+**Linux and Raspberry Pi**
+
+1. Check Python: `python3 --version`. On Debian, Ubuntu or Raspberry Pi OS,
+   `sudo apt install python3 python3-venv openssl` installs what is needed.
+2. Go to the folder and run the installer as the user the app should run as
+   (not as root; it asks for `sudo` when it needs it):
+
+       cd periodize-my-run
+       ./install.sh
+
+3. Choose an app password when asked.
+4. Open the address it prints, `https://<this computer's address>:8321`, from
+   any device on your home network, and log in with that password.
+
+It starts at boot. The browser warns once about the self-made certificate; that
 is expected. To keep it to this computer only instead, run
 `PERIODIZE_HOST=127.0.0.1 ./install.sh`.
 
-**By hand, on any system**
+### 3. Set it up
+
+The first page is a three-step wizard: connect your watch, add a goal race,
+confirm your running days. The first sync reads your history and takes a few
+minutes.
+
+### By hand, on any system
 
     python3 -m venv .venv
     .venv/bin/pip install --require-hashes -r requirements.lock   # Windows: .venv\Scripts\pip
     .venv/bin/python web.py                 # this computer only
     .venv/bin/python web.py --host 0.0.0.0  # your home network (needs an app password first)
 
-All data lives in `~/.periodize-my-run` (database, downloaded files, logs; on Windows
-`C:\Users\<you>\.periodize-my-run`), and the key that encrypts your Garmin login is
-in `~/.config/periodize-my-run/vault.key`. Delete both to start again.
+### Where things are kept
+
+| What | macOS and Linux | Windows |
+| --- | --- | --- |
+| The app | the folder you unpacked | the folder you unpacked |
+| Your data, backups and logs | `~/.periodize-my-run` | `C:\Users\<you>\.periodize-my-run` |
+| The key to your stored Garmin login | `~/.config/periodize-my-run/vault.key` | `C:\Users\<you>\.config\periodize-my-run\vault.key` |
+
+## Uninstall
+
+The uninstaller stops the app, stops it starting by itself, and removes its
+Python environment. **Your data is kept unless you ask for it to be deleted**,
+so you can install again later and carry on. It removes only what the installer
+made.
+
+**macOS and Linux** (on Linux it asks for `sudo` to remove the service)
+
+    cd periodize-my-run
+    ./uninstall.sh            # remove the app, keep your data
+    ./uninstall.sh --data     # remove the app and delete your data too
+
+**Windows** (in PowerShell, in the app's folder)
+
+    powershell -ExecutionPolicy Bypass -File .\uninstall.ps1          # remove the app, keep your data
+    powershell -ExecutionPolicy Bypass -File .\uninstall.ps1 -Data    # remove the app and delete your data too
+
+Deleting your data asks you to type `delete` first, and cannot be undone: take
+a backup from Settings beforehand if you might want it. Then:
+
+1. Delete the app's folder.
+2. If you installed it as an app in a browser or on a phone's home screen,
+   remove that there.
+3. Workouts already sent to your Garmin calendar stay there: the uninstaller
+   does not touch your Garmin account. Their names start with "PZ"; delete them
+   in Garmin Connect if you do not want them.
+
+To stop it without removing it: macOS
+`launchctl unload ~/Library/LaunchAgents/com.periodizemyrun.app.plist`; Windows
+`Stop-ScheduledTask -TaskName 'Periodize My Run'`; Linux
+`sudo systemctl stop periodize-my-run`. Running the installer again starts it.
 
 ### Have it as an app
 
@@ -207,11 +303,7 @@ the installer again. Your data is kept; the database upgrades itself. On Linux
 the installer asks for the app password again (you can enter the same one); this
 signs other devices out.
 
-**Stopping or removing it.** macOS:
-`launchctl unload ~/Library/LaunchAgents/com.periodizemyrun.app.plist`. Windows:
-`Unregister-ScheduledTask -TaskName 'Periodize My Run'`. Linux:
-`sudo systemctl disable --now periodize-my-run`. Then delete the folder, and
-`~/.periodize-my-run` and `~/.config/periodize-my-run` if you want your data gone too.
+**Stopping or removing it.** See Uninstall above.
 
 **Logs.** The Log tab shows what the app has been doing. The file is
 `~/.periodize-my-run/logs/periodize.log`; passwords, tokens and email addresses are

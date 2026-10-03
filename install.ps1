@@ -38,4 +38,4 @@ Start-ScheduledTask -TaskName $Task
 
 Write-Host "Periodize My Run is running. Open http://localhost:$Port"
 Write-Host "To have it as an app: open that address in Edge or Chrome and choose Install Periodize My Run, then pin it."
-Write-Host "To stop it starting at sign-in: Unregister-ScheduledTask -TaskName Periodize My Run"
+Write-Host "To remove it later: powershell -ExecutionPolicy Bypass -File .\uninstall.ps1 (your data is kept unless you add -Data)"
