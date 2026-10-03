@@ -41,11 +41,12 @@ service, hold your data, or owe you support, updates or fixes.
   port to it or publish it on a public address. If you use a private network such as Tailscale, keep the app password set.
 - **Keep your copy up to date** and check the change log; older versions may contain problems that have since been fixed.
 
-## 5. Garmin and other services
+## 5. Garmin, COROS and other services
 
-Periodize My Run is independent. It is not made, endorsed or supported by Garmin or any other company. It reaches Garmin through an
-unofficial interface that Garmin can change or block at any time. You are responsible for following Garmin's own terms for your
-account. Periodize My Run adds workouts to your Garmin calendar and removes only the ones it created, but the authors are not responsible
+Periodize My Run is independent. It is not made, endorsed or supported by Garmin, COROS or any other company. It reaches Garmin, and
+COROS if you choose the experimental COROS connection, through unofficial interfaces that those companies can change or block at
+any time; the COROS connection has not been tested with a real COROS account and may not work. You are responsible for following
+each company's own terms for your account. Periodize My Run adds workouts to your Garmin calendar and removes only the ones it created, but the authors are not responsible
 for any change, loss or problem with your Garmin account, devices or data.
 
 ## 6. Limitation of liability

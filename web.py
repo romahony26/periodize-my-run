@@ -19,6 +19,8 @@ import sys
 import threading
 import time
 
+import requests
+
 from flask import Flask, jsonify, request, send_file, send_from_directory, session
 
 import assess
@@ -35,6 +37,8 @@ import insights
 import forecast
 import garmin
 import calfile
+import coros
+import watch
 import aerobic
 import jobs
 import profile
@@ -356,8 +360,9 @@ def _sync_status(p, day, tp, adj, c, d, today):
         return {"state": "past", "text": "Was on your Garmin calendar." if p["garmin_id"] else "Was not sent to Garmin."}
     if not c["push_enabled"]:
         return {"state": "off", "text": "Sending to Garmin is switched off in Settings."}
-    if not garmin.has_tokens():
-        return {"state": "off", "text": "Garmin is not connected."}
+    if not watch.can_push():
+        return {"state": "off", "text": "Garmin is not connected." if watch.name() == "garmin" else
+                f"Your runs come from {watch.NAMES[watch.name()]}, which cannot receive workouts; follow the plan from this page."}
     if (d - today).days >= int(c["push_days"]):
         first = d - dt.timedelta(days=int(c["push_days"]) - 1)
         return {"state": "later", "text": f"Not sent yet. The next {c['push_days']} days are kept on your watch; this one goes on {first.day} {first.strftime('%b')}."}
@@ -539,7 +544,8 @@ def state():
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
         compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")),
-        setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
+        setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
+               "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
         job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
         settings={k: (vault.get("notify_url") or "") if k == "notify_url" else c.get(k) for k in SETTINGS}, limits=L, profile=prof, races=[{k: v for k, v in r.items() if k != "course"} | {"has_course": bool(r.get("course"))} for r in rs], statuses=db.rows("SELECT * FROM status ORDER BY start DESC"),
 holiday_modes=engine.HOLIDAY_MODES, fitness=fitness,
@@ -842,6 +848,51 @@ def export():
 def setup_finish():
     """The athlete has seen the summary at the end of the first-run wizard."""
     db.put("setup_seen", True)
+    return jsonify(ok=True)
+
+
+@app.post("/api/watch")
+def watch_source():
+    """Choose where runs come from. The folder for FIT files can only be set from the computer the app runs on."""
+    j = request.json or {}
+    src = j.get("source")
+    if src not in watch.SOURCES:
+        return jsonify(error="Unknown source."), 400
+    if src == "fitfolder":
+        folder = j.get("fit_folder")
+        if folder is not None:
+            if not _local():
+                return jsonify(error="The folder can only be chosen on the computer Periodize My Run runs on."), 403
+            folder = os.path.abspath(os.path.expanduser(str(folder).strip()))[:500]
+            if not os.path.isdir(folder):
+                return jsonify(error="That folder was not found."), 400
+            db.put("fit_folder", folder)
+        if not db.get("fit_folder"):
+            return jsonify(error="Choose the folder first."), 400
+    if src == "coros" and not coros.connected():
+        return jsonify(error="Sign in to COROS first."), 400
+    db.put("watch_source", src)
+    log.info("Runs now come from %s", watch.NAMES[src])
+    if db.get("setup_done"):
+        jobs.start("daily")
+    return jsonify(ok=True)
+
+
+@app.post("/api/coros/login")
+def coros_login():
+    j = request.json or {}
+    try:
+        return jsonify(result=coros.login(str(j.get("email") or "").strip(), str(j.get("password") or "")))
+    except ValueError as e:
+        return jsonify(error=str(e)), 400
+    except (coros.Unrecognised, requests.RequestException) as e:
+        log.error("COROS (experimental) sign-in failed: %s", type(e).__name__)
+        return jsonify(error="COROS did not accept the sign-in. This connection is experimental and may not work."), 400
+
+
+@app.post("/api/coros/disconnect")
+def coros_disconnect():
+    coros.disconnect()
     return jsonify(ok=True)
 
 

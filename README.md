@@ -48,6 +48,16 @@ It then reads your history and builds the plan, showing progress as it goes.
 - Counts steps taken outside your runs as background load.
 - Optional daily message with today's session.
 
+**Where your runs come from**
+- Garmin (the full connection: runs, sleep, HRV, resting heart rate, steps,
+  and workouts sent to the watch).
+- FIT files from a folder: exports from COROS, Polar, Suunto, Wahoo or any
+  watch, or a folder a sync app fills. Runs only, so there is no day-by-day
+  easing from sleep or HRV and nothing is sent to the watch.
+- COROS, **experimental**: runs read from your COROS account through COROS's
+  unofficial web interface. Written without a COROS watch to test against, so
+  it may not work; it never sends anything to COROS. Reports welcome.
+
 **Your watch**
 - The next 21 days (or 7 or 14) kept on the Garmin calendar as structured
   workouts with pace targets, including strength sessions.

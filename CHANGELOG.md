@@ -3,6 +3,17 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.1.0 - 2026-10-03
+### Added
+- Where your runs come from is now a choice, in Settings, Connections: Garmin (unchanged and still the default), FIT files from a folder, or COROS (experimental).
+- FIT files from a folder: .fit exports from COROS, Polar, Suunto, Wahoo or any watch, read at every update, with the full second-by-second detail. Files are recognised by their content, so a renamed file is not read twice. Runs only: no sleep or HRV, and nothing is sent to the watch. The folder can only be chosen on the computer the app runs on.
+- COROS (experimental): reads your runs from your COROS account through COROS's unofficial web interface. Written without a COROS watch to test against and tested only with stand-in COROS replies, so it may not work. Your password is sent once (as the hash COROS's own site sends) and never stored; only the access token is kept, encrypted. It never sends anything to COROS, and stops cleanly if COROS replies in a way it does not recognise.
+### Changed
+- Behind the scenes, the app now reaches watches through one place (watch.py), so other brands can be added without touching the planner.
+- DISCLAIMER.md names COROS alongside Garmin.
+### Fixed
+- The Fitness page could fail to load when two of your race results were at the same distance (the race-spread figure divided by zero). Found by the random-input tests.
+
 ## 2.0.0 - 2026-10-03
 ### Changed
 - Periodize is now **Periodize My Run**: in the app, the documents, the brochure and the GitHub project (github.com/romahony26/periodize-my-run).

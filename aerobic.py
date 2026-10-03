@@ -100,8 +100,8 @@ def relationship(units="mi"):
         if name not in best or s < best[name]["s"]:
             best[name] = {"name": name, "dist_m": r["dist_m"], "s": s, "date": r["date"], "adjusted": r["course"] is not None, "course": r["course"]}
     order = sorted(best.values(), key=lambda x: x["dist_m"])
-    if len(order) < 2:
-        return None
+    if len(order) < 2 or order[-1]["dist_m"] < 1.5 * order[0]["dist_m"]:
+        return None              # the spread needs distances well apart; two of the same distance would divide by zero
     base = order[0]
     k = 1.0 if units == "mi" else 1 / 1.609344
     rows = []

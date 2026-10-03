@@ -13,12 +13,12 @@ import calibrate
 import db
 import engine
 import execution
-import garmin
 import aerobic
 import profile
 import push
 import results
 import trends
+import watch
 import vault
 from log import log, scrub
 
@@ -266,6 +266,9 @@ def adjust():
                         ("several warning signs agree." if r["level"] == "red" else "a warning sign has lasted three mornings.") +
                         " The session comes back once you have recovered."})
         db.run("UPDATE plan SET adjust=? WHERE date=?", (json.dumps(adj) if adj else None, today.isoformat()))
+    if r["level"] == "unknown" and not watch.has_recovery_data():
+        r["reasons"] = [f"{watch.NAMES[watch.name()]} gives no sleep or heart-rate variability, so sessions are not adjusted day by day."]
+        db.put("readiness", r)
     log.info("Readiness today: %s (%s)", r["level"], "; ".join(r["reasons"]))
     return r
 
@@ -286,21 +289,13 @@ def run(kind):
         c = db.cfg()
         if kind in ("setup", "daily"):
             _progress("Reading your activity history")
-            garmin.sync_summaries(full=(kind == "setup"), progress=_progress)
+            watch.sync(kind, _progress)
             profile.derive()
-            if not db.get("vo2max_backfilled") and kind == "daily":
-                garmin.backfill_vo2max(_progress)
             found = results.detect()
             if found:
                 log.info("Race results found in your history: %d new", found)
-            _progress("Downloading recent runs")
-            garmin.sync_details(c["detail_weeks"], _progress)
-            _progress("Downloading sleep, HRV and heart rate")
-            garmin.sync_daily(63 if kind == "setup" or db.rows("SELECT 1 FROM daily WHERE steps IS NOT NULL LIMIT 1") == [] else 10, _progress)
-            garmin.sync_extras()
-            garmin.sync_activity_steps(63 if db.rows("SELECT 1 FROM activities WHERE steps IS NOT NULL LIMIT 1") == [] else 10)
-        if kind == "readiness":
-            garmin.sync_daily(2, _progress)
+        if kind in ("setup", "daily", "readiness"):
+            watch.sync_rest(kind, c, _progress)
         if kind in ("setup", "daily", "replan"):
             if aerobic.read_tests():
                 log.info("Aerobic test read from your watch")
@@ -317,7 +312,7 @@ def run(kind):
             replan(force=(kind in ("setup", "replan")))
         reshuffle()
         adjust()
-        if c["push_enabled"] and garmin.has_tokens():
+        if c["push_enabled"] and watch.can_push():
             _progress("Sending workouts to Garmin")
             sent, removed, same = push.sync_calendar(db.cfg())
             msg = f"{sent} workouts sent, {same} unchanged"
@@ -337,13 +332,13 @@ def run(kind):
             if m and db.get("notified") != dt.date.today().isoformat() and (db.get("readiness") or {}).get("level") != "unknown":
                 notify(m)
                 db.put("notified", dt.date.today().isoformat())
-    except garmin.GaveUp as e:
+    except watch.GaveUp as e:
         ok, msg = False, f"Garmin kept refusing requests ({e}). Progress is saved; it will resume on the next run."
         log.error("=== %s stopped: %s ===", kind, msg)
     except Exception as e:
         ok, msg = False, f"{type(e).__name__}: {scrub(str(e))[:200]}"
         log.error("=== %s failed ===\n%s", kind, traceback.format_exc())
-    garmin.save_tokens()
+    watch.save()
     db.run("UPDATE jobs SET finished=?, ok=?, message=? WHERE id=?", (dt.datetime.now().isoformat(timespec="seconds"), int(ok), msg, jid))
     if ok:
         log.info("=== %s finished: %s ===", kind, msg or "done")
@@ -416,7 +411,7 @@ def scheduler():
         try:
             if db.get("setup_done") and db.get("auto_backup") and dt.datetime.now().hour >= 2:
                 backup.nightly()          # once a day, whether or not Garmin could be reached
-            if db.get("setup_done") and garmin.has_tokens() and not status["running"]:
+            if db.get("setup_done") and watch.connected() and not status["running"]:
                 now = dt.datetime.now()
                 due = daily_due(now)
                 lo = last_ok()
