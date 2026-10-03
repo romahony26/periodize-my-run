@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 1.20.1 - 2026-10-03
+### Added
+- The Buy me a coffee link in Settings (About Periodize) and in the README.
+
 ## 1.20.0 - 2026-10-03
 ### Added
 - The season outline shows each week's distance above its bar and marks races under their week (★ goal race, ● tune-up), with a list of the season's races and the week each falls in. On a phone it scrolls sideways.

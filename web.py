@@ -888,7 +888,7 @@ def learned(c, L):
 
 
 PROJECT = {"url": "https://github.com/romahony26/periodize",
-           "support": ""}      # the maintainer's Buy Me a Coffee page; the link stays hidden while this is empty
+           "support": "https://buymeacoffee.com/romahony"}      # the maintainer's Buy Me a Coffee page; the link is hidden when empty
 _TRENDS = {"key": None, "data": None}
 
 

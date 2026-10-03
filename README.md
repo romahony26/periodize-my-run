@@ -213,6 +213,11 @@ did, what happened and what you expected, and paste the relevant part of the
 Log tab if it helps (check it for anything personal first). Security problems
 should be reported privately instead: see SECURITY.md.
 
+## Support
+
+If Periodize helps your running, you can buy me a coffee:
+https://buymeacoffee.com/romahony
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE): free to use, change and share, with no warranty.
