@@ -330,9 +330,42 @@ It is a web page, but you can give it its own icon and window:
 - **Windows:** open it in Edge (... > Apps > Install this site as an app) or
   Chrome (the install icon in the address bar), then pin it to the taskbar or
   Start.
-- **Phone:** open it in the browser and choose Add to Home Screen from the
-  share or menu button. The phone must be on your home network, and the app
-  must be installed for your network (the Linux or Raspberry Pi set-up).
+- **Phone:** see the next section.
+
+### Have it as an app on your phone
+
+The phone must be on the same Wi-Fi as the computer or Raspberry Pi running
+Periodize My Run, and the app must be installed for your network (the Linux or
+Raspberry Pi set-up, which prints the address to use, such as
+`https://raspberrypi.local:8321`). The home-screen icon then opens the planner
+full screen, with no browser bars.
+
+**iPhone or iPad (Safari).** It must be Safari: other iPhone browsers cannot
+add apps to the home screen.
+
+1. Open the app's address in Safari and sign in.
+2. Tap the Share button (the square with an arrow pointing up) at the bottom of
+   the screen. On an iPad it is at the top.
+3. Scroll the list and tap **Add to Home Screen**. If you do not see it, tap
+   **View More** first.
+4. Leave the name as "Periodize My Run" and tap **Add**.
+5. Open it from the new icon on your home screen.
+
+**Android (Chrome).**
+
+1. Open the app's address in Chrome and sign in.
+2. Tap the three-dot menu at the top right.
+3. Tap **Add to Home screen**, then **Install** (some phones say **Install
+   app**). Tap **Add** if asked to confirm.
+4. Open it from the new icon on your home screen or in your app drawer.
+
+On Samsung Internet the menu item is **Add page to**, then **Home screen**.
+
+The app has no copy of your data on the phone and does not work without the
+network connection to your computer. If your phone warns that the connection is
+not private, that is the app's own certificate, made when it was installed:
+trust it for this address only. A different network, or the computer being off,
+means the icon shows a "can't connect" page until you are home again.
 
 ## Tips and fixes
 

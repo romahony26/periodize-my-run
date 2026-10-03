@@ -14,6 +14,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%235b5bf0'/%3E%3Cstop offset='1' stop-color='%2319c2a0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='48' height='48' rx='12' fill='url(%23g)'/%3E%3Cpath d='M10 34l6.5-7 4.5 3.5 6-9.5 4.5 3.5L38 13' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='38' cy='13' r='3.4' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 :root{
+  color-scheme:light dark;
   --bg:#f7f7f5;--surface:#fff;--ink:#14161a;--ink2:#3a3f47;--mute:#5f656e;--line:#e8e7e3;--hover:#f1f0ed;
   --brand:#5b5bf0;--brand2:#19c2a0;--grad:linear-gradient(135deg,#5b5bf0,#19c2a0);
   --key:#96600a;--long:#c2410c;--race:#be185d;--easy:#157347;--rest:#6b7280;
@@ -26,7 +27,9 @@
   --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 32px -16px rgba(0,0,0,.6);
 }}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button,a,select,summary,.day,.tabs button{touch-action:manipulation}
+html:has(dialog[open]){overflow:hidden}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom)}
 .num{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 a{color:inherit}
@@ -139,11 +142,43 @@ code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ho
 .stepper{display:flex;gap:6px;margin-bottom:18px}.stepper i{flex:1;height:4px;border-radius:99px;background:var(--hover)}.stepper i.on{background:var(--grad)}
 .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--brand);animation:sp .8s linear infinite;display:inline-block;vertical-align:-3px;margin-right:8px}
 @keyframes sp{to{transform:rotate(360deg)}}
+.sheet{color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:0;width:min(760px,calc(100% - 24px));max-height:88vh;max-height:88dvh;overflow:auto;overscroll-behavior:contain;box-shadow:0 30px 80px -20px rgba(0,0,0,.55)}
+.sheet::backdrop{background:rgba(10,12,16,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.sheet .sh{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--line)}
+.sheet .sh .eyebrow{margin:0}.sheet .sh .ghost{margin-left:auto}
+.sheet .sb{padding:6px 20px 22px}
+.sheet .item{margin:18px 0 0;padding-top:16px;border-top:1px solid var(--line)}.sheet .item:first-of-type{border-top:0;padding-top:0}
+.sheet .item .h{font-size:17px}.sheet .item .dec{margin:6px 0 8px;font-weight:650;line-height:1.4}
+.sheet .item .k{margin:8px 0 0;color:var(--ink2);line-height:1.5}.sheet .item .k.mute{color:var(--mute)}
+.tabs::-webkit-scrollbar{display:none}.tabs{scrollbar-width:none}
 @media (max-width:900px){
   .card,.c6,.c8{grid-column:span 12}
   .cal{grid-template-columns:1fr}.day{min-height:0;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.day .d{width:100%}.day .t{width:100%;-webkit-line-clamp:3}.day .f{margin:0;padding:0}.day .l{margin:0}
-  .top .in{flex-wrap:wrap;gap:10px}.tabs{order:3;width:100%;overflow-x:auto;justify-content:flex-start;margin:0}.sync{margin-left:auto}
-  main{padding:16px 14px 80px}.big{font-size:28px}
+  .top .in{flex-wrap:wrap;gap:6px 10px;padding:8px max(14px,env(safe-area-inset-right)) 6px max(14px,env(safe-area-inset-left))}.tabs{order:3;width:100%;overflow-x:auto;justify-content:flex-start;margin:0;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}.tabs button{scroll-snap-align:center}.sync{margin-left:auto}
+  main{padding:14px max(14px,env(safe-area-inset-right)) 80px max(14px,env(safe-area-inset-left))}.big{font-size:28px}
+}
+@media (max-width:600px){
+  body{font-size:16px}
+  .logo svg{width:26px;height:26px}.logo b{font-size:16px}
+  .sync{font-size:13px;gap:6px}.sync .ghost{padding:6px 12px}
+  .card{padding:16px}.h{font-size:20px}
+  .small{font-size:14px}.xs{font-size:13px}.stat .k{font-size:13px}.stat .v{font-size:19px}.stats{gap:8px}
+  .eyebrow{font-size:12px}.chip{font-size:13px}.tag{font-size:12px;padding:2px 8px}
+  ul.why li,.steps li,.clist,.csteps{font-size:15px}
+  .day .d{font-size:12px}.day .l{font-size:15.5px}.day .m{font-size:20px}.day .t,.day .mt,.day .f{font-size:13px}
+  .sv,.sr{font-size:12px}.sd{font-size:11px}th{font-size:13px}table{font-size:14.5px}th,td{padding-right:12px}
+  label,.lab{font-size:14px}.lab2{font-size:12px}
+  input,select{font-size:16px;padding:10px 12px}
+  .copyrow code,code{font-size:13px}pre{font-size:13px}
+  .ov{padding:max(10px,env(safe-area-inset-top)) 0 0}.modal{width:100%!important;min-height:calc(100vh - 10px);border-radius:18px 18px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom))}
+  .sheet{width:100%;max-width:100%;margin:auto 0 0;border-radius:18px 18px 0 0;border-bottom:0;max-height:92vh;max-height:92dvh}
+  .sheet .sh{padding:12px 16px}.sheet .sb{padding:4px 16px calc(24px + env(safe-area-inset-bottom))}
+  .sheet .item .dec{font-size:16.5px}.sheet .item .k{font-size:15px}
+  #toast{bottom:calc(20px + env(safe-area-inset-bottom))}
+}
+@media (pointer:coarse){
+  .tabs button{padding:10px 16px;font-size:14.5px}.ghost{min-height:40px;padding:8px 14px;font-size:14px}.btn{min-height:44px;padding:10px 18px}
+  .checks label{padding:9px 13px}.gl{width:32px;height:32px}.gl svg{width:16px}
 }
 </style>
 </head>

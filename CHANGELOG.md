@@ -3,6 +3,18 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.8.3 - 2026-10-03
+### Fixed
+- Explain my plan could not be read on a phone in dark mode: the pop-up took the browser's own text colour, black, on the app's near-black background. It now uses the app's colours in both light and dark mode, and a test checks the contrast.
+### Changed
+- The app is easier to read and use on iPhone and Android: text is larger on phone screens, form fields no longer make iPhone Safari zoom in, buttons and tabs are bigger to tap, and the header takes less room.
+- Explain my plan is a sheet that fills the width of a phone, with its Close button always in view while you scroll, and the page behind it no longer scrolls.
+- Pop-ups (a day's detail, pacing plan, trends) fill the phone screen and keep clear of the home bar.
+- The tab strip scrolls to show the tab you are on, and the app keeps clear of the notch and the home bar when opened from the home screen.
+- The home-screen app's icon, colours and name are declared more completely (separate maskable icon, dark start-up colour), so Android installs it properly.
+### Added
+- Step-by-step instructions in the README for putting the app on an iPhone or Android home screen.
+
 ## 2.8.2 - 2026-10-03
 ### Added
 - Ready-made packages for Mac, Windows and Linux (including Raspberry Pi) can now be downloaded from the project's GitHub releases page, with a `SHA256SUMS.txt` to check them against. The README's install section starts with them; installing from the source files is still described below that.

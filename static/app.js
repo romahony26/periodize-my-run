@@ -32,6 +32,7 @@ function render(){
   if(!S.setup_done||!S.setup_seen){$('#nav').innerHTML='';$('#sync').innerHTML='';if(S.setup_done&&!S.setup_seen)wiz.step=6;return wizard()}
   const T={plan:'Plan',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
   $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}" data-v="${v}">${T[v]}</button>`).join('');
+  {const on=$('#nav button.on');if(on&&on.scrollIntoView)on.scrollIntoView({inline:'center',block:'nearest'})}
   $$('#nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})});
   const j=S.job;
   $('#sync').innerHTML=j.running?`<span class="dot busy"></span>${E(j.progress||'Working')}…`
@@ -465,16 +466,15 @@ function refsCard(){if(!REFS)return '';const li=x=>`<li>${E(x.text)}${x.used.len
   return `<div class="card c12" id="refs"><p class="eyebrow">The research behind the plan</p><p class="small">${REFS.papers.length} peer-reviewed studies are used. Only their findings are used: no text, tables or figures are copied. The numbered principles are in PRINCIPLES.md, which comes with the app.</p>
     <details id="refs-papers" ${TOPEN['refs-papers']?'open':''}><summary class="small" style="cursor:pointer"><b>Peer-reviewed studies (${REFS.papers.length})</b></summary><ul class="why">${REFS.papers.map(li).join('')}</ul></details>
     ${REFS.other.length?`<details id="refs-other" ${TOPEN['refs-other']?'open':''}><summary class="small" style="cursor:pointer"><b>Other sources, not peer-reviewed (${REFS.other.length})</b></summary><ul class="why">${REFS.other.map(li).join('')}</ul></details>`:''}</div>`}
-async function openExplain(){let d=$('#explaindlg');if(!d){d=document.createElement('dialog');d.id='explaindlg';d.className='card';d.setAttribute('aria-label','Explain my plan');
-    d.style.cssText='max-width:760px;width:calc(100% - 32px);max-height:86vh;overflow:auto;padding:22px;border:0';document.body.appendChild(d);
+async function openExplain(){let d=$('#explaindlg');if(!d){d=document.createElement('dialog');d.id='explaindlg';d.className='sheet';d.setAttribute('aria-label','Explain my plan');document.body.appendChild(d);
     d.addEventListener('click',e=>{if(e.target===d||e.target.id==='explainclose')d.close()})}
-  d.innerHTML='<span class="spin"></span>Loading';d.showModal();
+  const head='<div class="sh"><p class="eyebrow">Explain my plan</p><button class="ghost" id="explainclose">Close</button></div>';
+  d.innerHTML=head+'<div class="sb"><span class="spin"></span>Loading</div>';d.showModal();d.scrollTop=0;
   try{const x=await api('explain');
-    d.innerHTML=`<button class="ghost" id="explainclose" style="float:right">Close</button><p class="eyebrow">Explain my plan</p>
-      <p class="small">This plan is written for you. Each decision below shows what was decided, what in your own data led to it, and where the rule comes from.</p>
-      ${x.sections.map(s=>`<div style="margin:16px 0 0"><p class="h" style="font-size:1.05rem;margin:0">${E(s.title)}</p><p style="margin:4px 0"><b>${E(s.decision)}</b></p>
-        <p class="small" style="margin:4px 0"><b>From your data.</b> ${E(s.because)}</p><p class="small mute" style="margin:4px 0"><b>Where the rule comes from.</b> ${E(s.evidence)}</p></div>`).join('')||'<p class="small mute">The plan has not been built yet. Sync first.</p>'}`}
-  catch(e){d.innerHTML='<button class="ghost" id="explainclose" style="float:right">Close</button><p class="small">Could not load the explanation.</p>'}}
+    d.innerHTML=head+`<div class="sb"><p class="small mute" style="margin:12px 0 0">This plan is written for you. Each decision below shows what was decided, what in your own data led to it, and where the rule comes from.</p>
+      ${x.sections.map(s=>`<div class="item"><p class="h">${E(s.title)}</p><p class="dec">${E(s.decision)}</p>
+        <p class="k"><b>From your data.</b> ${E(s.because)}</p><p class="k mute"><b>Where the rule comes from.</b> ${E(s.evidence)}</p></div>`).join('')||'<p class="small mute">The plan has not been built yet. Sync first.</p>'}</div>`}
+  catch(e){d.innerHTML=head+'<div class="sb"><p class="small">Could not load the explanation.</p></div>'}}
 async function loadLogs(){logs=(await api('logs')).lines;if(view==='log')render()}
 
 function wizard(){
