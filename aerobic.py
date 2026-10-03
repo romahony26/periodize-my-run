@@ -10,6 +10,7 @@ import json
 
 import assess
 import db
+import heat
 import engine
 
 MI = 1609.344
@@ -37,7 +38,11 @@ def tests(units="mi"):
     out = []
     k = 1.0 if units == "mi" else 1 / 1.609344
     for r in db.rows("SELECT * FROM aerobic_tests ORDER BY date"):
-        out.append({"date": r["date"], "source": r["source"], "stages": [{"hr": s["hr"], "pace": _fmt(s["s_per_mi"] * k), "s": s["s_per_mi"] * k} for s in json.loads(r["stages"])]})
+        # the weather on the day: each stage is shown as what it was worth in neutral weather, so tests in different seasons compare
+        w = heat.on_day(r["date"], r["activity_id"])
+        wk = 1 - w["pct"] / 100 if w and w.get("pct") else 1.0
+        out.append({"date": r["date"], "source": r["source"], "weather": heat.words(w, units) if w else "", "adjusted": round((1 - wk) * 100, 1),
+                    "stages": [{"hr": s["hr"], "pace": _fmt(s["s_per_mi"] * k * wk), "s": s["s_per_mi"] * k * wk} for s in json.loads(r["stages"])]})
     for i, t in enumerate(out):
         if i:
             prev = {s["hr"]: s["s"] for s in out[i - 1]["stages"]}

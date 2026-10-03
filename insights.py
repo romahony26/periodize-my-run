@@ -81,6 +81,7 @@ def spikes(today, units="mi"):
     return out
 
 
+WARM_WBGT = 18      # above this, heat raises heart-rate drift by itself, so the run is left out of the durability trend
 LATE_H = 4           # Leota and colleagues (2025): hard exercise ending within 4 hours of sleep went with later, shorter sleep and lower overnight HRV
 EARLY = 7 * 60       # a run starting before 07:00 counts as early
 
@@ -199,7 +200,8 @@ def drift_history(today, weeks=16, min_minutes=70, limit=10):
             continue
         d = drift(r.get("series"))
         if d is not None:
-            out.append({"date": r["date"].isoformat(), "mi": round(r["mi"], 1), "minutes": round(r["timer_s"] / 60), "drift": d})
+            out.append({"date": r["date"].isoformat(), "mi": round(r["mi"], 1), "minutes": round(r["timer_s"] / 60), "drift": d,
+                        "warm": bool(r.get("wx") and r["wx"].get("wbgt", 0) > WARM_WBGT)})
     return out[-limit:]
 
 

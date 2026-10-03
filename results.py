@@ -68,7 +68,7 @@ def listing(units="mi", everything=False):
         f = _course_factor(r, trust) if (r["counts"] is None or r["counts"]) else None
         flat = r["time_s"] / f if f else r["time_s"]
         s = round(flat / (r["dist_m"] / per))
-        out.append({"id": r["id"], "date": r["date"], "name": r["name"], "dist_m": r["dist_m"], "time_s": r["time_s"], "flat_s": flat, "course": round((f - 1) * 100, 1) if f else None,
+        out.append({"id": r["id"], "activity_id": r["activity_id"], "date": r["date"], "name": r["name"], "dist_m": r["dist_m"], "time_s": r["time_s"], "flat_s": flat, "course": round((f - 1) * 100, 1) if f else None,
                     "pace": f"{s // 60}:{s % 60:02d}/{units}", "index": round(equiv.index(r["dist_m"], flat), 1), "source": r["source"],
                     "note": r["note"] or "", "weight_kg": r["weight_kg"], "counts": 1 if r["counts"] is None else r["counts"]})
     return out

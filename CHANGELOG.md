@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.7.2 - 2026-10-03
+### Changed
+- The "Is it working?" checks now allow for the weather on the day, when weather is switched on. Each aerobic test shows its weather, and its paces are what they were worth in neutral weather, so a test in July compares fairly with one in January. The prediction check takes what the weather cost off each race time before comparing it with the prediction (marked ☀). Long runs done in warm conditions (above 18 °C WBGT) are left out of the durability trend, because heat raises heart-rate drift by itself. The monthly pace at a heart rate was already adjusted in 2.7.0; its note now says so.
+
 ## 2.7.1 - 2026-10-03
 ### Changed
 - "The research behind the plan" is now at the bottom of the How it works page, after the explanation of what the app does.

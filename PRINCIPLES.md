@@ -178,6 +178,10 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     was known the Monday before and set against your actual time, so you can see how far to trust it and whether it leans fast or
     slow for you.
 42. **Weeks are compared, not single runs.** [P] One run's pace for its heart rate swings with wind, heat, route and time of day.
+    With weather switched on, the day's weather is allowed for in each of these checks (principle 89): the monthly pace at a
+    heart rate and each aerobic test are shown as what they were worth in neutral weather, a race is set against its prediction
+    after taking off what the weather cost, and long runs done in warm conditions (above 18 °C WBGT) are left out of the
+    durability trend, because heat raises heart-rate drift by itself (Wingo and colleagues, 2012). Wind is not allowed for.
 43. **Fitness is three things, each with its own trend.** [R] (*moderate*) Speed (the threshold estimate) mostly decides 5K and
     10K; the endurance base (long runs, race-pace miles, weekly volume) matters more as the race gets longer; durability (how well
     pace holds against heart rate late in long runs) matters most for the marathon and longer. How much threshold speed falls
@@ -529,4 +533,5 @@ on a detail.
 - Vihma T (2010). Effects of weather on the performance of marathon runners. *Int J Biometeorol*. *Abstract read.*
 - Walsh NP and colleagues (2021). Sleep and the athlete: narrative review and 2021 expert consensus recommendations. *Br J Sports Med* 55:356–368.
 - Wang Z and colleagues (2023). Effects of tapering on performance in endurance athletes: a systematic review and meta-analysis. *PLoS One*.
+- Wingo JE, Ganio MS, Cureton KJ (2012). Cardiovascular drift during heat stress: implications for exercise prescription. *Exerc Sport Sci Rev*. *From memory.*
 - Zanini M, Folland JP and colleagues (2025). Strength training improves running economy durability and fatigued high-intensity performance in well-trained male runners: a randomized control trial. *Med Sci Sports Exerc*.

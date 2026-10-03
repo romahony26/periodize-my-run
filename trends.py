@@ -22,6 +22,7 @@ import statistics
 import assess
 import db
 import engine
+import heat
 import equiv
 import insights
 
@@ -88,16 +89,18 @@ def base(hist):
 
 def durability(today):
     runs = insights.drift_history(today, weeks=WEEKS, min_minutes=70, limit=30)
-    rows = [{"date": r["date"], "v": r["drift"], "mi": r["mi"]} for r in runs]
-    if len(rows) >= 6:
-        now, then = statistics.mean(r["v"] for r in rows[-3:]), statistics.mean(r["v"] for r in rows[-6:-3])
+    rows = [{"date": r["date"], "v": r["drift"], "mi": r["mi"], "warm": r.get("warm", False)} for r in runs]
+    cool = [r for r in rows if not r["warm"]]         # warm runs drift more whatever the fitness, so they are shown but not compared
+    if len(cool) >= 6:
+        now, then = statistics.mean(r["v"] for r in cool[-3:]), statistics.mean(r["v"] for r in cool[-6:-3])
     else:
         now = then = None
     return {"kind": "durability", "title": "Aerobic drift on long runs", "rows": rows, "window": "last 6 long runs",
             "dir": direction(now, then, 1.5, higher_is_better=False), "change": round(now - then, 1) if now is not None else None,
             "text": "Durability: how far your pace per heartbeat fades in the second half of long steady runs. Less is better, and it "
                     "matters most for the marathon and longer. The last three long runs are compared with the three before; within "
-                    "1.5 points it counts as steady. Heat and hills raise drift, so read it alongside the weather."}
+                    "1.5 points it counts as steady. Heat raises drift by itself, so with weather switched on, runs done in warm conditions "
+                    "(above 18 °C WBGT) are left out of the comparison. Hills raise it too."}
 
 
 def steps(today):
@@ -189,8 +192,12 @@ def race_check(c, L, today, years=3, limit=12):
             changed = True
         pred = cache[key]
         if pred:
+            # predictions are for neutral weather, so the race is too: its time is reduced by what the day's weather cost
+            w = heat.on_day(r["date"], r.get("activity_id"))
+            actual = r["flat_s"] * (1 - w["pct"] / 100) if w and w.get("pct") else r["flat_s"]
             rows.append({"date": r["date"], "name": r["name"].split(" · ")[-1] if " · " in r["name"] else r["name"], "distance": r["name"].split(" · ")[0],
-                         "predicted": engine.hms(pred), "actual": engine.hms(r["flat_s"]), "error": round((pred - r["flat_s"]) / r["flat_s"] * 100, 1)})
+                         "predicted": engine.hms(pred), "actual": engine.hms(actual), "error": round((pred - actual) / actual * 100, 1),
+                         "weather": heat.words(w, c["units"]) if w else ""})
         if len(rows) >= limit:
             break
     if changed:

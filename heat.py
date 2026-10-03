@@ -209,6 +209,15 @@ def of(row):
     return w or None
 
 
+def on_day(date, activity_id=None):
+    """The weather of a run on a date (the named activity, else the day's longest outdoor run). None when weather is off or unknown."""
+    if not db.get("heat_adjust"):
+        return None
+    rows = db.rows("SELECT weather FROM activities WHERE id=?", (activity_id,)) if activity_id else []
+    rows = rows or db.rows("SELECT weather FROM activities WHERE sport='running' AND date=? AND weather IS NOT NULL AND weather!='{}' ORDER BY dist_m DESC LIMIT 1", (date,))
+    return of(rows[0]) if rows else None
+
+
 def words(w, units="mi"):
     """One line for a run's weather."""
     if not w:
