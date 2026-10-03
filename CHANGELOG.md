@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.8.2 - 2026-10-03
+### Added
+- Ready-made packages for Mac, Windows and Linux (including Raspberry Pi) can now be downloaded from the project's GitHub releases page, with a `SHA256SUMS.txt` to check them against. The README's install section starts with them; installing from the source files is still described below that.
+
 ## 2.8.1 - 2026-10-03
 ### Changed
 - The README now shows the app in pictures: the plan, the weeks ahead and the season, a day's card, Explain my plan, the Fitness page, a run in detail, a pacing plan and the phone view. All are taken from the app running with a made-up test athlete, by `tools/screenshots.py`.

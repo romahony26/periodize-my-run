@@ -176,6 +176,30 @@ the app in a browser. The installer makes a private Python environment inside
 the app's folder, downloads the libraries it needs, and sets the app to start
 by itself. It changes nothing else on the computer.
 
+### The quick way: download a package
+
+Ready-made packages for each system are on the releases page:
+<https://github.com/romahony26/periodize-my-run/releases/latest>. Download the
+one for your computer:
+
+| System | File | What you do |
+| --- | --- | --- |
+| Mac (Apple silicon) | `Periodize-My-Run-<version>-mac.zip`, about 40 MB | Unzip, drag the app to Applications, open it. Nothing is downloaded: the app holds its own Python and libraries. It starts at login and opens the planner in the browser. |
+| Windows 10 or 11 | `Periodize-My-Run-<version>-windows.zip`, about 2 MB | Unzip, double-click `Install.bat`. It downloads Python if there is none, and the libraries. |
+| Linux, Raspberry Pi | `Periodize-My-Run-<version>-linux.tar.gz`, about 2 MB | Unpack, run `./install.sh`. It downloads Python if there is none, and the libraries. |
+
+Each holds a `READ ME FIRST.txt` with the steps and how to remove it. The Mac
+app is not signed with an Apple Developer ID, so the first time it is opened
+macOS asks for confirmation: System Settings, Privacy & Security, Open Anyway.
+Windows may show "Windows protected your PC": More info, Run anyway. There is
+no package for Intel Macs, because one library the app needs no longer
+publishes a ready-built file for them; on an Intel Mac, follow the steps below.
+`SHA256SUMS.txt` on the same page lists each file's SHA-256, if you want to
+check a download.
+
+Then go to [Set it up](#3-set-it-up). The steps below are the other way to
+install: from the source files.
+
 ### 1. Get the files
 
 Either download the ZIP from
@@ -238,23 +262,10 @@ It starts at boot. The browser warns once about the self-made certificate; that
 is expected. To keep it to this computer only instead, run
 `PERIODIZE_HOST=127.0.0.1 ./install.sh`.
 
-### Sending it to someone
+### Building the packages
 
 `python tools/package.py` (a development tool, not part of the download) builds
-three files to give to someone who will not use git:
-
-| System | File | What they do |
-| --- | --- | --- |
-| Mac (Apple silicon) | `Periodize-My-Run-<version>-mac.zip`, about 40 MB | Unzip, drag the app to Applications, open it. Nothing is downloaded: the app holds its own Python and libraries. It starts at login and opens the planner in the browser. |
-| Windows 10 or 11 | `Periodize-My-Run-<version>-windows.zip`, under 1 MB | Unzip, double-click `Install.bat`. It downloads Python if there is none, and the libraries. |
-| Linux, Raspberry Pi | `Periodize-My-Run-<version>-linux.tar.gz`, under 1 MB | Unpack, run `./install.sh`. It downloads Python if there is none, and the libraries. |
-
-Each holds a `READ ME FIRST.txt` with the steps and how to remove it. The Mac
-app is not signed with an Apple Developer ID, so the first time it is opened
-macOS asks for confirmation: System Settings, Privacy & Security, Open Anyway.
-Windows may show "Windows protected your PC": More info, Run anyway. There is
-no package for Intel Macs, because one library the app needs no longer
-publishes a ready-built file for them.
+the three packages on the releases page, and their `SHA256SUMS.txt`.
 
 ### 3. Set it up
 
