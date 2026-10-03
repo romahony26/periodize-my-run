@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.7.1 - 2026-10-03
+### Changed
+- "The research behind the plan" is now at the bottom of the How it works page, after the explanation of what the app does.
+
 ## 2.7.0 - 2026-10-03
 ### Added
 - Weather for every run. With weather switched on (Settings, Connections), each outdoor run of the last three years is given the temperature, dew point, wind and rain it was run in, read once from Open-Meteo for the run's rounded start location and hour. It is shown with the run on its day card.

@@ -331,7 +331,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
     <label for="mapsw">Show runs on a real map</label>${yn('mapsw',S.map_tiles)}</div>`}
 function aboutView(){if(!ABOUT)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
-  return '<div class="grid">'+refsCard()+ABOUT.map(s=>`<div class="card c6"><p class="eyebrow">${E(s.title)}</p><ul class="why" style="margin:0">${s.items.map(i=>`<li>${E(i)}</li>`).join('')}</ul></div>`).join('')+'</div>'}
+  return '<div class="grid">'+ABOUT.map(s=>`<div class="card c6"><p class="eyebrow">${E(s.title)}</p><ul class="why" style="margin:0">${s.items.map(i=>`<li>${E(i)}</li>`).join('')}</ul></div>`).join('')+refsCard()+'</div>'}
 function logView(){return `<div class="grid"><div class="card c12"><p class="eyebrow">Activity log <button class="ghost" id="lr">Refresh</button></p><pre>${E(logs.join(''))||'Loading…'}</pre></div></div>`}
 function histView(){
   if(!HIST)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
