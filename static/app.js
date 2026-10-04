@@ -17,9 +17,9 @@ async function api(path, body, method){
   return j;
 }
 let fastT=null;
-async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
+async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
 function authView(kind){
-  $('#nav').innerHTML='';$('#sync').innerHTML='';
+  $('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';
   if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize My Run cannot be opened from another device yet.</p><p class="small">On the computer running Periodize My Run, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}
   $('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1><div class="mute">Enter the app password</div></div><div class="card c12"><div class="row"><input id="pw" type="password" aria-label="App password" autocomplete="current-password" style="flex:1"><button class="btn" id="go">Continue</button></div><p id="e" class="red small"></p></div></div>`;
   const go=async()=>{const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'periodize'},body:JSON.stringify({password:$('#pw').value})});
@@ -31,18 +31,24 @@ function render(){
   if(!S)return;CH={};CHN=0;
   {const v=$('#ver');if(v&&S.version){v.hidden=false;v.textContent='v'+S.version;v.classList.toggle('beta',S.version.includes('-beta'));v.title='You are running version '+S.version+(S.version.includes('-beta')?' (a beta). ':'. ')+'Click for the change log.';
     v.onclick=e=>{e.preventDefault();if(!S.setup_done||!S.setup_seen)return;view='changes';loadChanges();render();scrollTo({top:0})}}}
-  if(!S.setup_done||!S.setup_seen){$('#nav').innerHTML='';$('#sync').innerHTML='';if(S.setup_done&&!S.setup_seen)wiz.step=6;return wizard()}
+  if(!S.setup_done||!S.setup_seen){$('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';if(S.setup_done&&!S.setup_seen)wiz.step=6;return wizard()}
   const T={plan:'Plan',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
   $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}" data-v="${v}">${T[v]}</button>`).join('');
   {const on=$('#nav button.on');if(on&&on.scrollIntoView)on.scrollIntoView({inline:'center',block:'nearest'})}
-  $$('#nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})});
+  const go=v=>{MORE=false;view=v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})};
+  $$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+  {const ic={plan:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',hist:'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 4v4.5H8M12 8v4.5l3 2"/>',you:'<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',races:'<path d="M5 21V4M5 5h13l-2.5 4L18 13H5"/>',settings:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>',more:'<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>'};
+   const tb=[['plan','Plan'],['hist','History'],['you','Fitness'],['races','Races'],['settings','Settings'],['more','More']], inMore=['about','changes','log'].includes(view);
+   $('#tabbar').innerHTML=tb.map(([v,t])=>`<button data-t="${v}" class="${(v==='more'?(inMore||MORE):(v===view&&!MORE))?'on':''}" aria-label="${t}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic[v]}</svg>${t}</button>`).join('');
+   $$('#tabbar button').forEach(b=>b.onclick=()=>{if(b.dataset.t==='more'){MORE=!MORE;render()}else go(b.dataset.t)});
+   window.GO=go}
   const j=S.job;
-  $('#sync').innerHTML=j.running?`<span class="dot busy"></span>${E(j.progress||'Working')}…`
-    :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?'Synced '+E(S.last_run.slice(5).replace('T',' ')):'Not synced yet'} <button class="ghost" id="run">Sync</button>`;
+  $('#sync').innerHTML=j.running?`<span class="dot busy"></span><span class="st-run">${E(j.progress||'Working')}…</span>`
+    :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?`<span class="st-full">Synced ${E(S.last_run.slice(5).replace('T',' '))}</span><span class="st-short">${E(S.last_run.slice(5,10)===S.today.slice(5)?S.last_run.slice(11):S.last_run.slice(5,10))}</span>`:'Not synced yet'} <button class="ghost" id="run">Sync</button>`;
   let h='';
   if(j.error&&!j.running)h+=`<div class="alert err">The last sync had a problem: ${E(j.error)}</div>`;
   if(S.stale)h+=`<div class="alert">No successful sync in 7 days. Check the Log tab, then press Sync.</div>`;
-  $('#main').innerHTML=h+({plan:planView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])();
+  $('#main').innerHTML=h+({plan:planView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])()+(MORE?moreSheet():'');
   bind();bindCharts();
 }
 function ring(pct,label){const c=2*Math.PI*30;return `<svg class="ring" viewBox="0 0 74 74"><circle cx="37" cy="37" r="30" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="37" cy="37" r="30" fill="none" stroke="url(#lg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct)}" transform="rotate(-90 37 37)"/><text x="37" y="42" text-anchor="middle">${label}</text></svg>`}
@@ -86,7 +92,7 @@ function planView(){
   weeks.forEach((w,i)=>{
     const wi=S.week_info[(w.find(d=>d.week)||{}).week], total=w.reduce((a,d)=>a+(d.miles||0),0), prov=w.some(d=>d.week&&S.week_info[d.week]&&!S.week_info[d.week].final);
     h+=`<div class="wk"><b>${names[i]||''}</b><span class="mute small">${nice(w[0].date)} – ${nice(w[6].date)}</span>${total?`<span class="tag">${wi&&S.settings.week_start===0?E(wi.mode)+' · ':''}${U()==='mi'?Math.round(total*2)/2+' mi':Math.round(total*KM)+' km'}</span>`:''}${prov?'<span class="tag">provisional</span>':''}${w[0].week_perf!=null?`<span class="tag ${pc(w[0].week_perf)}" title="Pace for your heart rate across the week's runs, against the four weeks before">pace for heart rate ${w[0].week_perf>0?'+':''}${w[0].week_perf.toFixed(1)}%</span>`:''}
-      ${i===1?`<span style="margin-left:auto" class="xs mute">Click a day for detail · drag to swap ${S.can_undo?'· <a href="#" id="undo">Undo last move</a>':''}</span>`:''}</div><div class="cal">`;
+      ${i===1?`<span style="margin-left:auto" class="xs mute"><span class="hint-d">Click a day for detail · drag to swap</span><span class="hint-m">Tap a day for detail</span> ${S.can_undo?'· <a href="#" id="undo">Undo last move</a>':''}</span>`:''}</div><div class="cal">`;
     for(const d of w){const can=!d.past&&d.type, b=d.body;
       h+=`<div class="dw"><div class="day ${d.type||''} ${d.past?'past':''} ${d.today?'today':''} ${SEL===d.date?'sel':''}" data-date="${d.date}" ${can?'draggable="true"':''} tabindex="0" role="button" aria-label="${d.dow} ${+d.date.slice(8)}: ${E(d.label||'no session')}">
         <div class="d"><span>${d.dow} ${+d.date.slice(8)}</span><span>${d.done&&d.done.id?'':(d.on_watch?'⌚':'')+(d.source==='moved'?' ↔':'')+(d.source==='reshuffled'?' ↻':'')}</span></div>
@@ -299,6 +305,8 @@ function updatesBox(){const u=S.update;
 function termsNotice(){if(!S.setup_done||S.terms_ok)return '';
   return `<div class="card c12" id="termsnote" style="margin-bottom:18px"><p class="eyebrow">Terms of use</p><p class="small" style="margin:0">Periodize My Run is a training tool, not medical advice. You run at your own risk, your data and its security are yours to look after, and the app must not be put on the internet. Please read and accept the terms once.</p>
     ${termsBox('tbox2')}<p style="margin:12px 0 0"><label class="small"><input type="checkbox" id="tok2"> I have read and accept the terms of use</label> <button class="btn" id="taccept" style="margin-left:10px">Accept</button></p></div>`}
+function moreSheet(){const it=[['about','How it works','The reasoning behind your plan'],['changes','Change log','What is new in version '+S.version],['log','Log','What the app has been doing']];
+  return `<div class="ov" id="moreov"><div class="modal sheetm" role="dialog" aria-modal="true" aria-label="More">${it.map(([v,t,d])=>`<button class="morerow" data-go="${v}"><b>${t}</b><span class="mute small">${E(d)}</span></button>`).join('')}<button class="ghost" id="moreno" style="width:100%;margin-top:6px;justify-content:center;text-align:center">Close</button></div></div>`}
 function removeCard(){return `<div class="card c12" id="removecard"><p class="eyebrow">Remove Periodize My Run</p>
   <p class="small" style="margin:0">Stops the app, stops it starting by itself and removes its Python environment. Your training data is kept unless you choose to delete it too. You will be asked for the app password.</p>
   ${S.uninstall?'<p style="margin:12px 0 0"><button class="ghost" id="rmopen" style="color:var(--red)">Remove…</button></p>'
@@ -373,7 +381,7 @@ function histView(){
   return h+'</div></div>'+dayModal()}
 const scc=v=>v>=85?'green':v>=65?'amber':'red';
 const SCTIP='Execution score out of 100: how closely the run matched the planned session. 85 or more is on target, 65 to 84 is close, under 65 is off target. Open the detail to see why.';
-let UNI=false, CH={}, CHN=0, CHANGES=null, PACE=null, MAPZ=0, TR=null, TRV=null;
+let UNI=false, MORE=false, CH={}, CHN=0, CHANGES=null, PACE=null, MAPZ=0, TR=null, TRV=null;
 const GLINK=(id,cls)=>`<a class="gl ${cls||''}" href="https://connect.garmin.com/modern/activity/${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer" title="Open in Garmin Connect" aria-label="Open this activity in Garmin Connect"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6 15 14H1z" fill="#007cc3"/></svg></a>`;
 function lineChart(series,idx,color,label,fmtv,invert,tip){
   const pts=series.filter(s=>s[idx]!=null);if(pts.length<3)return '';
@@ -615,6 +623,9 @@ function bind(){
   $$('[data-pace]').forEach(b=>b.onclick=()=>pace(b.dataset.pace));
   on('#pgo',()=>pace($('#pgo').dataset.race,$('#ptime').value));
   on('#pacex',()=>{PACE=null;render()});
+  $$('[data-go]').forEach(b=>b.onclick=()=>window.GO(b.dataset.go));
+  on('#moreno',()=>{MORE=false;render()});
+  if($('#moreov'))$('#moreov').onclick=e=>{if(e.target.id==='moreov'){MORE=false;render()}};
   on('#clmore',()=>{CLALL=!CLALL;render();if(!CLALL)scrollTo({top:0})});
   on('#rmopen',()=>{UNI=true;render();$('#rmpw').focus()});
   on('#rmno',()=>{UNI=false;render()});

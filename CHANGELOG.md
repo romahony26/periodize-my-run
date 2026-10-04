@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.6 - 2026-10-04
+### Changed
+- Phones now get a layout of their own, so the app works both as a desktop page and as a home-screen app. The menu is a bar along the bottom with Plan, History, Fitness, Races, Settings and More (How it works, Change log, Log), always in reach and never wrapping; the top shows only the name, version, last sync time and the Sync button, so the page keeps most of the screen. Desktop and tablet keep the tabs along the top.
+- On a phone the plan lists each day as one line (day, session, distance, and a tick for what you ran) instead of a card each, so a week fits on screen. Past days drop their health numbers, which are still in a day's detail. The "drag to swap" hint now reads "Tap a day for detail" on touch screens.
+- Lists such as your races and your sick or holiday periods stack neatly instead of squeezing into columns, and form fields share the width evenly.
+- The Garmin link on a completed day no longer sits over its distance.
+
 ## 2.9.1-beta.5 - 2026-10-04
 ### Fixed
 - The page scrolled sideways in a window about 1000 to 1250 pixels wide (a Mac app window, for example): the header, with the version added, was wider than the window. The header now fits at every width: below 1120 pixels the tabs move to their own row, and above it they tighten.
