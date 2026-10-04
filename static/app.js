@@ -473,11 +473,17 @@ function recoveryCard(){const R=TR&&TR.recovery;
       <p class="xs mute" style="margin:4px 0 0">${x.normal?`Your normal ${x.normal[0]} ${x.unit} (±${x.normal[1]}) `:''}${dirTag(x.dir,'7 days against your normal')}</p></div>`};
   return `<div class="card c12" id="reccard"><p class="eyebrow">Recovery trends</p><div class="grid" style="gap:18px">${one('hrv','var(--green)',false)}${one('rhr','var(--amber)',true)}${one('sleep_h','var(--brand)',false)}</div>
     <p class="xs mute" style="margin:8px 0 0">7-day averages over 12 weeks, the way the research reads them: one night is noise, a week-long drift is real. Higher HRV, lower resting heart rate and more sleep are better, so each chart is drawn with better as up. These are the same figures the daily adjustment uses.</p></div>`}
+let CLALL=false;
 function changesView(){if(!CHANGES)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
-  const col={Added:'green',Changed:'amber',Removed:'red',Fixed:'unknown'};
-  return `<div class="grid"><div class="card c12"><p class="eyebrow">Change log</p><p class="small mute" style="margin:0">You are running version <b class="num">${E(S.version)}</b>. Every version is listed here, newest first, with what was added, changed, removed or fixed.</p></div>
-    ${CHANGES.map((v,i)=>`<div class="card c12 ver"><p class="h" style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span class="num">${E(v.version)}</span><span class="mute small" style="font-weight:500">${v.date?new Date(v.date+'T12:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):''}</span>${i===0?'<span class="tag green">current</span>':''}</p>
-      ${v.sections.map(s=>`<p class="lab2"><span class="chip ${col[s.title]||'unknown'}"><i></i>${E(s.title)}</span></p><ul class="why">${s.items.map(x=>`<li>${E(x)}</li>`).join('')}</ul>`).join('')}</div>`).join('')}</div>`}
+  const col={Added:'green',Changed:'amber',Removed:'red',Fixed:'unknown'}, SHOW=6;
+  const inline=t=>E(t).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+  const list=CLALL?CHANGES:CHANGES.slice(0,SHOW);
+  return `<div class="cl"><div class="cl-head"><h2>Change log</h2><p class="mute">You are running version <b class="num">${E(S.version)}</b>. Every version, newest first, with what was added, changed, removed or fixed.</p></div>
+    ${list.map(v=>`<section class="cl-rel"><div class="cl-meta"><div class="cl-v">${E(v.version)}</div>
+      <div class="cl-d">${v.date?new Date(v.date+'T12:00').toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'}):''}</div>
+      <div class="cl-tags">${v.version===S.version?'<span class="cl-tag" style="color:var(--green)">Running</span>':''}${v.version.includes('-beta')?'<span class="cl-tag" style="color:var(--amber)">Beta</span>':''}</div></div>
+      <div>${v.sections.map(x=>`<div class="cl-sec"><h3 class="${col[x.title]||'unknown'}" style="color:var(--${{green:'green',amber:'amber',red:'red'}[col[x.title]]||'mute'})"><i></i>${E(x.title)}</h3><ul>${x.items.map(i=>`<li>${inline(i)}</li>`).join('')}</ul></div>`).join('')}</div></section>`).join('')}
+    ${CHANGES.length>SHOW?`<button class="ghost cl-more" id="clmore">${CLALL?'Show fewer':`Show all ${CHANGES.length} versions`}</button>`:''}</div>`}
 async function loadChanges(){CHANGES=(await api('changelog')).versions;if(view==='changes')render()}
 async function loadAbout(){ABOUT=(await api('about')).sections;REFS=await api('references');if(view==='about')render()}
 let REFS=null;
@@ -609,6 +615,7 @@ function bind(){
   $$('[data-pace]').forEach(b=>b.onclick=()=>pace(b.dataset.pace));
   on('#pgo',()=>pace($('#pgo').dataset.race,$('#ptime').value));
   on('#pacex',()=>{PACE=null;render()});
+  on('#clmore',()=>{CLALL=!CLALL;render();if(!CLALL)scrollTo({top:0})});
   on('#rmopen',()=>{UNI=true;render();$('#rmpw').focus()});
   on('#rmno',()=>{UNI=false;render()});
   if($('#rmov'))$('#rmov').onclick=e=>{if(e.target.id==='rmov'){UNI=false;render()}};

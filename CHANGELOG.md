@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.4 - 2026-10-04
+### Fixed
+- The Change log page looked broken in 2.9.1-beta.3: the new version pill shared a style name with each version's card, so every card was set in the pill's small monospace type and would not wrap. The pill has its own style now, and the app's name no longer wraps beside it.
+### Changed
+- The Change log is redesigned: one comfortable reading column, each version with its date and a Running or Beta tag on the left (kept in view while you scroll its entries), and Added, Changed, Removed and Fixed as clear headings with easy-to-read lists. Code names and bold text are shown properly. The six newest versions show first, with a button for the rest. On a phone the version heads each entry.
+
 ## 2.9.1-beta.3 - 2026-10-04
 ### Added
 - The version number is always in view: a small pill beside the app's name at the top of every page, amber on a beta. Clicking it opens the Change log.
