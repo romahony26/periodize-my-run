@@ -401,15 +401,14 @@ def _local(t):
 
 
 def _check_due(now):
-    """True when a Garmin calendar check (every four hours, UTC, each moved by its own jitter) has passed since the last
-    successful job of any kind."""
+    """True when a sync slot (every four hours, UTC, each moved by its own jitter) has passed since the last successful sync."""
     utc = now.astimezone(dt.UTC)
     slots = [(utc.replace(hour=h, minute=0, second=0, microsecond=0) + dt.timedelta(days=d)) for d in (-1, 0, 1) for h in CHECK_HOURS_UTC]
     due = [t + jitter("check " + t.isoformat()) for t in slots]
     passed = [t for t in due if t <= utc]
     if not passed:
         return False
-    lo = last_ok(("setup", "daily", "replan", "readiness", "push"))
+    lo = last_ok()      # a sync (setup or daily); a replan or a calendar push reads no new runs, so it does not count
     return lo is None or lo < _local(max(passed))
 
 
@@ -428,8 +427,9 @@ def daily_due(now):
 
 def scheduler():
     """Runs for the life of the app. Once a day at the chosen time it downloads, reviews and sends; it catches up after downtime,
-    and re-checks the morning's sleep and HRV until the watch has synced. Every four hours (02:00, 06:00, 10:00 ... UTC) it checks
-    that the Garmin calendar holds the planned workouts for the next `push_days` days and sends any that are missing or changed."""
+    and re-checks the morning's sleep and HRV until the watch has synced. Every four hours (02:00, 06:00, 10:00 ... UTC) it syncs again,
+    so new runs are read, the plan follows them, and the Garmin calendar is kept holding the planned workouts for the next `push_days`
+    days."""
     last_try = None
     while True:
         try:
@@ -447,9 +447,9 @@ def scheduler():
                         (db.get("readiness") or {}).get("date") == now.date().isoformat():
                     last_try = now
                     run("readiness")
-                elif not recently_tried and db.get("push_enabled") and _check_due(now):
+                elif not recently_tried and _check_due(now):
                     last_try = now
-                    run("push")
+                    run("daily")      # the full sync, not only the calendar check: runs done later in the day arrive within hours
             if db.get("setup_done") and db.get("update_check") and _update_due(dt.datetime.now()):
                 updates.check()
         except Exception:

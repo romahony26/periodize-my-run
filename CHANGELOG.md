@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.2 - 2026-10-04
+### Fixed
+- The sync now runs several times a day, as the page says. Before, only the once-a-day sync read your runs; the four-hourly check only repaired the Garmin calendar (and only if sending workouts was on), so "last sync" stayed at the morning's time and a run done later did not show until the next day. Each four-hourly check is now a full sync.
+### Added
+- Marking one day sick, injured or on holiday: a **Just that day** button beside Save sets Until to the same day as From. The Until box now says what an empty one means (every day is rest until you press Better), which is what removed the rest of the plan from the watch when it was left empty.
+
 ## 2.9.1-beta.1 - 2026-10-04
 ### Added
 - Settings, Remove Periodize My Run: removes the app from Mac or Linux after an approval box in which the app password is typed again. It can also delete your data, which has its own tick box. A wrong password counts toward the same five-attempt lock as logging in.

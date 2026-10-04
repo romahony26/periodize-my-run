@@ -226,7 +226,7 @@ function racesView(){
     ${S.statuses.length?`<table>${S.statuses.map(s=>`<tr><td><span class="chip ${s.kind==='holiday'?'green':s.end?'unknown':'red'}"><i></i>${{sick:'Sick',injured:'Injured',holiday:'Holiday'}[s.kind]}</span></td><td>${nice(s.start)} → ${s.end?nice(s.end):'ongoing'}</td><td>${s.kind==='holiday'?`<b>${E(S.holiday_modes[s.mode]||'')}</b> `:''}${E(s.note)}</td><td class="r">${s.end?'':`<button class="ghost" data-better="${s.id}">${s.kind==='holiday'?"I'm back today":"I'm better today"}</button>`} <button class="ghost" data-sdel="${s.id}">Remove</button></td></tr>`).join('')}</table>`:''}
     <div class="row"><div><label for="sk">What</label><select id="sk"><option value="sick">Sick</option><option value="injured">Injured</option><option value="holiday">Holiday</option></select></div>
     <div id="smw" style="display:none"><label for="sm">On holiday I want to run</label><select id="sm">${Object.entries(S.holiday_modes).map(([k,v])=>`<option value="${k}" ${k==='easy'?'selected':''}>${E(v)}</option>`).join('')}</select></div><div><label for="ss">From</label><input id="ss" type="date" value="${S.today}"></div>
-    <div><label for="se">Until (empty if unknown)</label><input id="se" type="date"></div><div><label for="sn">Note</label><input id="sn" placeholder="e.g. cold, calf, travel"></div><button class="btn" id="sadd">Save</button></div></div></div>`;
+    <div><label for="se">Until (empty = every day is rest until you press Better)</label><input id="se" type="date"></div><div><label for="sn">Note</label><input id="sn" placeholder="e.g. cold, calf, travel"></div><button class="btn" id="sadd">Save</button> <button class="ghost" id="sday" title="Sets Until to the same day as From">Just that day</button></div></div></div>`;
 }
 const opt=(v,l,cur)=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`;
 const yn=(id,cur,dis)=>`<select id="${id}" ${dis?'disabled':''}>${opt(1,'Yes',cur?1:0)}${opt(0,'No',cur?1:0)}</select>`;
@@ -569,6 +569,7 @@ function bind(){
   $$('[data-del]').forEach(b=>b.onclick=async()=>{await api('races/'+b.dataset.del,null,'DELETE');await load()});
   on('#sadd',async()=>{await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:$('#ss').value,end:$('#se').value,note:$('#sn').value});toast('Saved. Replanning from today.');await load()});
   if($('#sk'))$('#sk').onchange=()=>{$('#smw').style.display=$('#sk').value==='holiday'?'':'none'};
+  on('#sday',async()=>{const d=$('#ss').value||S.today;await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:d,end:d,note:$('#sn').value});toast('Saved for one day. Replanning.');await load()});
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});
   $$('[data-sdel]').forEach(b=>b.onclick=async()=>{await api('status/'+b.dataset.sdel,null,'DELETE');await load()});
   on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
