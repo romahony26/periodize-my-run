@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.5 - 2026-10-04
+### Fixed
+- The page scrolled sideways in a window about 1000 to 1250 pixels wide (a Mac app window, for example): the header, with the version added, was wider than the window. The header now fits at every width: below 1120 pixels the tabs move to their own row, and above it they tighten.
+### Changed
+- The version is now a quiet line under the app's name instead of a pill beside it, so the name stays on one line.
+
 ## 2.9.1-beta.4 - 2026-10-04
 ### Fixed
 - The Change log page looked broken in 2.9.1-beta.3: the new version pill shared a style name with each version's card, so every card was set in the pill's small monospace type and would not wrap. The pill has its own style now, and the app's name no longer wraps beside it.
