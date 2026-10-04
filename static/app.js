@@ -17,7 +17,7 @@ async function api(path, body, method){
   return j;
 }
 let fastT=null;
-async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
+async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';
   if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize My Run cannot be opened from another device yet.</p><p class="small">On the computer running Periodize My Run, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}
@@ -269,7 +269,8 @@ function settingsView(){const s=S.settings;
     <p class="xs mute">For a copy off this computer, use Download backup above, or see How it works for a daily copy into a cloud folder.</p>
     <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button></p></div>
   ${connections()}
-  ${aboutCard()}</div>`}
+  ${aboutCard()}
+  ${removeCard()}</div>${UNI?removeModal():''}`}
 let TERMS=null, TOPEN={};
 async function loadTerms(){try{TERMS=await api('terms')}catch(e){TERMS={text:''}}render()}
 function md(t){return E(t||'').split(/\n\n+/).map(b=>{b=b.trim();if(!b||b==='---')return '';if(b.startsWith('# '))return '';
@@ -296,6 +297,16 @@ function updatesBox(){const u=S.update;
 function termsNotice(){if(!S.setup_done||S.terms_ok)return '';
   return `<div class="card c12" id="termsnote" style="margin-bottom:18px"><p class="eyebrow">Terms of use</p><p class="small" style="margin:0">Periodize My Run is a training tool, not medical advice. You run at your own risk, your data and its security are yours to look after, and the app must not be put on the internet. Please read and accept the terms once.</p>
     ${termsBox('tbox2')}<p style="margin:12px 0 0"><label class="small"><input type="checkbox" id="tok2"> I have read and accept the terms of use</label> <button class="btn" id="taccept" style="margin-left:10px">Accept</button></p></div>`}
+function removeCard(){return `<div class="card c12" id="removecard"><p class="eyebrow">Remove Periodize My Run</p>
+  <p class="small" style="margin:0">Stops the app, stops it starting by itself and removes its Python environment. Your training data is kept unless you choose to delete it too. You will be asked for the app password.</p>
+  ${S.uninstall?'<p style="margin:12px 0 0"><button class="ghost" id="rmopen" style="color:var(--red)">Remove…</button></p>'
+    :'<p class="xs mute" style="margin:8px 0 0">Not available on this install. Run the installer once more to turn it on, or use ./uninstall.sh in the app folder.</p>'}</div>`}
+function removeModal(){return `<div class="ov" id="rmov"><div class="modal" style="width:min(520px,100%)" role="dialog" aria-modal="true" aria-labelledby="rmt">
+  <p class="eyebrow"><span id="rmt">Remove Periodize My Run?</span></p>
+  <p class="small">This stops the app and removes it from start-up. The app folder itself is left for you to delete. Workouts already on your watch stay there.</p>
+  <label class="small" style="display:block;margin:10px 0"><input type="checkbox" id="rmdata"> Also delete my training data, backups and stored watch login. <b>This cannot be undone.</b></label>
+  <label for="rmpw">App password</label><input id="rmpw" type="password" autocomplete="current-password" maxlength="256">
+  <p style="margin:14px 0 0"><button class="btn" id="rmgo" style="background:var(--red)">Remove now</button> <button class="ghost" id="rmno">Cancel</button></p></div></div>`}
 function aboutCard(){const P=S.project||{}, x=(href,t)=>`<a href="${E(href)}" target="_blank" rel="noopener noreferrer">${t}</a>`;
   return `<div class="card c12" id="aboutcard"><p class="eyebrow">About Periodize My Run</p>
     <p class="small" style="margin:0">Version <b class="num">${E(S.version)}</b> · <a href="#" id="tochanges">What changed</a>${P.url?' · '+x(P.url,'Source code'):''}</p>
@@ -360,7 +371,7 @@ function histView(){
   return h+'</div></div>'+dayModal()}
 const scc=v=>v>=85?'green':v>=65?'amber':'red';
 const SCTIP='Execution score out of 100: how closely the run matched the planned session. 85 or more is on target, 65 to 84 is close, under 65 is off target. Open the detail to see why.';
-let CH={}, CHN=0, CHANGES=null, PACE=null, MAPZ=0, TR=null, TRV=null;
+let UNI=false, CH={}, CHN=0, CHANGES=null, PACE=null, MAPZ=0, TR=null, TRV=null;
 const GLINK=(id,cls)=>`<a class="gl ${cls||''}" href="https://connect.garmin.com/modern/activity/${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer" title="Open in Garmin Connect" aria-label="Open this activity in Garmin Connect"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6 15 14H1z" fill="#007cc3"/></svg></a>`;
 function lineChart(series,idx,color,label,fmtv,invert,tip){
   const pts=series.filter(s=>s[idx]!=null);if(pts.length<3)return '';
@@ -595,6 +606,11 @@ function bind(){
   $$('[data-pace]').forEach(b=>b.onclick=()=>pace(b.dataset.pace));
   on('#pgo',()=>pace($('#pgo').dataset.race,$('#ptime').value));
   on('#pacex',()=>{PACE=null;render()});
+  on('#rmopen',()=>{UNI=true;render();$('#rmpw').focus()});
+  on('#rmno',()=>{UNI=false;render()});
+  if($('#rmov'))$('#rmov').onclick=e=>{if(e.target.id==='rmov'){UNI=false;render()}};
+  on('#rmgo',async()=>{const b=$('#rmgo');b.disabled=true;try{await api('uninstall',{password:$('#rmpw').value,delete_data:$('#rmdata').checked});
+    $('#main').innerHTML='<div class="card"><p class="eyebrow">Removing</p><p class="small">Periodize My Run is being removed. This page will stop working in a few seconds. You can close it, then delete the app folder.</p></div>'}catch(e){b.disabled=false;$('#rmpw').value='';$('#rmpw').focus()}});
   $$('[data-trend]').forEach(b=>b.onclick=()=>{TRV=b.dataset.trend;render();if(!TR)loadTrends()});
   on('#trex',()=>{TRV=null;render()});
   if($('#tov'))$('#tov').onclick=e=>{if(e.target.id==='tov'){TRV=null;render()}};

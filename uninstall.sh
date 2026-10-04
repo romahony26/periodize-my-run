@@ -25,7 +25,13 @@ if [ "$(uname)" = "Darwin" ]; then
   else
     echo "The app was not set to start at login."
   fi
+  WATCH="$HOME/Library/LaunchAgents/com.periodizemyrun.uninstall.plist"
+  [ -f "$WATCH" ] && { launchctl unload "$WATCH" 2>/dev/null || true; rm -f "$WATCH"; }
 else
+  if [ -f /etc/systemd/system/periodize-my-run-uninstall.path ]; then
+    sudo systemctl disable --now periodize-my-run-uninstall.path || true
+    sudo rm -f /etc/systemd/system/periodize-my-run-uninstall.path /etc/systemd/system/periodize-my-run-uninstall.service /usr/local/libexec/periodize-my-run-uninstall
+  fi
   UNIT=/etc/systemd/system/periodize-my-run.service
   if [ -f "$UNIT" ]; then
     sudo systemctl disable --now periodize-my-run.service || true

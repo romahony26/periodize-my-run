@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.1 - 2026-10-04
+### Added
+- Settings, Remove Periodize My Run: removes the app from Mac or Linux after an approval box in which the app password is typed again. It can also delete your data, which has its own tick box. A wrong password counts toward the same five-attempt lock as logging in.
+- How it stays safe: the app never runs a command and takes nothing from the request but the password and a yes or no. It only creates one private file that says "keep" or "data". A watcher the installer registers (a launchd agent on Mac, a systemd path unit on Linux) sees the file and runs a fixed script, `uninstall-run.sh`. On Linux that script is a root-owned copy the app cannot change, it ignores anything in the file but those two words, and it deletes only as the app's own user, so nothing the app writes can add a command or point it at another folder.
+### Changed
+- Installs made before this version need the installer run once more to turn the button on; until then Settings says so. `uninstall.sh` also removes the watcher.
+
 ## 2.9.0 - 2026-10-04
 ### Added
 - Release and beta channels for updates. Settings, About, Updates now has an Update channel: **Stable** (the default) offers tested releases only; **Beta** also offers early versions (`2.9.1-beta.1` and so on) that carry fixes before they are released. A beta sorts before its release, so a release always replaces the beta it came from. Installs from before this version ignore beta versions, so only people who choose Beta ever see one.

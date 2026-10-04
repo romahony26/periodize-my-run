@@ -309,6 +309,14 @@ Python environment. **Your data is kept unless you ask for it to be deleted**,
 so you can install again later and carry on. It removes only what the installer
 made.
 
+**From the app (macOS and Linux):** Settings, Remove Periodize My Run. You
+approve it in a box and type the app password again; a second tick box also
+deletes your data. The app runs no command itself: it only leaves a private
+request file saying "keep" or "data", and a watcher the installer set up (which
+the app cannot change) runs a fixed script. Installs made before this feature
+need the installer run once more to turn it on. An app password must be set
+(`python web.py --set-password`).
+
 **macOS and Linux** (on Linux it asks for `sudo` to remove the service)
 
     cd periodize-my-run

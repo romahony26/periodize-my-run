@@ -250,6 +250,49 @@ def logout():
     return jsonify(ok=True)
 
 
+def _uninstall_ready():
+    """Can Settings remove the app here? Only if the installer registered the watcher that acts on the request file."""
+    if sys.platform == "darwin":
+        return os.path.isfile(os.path.expanduser("~/Library/LaunchAgents/com.periodizemyrun.uninstall.plist"))
+    return sys.platform.startswith("linux") and os.path.isfile("/etc/systemd/system/periodize-my-run-uninstall.path")
+
+
+@app.post("/api/uninstall")
+def uninstall():
+    """Remove the app, after the app password is typed again. The app never runs a command and takes no path or text from the request:
+    it creates one owner-only file holding "keep" or "data". A watcher the installer registered (and the app cannot change) notices
+    the file and runs a fixed script. See uninstall-run.sh."""
+    j = request.json
+    ip, now = request.remote_addr, time.time()
+    n, until = FAILS.get(ip, (0, 0))
+    if now < until:
+        return jsonify(error=f"Too many attempts. Try again in {int((until - now) // 60) + 1} minutes."), 429
+    stored = db.get("app_password")
+    if not stored:
+        return jsonify(error="Set an app password first (on this computer: python web.py --set-password), then try again."), 400
+    if not _uninstall_ready():
+        return jsonify(error="This install cannot remove itself from Settings. Run the installer once more to enable it, or run ./uninstall.sh."), 400
+    if not isinstance(j.get("delete_data"), bool):
+        return jsonify(error="Say whether to delete your data."), 400
+    pw = j.get("password")
+    pw = pw if isinstance(pw, str) and len(pw) <= 256 else ""
+    if not hmac.compare_digest(_hash(pw, stored["salt"], stored.get("rounds", 200_000)), stored["hash"]):
+        n += 1
+        FAILS[ip] = (0, now + LOCK_S) if n >= MAX_FAILS else (n, 0)
+        log.warning("Failed uninstall confirmation from %s (%d)", ip, n)
+        return jsonify(error="Wrong password."), 403
+    FAILS.pop(ip, None)
+    flag = os.path.join(db.HOME, "uninstall-request")
+    try:
+        fd = os.open(flag, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write("data\n" if j["delete_data"] else "keep\n")
+    except FileExistsError:
+        return jsonify(error="A removal is already under way."), 409
+    log.warning("Removal requested from %s (delete data: %s)", ip, j["delete_data"])
+    return jsonify(ok=True)
+
+
 @app.errorhandler(404)
 def not_found(e):
     return jsonify(error="Not found."), 404
@@ -553,7 +596,7 @@ def state():
         drift=insights.drift_history(today) if db.get("setup_done") else [], best_grade=best_grade, about_you={"sex": c.get("sex"), "birth_date": c.get("birth_date"), "gel_carbs_g": c.get("gel_carbs_g")},
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
-        compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")),
+        compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")), uninstall=_uninstall_ready(),
         update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
         heat={"on": bool(c.get("heat_adjust")), "located": bool((db.get("heat_forecast") or {}).get("loc")),
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None},

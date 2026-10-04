@@ -60,6 +60,20 @@ if [ "$(uname)" = "Darwin" ]; then
 PL
   launchctl unload "$PLIST" 2>/dev/null || true
   launchctl load "$PLIST"
+  # Lets Settings, Remove Periodize My Run, do its job: this agent starts uninstall-run.sh only when the app drops a request file.
+  KEYS="$HOME/.config/periodize-my-run"
+  WATCH="$HOME/Library/LaunchAgents/com.periodizemyrun.uninstall.plist"
+  cat > "$WATCH" <<PL
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.periodizemyrun.uninstall</string>
+  <key>ProgramArguments</key><array><string>/bin/sh</string><string>$DIR/uninstall-run.sh</string><string>$DIR</string><string>$HOME/.periodize-my-run</string><string>$KEYS</string></array>
+  <key>WatchPaths</key><array><string>$HOME/.periodize-my-run/uninstall-request</string></array>
+</dict></plist>
+PL
+  launchctl unload "$WATCH" 2>/dev/null || true
+  launchctl load "$WATCH"
   echo "Periodize My Run is running. Open http://localhost:$PORT"
   echo "To remove it later: ./uninstall.sh (your data is kept unless you add --data)"
 else
@@ -106,8 +120,31 @@ UMask=0077
 [Install]
 WantedBy=multi-user.target
 UN
+  # Lets Settings, Remove Periodize My Run, do its job. The app (which cannot run commands as root) only drops a request file; this
+  # path unit notices it and runs a root-owned copy of uninstall-run.sh that the app's user cannot change.
+  sudo install -d -m 755 -o root -g root /usr/local/libexec
+  sudo install -m 755 -o root -g root "$DIR/uninstall-run.sh" /usr/local/libexec/periodize-my-run-uninstall
+  sudo tee /etc/systemd/system/periodize-my-run-uninstall.path >/dev/null <<UN
+[Unit]
+Description=Periodize My Run: remove it when asked in Settings
+
+[Path]
+PathExists=$HOME/.periodize-my-run/uninstall-request
+
+[Install]
+WantedBy=multi-user.target
+UN
+  sudo tee /etc/systemd/system/periodize-my-run-uninstall.service >/dev/null <<UN
+[Unit]
+Description=Periodize My Run: remove it
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/periodize-my-run-uninstall $DIR $HOME/.periodize-my-run $HOME/.config/periodize-my-run $(id -un)
+UN
   sudo systemctl daemon-reload
   sudo systemctl enable --now periodize-my-run.service
+  sudo systemctl enable --now periodize-my-run-uninstall.path
   IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
   SCHEME=http; [ -f "$HOME/.periodize-my-run/tls/cert.pem" ] && SCHEME=https
   echo "Periodize My Run is running. Open $SCHEME://${IP:-<this device>}:$PORT from any device on your network and log in with the app password."
