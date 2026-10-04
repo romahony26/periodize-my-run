@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.3 - 2026-10-04
+### Added
+- The version number is always in view: a small pill beside the app's name at the top of every page, amber on a beta. Clicking it opens the Change log.
+
 ## 2.9.1-beta.2 - 2026-10-04
 ### Fixed
 - The sync now runs several times a day, as the page says. Before, only the once-a-day sync read your runs; the four-hourly check only repaired the Garmin calendar (and only if sending workouts was on), so "last sync" stayed at the morning's time and a run done later did not show until the next day. Each four-hourly check is now a full sync.

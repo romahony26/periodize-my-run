@@ -29,6 +29,8 @@ function authView(kind){
 
 function render(){
   if(!S)return;CH={};CHN=0;
+  {const v=$('#ver');if(v&&S.version){v.hidden=false;v.textContent='v'+S.version;v.classList.toggle('beta',S.version.includes('-beta'));v.title='You are running version '+S.version+(S.version.includes('-beta')?' (a beta). ':'. ')+'Click for the change log.';
+    v.onclick=e=>{e.preventDefault();if(!S.setup_done||!S.setup_seen)return;view='changes';loadChanges();render();scrollTo({top:0})}}}
   if(!S.setup_done||!S.setup_seen){$('#nav').innerHTML='';$('#sync').innerHTML='';if(S.setup_done&&!S.setup_seen)wiz.step=6;return wizard()}
   const T={plan:'Plan',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
   $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}" data-v="${v}">${T[v]}</button>`).join('');
