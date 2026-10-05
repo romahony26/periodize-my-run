@@ -224,12 +224,12 @@ code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ho
   table:not(:has(th)){display:block}table:not(:has(th)) tbody{display:block}
   table:not(:has(th)) tr{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
   table:not(:has(th)) td{display:block;border:0;padding:0!important;text-align:left}table:not(:has(th)) td.r{display:flex;flex-wrap:wrap;gap:8px;width:100%;white-space:normal}table:not(:has(th)) td.r .ghost{flex:1 1 auto}
-  table:has(th){display:block;width:100%}table:has(th) tbody{display:block}
+  table:has(th){display:block;width:100%;min-width:280px}table:has(th) tbody{display:block}
   table:has(th) tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:start}
   table:has(th) th{display:none}
-  table:has(th) td{display:block;border:0;padding:0!important;text-align:left;overflow-wrap:break-word}
-  table:has(th) td.r{text-align:left}table:has(th) td.num{text-align:left}table:has(th) td b{display:block;font-size:15px}
-  table:has(th) td:first-child{grid-column:1/-1;font-weight:600;padding-bottom:4px!important;border-bottom:1px solid var(--line-subtle)}
+  table:has(th) td{display:block;border:0;padding:0!important;text-align:left;overflow-wrap:break-word;word-break:break-word}
+  table:has(th) td.r{text-align:left}table:has(th) td.num{text-align:left}table:has(th) td b{display:block;font-size:15px;margin-bottom:2px}
+  table:has(th) td:first-child{grid-column:1/-1;font-weight:600;padding-bottom:4px!important;border-bottom:1px solid var(--line-subtle);margin-bottom:4px}
   .dw:has(.gl.corner) .day{padding-right:44px}.gl.corner{top:50%;right:10px;transform:translateY(-50%)}
 }
 </style>
