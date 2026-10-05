@@ -278,7 +278,7 @@ function settingsView(){const s=S.settings;
     <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button></p></div>
   ${connections()}
   ${aboutCard()}
-  ${removeCard()}</div>${UNI?removeModal():''}`}
+  ${removeCard()}</div>${UNI&&view==='settings'?removeModal():''}`}
 let TERMS=null, TOPEN={};
 async function loadTerms(){try{TERMS=await api('terms')}catch(e){TERMS={text:''}}render()}
 function md(t){return E(t||'').split(/\n\n+/).map(b=>{b=b.trim();if(!b||b==='---')return '';if(b.startsWith('# '))return '';
