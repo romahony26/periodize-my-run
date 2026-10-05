@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.10 - 2026-10-05
+### Fixed
+- iOS: Race predictor and history tables now stack vertically on iPhone instead of requiring horizontal scroll.
+- iOS: Last eight weeks table now displays as a readable 2-column layout on small screens.
+- iOS: Personal bests table reorganized for mobile readability.
+- iOS: Pace-for-heart-rate tag hidden on week bars to prevent wrapping on iPhone.
+
 ## 2.9.1-beta.7 - 2026-10-05
 ### Fixed
 - The uninstall modal no longer appears on other tabs if you navigate away from Settings before confirming removal.

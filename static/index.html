@@ -210,7 +210,8 @@ code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ho
   main{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
   #toast{bottom:calc(76px + env(safe-area-inset-bottom))}
   .modal.sheetm{min-height:0;margin-top:auto;border-radius:18px 18px 0 0}.ov:has(.sheetm){align-items:flex-end;padding:0}
-  .wk{margin:18px 2px 8px}
+  .wk{margin:18px 2px 8px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:baseline}
+  .wk span.tag:nth-of-type(3){display:none}
   .cal{gap:8px}
   .day{display:grid;grid-template-columns:56px minmax(0,1fr) auto;grid-template-areas:"d l m" "d t f" ". mt mt";column-gap:10px;row-gap:2px;align-items:center;padding:10px 12px 10px 16px;min-height:0}
   .day .d{grid-area:d;flex-direction:column;justify-content:flex-start;align-self:start;gap:2px;width:auto;font-size:11.5px}
@@ -219,9 +220,16 @@ code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ho
   .day .f{grid-area:f;margin:0;padding:0;justify-self:end;font-size:12px}
   .day .mt{grid-area:mt;margin-top:4px;padding-top:4px;font-size:12px}.day.past .mt{display:none}
   .row>div{flex:1 1 150px;min-width:0}.row input,.row select{width:100%;box-sizing:border-box}.row>.btn,.row>.ghost{flex:1 1 140px}
+  table{overflow-x:auto}
   table:not(:has(th)){display:block}table:not(:has(th)) tbody{display:block}
   table:not(:has(th)) tr{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
   table:not(:has(th)) td{display:block;border:0;padding:0!important;text-align:left}table:not(:has(th)) td.r{display:flex;flex-wrap:wrap;gap:8px;width:100%;white-space:normal}table:not(:has(th)) td.r .ghost{flex:1 1 auto}
+  table:has(th){display:block;width:100%}table:has(th) tbody{display:block}
+  table:has(th) tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:start}
+  table:has(th) th{display:none}
+  table:has(th) td{display:block;border:0;padding:0!important;text-align:left;overflow-wrap:break-word}
+  table:has(th) td.r{text-align:left}table:has(th) td.num{text-align:left}table:has(th) td b{display:block;font-size:15px}
+  table:has(th) td:first-child{grid-column:1/-1;font-weight:600;padding-bottom:4px!important;border-bottom:1px solid var(--line-subtle)}
   .dw:has(.gl.corner) .day{padding-right:44px}.gl.corner{top:50%;right:10px;transform:translateY(-50%)}
 }
 </style>
