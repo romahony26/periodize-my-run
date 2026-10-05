@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.1-beta.7 - 2026-10-05
+### Fixed
+- The uninstall modal no longer appears on other tabs if you navigate away from Settings before confirming removal.
+
 ## 2.9.1-beta.6 - 2026-10-04
 ### Changed
 - Phones now get a layout of their own, so the app works both as a desktop page and as a home-screen app. The menu is a bar along the bottom with Plan, History, Fitness, Races, Settings and More (How it works, Change log, Log), always in reach and never wrapping; the top shows only the name, version, last sync time and the Sync button, so the page keeps most of the screen. Desktop and tablet keep the tabs along the top.
