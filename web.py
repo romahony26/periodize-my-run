@@ -843,7 +843,7 @@ def aero_delete(date):
 @app.post("/api/status")
 def status_save():
     j = request.json or {}
-    if j.get("id"):
+    if j.get("id") and not j.get("edit"):
         db.run("UPDATE status SET end=? WHERE id=?", (j.get("end") or dt.date.today().isoformat(), j["id"]))
         log.info("Status %s ended", j["id"])
     else:
@@ -859,8 +859,13 @@ def status_save():
             return jsonify(error="Check the dates."), 400
         if end and end < start:
             return jsonify(error="The end date is before the start date."), 400
-        db.run("INSERT INTO status(kind,start,end,note,mode) VALUES(?,?,?,?,?)", (j["kind"], start.isoformat(), end.isoformat() if end else None, (j.get("note") or "")[:120], mode))
-        log.info("Status recorded: %s from %s", j["kind"], j.get("start"))
+        vals = (j["kind"], start.isoformat(), end.isoformat() if end else None, (j.get("note") or "")[:120], mode)
+        if j.get("id"):
+            db.run("UPDATE status SET kind=?,start=?,end=?,note=?,mode=? WHERE id=?", vals + (j["id"],))
+            log.info("Status %s edited", j["id"])
+        else:
+            db.run("INSERT INTO status(kind,start,end,note,mode) VALUES(?,?,?,?,?)", vals)
+            log.info("Status recorded: %s from %s", j["kind"], j.get("start"))
     jobs.start("replan")
     return jsonify(ok=True)
 
