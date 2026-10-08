@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.2 - 2026-10-08
+### Added
+- Sick, injured and holiday entries can now be edited. Press Edit on an entry to change its type, dates or note (for example, to lengthen or shorten how long you are sick), then Update. The plan replans from today.
+
 ## 2.9.1 - 2026-10-05
 ### Fixed
 - iOS: Sessions history table now stacks vertically on iPhone, showing date and stats in a readable 2-column layout.

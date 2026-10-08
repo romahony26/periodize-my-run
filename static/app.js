@@ -231,10 +231,10 @@ async function readGpx(file){
 function racesView(){
   return `<div class="grid"><div class="card c12"><p class="eyebrow">Races</p>${raceRows()}<p class="xs mute" style="margin:8px 0 0">Add a race's course as a GPX file for a split-by-split pacing plan that allows for the hills, and climb targets in training if it is hilly. The file is read here in your browser; only distance and elevation are stored.</p>${raceForm()}</div>${paceModal()}
   <div class="card c12"><p class="eyebrow">Sick, injured or on holiday</p><p class="small mute" style="margin-top:0">Sick or injured: the plan rests you, then brings you back with easy running. Holiday: choose how you want to run while away. Saving replans from today.</p>
-    ${S.statuses.length?`<table>${S.statuses.map(s=>`<tr><td><span class="chip ${s.kind==='holiday'?'green':s.end?'unknown':'red'}"><i></i>${{sick:'Sick',injured:'Injured',holiday:'Holiday'}[s.kind]}</span></td><td>${nice(s.start)} → ${s.end?nice(s.end):'ongoing'}</td><td>${s.kind==='holiday'?`<b>${E(S.holiday_modes[s.mode]||'')}</b> `:''}${E(s.note)}</td><td class="r">${s.end?'':`<button class="ghost" data-better="${s.id}">${s.kind==='holiday'?"I'm back today":"I'm better today"}</button>`} <button class="ghost" data-sdel="${s.id}">Remove</button></td></tr>`).join('')}</table>`:''}
+    ${S.statuses.length?`<table>${S.statuses.map(s=>`<tr><td><span class="chip ${s.kind==='holiday'?'green':s.end?'unknown':'red'}"><i></i>${{sick:'Sick',injured:'Injured',holiday:'Holiday'}[s.kind]}</span></td><td>${nice(s.start)} → ${s.end?nice(s.end):'ongoing'}</td><td>${s.kind==='holiday'?`<b>${E(S.holiday_modes[s.mode]||'')}</b> `:''}${E(s.note)}</td><td class="r">${s.end?'':`<button class="ghost" data-better="${s.id}">${s.kind==='holiday'?"I'm back today":"I'm better today"}</button>`} <button class="ghost" data-sedit="${s.id}">Edit</button> <button class="ghost" data-sdel="${s.id}">Remove</button></td></tr>`).join('')}</table>`:''}
     <div class="row"><div><label for="sk">What</label><select id="sk"><option value="sick">Sick</option><option value="injured">Injured</option><option value="holiday">Holiday</option></select></div>
     <div id="smw" style="display:none"><label for="sm">On holiday I want to run</label><select id="sm">${Object.entries(S.holiday_modes).map(([k,v])=>`<option value="${k}" ${k==='easy'?'selected':''}>${E(v)}</option>`).join('')}</select></div><div><label for="ss">From</label><input id="ss" type="date" value="${S.today}"></div>
-    <div><label for="se">Until (empty = every day is rest until you press Better)</label><input id="se" type="date"></div><div><label for="sn">Note</label><input id="sn" placeholder="e.g. cold, calf, travel"></div><button class="btn" id="sadd">Save</button> <button class="ghost" id="sday" title="Sets Until to the same day as From">Just that day</button></div></div></div>`;
+    <div><label for="se">Until (empty = every day is rest until you press Better)</label><input id="se" type="date"></div><div><label for="sn">Note</label><input id="sn" placeholder="e.g. cold, calf, travel"></div><button class="btn" id="sadd">Save</button> <button class="ghost" id="scancel" style="display:none">Cancel edit</button> <button class="ghost" id="sday" title="Sets Until to the same day as From">Just that day</button></div></div></div>`;
 }
 const opt=(v,l,cur)=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`;
 const yn=(id,cur,dis)=>`<select id="${id}" ${dis?'disabled':''}>${opt(1,'Yes',cur?1:0)}${opt(0,'No',cur?1:0)}</select>`;
@@ -583,7 +583,12 @@ function bind(){
   on('#retry',async()=>{await api('run',{kind:'setup'});await load()});
   on('#radd',async()=>{await api('races',raceRead());toast('Race saved');await load()});
   $$('[data-del]').forEach(b=>b.onclick=async()=>{await api('races/'+b.dataset.del,null,'DELETE');await load()});
-  on('#sadd',async()=>{await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:$('#ss').value,end:$('#se').value,note:$('#sn').value});toast('Saved. Replanning from today.');await load()});
+  let sEditId=null;
+  on('#sadd',async()=>{await api('status',{id:sEditId||undefined,edit:sEditId?1:undefined,kind:$('#sk').value,mode:$('#sm').value,start:$('#ss').value,end:$('#se').value,note:$('#sn').value});toast('Saved. Replanning from today.');await load()});
+  $$('[data-sedit]').forEach(b=>b.onclick=()=>{const s=S.statuses.find(x=>x.id==b.dataset.sedit);if(!s)return;sEditId=s.id;
+    $('#sk').value=s.kind;$('#smw').style.display=s.kind==='holiday'?'':'none';if(s.mode)$('#sm').value=s.mode;
+    $('#ss').value=s.start;$('#se').value=s.end||'';$('#sn').value=s.note||'';$('#sadd').textContent='Update';$('#scancel').style.display='';$('#sk').scrollIntoView({block:'center'})});
+  on('#scancel',()=>load());
   if($('#sk'))$('#sk').onchange=()=>{$('#smw').style.display=$('#sk').value==='holiday'?'':'none'};
   on('#sday',async()=>{const d=$('#ss').value||S.today;await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:d,end:d,note:$('#sn').value});toast('Saved for one day. Replanning.');await load()});
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});
