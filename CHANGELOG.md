@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.1 - 2026-10-08
+### Changed
+- The beta channel now follows the 2.9.3 line, starting from the 2.9.2 release. No functional changes yet.
+
 ## 2.9.2 - 2026-10-08
 ### Added
 - Sick, injured and holiday entries can now be edited. Press Edit on an entry to change its type, dates or note (for example, to lengthen or shorten how long you are sick), then Update. The plan replans from today.
