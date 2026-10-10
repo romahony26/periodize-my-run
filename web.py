@@ -500,9 +500,12 @@ def state():
             fc = forecast.forecast(tp, s["endurance"], c, goal, today)
             cp = fc["completion"]
             log_ = db.get("forecast_log") or {}
-            prev = [v for k, v in sorted(log_.items()) if k < mon.isoformat()]
-            if log_.get(mon.isoformat()) is None or abs(log_[mon.isoformat()] - fc["seconds"]) > 1:
-                log_[mon.isoformat()] = round(fc["seconds"])
+            # each entry remembers which race it was for, so a change of goal race is never shown as a change in fitness
+            # (older entries are bare seconds with no race, and are left out of the comparison)
+            prev = [v["s"] for k, v in sorted(log_.items()) if k < mon.isoformat() and isinstance(v, dict) and v.get("race") == goal["id"]]
+            cur_e = log_.get(mon.isoformat())
+            if not isinstance(cur_e, dict) or cur_e.get("race") != goal["id"] or abs(cur_e["s"] - fc["seconds"]) > 1:
+                log_[mon.isoformat()] = {"s": round(fc["seconds"]), "race": goal["id"]}
                 db.put("forecast_log", dict(sorted(log_.items())[-30:]))
             gs = None
             if goal["goal_time"]:

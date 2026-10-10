@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.2 - 2026-10-10
+### Fixed
+- Adding or switching to a nearer goal race (for example a 5K while a marathon was your goal) no longer shows the difference between the two forecasts as a "this week" change. The weekly change now compares a race only with its own earlier forecasts.
+
 ## 2.9.3-beta.1 - 2026-10-08
 ### Changed
 - The beta channel now follows the 2.9.3 line, starting from the 2.9.2 release. No functional changes yet.
