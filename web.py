@@ -446,7 +446,7 @@ def _days(c, today, L=None):
             adj = json.loads(p["adjust"]) if p["adjust"] else None
             planned = dict(p, steps=json.loads(p["steps"]) if p["steps"] else None)
             day = engine.as_run(planned, adj)
-            item.update({"type": day["type"], "label": day["label"], "dist": engine.dist(p["miles"], c["units"]) if p["miles"] else "", "miles": p["miles"] or 0,
+            item.update({"type": day["type"], "label": day["label"], "dist": engine.dist(day["miles"], c["units"]) if day["miles"] else "", "miles": p["miles"] or 0,
                          "short": engine.short(day, c["units"]), "week": (d - dt.timedelta(days=d.weekday())).isoformat(),
                          "text": engine.describe(day, tp, c["units"], (adj or {}).get("slow", 0.0)) if tp and day["steps"] else "",
                          "purpose": engine.purpose({"type": day["type"], "label": p["label"], "adjust": adj}),
@@ -607,7 +607,7 @@ def state():
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
         job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
         settings={k: (vault.get("notify_url") or "") if k == "notify_url" else c.get(k) for k in SETTINGS}, limits=L, profile=prof, races=[{k: v for k, v in r.items() if k != "course"} | {"has_course": bool(r.get("course"))} for r in rs], statuses=db.rows("SELECT * FROM status ORDER BY start DESC"),
-holiday_modes=engine.HOLIDAY_MODES, fitness=fitness,
+holiday_modes=engine.HOLIDAY_MODES, recovery_modes=engine.RECOVERY_MODES, fitness=fitness,
         backups=backup.listing()[:20], auto_backup=c["auto_backup"],
         week_info={r["monday"]: {"mode": r["mode"], "total": engine.dist(json.loads(r["summary"])["total"], c["units"]), "final": bool(r["final"])}
                    for r in db.rows("SELECT monday,mode,final,summary FROM weeks WHERE monday>=?", ((mon - dt.timedelta(days=7)).isoformat(),))}, readiness=db.get("readiness"), days=_days(c, today, L) if db.get("setup_done") else [], today=today.isoformat(),
@@ -850,11 +850,13 @@ def status_save():
         db.run("UPDATE status SET end=? WHERE id=?", (j.get("end") or dt.date.today().isoformat(), j["id"]))
         log.info("Status %s ended", j["id"])
     else:
-        if j.get("kind") not in ("sick", "injured", "holiday"):
-            return jsonify(error="Choose sick, injured or holiday."), 400
-        mode = j.get("mode") if j["kind"] == "holiday" else None
+        if j.get("kind") not in ("sick", "injured", "holiday", "recovering"):
+            return jsonify(error="Choose sick, injured, recovering or holiday."), 400
+        mode = j.get("mode") if j["kind"] in ("holiday", "recovering") else None
         if j["kind"] == "holiday" and mode not in engine.HOLIDAY_MODES:
             return jsonify(error="Choose how you want to run on holiday."), 400
+        if j["kind"] == "recovering" and mode not in engine.RECOVERY_MODES:
+            return jsonify(error="Choose how you want to run while recovering."), 400
         try:
             start = dt.date.fromisoformat(j.get("start") or dt.date.today().isoformat())
             end = dt.date.fromisoformat(j["end"]) if j.get("end") else None
@@ -1444,9 +1446,14 @@ def about():
         ]),
         ("Sick or injured", [
             "While marked sick or injured, every day is rest.",
-            "After sickness: easy running only for as many days as you were out (up to 7), building from half distance.",
+            "After sickness: easy running only for as many days as you were out plus two (at least 3, up to 10), building from half distance. Entries that touch, such as two days written as two entries, count as one illness.",
             "After injury: easy running only for twice the days you were out (up to 14).",
             "Any change replans from today.",
+        ]),
+        ("Recovering", [
+            "Use this while you are running but not yet well, for example on antibiotics. Sessions become easy running and the long run is shortened to about 60% (up to 8 miles). Nothing is rested.",
+            "Choose the second option if the antibiotic can affect tendons (the fluoroquinolones, such as ciprofloxacin or levofloxacin): it adds a reminder to keep it flat and slow.",
+            "You do not have to set this to be looked after. For two weeks after any sickness you record, a poor recovery sign on the morning of a long run or a session (a short night, a heart rate or HRV off your normal, or a resting heart rate 4 or more above it) eases that day by itself and says why.",
         ]),
         ("Your watch", [
             f"Status: {yn(c['push_enabled'])}. The next {c['push_days']} days are kept on your Garmin calendar as structured workouts with pace targets on the fast parts.",

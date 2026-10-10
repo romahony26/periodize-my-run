@@ -225,7 +225,22 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     colleagues, 2021). Periodize My Run does this automatically on a morning with three or more warning signs, or when a sign has lasted
     three mornings in a row; the watch gets the easy run, and the planned session is still shown. [P]
 54. **Illness means rest, then a gradual return.** [C] While sick, no running. Afterwards, easy running for as many days as you
-    were out (up to seven), building from half distance.
+    were out plus two (at least three, up to ten), building from half distance. Two entries that touch are one illness. The return
+    is longer than the time out because symptoms of an acute respiratory illness last about a week on average in athletes
+    (Derman and colleagues, 2022), and the graded return-to-exercise templates, written for COVID-19 and not validated for other
+    illnesses, run to about a week or more of easy steps before full training (Elliott and colleagues, 2020). No study tests the
+    exact length; the numbers are this project's choice. [P]
+54a. **For two weeks after an illness, a poor recovery sign eases the long run and the sessions.** [P] The "neck check" used to
+    decide whether to run while ill has no scientific support, and evidence-based guidance on returning after a respiratory illness
+    is lacking (Derman and colleagues, 2022). On a morning in the two weeks after an illness you recorded, any readiness warning
+    sign, or a resting heart rate 4 or more above your own normal, turns a long run into an easy run of about 60% of its distance
+    (up to 8 miles) and a session into easy running, and says why. This borrows the rule that readiness-guided training swapped hard
+    days for easy ones when morning signs were poor (Düking and colleagues, 2021), and applies it with a lower threshold because
+    the cost of a relapse is larger than the cost of a gentle day. The threshold is not from a study.
+54b. **While on treatment you can choose easy running only.** [P] Marking yourself as recovering turns sessions into easy
+    running and shortens the long run, with nothing rested. The fluoroquinolone antibiotics carry a regulator's boxed warning for
+    tendinitis and tendon rupture (U.S. Food and Drug Administration, 2008), so that option also asks for flat, slow running and
+    no hills. It does not know which antibiotic you take; it only acts on what you choose.
 
 ## 10. Racing
 
@@ -445,9 +460,11 @@ on a detail.
 - Daniels J, Gilbert J (1979). *Oxygen Power: Performance Tables for Distance Runners*. A book; only its two published equations (the oxygen cost of running at a speed, and the fraction of capacity held for a given time) are used, not its tables. Not peer-reviewed.
 - Deaner RO, Carter RE, Joyner MJ, Hunter SK (2015). Men are more likely than women to slow in the marathon. *Med Sci Sports Exerc*. *Abstract read.*
 - Desai P, Jungmalm J, Börjesson M, Karlsson J, Grau S (2021). Recreational runners with a history of injury are twice as likely to sustain a running-related injury as runners with no history of injury: a 1-year prospective cohort study. *J Orthop Sports Phys Ther* 51:144–150. *Abstract read.*
+- Derman W and colleagues (2022). Incidence of and risk factors for acute respiratory illness in athletes: a systematic review and meta-analysis by an IOC consensus subgroup. *Br J Sports Med*. *From memory; finding search-confirmed (about 20% of illnesses cost more than a day of training; symptoms last about 7 days on average; the neck check has no scientific support).*
 - Dial MB and colleagues (2025). Validation of nocturnal resting heart rate and heart rate variability in consumer wearables. *Physiol Rep*.
 - Doherty C and colleagues (2020). An evaluation of the training determinants of marathon performance: a meta-analysis with meta-regression. *J Sci Med Sport* 23:182–188.
 - Düking P and colleagues (2021). Monitoring and adapting endurance training on the basis of heart rate variability monitored by wearable technologies. *J Sci Med Sport*.
+- Elliott N and colleagues (2020). Infographic. Graduated return to play guidance following COVID-19 infection. *Br J Sports Med*. *From memory; check the paper before relying on a detail.*
 - El Helou N and colleagues (2012). Impact of environmental parameters on marathon running performance. *PLoS One*. *Abstract read.*
 - Ely MR, Cheuvront SN, Roberts WO, Montain SJ (2007). Impact of weather on marathon-running performance. *Med Sci Sports Exerc*.
 - Esteve-Lanao J, Foster C, Seiler S, Lucia A (2007). Impact of training intensity distribution on performance in endurance athletes. *J Strength Cond Res* 21:943–949.
@@ -530,6 +547,7 @@ on a detail.
 - van der Worp MP and colleagues (2015). Injuries in runners: a systematic review on risk factors and sex differences. *PLoS One*.
 - Vernillo G and colleagues (2017). Biomechanics and physiology of uphill and downhill running. *Sports Med* 47:615–629.
 - Vickers AJ, Vertosick EA (2016). An empirical study of race times in recreational endurance runners. *BMC Sports Sci Med Rehabil*.
+- U.S. Food and Drug Administration (2008). Boxed warning on fluoroquinolone antibiotics: tendinitis and tendon rupture. Not peer-reviewed; a regulator's safety communication. *From memory.*
 - Vihma T (2010). Effects of weather on the performance of marathon runners. *Int J Biometeorol*. *Abstract read.*
 - Walsh NP and colleagues (2021). Sleep and the athlete: narrative review and 2021 expert consensus recommendations. *Br J Sports Med* 55:356–368.
 - Wang Z and colleagues (2023). Effects of tapering on performance in endurance athletes: a systematic review and meta-analysis. *PLoS One*.

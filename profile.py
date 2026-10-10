@@ -74,6 +74,8 @@ def derive(today=None):
     excused += [dt.date.fromisoformat(r["date"]) for r in db.rows("SELECT date FROM results WHERE dist_m>=21000 AND date!=''")]
     hurt = []
     for s in db.rows("SELECT kind,start,end FROM status"):
+        if s["kind"] == "recovering":        # still running, only easier: neither a break nor an excuse
+            continue
         a, b = dt.date.fromisoformat(s["start"]), dt.date.fromisoformat(s["end"]) if s["end"] else today
         (excused if s["kind"] == "holiday" else hurt).extend(a + dt.timedelta(days=i) for i in range(0, max((b - a).days, 0) + 1, 7))
     proven8_3y, proven8_all = proven_block(wk, y3, excused, hurt), proven_block(wk, dt.date.min, excused, hurt)

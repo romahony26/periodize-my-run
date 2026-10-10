@@ -89,6 +89,9 @@ def score(p, runs, tp, L):
     steps = json.loads(p["steps"]) if p["steps"] else None
     if not steps or p["type"] == "Rest" or not tp:
         return None
+    adj = json.loads(p["adjust"]) if p["adjust"] else {}
+    if adj.get("recovery"):          # eased because of a recent illness: judge the run against the eased day, not the one it replaced
+        steps = engine.as_run({"steps": steps, "miles": p["miles"], "type": p["type"], "label": p["label"]}, adj)["steps"]
     plan, by_hr = planned_zones(steps, tp, L["hrmax"])
     if not runs:
         return {"score": 0, "verdict": "Missed", "planned_load": round(load(plan)), "load": 0,

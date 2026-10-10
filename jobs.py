@@ -133,7 +133,7 @@ def today_message():
     day = engine.as_run(dict(r, steps=json.loads(r["steps"]) if r["steps"] else None), adj)
     text = engine.describe(day, wk[0]["tp"], c["units"], adj.get("slow", 0.0)) if wk and day["steps"] else ""
     rd = db.get("readiness") or {}
-    out = f"Today: {day['label']}" + (f" {engine.dist(r['miles'], c['units'])}" if r["miles"] else "") + (f"\n{text}" if text else "")
+    out = f"Today: {day['label']}" + (f" {engine.dist(day['miles'], c['units'])}" if day["miles"] else "") + (f"\n{text}" if text else "")
     if adj.get("easy"):
         out += "\n" + adj["advice"] + " " + "; ".join(adj.get("reasons", []))
     elif adj.get("slow"):
@@ -268,6 +268,18 @@ def adjust():
             adj.update({"easy": True, "slow": 0.0, "advice": "Changed to an easy run today because " +
                         ("several warning signs agree." if r["level"] == "red" else "a warning sign has lasted three mornings.") +
                         " The session comes back once you have recovered."})
+        # inside the weeks after an illness, any warning sign eases the long run and turns a session into easy running: a relapse
+        # costs far more than a gentle few days (see PRINCIPLES.md, illness)
+        ill = engine.illness_signs(r, today, db.rows("SELECT * FROM status"))
+        if ill and row[0]["type"] in ("Long", "Key") and not (adj and adj.get("easy")):
+            planned = row[0]["miles"] or 0
+            cap = max(engine.half(min(planned * 0.6, 8)), 3) if row[0]["type"] == "Long" else None
+            adj = {"slow": 0.0, "level": r["level"], "reasons": ill, "easy": True, "recovery": True,
+                   "advice": (f"Eased to an easy {engine.dist(cap, c['units'])} today" if cap else "Changed to an easy run today") +
+                             " because you are recovering from an illness and your recovery signs are not back to normal yet. "
+                             "The session comes back once they are."}
+            if cap:
+                adj["miles"] = cap
         h = heat.at(today, heat.run_hour(today)) if c.get("heat_adjust") and fast else None
         if h and not (adj and adj.get("easy")):
             say = f"the forecast at {h['hour']}:00 is {h['temp']}°C with a dew point of {h['dew']}°C"

@@ -67,7 +67,8 @@ def as_run(day, adj):
     """The day as it should be run today: a session turned into an easy run when the warning signs say so (see jobs.adjust)."""
     if not adj or not adj.get("easy") or not day.get("steps") or day.get("type") in ("Rest", "Race"):
         return day
-    return dict(day, steps=[("d", day["miles"], "easy")], label=f"Easy (was {day['label']})", type="Easy")
+    miles = min(day["miles"], adj["miles"]) if adj.get("miles") else day["miles"]         # a long run eased while recovering is also shortened
+    return dict(day, steps=[("d", miles, "easy")], miles=miles, label=f"Easy (was {day['label']})", type="Easy")
 
 
 def warmup_rest(day):
@@ -640,31 +641,105 @@ def _holiday(d, mode):
             d.update(rest)
 
 
-def apply_status(days, statuses):
-    """Overlay sick, injured and holiday periods on planned days.
+RECOVERY_MODES = {
+    "easy": "Easy running only",
+    "tendon": "Easy running only, flat and slow (an antibiotic that can affect tendons)",
+}
+ILLNESS_WINDOW = 14           # days after an illness during which a poor recovery sign eases the long run and the sessions
+TENDON_NOTE = ("Flat and slow: no hills and no fast running while you are on it and for some weeks after. Tendon injury, including "
+               "Achilles rupture, is a recognised effect of this class of antibiotic. Stop and see a clinician for any tendon pain.")
 
-    Sick or injured: rest while unwell, then easy running for a return period. Holiday: the athlete's chosen way of running while away.
+
+def episodes(statuses, kinds=("sick",)):
+    """Sick (or injured) entries of one kind, with entries that touch or overlap run together as one episode: [(start, end or None)]."""
+    spans = sorted((dt.date.fromisoformat(s["start"]), dt.date.fromisoformat(s["end"]) if s["end"] else None) for s in statuses if s["kind"] in kinds)
+    out = []
+    for a, b in spans:
+        if out and out[-1][1] is not None and a <= out[-1][1] + dt.timedelta(days=1):
+            out[-1] = (out[-1][0], None if b is None else max(out[-1][1], b))
+        elif out and out[-1][1] is None:
+            continue
+        else:
+            out.append((a, b))
+    return out
+
+
+def return_days(off, kind):
+    """How many easy days follow an episode that kept you out for `off` days."""
+    return min(off + 2, 10) if kind == "sick" else min(2 * off, 14)
+
+
+def recent_illness(statuses, today):
+    """(end date, days since) of an illness that ended in the last ILLNESS_WINDOW days, or None. The day it ends counts as day 0."""
+    ended = [b for a, b in episodes(statuses) if b is not None and b <= today]
+    if not ended:
+        return None
+    last = max(ended)
+    k = (today - last).days
+    return (last, k) if k <= ILLNESS_WINDOW else None
+
+
+def illness_signs(r, today, statuses):
+    """Why, this morning, a recent illness is not yet behind you: the readiness signs, plus a resting heart rate well above your normal.
+
+    Only inside the window after an illness. A single morning's resting heart rate is a noisy reading, so on its own it is not acted on
+    outside that window (see readiness); here the cost of being wrong is small and the risk of a relapse is what is being avoided."""
+    if not recent_illness(statuses, today):
+        return []
+    signs = list(r["reasons"]) if r["points"] >= 1 else []
+    rhr, base = r.get("rhr"), (r.get("normal") or {}).get("rhr")
+    if rhr and base and rhr - base >= 4 and not any("resting heart rate" in x for x in signs):
+        signs.append(f"your resting heart rate this morning is {rhr:.0f}, {rhr - base:.0f} above your normal {base:.0f}")
+    return signs
+
+
+def _recovering(d, mode):
+    """Reshape one planned day while recovering: sessions become easy running and the long run is shortened."""
+    note = "On treatment or easing back: easy running only." + (" " + TENDON_NOTE if mode == "tendon" else "")
+    if d["type"] in ("Rest", "Race"):
+        return
+    d["strength"] = ""
+    if d["type"] == "Easy":
+        d["note"] = note
+    elif d["type"] == "Key":
+        mi_ = max(half(min(d["miles"], 8) * 0.8), 3)
+        d.update({"type": "Easy", "label": "Easy", "steps": [("d", mi_, "easy")], "miles": mi_, "note": note})
+    elif d["type"] == "Long":
+        mi_ = max(half(min(d["miles"] * 0.6, 8)), 3)
+        d.update({"type": "Easy", "label": "Easy", "steps": [("d", mi_, "easy")], "miles": mi_, "note": note})
+
+
+def apply_status(days, statuses):
+    """Overlay sick, injured, recovering and holiday periods on planned days.
+
+    Sick or injured: rest while unwell, then easy running for a return period. Entries that touch are one episode, so a week written as
+    two entries does not get two short returns. Recovering: easy running only, for as long as it is switched on. Holiday: the
+    athlete's chosen way of running while away.
     """
+    spans = {"sick": episodes(statuses, ("sick",)), "injured": episodes(statuses, ("injured",))}
     for d in days:
         for s in statuses:
-            start = dt.date.fromisoformat(s["start"])
-            end = dt.date.fromisoformat(s["end"]) if s["end"] else None
-            if s["kind"] == "holiday":
+            if s["kind"] in ("holiday", "recovering"):
+                start = dt.date.fromisoformat(s["start"])
+                end = dt.date.fromisoformat(s["end"]) if s["end"] else None
                 if d["date"] >= start and (end is None or d["date"] <= end):
-                    _holiday(d, s.get("mode") if s.get("mode") in HOLIDAY_MODES else "easy")
-                continue
-            word = "Sick" if s["kind"] == "sick" else "Injured"
-            if d["date"] >= start and (end is None or d["date"] <= end):
-                d.update({"type": "Rest", "label": f"{word}: no running", "steps": None, "miles": 0, "strength": "",
-                          "note": "Rest until you are well." if s["kind"] == "sick" else "No running until it is pain-free to walk briskly and hop. See a clinician if it is not improving."})
-            elif end and d["date"] > end:
-                off = (end - start).days + 1
-                back = min(off, 7) if s["kind"] == "sick" else min(2 * off, 14)
-                k = (d["date"] - end).days
-                if k <= back and d["type"] != "Rest":
-                    mi_ = max(half(min(d["miles"], 10) * (0.5 + 0.4 * k / back)), 2)
-                    d.update({"type": "Easy", "label": "Return: easy", "steps": [("d", mi_, "easy")], "miles": mi_,
-                              "note": f"Day {k} of {back} back after being {word.lower()}. Easy only; stop if symptoms return."})
+                    if s["kind"] == "holiday":
+                        _holiday(d, s.get("mode") if s.get("mode") in HOLIDAY_MODES else "easy")
+                    else:
+                        _recovering(d, s.get("mode") if s.get("mode") in RECOVERY_MODES else "easy")
+        for kind, word in (("sick", "Sick"), ("injured", "Injured")):
+            for start, end in spans[kind]:
+                if d["date"] >= start and (end is None or d["date"] <= end):
+                    d.update({"type": "Rest", "label": f"{word}: no running", "steps": None, "miles": 0, "strength": "",
+                              "note": "Rest until you are well." if kind == "sick" else "No running until it is pain-free to walk briskly and hop. See a clinician if it is not improving."})
+                elif end and d["date"] > end:
+                    off = (end - start).days + 1
+                    back = return_days(off, kind)
+                    k = (d["date"] - end).days
+                    if k <= back and d["type"] != "Rest":
+                        mi_ = max(half(min(d["miles"], 10) * (0.5 + 0.4 * k / back)), 2)
+                        d.update({"type": "Easy", "label": "Return: easy", "steps": [("d", mi_, "easy")], "miles": mi_,
+                                  "note": f"Day {k} of {back} back after being {word.lower()}. Easy only; stop if symptoms return."})
     return days
 
 

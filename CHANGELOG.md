@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.3 - 2026-10-10
+### Added
+- Recovering: a new entry type next to sick, injured and holiday, for when you are running but not yet well, for example on antibiotics. Sessions become easy running and the long run is shortened to about 60% of its distance (up to 8 miles); nothing is rested and it does not count as a break from training. A second option adds a reminder to keep it flat and slow, for antibiotics that can affect tendons.
+- After an illness you recorded, a poor recovery sign eases the day by itself, with no entry needed. For two weeks afterwards, a short night, a heart rate or HRV off your normal, or a resting heart rate 4 or more above it, turns the morning's long run into an easy run of about 60% of its distance (up to 8 miles) and a session into easy running, on the watch too, and says why. The execution score judges that day against the eased run.
+### Changed
+- The return after sickness is longer: easy running for the days you were out plus two (at least 3, up to 10), instead of the days you were out. Sick entries that touch, such as two days entered separately, now count as one illness, so they get one return instead of two short ones.
+- Today's message and the plan show the distance of an eased run, not the distance it replaced.
+
 ## 2.9.3-beta.2 - 2026-10-10
 ### Fixed
 - Adding or switching to a nearer goal race (for example a 5K while a marathon was your goal) no longer shows the difference between the two forecasts as a "this week" change. The weekly change now compares a race only with its own earlier forecasts.
