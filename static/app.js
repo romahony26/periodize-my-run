@@ -61,10 +61,18 @@ async function api(path, body, method){
   const j=await r.json().catch(()=>({}));
   if(r.status===401){authView(j.auth);throw new Error('auth')}
   if(!r.ok){toast(j.error||'Something went wrong.','err');throw new Error(j.error)}
+  if(path==='settings')DIRTY=false;
   return j;
 }
-let fastT=null;
-async function load(){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(load,1000)}catch(e){}}
+let fastT=null, LASTUI=0, DIRTY=false;
+// The page redraws itself as new data arrives. That closes an open dropdown and resets unsaved choices, so it holds off while you are
+// using a control (and, on Settings, until your changes are saved).
+document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('select,input,textarea,label'))LASTUI=Date.now()},true);
+document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
+document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
+document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea')){LASTUI=Date.now();if(view==='settings')DIRTY=true}},true);
+const holdUI=()=>{const a=document.activeElement;return Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
+async function load(auto){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE||(auto&&holdUI())){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(()=>load(true),1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';
   if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize My Run cannot be opened from another device yet.</p><p class="small">On the computer running Periodize My Run, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}
@@ -82,7 +90,7 @@ function render(){
   const T={plan:'Plan',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
   $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}" data-v="${v}">${T[v]}</button>`).join('');
   {const on=$('#nav button.on');if(on&&on.scrollIntoView)on.scrollIntoView({inline:'center',block:'nearest'})}
-  const go=v=>{MORE=false;view=v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})};
+  const go=v=>{MORE=false;DIRTY=false;view=v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})};
   $$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
   {const ic={plan:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',hist:'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 4v4.5H8M12 8v4.5l3 2"/>',you:'<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',races:'<path d="M5 21V4M5 5h13l-2.5 4L18 13H5"/>',settings:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>',more:'<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>'};
    const tb=[['plan','Plan'],['hist','History'],['you','Fitness'],['races','Races'],['settings','Settings'],['more','More']], inMore=['about','changes','log'].includes(view);
@@ -732,4 +740,4 @@ function bind(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(SEL||DAY||PACE||TRV)){SEL=null;DAY=null;PACE=null;TRV=null;render()}});
 load();
-setInterval(()=>{const a=document.activeElement;if(a&&['INPUT','SELECT'].includes(a.tagName))return;if(document.querySelector('details[open]'))return;if(document.querySelector('.day.drag'))return;load()},6000);
+setInterval(()=>{const a=document.activeElement;if(a&&['INPUT','SELECT'].includes(a.tagName))return;if(document.querySelector('details[open]'))return;if(document.querySelector('.day.drag'))return;load(true)},6000);

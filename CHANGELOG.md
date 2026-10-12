@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.13 - 2026-10-13
+### Fixed
+- Dropdowns closed too fast to pick from. The page redraws itself every few seconds (every second while a sync runs), which closed an open dropdown and reset unsaved choices. It now waits while you are using a control (20 seconds after you last touched one) and, on Settings, until your changes are saved. Pressing a button still refreshes at once.
+
 ## 2.9.3-beta.12 - 2026-10-13
 ### Changed
 - "Set the hours you can run" in the Weather card, and "Change the hours you can run" in a day's weather pop-out, now jump straight to the hours in Settings and highlight them.
