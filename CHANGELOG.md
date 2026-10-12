@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.7 - 2026-10-13
+### Added
+- The day pop-out now charts the day's weather by hour across daylight: temperature with dew point, rain (mm an hour, with the chance of rain on hover) and, on days when any hour costs pace, the heat cost (% slower). The best hour is marked and your running window is shaded. Hover or use the arrow keys for values, and open "Hourly figures" for the same numbers as a table.
+### Changed
+- The forecast sent to the page now carries the hourly figures for the day.
+
 ## 2.9.3-beta.6 - 2026-10-13
 ### Added
 - The running window can be set separately for weekends (Saturday and Sunday). Left as "Same as weekdays", the weekday window applies every day, as in beta.5.

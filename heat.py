@@ -224,7 +224,15 @@ def day_plan(day, usual, now=None, f=None, win=None):
         return (v[3] or 0) >= WET_MM or (v[4] or 0) >= WET_CHANCE
     pool = [x for x in hrs if not wet(x[1])] or hrs
     h, v = min(pool, key=lambda x: (worth(x[1][0], x[1][1]), abs(x[0] - usual), x[0]))
-    out = {"date": k, "hour": h, "temp": round(v[0]), "dew": round(v[1]), "pct": slowdown(v[0], v[1]),
+    # the whole of daylight (not only the hours that could be chosen) for the charts: [hour, temp, dew, per cent slower, rain mm, chance]
+    a, z = (_hm(sun[0]) // 60, -(-_hm(sun[1]) // 60)) if sun else FALLBACK_DAY
+    rows = []
+    for x in range(max(a, 0), min(z, 23) + 1):
+        u = f["hours"].get(f"{k}T{x:02d}:00")
+        if u and u[0] is not None and u[1] is not None:
+            u = list(u) + [None] * (5 - len(u))
+            rows.append([x, round(u[0], 1), round(u[1], 1), slowdown(u[0], u[1]), None if u[3] is None else round(u[3], 1), u[4]])
+    out = {"hourly": rows, "date": k, "hour": h, "temp": round(v[0]), "dew": round(v[1]), "pct": slowdown(v[0], v[1]),
            "wind": round(v[2]) if v[2] is not None else None, "rain": round(v[3], 1) if v[3] is not None else None,
            "chance": round(v[4]) if v[4] is not None else None, "wet": wet(v), "dry_hours": len([x for x in hrs if not wet(x[1])]),
            "sunrise": sun[0] if sun else None, "sunset": sun[1] if sun else None, "dark": dark, "window": list(win) if win else None,
