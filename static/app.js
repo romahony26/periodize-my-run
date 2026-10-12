@@ -9,12 +9,15 @@ const hmsIn=t=>{const p=String(t||'').trim().split(':').map(Number);if(!p.length
 const fmt=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`};
 const nice=d=>new Date(d+'T12:00').toLocaleDateString(undefined,{day:'numeric',month:'short'});
 function wxChart(rows,o){
-  // rows: [hour, temp, dew, pct, rain, chance]; one chart, one axis. o: {title, unit, kind:'line'|'bar', cols:[[index,color,name]], min, tip, win, best}
+  // rows: [hour, temp, dew, pct, rain, chance]; one chart, one axis, its own panel. o: {title, unit, kind:'line'|'bar', cols:[[index,color,name]], min, tip, win, best}
   const W=600,Ht=110,n=rows.length,cols=o.cols,vs=rows.flatMap(r=>cols.map(c=>r[c[0]])).filter(v=>v!=null);if(n<3||!vs.length)return '';
-  let lo=o.kind==='bar'?0:Math.floor(Math.min(...vs))-1, hi=o.kind==='bar'?Math.max(Math.max(...vs),o.min||1):Math.ceil(Math.max(...vs))+1;if(hi<=lo)hi=lo+1;
-  const x=i=>(i+.5)/n*W, y=v=>(1-(v-lo)/(hi-lo))*(Ht-14)+7, slot=W/n;
+  let lo=o.kind==='bar'?0:Math.min(...vs), hi=Math.max(Math.max(...vs),o.kind==='bar'?(o.min||1):lo+2);
+  const step=[.5,1,2,5,10,20,50].find(k=>(hi-lo)/k<=4)||50;
+  lo=o.kind==='bar'?0:Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;if(hi<=lo)hi=lo+step;
+  const ticks=[];for(let v=lo;v<=hi+1e-9;v+=step)ticks.push(+v.toFixed(2));
+  const x=i=>(i+.5)/n*W, y=v=>(1-(v-lo)/(hi-lo))*(Ht-14)+7, slot=W/n, ST='var(--line)';
   const id='c'+(++CHN);CH[id]=rows.map((r,i)=>[(i+.5)/n,y(r[cols[0][0]]==null?lo:r[cols[0][0]])/Ht,o.tip(r)]);
-  let g='';
+  let g=ticks.map(v=>`<line x1="0" x2="${W}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${ST}" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('');
   if(o.win){const a=rows.findIndex(r=>r[0]>=o.win[0]),b=rows.length-1-[...rows].reverse().findIndex(r=>r[0]<=o.win[1]);
     if(a>=0&&b>=a&&b<n)g+=`<rect x="${(a*slot).toFixed(1)}" y="0" width="${((b-a+1)*slot).toFixed(1)}" height="${Ht}" fill="var(--brand)" opacity=".09"/>`}
   const bi=rows.findIndex(r=>r[0]===o.best);
@@ -23,12 +26,16 @@ function wxChart(rows,o){
     g+=`<rect x="${(x(i)-bw/2).toFixed(1)}" y="${t.toFixed(1)}" width="${bw.toFixed(1)}" height="${(y(0)-t).toFixed(1)}" fill="${c[1]}"/>`}));
   else cols.forEach(c=>{const d=rows.filter(r=>r[c[0]]!=null).map((r,i)=>(i?'L':'M')+x(rows.indexOf(r)).toFixed(1)+' '+y(r[c[0]]).toFixed(1)).join(' ');
     g+=`<path d="${d}" fill="none" stroke="${c[1]}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>`});
-  g+=`<line x1="0" x2="${W}" y1="${y(lo).toFixed(1)}" y2="${y(lo).toFixed(1)}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
-  const ticks=rows.map((r,i)=>r[0]%3===0?`<span style="position:absolute;left:${((i+.5)/n*100).toFixed(2)}%;transform:translateX(-50%)">${r[0]}:00</span>`:'').join('');
-  const key=cols.map(c=>`<span style="margin-right:12px"><i style="display:inline-block;width:14px;height:3px;border-radius:2px;background:${c[1]};vertical-align:middle;margin-right:5px"></i>${E(c[2])}</span>`).join('');
-  return `<div class="xs mute" style="display:flex;justify-content:space-between;margin-top:12px;gap:8px;flex-wrap:wrap"><span><b>${E(o.title)}</b> <span class="mute">· ${key}</span></span><span class="num">${lo<0||o.kind!=='bar'?Math.round(lo):0} to ${Math.round(hi)} ${E(o.unit)}</span></div>
-    <div class="lc" data-ch="${id}" tabindex="0" role="img" aria-label="${E(o.title)} by hour, ${E(o.unit)}. Use the left and right arrow keys to read values."><svg viewBox="0 0 ${W} ${Ht}" preserveAspectRatio="none" style="width:100%;height:96px;display:block" aria-hidden="true">${g}</svg><i class="cur"></i><i class="pt" style="background:${cols[0][1]}"></i><span class="tp num" aria-live="polite"></span></div>
-    <div class="xs mute" style="position:relative;height:16px;margin-top:2px" aria-hidden="true">${ticks}</div>`}
+  const yl=ticks.map(v=>`<span style="position:absolute;right:0;top:${(y(v)/Ht*100).toFixed(2)}%;transform:translateY(-50%)">${v}</span>`).join('');
+  const xl=rows.map((r,i)=>`<span style="position:absolute;left:${((i+.5)/n*100).toFixed(2)}%;transform:translateX(-50%)">${r[0]}</span>`).join('');
+  const key=cols.length>1?cols.map(c=>`<span style="margin-left:12px"><i style="display:inline-block;width:14px;height:3px;border-radius:2px;background:${c[1]};vertical-align:middle;margin-right:5px"></i>${E(c[2])}</span>`).join(''):'';
+  return `<div style="border:1px solid var(--line);border-radius:12px;padding:10px 12px 8px;margin-top:12px">
+    <div class="xs" style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span><b>${E(o.title)}</b> <span class="mute">${E(o.unit)}</span></span><span class="mute">${key}</span></div>
+    <div style="display:grid;grid-template-columns:36px minmax(0,1fr);column-gap:6px;margin-top:8px">
+      <div class="xs mute num" style="position:relative;height:96px;text-align:right" aria-hidden="true">${yl}</div>
+      <div><div class="lc" data-ch="${id}" tabindex="0" role="img" aria-label="${E(o.title)} by hour, ${E(o.unit)}. Use the left and right arrow keys to read values."><svg viewBox="0 0 ${W} ${Ht}" preserveAspectRatio="none" style="width:100%;height:96px;display:block" aria-hidden="true">${g}</svg><i class="cur"></i><i class="pt" style="background:${cols[0][1]}"></i><span class="tp num" aria-live="polite"></span></div>
+        <div class="xs mute num" style="position:relative;height:16px;margin-top:3px" aria-hidden="true">${xl}</div></div></div>
+    <div class="xs mute" style="text-align:center;margin-top:0">hour of the day (24 h)</div></div>`}
 function wxCharts(w){
   const r=w.hourly||[];if(r.length<3)return '';
   const common={best:w.hour,win:w.window&&!w.dark?w.window:null}, hh=v=>v+':00', anyHeat=r.some(x=>x[3]===null||x[3]>0);
@@ -37,7 +44,7 @@ function wxCharts(w){
   const heat=anyHeat?wxChart(r,Object.assign({title:'Heat cost to your pace',unit:'% slower',kind:'bar',min:2,cols:[[3,'var(--amber)','Slower for the heat']],
     tip:x=>`${hh(x[0])} · ${x[3]===null?'too hot for hard running':(x[3]||0)+'% slower'} (${Math.round(x[1])}°C)`},Object.assign({},common,{}))):'';
   const tab=`<details style="margin-top:8px"><summary class="xs mute" style="cursor:pointer">Hourly figures</summary><table class="xs" style="margin-top:6px"><tr><th>Hour</th><th class="r">Air °C</th><th class="r">Dew °C</th><th class="r">Slower %</th><th class="r">Rain mm</th><th class="r">Chance %</th></tr>${r.map(x=>`<tr><td>${hh(x[0])}${x[0]===w.hour?' ★':''}</td><td class="r num">${x[1]}</td><td class="r num">${x[2]}</td><td class="r num">${x[3]===null?'too hot':x[3]}</td><td class="r num">${x[4]??''}</td><td class="r num">${x[5]??''}</td></tr>`).join('')}</table></details>`;
-  return t+rain+heat+`<p class="xs mute" style="margin:6px 0 0">The line marks the best hour${common.win?'; the tinted band is your running window':''}. ${anyHeat?'':'No hour of the day costs any pace for heat. '}Daylight hours only.</p>`+tab}
+  return t+rain+heat+`<p class="xs mute" style="margin:6px 0 0">The vertical line marks the best hour${common.win?'; the tinted band is your running window':''}. ${anyHeat?'':'No hour of the day costs any pace for heat. '}Daylight hours only.</p>`+tab}
 function wxWind(k){return U()==='mi'?Math.round(k/1.609344)+' mph':k+' km/h'}
 function wxTip(w){return wxLines(w).join(' ')}
 function wxLines(w){const r=[];

@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.8 - 2026-10-13
+### Changed
+- The hourly weather charts in the day pop-out are now three separate panels, each with numbers down the y axis (with faint lines across), every hour of daylight labelled along the bottom, and the unit in its title.
+
 ## 2.9.3-beta.7 - 2026-10-13
 ### Added
 - The day pop-out now charts the day's weather by hour across daylight: temperature with dew point, rain (mm an hour, with the chance of rain on hover) and, on days when any hour costs pace, the heat cost (% slower). The best hour is marked and your running window is shaded. Hover or use the arrow keys for values, and open "Hourly figures" for the same numbers as a table.
