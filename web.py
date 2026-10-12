@@ -443,7 +443,7 @@ def _days(c, today, L=None):
         k = d.isoformat()
         p, a = plan.get(k), done.get(k)
         item = {"date": k, "dow": engine.DAYS[d.weekday()], "past": d < today, "today": d == today}
-        wx = heat.day_plan(d, usual, f=fc, win=heat.window()) if fc and d >= today else None
+        wx = heat.day_plan(d, usual, f=fc, win=heat.window(d)) if fc and d >= today else None
         if wx:
             item["wx"] = wx
         if p:
@@ -606,7 +606,7 @@ def state():
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
         compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")), uninstall=_uninstall_ready(),
         update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
-        heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "located": bool((db.get("heat_forecast") or {}).get("loc")),
+        heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "window_weekend": _w if (_w := db.get("run_window_weekend")) and heat._win(_w) else None, "located": bool((db.get("heat_forecast") or {}).get("loc")),
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None},
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
@@ -685,15 +685,16 @@ def settings():
         log.info("Weather switched %s", "on" if j["heat_adjust"] else "off")
         if db.get("setup_done"):
             jobs.start("readiness")
-    if "run_window" in j:
-        w = j["run_window"]
-        if w is not None and not (isinstance(w, list) and len(w) == 2 and all(_is_int(x, 0, 23) for x in w) and w[0] <= w[1]):
-            return jsonify(error="The running window is an earliest and a latest start hour, between 0 and 23, earliest first."), 400
-        db.put("run_window", w)
-        log.info("Running window: %s", f"{w[0]}:00 to {w[1]}:00" if w else "not set")
-        if db.get("setup_done") and db.get("heat_adjust"):
-            jobs.start("readiness")      # today's heat easing uses the hour inside the window
-    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust", "run_window", "update_check", "update_channel"}:
+    for key in ("run_window", "run_window_weekend"):
+        if key in j:
+            w = j[key]
+            if w is not None and not (isinstance(w, list) and len(w) == 2 and all(_is_int(x, 0, 23) for x in w) and w[0] <= w[1]):
+                return jsonify(error="A running window is an earliest and a latest start hour, between 0 and 23, earliest first."), 400
+            db.put(key, w)
+            log.info("Running window (%s): %s", "weekends" if key.endswith("weekend") else "weekdays", f"{w[0]}:00 to {w[1]}:00" if w else "not set")
+            if db.get("setup_done") and db.get("heat_adjust"):
+                jobs.start("readiness")      # today's heat easing uses the hour inside the window
+    if set(j) <= {"auto_backup", "sex", "birth_date", "gel_carbs_g", "map_tiles", "heat_adjust", "run_window", "run_window_weekend", "update_check", "update_channel"}:
         return jsonify(ok=True)       # nothing here changes the plan
     sr = j.get("seed_race")
     if isinstance(sr, dict) and _is_num(sr.get("miles"), 0.5, 200) and _is_num(sr.get("time_s"), 120, 400_000):

@@ -6,7 +6,7 @@ your watch's.
   - The forecast is read for the hour you usually start running (the median start hour of your runs in the last four weeks).
   - For each coming day the plan also shows the best hour to start, between sunrise and an hour before sunset: a dry hour if there is
     one, then the hour that costs least pace for the weather, then the one nearest your usual hour. Rain and wind are shown, not used.
-  - A running window (earliest and latest start hour, in Settings) narrows those hours, and holds the hour used for today's heat easing
+  - A running window (earliest and latest start hour, in Settings; one for weekdays and optionally one for weekends) narrows those hours, and holds the hour used for today's heat easing
     inside it.
   - The location is the start of your latest GPS run, so on holiday the forecast follows you from your first run there.
   - How much to slow comes from race data: across 1,258 endurance races, performance was best at a wet-bulb globe temperature
@@ -87,12 +87,20 @@ def location():
     return None
 
 
-def window():
-    """(earliest, latest) start hour you are willing to run in, as set in Settings; None when not set."""
-    w = db.get("run_window")
+def _win(w):
     if isinstance(w, list) and len(w) == 2 and all(isinstance(x, int) and not isinstance(x, bool) and 0 <= x <= 23 for x in w) and w[0] <= w[1]:
         return w[0], w[1]
     return None
+
+
+def window(day=None):
+    """(earliest, latest) start hour you are willing to run in, from Settings; None when not set. Saturday and Sunday use their own
+    window when one is set, otherwise the same as the other days."""
+    if day is not None and day.weekday() >= 5:
+        w = _win(db.get("run_window_weekend"))
+        if w:
+            return w
+    return _win(db.get("run_window"))
 
 
 def run_hour(today=None):
@@ -108,7 +116,7 @@ def run_hour(today=None):
         t = t.replace(tzinfo=dt.UTC) if t.tzinfo is None else t      # Garmin gives the start in UTC
         hours.append(t.astimezone().hour)
     h = int(statistics.median(hours)) if hours else 8
-    w = window()
+    w = window(today)
     return min(max(h, w[0]), w[1]) if w else h
 
 

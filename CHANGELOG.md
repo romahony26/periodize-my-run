@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.6 - 2026-10-13
+### Added
+- The running window can be set separately for weekends (Saturday and Sunday). Left as "Same as weekdays", the weekday window applies every day, as in beta.5.
+
 ## 2.9.3-beta.5 - 2026-10-13
 ### Added
 - Running window (Settings, in the Weather card): the earliest and latest hour you can start a run. The best hour for each day is now chosen inside it as well as inside daylight, and the hour used to ease today's session for heat is held inside it. A day whose window falls wholly in the dark still uses your hours, and says so. Left on "Any hour", nothing changes.
