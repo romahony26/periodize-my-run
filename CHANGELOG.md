@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.9 - 2026-10-13
+### Changed
+- The day pop-out's weather no longer shows the dew point: the temperature chart is a single line, and the dew point is gone from its hover text, summary line and table. It is still used behind the scenes for the heat cost.
+
 ## 2.9.3-beta.8 - 2026-10-13
 ### Changed
 - The hourly weather charts in the day pop-out are now three separate panels, each with numbers down the y axis (with faint lines across), every hour of daylight labelled along the bottom, and the unit in its title.

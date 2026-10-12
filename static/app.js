@@ -39,16 +39,16 @@ function wxChart(rows,o){
 function wxCharts(w){
   const r=w.hourly||[];if(r.length<3)return '';
   const common={best:w.hour,win:w.window&&!w.dark?w.window:null}, hh=v=>v+':00', anyHeat=r.some(x=>x[3]===null||x[3]>0);
-  const t=wxChart(r,Object.assign({title:'Temperature',unit:'°C',kind:'line',cols:[[1,'var(--long)','Air'],[2,'var(--brand)','Dew point']],tip:x=>`${hh(x[0])} · ${Math.round(x[1])}°C, dew point ${Math.round(x[2])}°C`},common));
+  const t=wxChart(r,Object.assign({title:'Temperature',unit:'°C',kind:'line',cols:[[1,'var(--long)','Air']],tip:x=>`${hh(x[0])} · ${Math.round(x[1])}°C`},common));
   const rain=wxChart(r,Object.assign({title:'Rain',unit:'mm an hour',kind:'bar',min:2,cols:[[4,'var(--brand)','Rain']],tip:x=>`${hh(x[0])} · ${x[4]==null?'no rain figure':x[4]+' mm'}${x[5]!=null?', '+x[5]+'% chance':''}`},common));
   const heat=anyHeat?wxChart(r,Object.assign({title:'Heat cost to your pace',unit:'% slower',kind:'bar',min:2,cols:[[3,'var(--amber)','Slower for the heat']],
     tip:x=>`${hh(x[0])} · ${x[3]===null?'too hot for hard running':(x[3]||0)+'% slower'} (${Math.round(x[1])}°C)`},Object.assign({},common,{}))):'';
-  const tab=`<details style="margin-top:8px"><summary class="xs mute" style="cursor:pointer">Hourly figures</summary><table class="xs" style="margin-top:6px"><tr><th>Hour</th><th class="r">Air °C</th><th class="r">Dew °C</th><th class="r">Slower %</th><th class="r">Rain mm</th><th class="r">Chance %</th></tr>${r.map(x=>`<tr><td>${hh(x[0])}${x[0]===w.hour?' ★':''}</td><td class="r num">${x[1]}</td><td class="r num">${x[2]}</td><td class="r num">${x[3]===null?'too hot':x[3]}</td><td class="r num">${x[4]??''}</td><td class="r num">${x[5]??''}</td></tr>`).join('')}</table></details>`;
+  const tab=`<details style="margin-top:8px"><summary class="xs mute" style="cursor:pointer">Hourly figures</summary><table class="xs" style="margin-top:6px"><tr><th>Hour</th><th class="r">Air °C</th><th class="r">Slower %</th><th class="r">Rain mm</th><th class="r">Chance %</th></tr>${r.map(x=>`<tr><td>${hh(x[0])}${x[0]===w.hour?' ★':''}</td><td class="r num">${x[1]}</td><td class="r num">${x[3]===null?'too hot':x[3]}</td><td class="r num">${x[4]??''}</td><td class="r num">${x[5]??''}</td></tr>`).join('')}</table></details>`;
   return t+rain+heat+`<p class="xs mute" style="margin:6px 0 0">The vertical line marks the best hour${common.win?'; the tinted band is your running window':''}. ${anyHeat?'':'No hour of the day costs any pace for heat. '}Daylight hours only.</p>`+tab}
 function wxWind(k){return U()==='mi'?Math.round(k/1.609344)+' mph':k+' km/h'}
 function wxTip(w){return wxLines(w).join(' ')}
 function wxLines(w){const r=[];
-  r.push(`Best start ${w.hour}:00: ${w.temp}°C, dew point ${w.dew}°C${w.wind!=null?', wind '+wxWind(w.wind):''}${w.chance!=null?', '+(w.wet?w.chance+'% chance of rain':'dry'):''}.`);
+  r.push(`Best start ${w.hour}:00: ${w.temp}°C${w.wind!=null?', wind '+wxWind(w.wind):''}${w.chance!=null?', '+(w.wet?w.chance+'% chance of rain':'dry'):''}.`);
   r.push(w.pct===null?'Too hot and humid for hard running at any hour: run early or late, or keep it easy.':w.pct>0?`About ${w.pct}% slower for the heat at that hour.`:'No heat slowdown at that hour.');
   if(w.dark)r.push('Your running window is in the dark on this day.');
   if(w.wet)r.push('Every hour in daylight has some rain in the forecast; this is the driest.');
