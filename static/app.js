@@ -47,12 +47,21 @@ function wxCharts(w){
   return t+rain+heat+`<p class="xs mute" style="margin:6px 0 0">The vertical line marks the best hour${common.win?'; the tinted band is your running window':''}. ${anyHeat?'':'No hour of the day costs any pace for heat. '}Daylight hours only.</p>`+tab}
 function wxWind(k){return U()==='mi'?Math.round(k/1.609344)+' mph':k+' km/h'}
 function wxTip(w){return wxLines(w).join(' ')}
-function wxLines(w){const r=[];
-  r.push(`Best start ${w.hour}:00: ${w.temp}°C${w.wind!=null?', wind '+wxWind(w.wind):''}${w.chance!=null?', '+(w.wet?w.chance+'% chance of rain':'dry'):''}.`);
-  r.push(w.pct===null?'Too hot and humid for hard running at any hour: run early or late, or keep it easy.':w.pct>0?`About ${w.pct}% slower for the heat at that hour.`:'No heat slowdown at that hour.');
-  if(w.dark)r.push('Your running window is in the dark on this day.');
-  if(w.wet)r.push('Every hour in daylight has some rain in the forecast; this is the driest.');
-  if(w.usual)r.push(`Your usual ${w.usual.hour}:00 would be ${w.usual.temp}°C${w.usual.wet?' and wet':''}${w.usual.pct===null?', too hot for hard running':w.usual.pct>0?', about '+w.usual.pct+'% slower':''}.`);
+function wxBest(w){
+  const rain=w.chance==null&&w.rain==null?'':w.wet?`${w.chance!=null?w.chance+'%':'Rain'}`:'Dry', rk=w.wet?'Chance of rain':'Rain';
+  const stat=(v,k,c)=>`<div class="stat"><div class="v num ${c||''}">${E(v)}</div><div class="k">${E(k)}</div></div>`;
+  const why=[w.window?`inside your hours (${w.window[0]}:00 to ${w.window[1]}:00)`:'',w.sunrise?`between sunrise ${w.sunrise} and an hour before sunset ${w.sunset}`:'in daylight'].filter(Boolean).join(', ');
+  return `<div id="besttime" style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0 0;background:color-mix(in srgb,var(--brand) 6%,var(--surface))">
+    <p class="eyebrow" style="margin:0">Best time to run</p>
+    <p style="margin:2px 0 0;font-size:30px;font-weight:730;letter-spacing:-.03em" class="num">${w.hour}:00 <span class="small mute" style="font-size:14px;font-weight:600;letter-spacing:0">${E(w.pct===null?'too hot for hard running':w.pct>0?'about '+w.pct+'% slower for the heat':'no heat slowdown')}</span></p>
+    <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(96px,1fr));margin:8px 0 0">${stat(w.temp+'°C','Air then')}${w.wind!=null?stat(wxWind(w.wind),'Wind'):''}${rain?stat(rain,rk,w.wet?'amber':''):''}${w.rain>0?stat(w.rain+' mm','Rain that hour'):''}</div>
+    <p class="xs mute" style="margin:8px 0 0">Chosen as the ${w.wet?'driest start, then the one that costs least pace':'best dry start: the one that costs least pace for the weather, then nearest your usual hour'}, ${E(why)}.${w.dark?' Your hours are in the dark on this day.':''}${w.usual?` Your usual ${w.usual.hour}:00 would be ${w.usual.temp}°C${w.usual.wet?' and wet':''}${w.usual.pct>0?', about '+w.usual.pct+'% slower':''}.`:''}</p></div>`}
+function wxLines(w,short){const r=[];
+  if(!short)r.push(`Best start ${w.hour}:00: ${w.temp}°C${w.wind!=null?', wind '+wxWind(w.wind):''}${w.chance!=null?', '+(w.wet?w.chance+'% chance of rain':'dry'):''}.`);
+  if(!short)r.push(w.pct===null?'Too hot and humid for hard running at any hour: run early or late, or keep it easy.':w.pct>0?`About ${w.pct}% slower for the heat at that hour.`:'No heat slowdown at that hour.');
+  if(!short&&w.dark)r.push('Your running window is in the dark on this day.');
+  if(!short&&w.wet)r.push('Every hour in daylight has some rain in the forecast; this is the driest.');
+  if(!short&&w.usual)r.push(`Your usual ${w.usual.hour}:00 would be ${w.usual.temp}°C${w.usual.wet?' and wet':''}${w.usual.pct===null?', too hot for hard running':w.usual.pct>0?', about '+w.usual.pct+'% slower':''}.`);
   r.push(`Day (daylight): ${w.low}–${w.high}°C${w.rain_day?', '+w.rain_day+' mm of rain':', no rain expected'}${w.sunrise?`. Sunrise ${w.sunrise}, sunset ${w.sunset}.`:'.'}`);
   return r}
 function toast(t,k){const e=$('#toast');e.textContent=t;e.className='on '+(k||'');clearTimeout(toastT);toastT=setTimeout(()=>e.className='',k?6500:3200)}
@@ -161,11 +170,12 @@ function planView(){
     h+=`<div class="ov" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
     <p class="eyebrow"><span id="mt">${sd.dow} ${nice(sd.date)} ${sd.date.slice(0,4)}</span><button class="ghost" id="selx" style="margin-left:auto" aria-label="Close">Close</button></p>
     <p class="h">${E(sd.label||'No session planned')} <span class="mute num" style="font-weight:600">${E(sd.dist||'')}</span></p>
+    ${sd.wx?wxBest(sd.wx):''}
     ${sd.type&&sd.type!=='Rest'?`<p class="lab2">${a?'Original session':'Session'}</p>${stepList(a?sd.original:sd.text)}`:''}
     ${a?`<p class="lab2">Tuned for today <span class="chip amber" style="margin-left:6px"><i></i>paces eased ${(a.slow*100).toFixed(1)}%</span></p>${stepList(sd.text)}
       <p class="small" style="margin:8px 0 0">Why: ${E((a.reasons||[]).join('; '))}. ${E(a.advice||'')}</p>`
      :sd.type&&sd.type!=='Rest'&&!sd.past?`<p class="small mute" style="margin:8px 0 0">${sd.today?(b?'Not tuned: last night’s sleep and your HRV and resting heart rate trends are normal, so it stands as planned.':'Not tuned yet: waiting for last night’s data from your watch.'):'Tuning happens on the morning of the session, from the night before and your recent trends.'}</p>`:''}
-    ${sd.wx?`<p class="lab2">Weather</p><p class="small" id="daywx" style="margin:4px 0 0">${wxLines(sd.wx).map(E).join('<br>')}</p>${wxCharts(sd.wx)}<p class="xs" style="margin:8px 0 0"><a href="#" data-gohours>Change the hours you can run</a></p>`:''}
+    ${sd.wx?`<p class="lab2">Weather through the day</p><p class="small" id="daywx" style="margin:4px 0 0">${wxLines(sd.wx,true).map(E).join('<br>')}</p>${wxCharts(sd.wx)}<p class="xs" style="margin:8px 0 0"><a href="#" data-gohours>Change the hours you can run</a></p>`:''}
     ${sd.purpose?`<p class="small" id="purpose" style="margin:8px 0 0"><b>What it is for.</b> ${E(sd.purpose)}</p>`:''}
     ${sd.note?`<p class="small mute" style="margin:8px 0 0">${E(sd.note)}</p>`:''}${sd.strength?`<p class="xs" style="margin:8px 0 0"><span class="tag">+ ${E(sd.strength)}</span></p>`:''}
     ${b?`<p class="lab2">Recovery markers</p><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(118px,1fr));margin-top:6px">

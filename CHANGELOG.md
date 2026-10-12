@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.14 - 2026-10-13
+### Changed
+- The best time to run is now the first thing in a day's pop-out: a boxed "Best time to run" with the hour in large type, the heat slowdown beside it, then temperature, wind and rain, and one line saying how it was chosen. The detail lines and charts stay below, under "Weather through the day".
+
 ## 2.9.3-beta.13 - 2026-10-13
 ### Fixed
 - Dropdowns closed too fast to pick from. The page redraws itself every few seconds (every second while a sync runs), which closed an open dropdown and reset unsaved choices. It now waits while you are using a control (20 seconds after you last touched one) and, on Settings, until your changes are saved. Pressing a button still refreshes at once.
