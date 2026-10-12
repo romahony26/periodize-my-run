@@ -157,7 +157,7 @@ function planView(){
     ${a?`<p class="lab2">Tuned for today <span class="chip amber" style="margin-left:6px"><i></i>paces eased ${(a.slow*100).toFixed(1)}%</span></p>${stepList(sd.text)}
       <p class="small" style="margin:8px 0 0">Why: ${E((a.reasons||[]).join('; '))}. ${E(a.advice||'')}</p>`
      :sd.type&&sd.type!=='Rest'&&!sd.past?`<p class="small mute" style="margin:8px 0 0">${sd.today?(b?'Not tuned: last night’s sleep and your HRV and resting heart rate trends are normal, so it stands as planned.':'Not tuned yet: waiting for last night’s data from your watch.'):'Tuning happens on the morning of the session, from the night before and your recent trends.'}</p>`:''}
-    ${sd.wx?`<p class="lab2">Weather</p><p class="small" id="daywx" style="margin:4px 0 0">${wxLines(sd.wx).map(E).join('<br>')}</p>${wxCharts(sd.wx)}`:''}
+    ${sd.wx?`<p class="lab2">Weather</p><p class="small" id="daywx" style="margin:4px 0 0">${wxLines(sd.wx).map(E).join('<br>')}</p>${wxCharts(sd.wx)}<p class="xs" style="margin:8px 0 0"><a href="#" data-gohours>Change the hours you can run</a></p>`:''}
     ${sd.purpose?`<p class="small" id="purpose" style="margin:8px 0 0"><b>What it is for.</b> ${E(sd.purpose)}</p>`:''}
     ${sd.note?`<p class="small mute" style="margin:8px 0 0">${E(sd.note)}</p>`:''}${sd.strength?`<p class="xs" style="margin:8px 0 0"><span class="tag">+ ${E(sd.strength)}</span></p>`:''}
     ${b?`<p class="lab2">Recovery markers</p><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(118px,1fr));margin-top:6px">
@@ -287,9 +287,11 @@ function racesView(){
 const opt=(v,l,cur)=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`;
 const yn=(id,cur,dis)=>`<select id="${id}" ${dis?'disabled':''}>${opt(1,'Yes',cur?1:0)}${opt(0,'No',cur?1:0)}</select>`;
 function windowFields(){const h=S.heat||{},row=(label,p,w,anyl)=>`<div><label>${label}</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-label="${label}"><select id="${p}from" aria-label="${label}: earliest start">${opt('',anyl,w?w[0]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[0]:'')).join('')}</select><span class="mute">to</span><select id="${p}to" aria-label="${label}: latest start">${opt('',anyl,w?w[1]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[1]:'')).join('')}</select></div></div>`;
-  return `<div class="lab" style="margin-top:14px">Hours you can run <span class="mute">(earliest and latest start)</span></div>
+  return `<div id="hours" style="margin-top:14px;padding:2px 0;border-radius:10px;transition:box-shadow .3s"><div class="lab">Hours you can run <span class="mute">(earliest and latest start)</span></div>
   <div class="row">${row('Weekdays (Mon to Fri)','rw',h.window,'Any hour')}${row('Weekends (Sat, Sun)','rx',h.window_weekend,'Same as weekdays')}</div>
-  <p style="margin:10px 0 0"><button class="btn" id="rwsave">Save hours</button> <span class="xs mute">The weather forecast picks the best time to run inside these hours and inside daylight. Needs weather tracking on (Connections).</span></p>`}
+  <p style="margin:10px 0 0"><button class="btn" id="rwsave">Save hours</button> <span class="xs mute">The weather forecast picks the best time to run inside these hours and inside daylight. Needs weather tracking on (Connections).</span></p></div>`}
+function gotoHours(){MORE=false;SEL=null;view='settings';render();scrollTo({top:0});
+  setTimeout(()=>{const e=$('#hours');if(!e)return;e.scrollIntoView({block:'center',behavior:'smooth'});e.style.boxShadow='0 0 0 3px var(--brand)';setTimeout(()=>{e.style.boxShadow='none'},1800)},60)}
 function rwRead(p){const a=$('#'+p+'from').value,b=$('#'+p+'to').value;if(a===''&&b==='')return null;const w=[a===''?0:+a,b===''?23:+b];return w[0]>w[1]?false:w}
 function prefs(s){return `<div class="row"><div><label for="units">Distances in</label><select id="units">${opt('mi','Miles',s.units)}${opt('km','Kilometres',s.units)}</select></div>
   <div><label for="run_days">Running days a week</label><select id="run_days">${[3,4,5,6].map(n=>opt(n,n,s.run_days)).join('')}</select></div>
@@ -407,7 +409,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
   <div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
     <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), shows each coming day's forecast with the best hour to start between sunrise and sunset, judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
     <label for="heatsw">Track the weather and adjust for it</label>${yn('heatsw',S.heat&&S.heat.on)}
-    <p class="xs mute" style="margin:8px 0 0">The hours you can run, which the best time of day is chosen inside, are set in Settings, under How you train.</p>
+    <p class="xs" style="margin:8px 0 0"><a href="#" data-gohours>Set the hours you can run</a> <span class="mute">(the best time of day is chosen inside them)</span></p>
     ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
@@ -650,6 +652,7 @@ function bind(){
   on('#sday',async()=>{const d=$('#ss').value||S.today;await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:d,end:d,note:$('#sn').value});toast('Saved for one day. Replanning.');await load()});
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});
   $$('[data-sdel]').forEach(b=>b.onclick=async()=>{await api('status/'+b.dataset.sdel,null,'DELETE');await load()});
+  $$('[data-gohours]').forEach(a=>a.onclick=e=>{e.preventDefault();gotoHours()});
   on('#rwsave',async()=>{const w=rwRead('rw'),x=rwRead('rx');if(w===false||x===false)return toast('The earliest start must not be after the latest.','err');
     await api('settings',{run_window:w,run_window_weekend:x});toast('Hours saved');await load()});
   on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
