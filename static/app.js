@@ -289,7 +289,7 @@ const yn=(id,cur,dis)=>`<select id="${id}" ${dis?'disabled':''}>${opt(1,'Yes',cu
 function windowFields(){const h=S.heat||{},row=(label,p,w,anyl)=>`<div><label>${label}</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-label="${label}"><select id="${p}from" aria-label="${label}: earliest start">${opt('',anyl,w?w[0]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[0]:'')).join('')}</select><span class="mute">to</span><select id="${p}to" aria-label="${label}: latest start">${opt('',anyl,w?w[1]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[1]:'')).join('')}</select></div></div>`;
   return `<div class="lab" style="margin-top:14px">Hours you can run <span class="mute">(earliest and latest start)</span></div>
   <div class="row">${row('Weekdays (Mon to Fri)','rw',h.window,'Any hour')}${row('Weekends (Sat, Sun)','rx',h.window_weekend,'Same as weekdays')}</div>
-  <p class="xs mute">The weather forecast picks the best time to run inside these hours and inside daylight. Needs weather tracking on (Connections).</p>`}
+  <p style="margin:10px 0 0"><button class="btn" id="rwsave">Save hours</button> <span class="xs mute">The weather forecast picks the best time to run inside these hours and inside daylight. Needs weather tracking on (Connections).</span></p>`}
 function rwRead(p){const a=$('#'+p+'from').value,b=$('#'+p+'to').value;if(a===''&&b==='')return null;const w=[a===''?0:+a,b===''?23:+b];return w[0]>w[1]?false:w}
 function prefs(s){return `<div class="row"><div><label for="units">Distances in</label><select id="units">${opt('mi','Miles',s.units)}${opt('km','Kilometres',s.units)}</select></div>
   <div><label for="run_days">Running days a week</label><select id="run_days">${[3,4,5,6].map(n=>opt(n,n,s.run_days)).join('')}</select></div>
@@ -650,6 +650,8 @@ function bind(){
   on('#sday',async()=>{const d=$('#ss').value||S.today;await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:d,end:d,note:$('#sn').value});toast('Saved for one day. Replanning.');await load()});
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});
   $$('[data-sdel]').forEach(b=>b.onclick=async()=>{await api('status/'+b.dataset.sdel,null,'DELETE');await load()});
+  on('#rwsave',async()=>{const w=rwRead('rw'),x=rwRead('rx');if(w===false||x===false)return toast('The earliest start must not be after the latest.','err');
+    await api('settings',{run_window:w,run_window_weekend:x});toast('Hours saved');await load()});
   on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
     s.run_window=rwRead('rw');s.run_window_weekend=rwRead('rx');if(s.run_window===false||s.run_window_weekend===false)return toast('In the hours you can run, the earliest start must not be after the latest.','err');
     s.hrmax=+$('#hrmax').value||null;s.peak_miles_override=+$('#peak').value||null;s.push_days=+$('#push_days').value;s.weeks_ahead=+$('#weeks_ahead').value;s.forecast_completion=$('#forecast_completion').value?+$('#forecast_completion').value/100:null;s.aero_test=+$('#aero_test_weeks').value>0;if(s.aero_test)s.aero_test_weeks=+$('#aero_test_weeks').value;s.aero_runs=$('#aero_runs').value==='1';s.aero_format=$('#aero_format').value;s.notify_url=$('#notify').value.trim();await api('settings',s);toast('Saved. Replanning.');await load()});

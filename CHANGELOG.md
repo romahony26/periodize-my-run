@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.11 - 2026-10-13
+### Fixed
+- The hours you can run now have their own Save hours button directly under them in Settings. Before, they were only saved by "Save and replan" at the bottom of the Advanced card. Saving them does not replan.
+
 ## 2.9.3-beta.10 - 2026-10-13
 ### Changed
 - The hours you can run (weekdays and weekends) moved from the Weather card on Connections to Settings, under How you train, and are saved with the Save button there. The Weather card points to it.
