@@ -6,6 +6,8 @@ your watch's.
   - The forecast is read for the hour you usually start running (the median start hour of your runs in the last four weeks).
   - For each coming day the plan also shows the best hour to start, between sunrise and an hour before sunset: a dry hour if there is
     one, then the hour that costs least pace for the weather, then the one nearest your usual hour. Rain and wind are shown, not used.
+  - A running window (earliest and latest start hour, in Settings) narrows those hours, and holds the hour used for today's heat easing
+    inside it.
   - The location is the start of your latest GPS run, so on holiday the forecast follows you from your first run there.
   - How much to slow comes from race data: across 1,258 endurance races, performance was best at a wet-bulb globe temperature
     (WBGT) of 7.5 to 15 C and fell by 0.3 to 0.4% for every degree outside that range (Mantzios and colleagues, 2022) [R]. Marathon
@@ -85,8 +87,17 @@ def location():
     return None
 
 
+def window():
+    """(earliest, latest) start hour you are willing to run in, as set in Settings; None when not set."""
+    w = db.get("run_window")
+    if isinstance(w, list) and len(w) == 2 and all(isinstance(x, int) and not isinstance(x, bool) and 0 <= x <= 23 for x in w) and w[0] <= w[1]:
+        return w[0], w[1]
+    return None
+
+
 def run_hour(today=None):
-    """The hour of day you usually start running: the median of the last four weeks, local time. 8 if unknown."""
+    """The hour of day you usually start running: the median of the last four weeks, local time, held inside your running window.
+    8 if unknown."""
     today = today or dt.date.today()
     hours = []
     for r in db.rows("SELECT start FROM activities WHERE sport='running' AND date>=?", ((today - dt.timedelta(days=28)).isoformat(),)):
@@ -96,7 +107,9 @@ def run_hour(today=None):
             continue
         t = t.replace(tzinfo=dt.UTC) if t.tzinfo is None else t      # Garmin gives the start in UTC
         hours.append(t.astimezone().hour)
-    return int(statistics.median(hours)) if hours else 8
+    h = int(statistics.median(hours)) if hours else 8
+    w = window()
+    return min(max(h, w[0]), w[1]) if w else h
 
 
 def forecast(force=False, cached_only=False):
@@ -159,10 +172,12 @@ def _hm(text):
     return int(text[:2]) * 60 + int(text[3:5])
 
 
-def day_plan(day, usual, now=None, f=None):
+def day_plan(day, usual, now=None, f=None, win=None):
     """The weather for one day's run and the best hour to start it, from the saved forecast. None outside the forecast.
 
-    The window is from sunrise to an hour before sunset (06:00 to 21:00 when the forecast has no sun times; for today, from this hour).
+    The window is from sunrise to an hour before sunset (06:00 to 21:00 when the forecast has no sun times; for today, from this hour),
+    narrowed to the hours you said you can run (`win`, from Settings). If those hours are all in the dark, they are used anyway and
+    the day is marked `dark`: it is your choice of hours, and the plan says so.
     Dry hours are preferred, because nobody plans a run for the wet; then the hour that costs least pace for the weather
     (`worth`: heat from a wet-bulb globe temperature of 15 C up, cold counted less); then the one nearest the hour you usually start.
     Wind and rain are shown but never change a pace: they had no effect of their own in race data once temperature was allowed for.
@@ -180,6 +195,12 @@ def day_plan(day, usual, now=None, f=None):
     if now is None:      # the time where the forecast is, not where this computer is: they differ on holiday
         off = f.get("offset")
         now = dt.datetime.now(dt.UTC).replace(tzinfo=None) + dt.timedelta(seconds=off) if off is not None else dt.datetime.now()
+    dark = False
+    if win:
+        if max(lo, win[0]) <= min(hi, win[1]):
+            lo, hi = max(lo, win[0]), min(hi, win[1])
+        else:
+            lo, hi, dark = win[0], win[1], True
     if day == now.date():
         lo = max(lo, now.hour)
     hrs = []
@@ -198,7 +219,7 @@ def day_plan(day, usual, now=None, f=None):
     out = {"date": k, "hour": h, "temp": round(v[0]), "dew": round(v[1]), "pct": slowdown(v[0], v[1]),
            "wind": round(v[2]) if v[2] is not None else None, "rain": round(v[3], 1) if v[3] is not None else None,
            "chance": round(v[4]) if v[4] is not None else None, "wet": wet(v), "dry_hours": len([x for x in hrs if not wet(x[1])]),
-           "sunrise": sun[0] if sun else None, "sunset": sun[1] if sun else None,
+           "sunrise": sun[0] if sun else None, "sunset": sun[1] if sun else None, "dark": dark, "window": list(win) if win else None,
            "low": round(min(x[1][0] for x in hrs)), "high": round(max(x[1][0] for x in hrs)),
            "rain_day": round(sum(x[1][3] or 0 for x in hrs), 1)}
     u = next((x for x in hrs if x[0] == usual), None)

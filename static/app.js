@@ -13,6 +13,7 @@ function wxTip(w){return wxLines(w).join(' ')}
 function wxLines(w){const r=[];
   r.push(`Best start ${w.hour}:00: ${w.temp}°C, dew point ${w.dew}°C${w.wind!=null?', wind '+wxWind(w.wind):''}${w.chance!=null?', '+(w.wet?w.chance+'% chance of rain':'dry'):''}.`);
   r.push(w.pct===null?'Too hot and humid for hard running at any hour: run early or late, or keep it easy.':w.pct>0?`About ${w.pct}% slower for the heat at that hour.`:'No heat slowdown at that hour.');
+  if(w.dark)r.push('Your running window is in the dark on this day.');
   if(w.wet)r.push('Every hour in daylight has some rain in the forecast; this is the driest.');
   if(w.usual)r.push(`Your usual ${w.usual.hour}:00 would be ${w.usual.temp}°C${w.usual.wet?' and wet':''}${w.usual.pct===null?', too hot for hard running':w.usual.pct>0?', about '+w.usual.pct+'% slower':''}.`);
   r.push(`Day (daylight): ${w.low}–${w.high}°C${w.rain_day?', '+w.rain_day+' mm of rain':', no rain expected'}${w.sunrise?`. Sunrise ${w.sunrise}, sunset ${w.sunset}.`:'.'}`);
@@ -364,6 +365,9 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
   <div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
     <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), shows each coming day's forecast with the best hour to start between sunrise and sunset, judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
     <label for="heatsw">Track the weather and adjust for it</label>${yn('heatsw',S.heat&&S.heat.on)}
+    <div class="lab" style="margin-top:12px" id="rwl">Hours you can run <span class="mute">(best time is chosen inside these, and inside daylight)</span></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-labelledby="rwl"><select id="rwfrom" aria-label="Earliest start">${opt('','Any hour',S.heat&&S.heat.window?S.heat.window[0]:'')}${Array.from({length:24},(_,h)=>opt(h,h+':00',S.heat&&S.heat.window?S.heat.window[0]:'')).join('')}</select>
+      <span class="mute">to</span><select id="rwto" aria-label="Latest start">${opt('','Any hour',S.heat&&S.heat.window?S.heat.window[1]:'')}${Array.from({length:24},(_,h)=>opt(h,h+':00',S.heat&&S.heat.window?S.heat.window[1]:'')).join('')}</select><span class="xs mute">earliest and latest start</span></div>
     ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
@@ -624,6 +628,10 @@ function bind(){
   on('#wfsave',async()=>{await api('watch',{source:'fitfolder',fit_folder:$('#wfolder').value});toast('Folder set. Reading it now.');await load()});
   on('#corgo',async()=>{await api('coros/login',{email:$('#cem').value,password:$('#cpw').value});$('#cpw').value='';toast('COROS connected');await api('watch',{source:'coros'});await load()});
   on('#cordis',async()=>{await api('coros/disconnect',{});toast('COROS disconnected');await load()});
+  const rw=async()=>{const a=$('#rwfrom').value,b=$('#rwto').value;let w=null;
+    if(a!==''||b!==''){w=[a===''?0:+a,b===''?23:+b];if(w[0]>w[1])return toast('The earliest start must not be after the latest.','err')}
+    await api('settings',{run_window:w});toast(w?'Running window saved':'Running window cleared');await load()};
+  if($('#rwfrom'))$('#rwfrom').onchange=$('#rwto').onchange=rw;
   if($('#heatsw'))$('#heatsw').onchange=async()=>{await api('settings',{heat_adjust:$('#heatsw').value==='1'});toast($('#heatsw').value==='1'?'Weather on':'Weather off');await load()};
   const restartWait=()=>{toast('Restarting into the new version…');let n=0;const t=setInterval(async()=>{n++;try{const r=await fetch('/api/state',{headers:{'X-Requested-With':'periodize'}});if(r.ok){clearInterval(t);location.reload()}}catch(e){}if(n>60)clearInterval(t)},2000)};
   $$('[data-upd]').forEach(b=>b.onclick=async()=>{const act=b.dataset.upd,v=b.dataset.v;

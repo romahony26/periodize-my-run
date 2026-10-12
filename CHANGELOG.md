@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.5 - 2026-10-13
+### Added
+- Running window (Settings, in the Weather card): the earliest and latest hour you can start a run. The best hour for each day is now chosen inside it as well as inside daylight, and the hour used to ease today's session for heat is held inside it. A day whose window falls wholly in the dark still uses your hours, and says so. Left on "Any hour", nothing changes.
+
 ## 2.9.3-beta.4 - 2026-10-13
 ### Added
 - Forecast for each coming day on the plan (when weather tracking is on): the best hour to start, the temperature and dew point then, wind, rain and the chance of rain, sunrise and sunset, and the day's range. Each day in the calendar shows the best hour and temperature (☂ if every daylight hour has rain); click a day for the rest.
