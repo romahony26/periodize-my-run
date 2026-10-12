@@ -286,6 +286,11 @@ function racesView(){
 }
 const opt=(v,l,cur)=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`;
 const yn=(id,cur,dis)=>`<select id="${id}" ${dis?'disabled':''}>${opt(1,'Yes',cur?1:0)}${opt(0,'No',cur?1:0)}</select>`;
+function windowFields(){const h=S.heat||{},row=(label,p,w,anyl)=>`<div><label>${label}</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-label="${label}"><select id="${p}from" aria-label="${label}: earliest start">${opt('',anyl,w?w[0]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[0]:'')).join('')}</select><span class="mute">to</span><select id="${p}to" aria-label="${label}: latest start">${opt('',anyl,w?w[1]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[1]:'')).join('')}</select></div></div>`;
+  return `<div class="lab" style="margin-top:14px">Hours you can run <span class="mute">(earliest and latest start)</span></div>
+  <div class="row">${row('Weekdays (Mon to Fri)','rw',h.window,'Any hour')}${row('Weekends (Sat, Sun)','rx',h.window_weekend,'Same as weekdays')}</div>
+  <p class="xs mute">The weather forecast picks the best time to run inside these hours and inside daylight. Needs weather tracking on (Connections).</p>`}
+function rwRead(p){const a=$('#'+p+'from').value,b=$('#'+p+'to').value;if(a===''&&b==='')return null;const w=[a===''?0:+a,b===''?23:+b];return w[0]>w[1]?false:w}
 function prefs(s){return `<div class="row"><div><label for="units">Distances in</label><select id="units">${opt('mi','Miles',s.units)}${opt('km','Kilometres',s.units)}</select></div>
   <div><label for="run_days">Running days a week</label><select id="run_days">${[3,4,5,6].map(n=>opt(n,n,s.run_days)).join('')}</select></div>
   <div><label for="long_day">Long run day</label><select id="long_day">${DOW.map((d,i)=>opt(i,d,s.long_day)).join('')}</select></div>
@@ -300,7 +305,7 @@ function prefs(s){return `<div class="row"><div><label for="units">Distances in<
 function prefsRead(){return {week_start:+$('#week_start').value,units:$('#units').value,run_days:+$('#run_days').value,long_day:+$('#long_day').value,run_time:$('#run_time').value,push_enabled:$('#push_enabled').value==='1',
   blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
 function settingsView(){const s=S.settings;
-  return `<div class="grid sgrid"><div class="card c12"><p class="eyebrow">How you train</p>${prefs(s)}</div>
+  return `<div class="grid sgrid"><div class="card c12"><p class="eyebrow">How you train</p>${prefs(s)}${windowFields()}</div>
   <div class="card c12"><p class="eyebrow">Advanced</p><div class="fgrid">
     <div><label for="hrmax">Maximum heart rate (empty: use ${S.profile.hrmax_observed||'observed'})</label><input id="hrmax" type="number" value="${s.hrmax||''}"></div>
     <div><label for="peak">Peak week in miles (empty: use ${S.limits.peak_miles}, from your history)</label><input id="peak" type="number" value="${s.peak_miles_override||''}"></div>
@@ -402,13 +407,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
   <div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
     <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), shows each coming day's forecast with the best hour to start between sunrise and sunset, judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
     <label for="heatsw">Track the weather and adjust for it</label>${yn('heatsw',S.heat&&S.heat.on)}
-    <p class="small" style="margin:12px 0 0"><b>Hours you can run.</b> The best time is chosen inside these (earliest and latest start) and inside daylight.</p>
-    <div class="lab" style="margin-top:10px">Weekdays (Mon to Fri)</div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-label="Weekdays (Mon to Fri)"><select id="rwfrom" aria-label="Weekdays (Mon to Fri): earliest start">${opt('','Any hour',((S.heat&&S.heat.window)?(S.heat&&S.heat.window)[0]:''))}${Array.from({length:24},(_,h)=>opt(h,h+':00',((S.heat&&S.heat.window)?(S.heat&&S.heat.window)[0]:''))).join('')}</select>
-      <span class="mute">to</span><select id="rwto" aria-label="Weekdays (Mon to Fri): latest start">${opt('','Any hour',((S.heat&&S.heat.window)?(S.heat&&S.heat.window)[1]:''))}${Array.from({length:24},(_,h)=>opt(h,h+':00',((S.heat&&S.heat.window)?(S.heat&&S.heat.window)[1]:''))).join('')}</select></div>
-    <div class="lab" style="margin-top:10px">Weekends (Sat, Sun)</div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-label="Weekends (Sat, Sun)"><select id="rxfrom" aria-label="Weekends (Sat, Sun): earliest start">${opt('','Same as weekdays',((S.heat&&S.heat.window_weekend)?(S.heat&&S.heat.window_weekend)[0]:''))}${Array.from({length:24},(_,h)=>opt(h,h+':00',((S.heat&&S.heat.window_weekend)?(S.heat&&S.heat.window_weekend)[0]:''))).join('')}</select>
-      <span class="mute">to</span><select id="rxto" aria-label="Weekends (Sat, Sun): latest start">${opt('','Same as weekdays',((S.heat&&S.heat.window_weekend)?(S.heat&&S.heat.window_weekend)[1]:''))}${Array.from({length:24},(_,h)=>opt(h,h+':00',((S.heat&&S.heat.window_weekend)?(S.heat&&S.heat.window_weekend)[1]:''))).join('')}</select></div>
+    <p class="xs mute" style="margin:8px 0 0">The hours you can run, which the best time of day is chosen inside, are set in Settings, under How you train.</p>
     ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
@@ -652,6 +651,7 @@ function bind(){
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});
   $$('[data-sdel]').forEach(b=>b.onclick=async()=>{await api('status/'+b.dataset.sdel,null,'DELETE');await load()});
   on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
+    s.run_window=rwRead('rw');s.run_window_weekend=rwRead('rx');if(s.run_window===false||s.run_window_weekend===false)return toast('In the hours you can run, the earliest start must not be after the latest.','err');
     s.hrmax=+$('#hrmax').value||null;s.peak_miles_override=+$('#peak').value||null;s.push_days=+$('#push_days').value;s.weeks_ahead=+$('#weeks_ahead').value;s.forecast_completion=$('#forecast_completion').value?+$('#forecast_completion').value/100:null;s.aero_test=+$('#aero_test_weeks').value>0;if(s.aero_test)s.aero_test_weeks=+$('#aero_test_weeks').value;s.aero_runs=$('#aero_runs').value==='1';s.aero_format=$('#aero_format').value;s.notify_url=$('#notify').value.trim();await api('settings',s);toast('Saved. Replanning.');await load()});
   on('#explain',openExplain);on('#run',async()=>{await api('run',{kind:'daily'});toast('Syncing');await load()});on('#lr',loadLogs);
   on('#xadd',async()=>{const t=hmsIn($('#xt').value);if(!t)return toast('Enter the time as h:mm:ss or mm:ss.','err');let mi=$('#xm').value==='c'?(+$('#xo').value)/(U()==='mi'?1:KM):+$('#xm').value;if(!mi)return toast('Enter the distance.','err');await api('results',{name:$('#xn').value,date:$('#xd').value,miles:mi,time_s:t,off_road:$('#xs').value==='1'});toast('Result added');await load()});
@@ -669,10 +669,6 @@ function bind(){
   on('#wfsave',async()=>{await api('watch',{source:'fitfolder',fit_folder:$('#wfolder').value});toast('Folder set. Reading it now.');await load()});
   on('#corgo',async()=>{await api('coros/login',{email:$('#cem').value,password:$('#cpw').value});$('#cpw').value='';toast('COROS connected');await api('watch',{source:'coros'});await load()});
   on('#cordis',async()=>{await api('coros/disconnect',{});toast('COROS disconnected');await load()});
-  const rwRead=p=>{const a=$('#'+p+'from').value,b=$('#'+p+'to').value;if(a===''&&b==='')return null;const w=[a===''?0:+a,b===''?23:+b];return w[0]>w[1]?false:w};
-  const rw=async()=>{const w=rwRead('rw'),x=rwRead('rx');if(w===false||x===false)return toast('The earliest start must not be after the latest.','err');
-    await api('settings',{run_window:w,run_window_weekend:x});toast('Running window saved');await load()};
-  if($('#rwfrom'))$('#rwfrom').onchange=$('#rwto').onchange=$('#rxfrom').onchange=$('#rxto').onchange=rw;
   if($('#heatsw'))$('#heatsw').onchange=async()=>{await api('settings',{heat_adjust:$('#heatsw').value==='1'});toast($('#heatsw').value==='1'?'Weather on':'Weather off');await load()};
   const restartWait=()=>{toast('Restarting into the new version…');let n=0;const t=setInterval(async()=>{n++;try{const r=await fetch('/api/state',{headers:{'X-Requested-With':'periodize'}});if(r.ok){clearInterval(t);location.reload()}}catch(e){}if(n>60)clearInterval(t)},2000)};
   $$('[data-upd]').forEach(b=>b.onclick=async()=>{const act=b.dataset.upd,v=b.dataset.v;

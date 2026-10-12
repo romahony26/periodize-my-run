@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.10 - 2026-10-13
+### Changed
+- The hours you can run (weekdays and weekends) moved from the Weather card on Connections to Settings, under How you train, and are saved with the Save button there. The Weather card points to it.
+
 ## 2.9.3-beta.9 - 2026-10-13
 ### Changed
 - The day pop-out's weather no longer shows the dew point: the temperature chart is a single line, and the dew point is gone from its hover text, summary line and table. It is still used behind the scenes for the heat cost.
