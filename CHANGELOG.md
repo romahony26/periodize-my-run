@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.15 - 2026-10-13
+### Fixed
+- A day's pop-out scrolled back to the top by itself, because the page's automatic refresh redrew it. The refresh now waits while a pop-out is open and catches up when you close it.
+
 ## 2.9.3-beta.14 - 2026-10-13
 ### Changed
 - The best time to run is now the first thing in a day's pop-out: a boxed "Best time to run" with the hour in large type, the heat slowdown beside it, then temperature, wind and rain, and one line saying how it was chosen. The detail lines and charts stay below, under "Weather through the day".

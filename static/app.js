@@ -80,7 +80,7 @@ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closes
 document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
 document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
 document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea')){LASTUI=Date.now();if(view==='settings')DIRTY=true}},true);
-const holdUI=()=>{const a=document.activeElement;return Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
+const holdUI=()=>{const a=document.activeElement;return !!SEL||Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
 async function load(auto){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE||(auto&&holdUI())){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(()=>load(true),1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';
