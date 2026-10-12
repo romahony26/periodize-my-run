@@ -8,6 +8,15 @@ const KM=1.609344, U=()=>S.settings.units, dU=m=>U()==='mi'?`${Math.round(m).toL
 const hmsIn=t=>{const p=String(t||'').trim().split(':').map(Number);if(!p.length||p.some(isNaN))return 0;return p.reduce((a,x)=>a*60+x,0)};
 const fmt=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`};
 const nice=d=>new Date(d+'T12:00').toLocaleDateString(undefined,{day:'numeric',month:'short'});
+function wxWind(k){return U()==='mi'?Math.round(k/1.609344)+' mph':k+' km/h'}
+function wxTip(w){return wxLines(w).join(' ')}
+function wxLines(w){const r=[];
+  r.push(`Best start ${w.hour}:00: ${w.temp}°C, dew point ${w.dew}°C${w.wind!=null?', wind '+wxWind(w.wind):''}${w.chance!=null?', '+(w.wet?w.chance+'% chance of rain':'dry'):''}.`);
+  r.push(w.pct===null?'Too hot and humid for hard running at any hour: run early or late, or keep it easy.':w.pct>0?`About ${w.pct}% slower for the heat at that hour.`:'No heat slowdown at that hour.');
+  if(w.wet)r.push('Every hour in daylight has some rain in the forecast; this is the driest.');
+  if(w.usual)r.push(`Your usual ${w.usual.hour}:00 would be ${w.usual.temp}°C${w.usual.wet?' and wet':''}${w.usual.pct===null?', too hot for hard running':w.usual.pct>0?', about '+w.usual.pct+'% slower':''}.`);
+  r.push(`Day (daylight): ${w.low}–${w.high}°C${w.rain_day?', '+w.rain_day+' mm of rain':', no rain expected'}${w.sunrise?`. Sunrise ${w.sunrise}, sunset ${w.sunset}.`:'.'}`);
+  return r}
 function toast(t,k){const e=$('#toast');e.textContent=t;e.className='on '+(k||'');clearTimeout(toastT);toastT=setTimeout(()=>e.className='',k?6500:3200)}
 async function api(path, body, method){
   const r=await fetch('/api/'+path,{method:method||(body?'POST':'GET'),headers:{'Content-Type':'application/json','X-Requested-With':'periodize'},body:body?JSON.stringify(body):undefined});
@@ -97,7 +106,7 @@ function planView(){
       h+=`<div class="dw"><div class="day ${d.type||''} ${d.past?'past':''} ${d.today?'today':''} ${SEL===d.date?'sel':''}" data-date="${d.date}" ${can?'draggable="true"':''} tabindex="0" role="button" aria-label="${d.dow} ${+d.date.slice(8)}: ${E(d.label||'no session')}">
         <div class="d"><span>${d.dow} ${+d.date.slice(8)}</span><span>${d.done&&d.done.id?'':(d.on_watch?'⌚':'')+(d.source==='moved'?' ↔':'')+(d.source==='reshuffled'?' ↻':'')}</span></div>
         ${d.type?`<div class="l">${E(d.label)}</div>${d.dist?`<div class="m num">${E(d.dist)}</div>`:''}<div class="t">${E(d.short||'')}</div>`:''}
-        <div class="f">${d.done?`<span class="done">✓ ${E(d.done.dist)}</span>`:''}${d.adjust?`<span class="tag amber">eased ${(d.adjust.slow*100).toFixed(1)}%</span>`:''}</div>
+        <div class="f">${d.done?`<span class="done">✓ ${E(d.done.dist)}</span>`:''}${d.wx&&!d.done?`<span class="xs mute num" title="${E(wxTip(d.wx))}">${d.wx.wet?'☂':'☀'} ${d.wx.hour}:00 · ${d.wx.temp}°</span>`:''}${d.adjust?`<span class="tag amber">eased ${(d.adjust.slow*100).toFixed(1)}%</span>`:''}</div>
         ${b?`<div class="mt num"><span class="${fc(b.fresh)}" title="Freshness this morning: last night’s sleep, and your 7-day HRV and resting heart rate, against your normal"><b>${b.fresh}</b></span>${b.sleep_score?`<span title="Last night's sleep score">☾${b.sleep_score}</span>`:''}${b.rhr?`<span title="Resting heart rate">♥${Math.round(b.rhr)}</span>`:''}${b.hrv?`<span title="Last night's HRV">∿${Math.round(b.hrv)}</span>`:''}</div>`:''}</div>${d.done&&d.done.id?GLINK(d.done.id,'corner'):''}</div>`}
     h+='</div>'});
   h+=`<p class="xs mute" style="margin:10px 2px 0">On each day: <b>freshness</b> out of 100, from that night's sleep and your 7-day HRV and resting heart rate, against your normal · ☾ that night's sleep score · ♥ resting heart rate · ∿ that night's HRV. In each week's heading: your pace for your heart rate across the week against the four weeks before. ⌚ on your watch · ↔ moved by you · ↻ moved here because it was missed earlier in the week.</p>`;
@@ -110,6 +119,7 @@ function planView(){
     ${a?`<p class="lab2">Tuned for today <span class="chip amber" style="margin-left:6px"><i></i>paces eased ${(a.slow*100).toFixed(1)}%</span></p>${stepList(sd.text)}
       <p class="small" style="margin:8px 0 0">Why: ${E((a.reasons||[]).join('; '))}. ${E(a.advice||'')}</p>`
      :sd.type&&sd.type!=='Rest'&&!sd.past?`<p class="small mute" style="margin:8px 0 0">${sd.today?(b?'Not tuned: last night’s sleep and your HRV and resting heart rate trends are normal, so it stands as planned.':'Not tuned yet: waiting for last night’s data from your watch.'):'Tuning happens on the morning of the session, from the night before and your recent trends.'}</p>`:''}
+    ${sd.wx?`<p class="lab2">Weather</p><p class="small" id="daywx" style="margin:4px 0 0">${wxLines(sd.wx).map(E).join('<br>')}</p>`:''}
     ${sd.purpose?`<p class="small" id="purpose" style="margin:8px 0 0"><b>What it is for.</b> ${E(sd.purpose)}</p>`:''}
     ${sd.note?`<p class="small mute" style="margin:8px 0 0">${E(sd.note)}</p>`:''}${sd.strength?`<p class="xs" style="margin:8px 0 0"><span class="tag">+ ${E(sd.strength)}</span></p>`:''}
     ${b?`<p class="lab2">Recovery markers</p><div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(118px,1fr));margin-top:6px">
@@ -352,7 +362,7 @@ function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="c
     <p class="small">The next sessions as a file for Apple Calendar, Outlook or Google Calendar. Import it by hand; nothing is sent anywhere.</p>
     <p class="cact"><a class="ghost" href="/api/calendar.ics">Download calendar file</a></p></div>
   <div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
-    <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
+    <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), shows each coming day's forecast with the best hour to start between sunrise and sunset, judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
     <label for="heatsw">Track the weather and adjust for it</label>${yn('heatsw',S.heat&&S.heat.on)}
     ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}

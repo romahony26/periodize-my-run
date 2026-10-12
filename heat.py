@@ -4,6 +4,9 @@ your watch's.
   - Weather comes from Open-Meteo (open-meteo.com: free, no account, no key). The only thing sent is your rough location, rounded to
     0.1 degrees (about 10 km), taken from the start of your latest outdoor run with GPS. Nothing else about you is sent.
   - The forecast is read for the hour you usually start running (the median start hour of your runs in the last four weeks).
+  - For each coming day the plan also shows the best hour to start, between sunrise and an hour before sunset: a dry hour if there is
+    one, then the hour that costs least pace for the weather, then the one nearest your usual hour. Rain and wind are shown, not used.
+  - The location is the start of your latest GPS run, so on holiday the forecast follows you from your first run there.
   - How much to slow comes from race data: across 1,258 endurance races, performance was best at a wet-bulb globe temperature
     (WBGT) of 7.5 to 15 C and fell by 0.3 to 0.4% for every degree outside that range (Mantzios and colleagues, 2022) [R]. Marathon
     data agree: times fall progressively as it gets warmer, and slower runners lose more (Ely and colleagues, 2007) [R].
@@ -26,6 +29,7 @@ from log import log
 
 API = "https://api.open-meteo.com/v1/forecast"
 REFRESH_S = 3 * 3600
+FORECAST_V = 2                # bumped when the saved forecast gains fields, so an older one is read again
 ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 BEST_WBGT = (7.5, 15.0)      # the range in which endurance running performance peaks (Mantzios and colleagues, 2022)
 PCT_PER_DEGREE = 0.35        # per cent slower for each degree of WBGT outside it: the middle of their 0.3 to 0.4
@@ -33,6 +37,9 @@ TOO_HOT_WBGT = 28.0          # above this, no hard running: the level at which r
 TRACK_YEARS = 3
 MAX_PCT = 12.0
 MAX_COLD_PCT = 1.5
+WET_MM = 0.3                 # an hour with this much rain or more counts as wet
+WET_CHANCE = 60              # so does an hour with a chance of rain this high (per cent)
+FALLBACK_DAY = (6, 21)       # first and last start hour when there is no sunrise and sunset to go on
 
 
 def wbgt(temp_c, dew_c):
@@ -104,19 +111,33 @@ def forecast(force=False, cached_only=False):
         return None
     cached = db.get("heat_forecast") or {}
     now = dt.datetime.now()
-    if not force and cached.get("loc") == list(loc) and cached.get("at") and (now - dt.datetime.fromisoformat(cached["at"])).total_seconds() < REFRESH_S:
+    if not force and cached.get("v") == FORECAST_V and cached.get("loc") == list(loc) and cached.get("at") and (now - dt.datetime.fromisoformat(cached["at"])).total_seconds() < REFRESH_S:
         return cached
     try:
-        r = requests.get(API, params={"latitude": loc[0], "longitude": loc[1], "hourly": "temperature_2m,dew_point_2m",
-                                      "forecast_days": 16, "timezone": "auto"}, timeout=20, allow_redirects=False)
-        h = r.json().get("hourly") if r.status_code == 200 else None
-        times, temps, dews = (h or {}).get("time"), (h or {}).get("temperature_2m"), (h or {}).get("dew_point_2m")
-        if not (isinstance(times, list) and isinstance(temps, list) and isinstance(dews, list) and len(times) == len(temps) == len(dews)):
+        r = requests.get(API, params={"latitude": loc[0], "longitude": loc[1],
+                                      "hourly": "temperature_2m,dew_point_2m,wind_speed_10m,precipitation,precipitation_probability",
+                                      "daily": "sunrise,sunset", "forecast_days": 16, "timezone": "auto"}, timeout=20, allow_redirects=False)
+        body = r.json() if r.status_code == 200 else {}
+        h = body.get("hourly")
+        cols = [(h or {}).get(k) for k in ("time", "temperature_2m", "dew_point_2m")]
+        if not all(isinstance(x, list) and len(x) == len(cols[0]) for x in cols):
             raise ValueError("unexpected reply")
-    except (requests.RequestException, ValueError) as e:
+        # wind, rain and the rain chance are shown, not used in any figure, so a reply without them is still good
+        extra = [(h or {}).get(k) for k in ("wind_speed_10m", "precipitation", "precipitation_probability")]
+        extra = [x if isinstance(x, list) and len(x) == len(cols[0]) else [None] * len(cols[0]) for x in extra]
+        d = body.get("daily") or {}
+        sun = {}
+        if isinstance(d.get("time"), list) and isinstance(d.get("sunrise"), list) and isinstance(d.get("sunset"), list):
+            for day, up, down in zip(d["time"], d["sunrise"], d["sunset"], strict=False):
+                if isinstance(up, str) and isinstance(down, str) and "T" in up and "T" in down:
+                    sun[day] = [up.split("T")[1][:5], down.split("T")[1][:5]]
+    except (requests.RequestException, ValueError, AttributeError) as e:
         log.warning("Weather could not be read (%s); no heat adjustment this time", type(e).__name__)
         return cached or None
-    out = {"loc": list(loc), "at": now.isoformat(timespec="seconds"), "hours": {t: [a, b] for t, a, b in zip(times, temps, dews, strict=True)}}
+    off = body.get("utc_offset_seconds")
+    out = {"v": FORECAST_V, "loc": list(loc), "at": now.isoformat(timespec="seconds"), "sun": sun,
+           "offset": off if isinstance(off, int) and not isinstance(off, bool) else None,
+           "hours": {t: [a, b, w, p, c] for t, a, b, w, p, c in zip(*cols, *extra, strict=True)}}
     db.put("heat_forecast", out)
     return out
 
@@ -131,6 +152,59 @@ def at(day, hour, cached_only=False):
         return None
     pct = slowdown(v[0], v[1])
     return {"temp": round(v[0]), "dew": round(v[1]), "pct": pct, "hour": hour}
+
+
+def _hm(text):
+    """Minutes since midnight from "HH:MM"."""
+    return int(text[:2]) * 60 + int(text[3:5])
+
+
+def day_plan(day, usual, now=None, f=None):
+    """The weather for one day's run and the best hour to start it, from the saved forecast. None outside the forecast.
+
+    The window is from sunrise to an hour before sunset (06:00 to 21:00 when the forecast has no sun times; for today, from this hour).
+    Dry hours are preferred, because nobody plans a run for the wet; then the hour that costs least pace for the weather
+    (`worth`: heat from a wet-bulb globe temperature of 15 C up, cold counted less); then the one nearest the hour you usually start.
+    Wind and rain are shown but never change a pace: they had no effect of their own in race data once temperature was allowed for.
+    """
+    f = f or forecast(cached_only=True)
+    if not f or not f.get("hours"):
+        return None
+    k = day.isoformat()
+    sun = (f.get("sun") or {}).get(k)
+    lo, hi = FALLBACK_DAY
+    if sun:
+        lo, hi = -(-_hm(sun[0]) // 60), (_hm(sun[1]) // 60) - 1
+        if hi < lo:
+            lo, hi = FALLBACK_DAY
+    if now is None:      # the time where the forecast is, not where this computer is: they differ on holiday
+        off = f.get("offset")
+        now = dt.datetime.now(dt.UTC).replace(tzinfo=None) + dt.timedelta(seconds=off) if off is not None else dt.datetime.now()
+    if day == now.date():
+        lo = max(lo, now.hour)
+    hrs = []
+    for h in range(lo, hi + 1):
+        v = f["hours"].get(f"{k}T{h:02d}:00")
+        if v and v[0] is not None and v[1] is not None:
+            v = list(v) + [None] * (5 - len(v))
+            hrs.append((h, v))
+    if not hrs:
+        return None
+
+    def wet(v):
+        return (v[3] or 0) >= WET_MM or (v[4] or 0) >= WET_CHANCE
+    pool = [x for x in hrs if not wet(x[1])] or hrs
+    h, v = min(pool, key=lambda x: (worth(x[1][0], x[1][1]), abs(x[0] - usual), x[0]))
+    out = {"date": k, "hour": h, "temp": round(v[0]), "dew": round(v[1]), "pct": slowdown(v[0], v[1]),
+           "wind": round(v[2]) if v[2] is not None else None, "rain": round(v[3], 1) if v[3] is not None else None,
+           "chance": round(v[4]) if v[4] is not None else None, "wet": wet(v), "dry_hours": len([x for x in hrs if not wet(x[1])]),
+           "sunrise": sun[0] if sun else None, "sunset": sun[1] if sun else None,
+           "low": round(min(x[1][0] for x in hrs)), "high": round(max(x[1][0] for x in hrs)),
+           "rain_day": round(sum(x[1][3] or 0 for x in hrs), 1)}
+    u = next((x for x in hrs if x[0] == usual), None)
+    if u and u[0] != h:
+        out["usual"] = {"hour": u[0], "temp": round(u[1][0]), "pct": slowdown(u[1][0], u[1][1]), "wet": wet(u[1])}
+    return out
 
 
 def _hours(url, loc, **params):

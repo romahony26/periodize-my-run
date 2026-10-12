@@ -436,11 +436,16 @@ def _days(c, today, L=None):
         a["m"] += r["dist_m"] or 0
         a["s"] += r["timer_s"] or 0
         a["n"] += 1
+    usual = heat.run_hour(today) if c.get("heat_adjust") else None
+    fc = heat.forecast(cached_only=True) if usual is not None else None
     out, d = [], start
     while d <= end:
         k = d.isoformat()
         p, a = plan.get(k), done.get(k)
         item = {"date": k, "dow": engine.DAYS[d.weekday()], "past": d < today, "today": d == today}
+        wx = heat.day_plan(d, usual, f=fc) if fc and d >= today else None
+        if wx:
+            item["wx"] = wx
         if p:
             tp = tps.get((d - dt.timedelta(days=d.weekday())).isoformat())
             adj = json.loads(p["adjust"]) if p["adjust"] else None

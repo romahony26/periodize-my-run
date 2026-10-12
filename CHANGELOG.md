@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.4 - 2026-10-13
+### Added
+- Forecast for each coming day on the plan (when weather tracking is on): the best hour to start, the temperature and dew point then, wind, rain and the chance of rain, sunrise and sunset, and the day's range. Each day in the calendar shows the best hour and temperature (☂ if every daylight hour has rain); click a day for the rest.
+- The best hour is chosen between sunrise and an hour before sunset, so it is never in the dark. A dry hour is preferred; then the hour that costs least pace for heat (the same wet-bulb globe temperature model as before); then the one nearest the hour you usually start. Wind and rain are shown only: they change no pace.
+- The forecast follows you when you travel: it uses the start of your latest GPS run, so the forecast and best hours move to the new place after your first run there. Times are for that place, including "today" when the best hour has already passed.
+### Changed
+- The saved forecast now also holds wind, rain, the chance of rain and sunrise and sunset for 16 days, read in the same single request to Open-Meteo, with the same rounded location and nothing else sent.
+
 ## 2.9.3-beta.3 - 2026-10-10
 ### Added
 - Recovering: a new entry type next to sick, injured and holiday, for when you are running but not yet well, for example on antibiotics. Sessions become easy running and the long run is shortened to about 60% of its distance (up to 8 miles); nothing is rested and it does not count as a break from training. A second option adds a reminder to keep it flat and slow, for antibiotics that can affect tendons.
