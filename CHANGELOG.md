@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.3 - 2026-10-13
+### Added
+- The marathon assumptions are now checked against 6,582 real marathons from a public dataset of 36,412 athletes (CC BY 4.0). Principles 99 to 103 give what held (weekly volume goes with faster marathons beyond speed; the race equivalence has a median error of 6.4%) and what the data cannot show (long runs separately from volume, taper depth, breaks). The check is `tools/validate_public.py`, not part of the app.
+
 ## 2.10.0-beta.2 - 2026-10-13
 ### Fixed
 - The feel and effort rating from your watch was never read: Garmin keeps it in each run's own summary, not in the activity list. It is now fetched for runs of the last four days (checked on your account, where the fields exist).

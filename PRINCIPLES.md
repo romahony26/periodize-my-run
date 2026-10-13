@@ -456,6 +456,39 @@ of ultra training, so read these as the best available reasoning, not proven met
     conversation with a doctor or sports dietitian. The 3% and 15 miles are this project's choice, and a watch cannot screen for the
     condition itself. [P]
 
+## 18. Checked against 6,582 real marathons
+
+The rules above come from published research. This section is the project's own check of them against public data: the daily running
+logs of 36,412 athletes in 2019, with the marathons they ran (Afonseca and colleagues, 2022; data CC BY 4.0), reproduced by
+`tools/validate_public.py`. A race is a marathon-length day within a day of a 2019 Major, and only the autumn Majors (Berlin, Chicago, New
+York) have 16 weeks of history in the 2019 file, so the sample is 6,582 autumn marathoners, mostly from Europe and the USA, who record
+their running on a social network. Everything here is **association across runners, not cause**, and daily totals cannot tell one run from
+two or a missed log from a missed day. [P]
+
+99. **Weekly volume goes with faster marathons beyond what speed explains.** [P] (*moderate*, observational) Holding speed, sex and the
+    other measures equal, each standard deviation more weekly distance in weeks 4 to 16 before the race went with a marathon about 5 to
+    7% faster, the same in women and men and in all three age groups, and in both halves of the sample. Speed (the best training run of 5
+    to 25 km) went with about 10% per standard deviation. This is the same direction as the meta-analysis (Doherty and colleagues,
+    2020), and it supports building volume first (principles 19 and 87).
+100. **The longest run added nothing once volume was known.** [P] (*limited*) The longest run in the build went with faster finishes on its
+    own, but holding volume and speed equal its coefficient was close to zero (about 0.2%). Long runs and weekly volume are tangled
+    together in this data: people who run long also run a lot. It does not show long runs are unimportant; it shows the data cannot
+    separate them from volume, and the 3-hour cap (principle 30) is not contradicted.
+101. **A very deep fall in the last three weeks went with slower finishes, a modest one with faster.** [P] (*limited*) Runners whose last
+    three weeks averaged under 60% of their build had times about 2% slower than their speed predicted, and those at 80 to 100% about
+    3% faster, against the average of weeks 4 to 16 (not the peak). That cannot be read as "taper less": a deep fall is also what an
+    illness or an injury leaves, and these are different runners, not the same runner with two tapers. It does not argue against the
+    taper principles (36 and 85), which rest on trials and on within-runner comparisons.
+102. **A week or more without logged running was not clearly harmful here.** [P] (*not shown*) Its sign changed with what was adjusted
+    for, so this data neither confirms nor refutes the 5 to 8% cost of a break found within runners (Feely and colleagues, 2022). A gap in
+    a public log is often an unlogged run.
+103. **Race equivalence works, with a known lean.** [P] (*moderate*) Turning each runner's best training run of 5 to 25 km into a marathon
+    with the Daniels-Gilbert equations (the method behind the race predictions) gave a median error of 6.4% after one fixed adjustment,
+    with 80% of runners within 12.8%. Training runs are slower than races, so the raw prediction is fast by about 7% on average: by
+    3.7% for the fastest third of runners and 9.5% for the slowest third, which is what principle 87 says about slower runners holding
+    a smaller fraction of their speed. Weekly volume and the longest run lowered the held-out error only from 6.7% to 6.3%. The app
+    does not use training runs as race results: it learns its own lean from your races (principle 41).
+
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
 Listed so they are not mistaken for principles.
@@ -490,6 +523,7 @@ Research named above. Only findings are used; no text, tables or figures are rep
 on a detail.
 
 - Bangsbo J and colleagues (2009). Reduced volume and increased training intensity elevate muscle Na+-K+ pump α2-subunit expression as well as short- and long-term work capacity in humans. *J Appl Physiol*. *From memory; finding search-confirmed.*
+- Afonseca LA, Watanabe RN, Duarte M (2022). A worldwide comparison of long-distance running training in 2019 and 2020: associated effects of the COVID-19 pandemic. *PeerJ* 10:e13192. Data: figshare 10.6084/m9.figshare.16620238, CC BY 4.0. *Dataset description read; analysis is this project's own.*
 - Banister EW (1991). Modeling elite athletic performance. In: *Physiological Testing of Elite Athletes*. Human Kinetics. *From memory; a book chapter.*
 - Bassett DR, Howley ET (2000). Limiting factors for maximum oxygen uptake and determinants of endurance performance. *Med Sci Sports Exerc* 32:70–84.
 - Bontemps B, Vercruyssen F, Gruet M, Louis J (2020). Downhill running: what are the effects and how can we adapt? A narrative review. *Sports Med*.
