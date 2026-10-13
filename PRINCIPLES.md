@@ -420,18 +420,19 @@ of ultra training, so read these as the best available reasoning, not proven met
 
 ## 17. How runs felt, steady weeks, and getting used to heat
 
-92. **How a run felt, as you rated it on the watch, counts as a recovery sign.** [R] (*strong* that self-report tracks response) Self-reported
-    measures of fatigue and effort track the response to training at least as well as the objective measures (Saw and colleagues,
-    2016). Garmin watches can ask for a feel and an effort rating after a run; nothing is ever typed into Periodize My Run. A last run
-    (yesterday or today) rated "weak" or "very weak", or an effort of 9 or more out of 10, counts as one warning sign; two such runs in
-    the last four days count as two. They are added to the sleep, HRV and resting heart rate signs and ease the fast running the same
-    way. Whether a watch records the rating depends on the watch and on you answering it. [P]
-93. **Weeks with little hard-easy variation, on a heavy load, went with illness.** [R] (*limited*) In 25 experienced athletes, illnesses
-    clustered where thresholds of training strain (weekly load times monotony, the week's mean daily load divided by its standard
-    deviation) was exceeded (Foster, 1998). Those thresholds were individual, and the study is small. Periodize My Run shows monotony and
-    strain on the Fitness page and warns only when monotony is 2 or more and the week is 20% heavier than your previous four weeks,
-    because a steady week at your usual load is normal for a runner. The 2.0 line is coaching convention and the 20% is this
-    project's choice. [C] [P]
+92. **A very hard effort on the watch counts as a recovery sign; a poor rating does not.** [R] (*moderate*) Self-reported measures of
+    fatigue and effort track the response to training at least as well as the objective measures (Saw and colleagues, 2016). Garmin
+    watches can ask for a feel and an effort rating after a run; nothing is ever typed into Periodize My Run. A last run (yesterday or
+    today) rated 9 or 10 out of 10 for effort counts as one warning sign, and two such runs in the last four days count as two. They
+    are added to the sleep, HRV and resting heart rate signs and ease the fast running the same way. A "weak" feel is stored and not
+    counted: in the log of 74 competitive runners (section 18) a week with a very hard rated session went with 1.9 times the injury
+    rate, and a week with a badly rated session with fewer injuries, not more. [P]
+93. **Training monotony and strain are shown, not warned about.** [R] (*not supported here*) In 25 experienced athletes, illnesses
+    clustered where a threshold of training strain (weekly load times monotony, the week's mean daily load divided by its standard
+    deviation) was exceeded, with individual thresholds (Foster, 1998). In 42,766 days of the 74 competitive runners' log, a monotony
+    of 2 or more on daily distance went with an injury rate of 1.06 times that of other days (95% interval 0.80 to 1.38), and the
+    top tenth of strain with 0.80 times. Illness was Foster's outcome and injury is the log's, so this does not refute the study, but it
+    gives no reason to warn on it. Periodize My Run shows monotony and strain on the Fitness page and no longer raises a watch-out. [P]
 94. **Getting used to heat takes repeated hot runs over one to two weeks.** [R] (*strong*) Heat acclimatisation, the most important
     thing an athlete can do to reduce the strain of the heat, comprises repeated exercise-heat exposures over 1 to 2 weeks (Racinais and
     colleagues, 2015). With weather switched on, the Fitness page counts your runs of 30 minutes or more at a WBGT of 18 °C or more in
@@ -519,6 +520,22 @@ two or a missed log from a missed day. [P]
     coming A or B race is saved every week, so after the race the one made 8, 4 and 2 weeks before it is set against the result, not a
     prediction rebuilt afterwards. It cannot show that the plan caused a result.
 
+109. **Seven days in a row without a rest day is noted.** [P] (*limited*) In the same log, a week with no rest day went with 1.34 times
+    the injury rate of other weeks (95% interval 1.08 to 1.71, resampled by runner). It is one dataset of strong runners, so it is a
+    note on the Plan page, not a rule; the plan itself always includes a rest day below seven running days.
+110. **Of the rules tested on injury, a jump in the longest run and a very hard session held; a 20% jump in the week held weakly.** [P]
+    In 42,798 weeks of the log (575 injuries, 74 runners), the injury rate was 1.33 times higher after a longest day more than 10% over
+    the longest of the two weeks before (1.13 to 1.54; principle 22), 1.25 times after a week more than 20% above the best of the two
+    before (1.01 to 1.55; principle 104), and 1.89 times after a session rated 0.9 or more for effort (1.32 to 2.67).
+111. **How well the rules separate injured weeks is modest.** [P] Together, a longest-day jump, a 20% rise or a very hard session
+    flagged 28% of weeks and caught 36% of injuries, with 1.45 times the injury rate in flagged weeks (1.23 to 1.69). Adding the
+    no-rest-day note, 40% of weeks and 52% of injuries (1.61 times, 1.35 to 1.96). Counting a poor rating as a sign removed the signal altogether
+    (1.04). The authors' own machine-learning models reached an AUC of about 0.68 on weekly data (Lövdal and colleagues, 2021): these
+    rules are in that range, which is useful for a note and not enough to decide a day by.
+112. **The test is `tools/validate_injuries.py`.** [P] Intervals come from resampling runners and move a little between runs. Data: Lövdal, den Hartigh and Azzopardi (2021), CC0, from DataverseNL. Runners are
+    competitive and train with a team, so the numbers may not transfer to everyone, injury is whatever the team recorded, and the
+    association between a rule and an injury is not proof that following the rule prevents one.
+
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
 Listed so they are not mistaken for principles.
@@ -554,6 +571,7 @@ on a detail.
 
 - Bangsbo J and colleagues (2009). Reduced volume and increased training intensity elevate muscle Na+-K+ pump α2-subunit expression as well as short- and long-term work capacity in humans. *J Appl Physiol*. *From memory; finding search-confirmed.*
 - Afonseca LA, Watanabe RN, Duarte M (2022). A worldwide comparison of long-distance running training in 2019 and 2020: associated effects of the COVID-19 pandemic. *PeerJ* 10:e13192. Data: figshare 10.6084/m9.figshare.16620238, CC BY 4.0. *Dataset description read; analysis is this project's own.*
+- Lövdal SS, den Hartigh RJR, Azzopardi G (2021). Injury prediction in competitive runners with machine learning. *Int J Sports Physiol Perform* 16:1522–1531. Data: DataverseNL doi:10.34894/UWU9PV, CC0. *Dataset record and README read; analysis is this project's own; volume and pages from memory.*
 - Banister EW (1991). Modeling elite athletic performance. In: *Physiological Testing of Elite Athletes*. Human Kinetics. *From memory; a book chapter.*
 - Bassett DR, Howley ET (2000). Limiting factors for maximum oxygen uptake and determinants of endurance performance. *Med Sci Sports Exerc* 32:70–84.
 - Bontemps B, Vercruyssen F, Gruet M, Louis J (2020). Downhill running: what are the effects and how can we adapt? A narrative review. *Sports Med*.

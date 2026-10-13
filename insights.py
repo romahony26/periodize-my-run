@@ -367,8 +367,19 @@ def energy(today):
     return {"loss_pct": round(loss, 1), "miles": round(miles)}
 
 
+def no_rest(today):
+    """Every one of the last seven days has a run of a kilometre or more. In the training log of 74 competitive runners, a week with no rest
+    day went with about 1.3 times the injury rate (principle 109). One dataset of strong runners, so shown as a note, not a rule."""
+    since = (today - dt.timedelta(days=7)).isoformat()
+    days = {r["date"] for r in db.rows("SELECT date FROM activities WHERE sport='running' AND dist_m>=1000 AND date>=? AND date<?", (since, today.isoformat()))}
+    return len(days) >= 7
+
+
 def warnings(today, units="mi", sex=None, hrmax=None):
     out = spikes(today, units)
+    if no_rest(today):
+        out.append({"kind": "norest", "date": today.isoformat(), "text": "You have run on each of the last 7 days. In the training log of 74 competitive runners, weeks with no rest day "
+                    "went with about 30% more injuries. A day off, or a walk, before the next run costs very little."})
     e = energy(today)
     if e:
         out.append({"kind": "energy", "date": today.isoformat(), "text": f"Your weight has fallen about {e['loss_pct']}% over eight weeks while you run about {e['miles']} miles a week and your recovery signs are off. "

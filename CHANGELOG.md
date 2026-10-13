@@ -3,6 +3,15 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.10 - 2026-10-14
+### Changed
+- The rules were tested against a public training log of 74 competitive runners with 575 recorded injuries (DataverseNL, CC0). What held: a jump in the longest run (1.33 times the injury rate), a very hard rated session (1.89 times), and, weakly, a week 20% above the best of the last two (1.25 times). What did not: training monotony (1.06 times, no signal) and a poor rating after a run (fewer injuries, not more).
+- A very hard effort rating on your watch (9 or 10 out of 10) still counts as a recovery sign, but a "weak" feel alone no longer does.
+- The monotony watch-out is removed; monotony and strain are still shown on the Fitness page.
+### Added
+- A note on the Plan page when you have run on each of the last seven days: weeks with no rest day went with about 1.3 times the injury rate in that log.
+- `tools/validate_injuries.py` repeats the test, and principles 109 to 112 give the numbers and their limits.
+
 ## 2.10.0-beta.9 - 2026-10-14
 ### Changed
 - The top right panel now switches to tomorrow's session as soon as any run is logged today, whatever its length. The 70% rule was removed: the app plans one run a day, so there is no second session to wait for.

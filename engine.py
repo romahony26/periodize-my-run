@@ -867,14 +867,14 @@ def readiness(today, c, learn=True):
     since = (today - dt.timedelta(days=4)).isoformat()
     rated = db.rows("SELECT date,feel,rpe FROM activities WHERE sport='running' AND date>=? AND date<=? AND (feel IS NOT NULL OR rpe IS NOT NULL) ORDER BY date DESC",
                     (since, today.isoformat()))
-    rough = [r for r in rated if (r["feel"] is not None and r["feel"] <= 25) or (r["rpe"] is not None and r["rpe"] >= 90)]
+    rough = [r for r in rated if r["rpe"] is not None and r["rpe"] >= 90]    # effort 9 or 10; a "weak" feel alone is not counted (principle 92)
     if rough:
         latest = (today - dt.date.fromisoformat(rough[0]["date"])).days
         if len(rough) >= 2 or latest <= 1:
             fp = 2 if len(rough) >= 2 else 1
             pts += fp
             lost += 10 * fp
-            reasons.append(f"you rated {'two recent runs' if len(rough) >= 2 else 'your last run'} as hard going on your watch (feel weak or effort very high)")
+            reasons.append(f"you rated {'two recent runs' if len(rough) >= 2 else 'your last run'} as a very hard effort on your watch")
     per = ((db.get("model") or {}).get("slow_per_point") or {}).get("value", 0.012) if learn else 0.012
     return {"level": "green" if pts == 0 else "amber" if pts <= 2 else "red", "slow": min(pts, 4) * per, "points": pts,
             "reasons": reasons or ["Last night's sleep was normal for you, and your 7-day HRV and resting heart rate are in your normal range."],
