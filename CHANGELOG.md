@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.4 - 2026-10-14
+### Fixed
+- After a dip in running, a build week could be planned 25 to 40% above the best of the last three weeks, because two sessions and a long run, or a marathon-pace long run, have a minimum size. Under 20 miles a week one session now replaces two, and a marathon-pace long run is held back a week when it would cause such a jump. Found by running the planner on 1,500 real athletes' histories from a public dataset; such weeks fell from 3.3% to 0.6% of build weeks.
+### Added
+- `tools/validate_engine.py` repeats that check, and principles 104 and 105 record the result and its limits.
+
 ## 2.10.0-beta.3 - 2026-10-13
 ### Added
 - The marathon assumptions are now checked against 6,582 real marathons from a public dataset of 36,412 athletes (CC BY 4.0). Principles 99 to 103 give what held (weekly volume goes with faster marathons beyond speed; the race equivalence has a median error of 6.4%) and what the data cannot show (long runs separately from volume, taper depth, breaks). The check is `tools/validate_public.py`, not part of the app.

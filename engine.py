@@ -219,6 +219,21 @@ def goal_race(races, monday):
 
 
 def plan(st, c, L, races):
+    """The week's plan. A marathon-pace long run is held back for a week when it would lift the week more than 20% above the best of the
+    last three: its minimum size, not the week's target, is what lifts the total, and a week raised by 20% or more was followed by more
+    injuries (Damsted and colleagues, 2019). Found by running the planner on 600 real athletes' histories."""
+    pl = _plan(st, c, L, races)
+    recent_best = max([w["mi"] for w in st["weeks"][-3:]] or [0])
+    if pl["mode"] == "build" and pl["done"]["mp_long"] and recent_best >= 8 and pl["total"] > 1.20 * recent_best:
+        alt = _plan(dict(st, no_mp_long=True), c, L, races)
+        if alt["total"] < pl["total"]:
+            alt["why"].append("Marathon-pace long run held back this week: with it the week would be more than 20% above your best of the last three, "
+                              "and a week raised by 20% or more was followed by more injuries (Damsted and colleagues, 2019). It comes a week later. [P]")
+            return alt
+    return pl
+
+
+def _plan(st, c, L, races):
     mon, tp = st["monday"], st["tp"]
     goal = goal_race(races, mon)
     gm = goal["miles"] if goal else None
@@ -290,6 +305,13 @@ def plan(st, c, L, races):
                    else f"Volume up {grow - 1:.0%}, half the usual rate: this is more than you have held for eight weeks in the last year "
                         f"({dist(half(proven), c['units'])}), and weeks strung together count for more than a faster build." if new_ground
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
+        recent_best = max(wk[-3:] or [0])
+        if recent_best >= 8 and target > 1.20 * recent_best:
+            # a week raised by 20% or more was followed by more injuries (Damsted and colleagues, 2019); this stops a dip in the last
+            # weeks being "made up" in one step by planning back to the eight-week average
+            target = 1.20 * recent_best
+            why.append(f"Volume rise limited to 20% above your best of the last three weeks ({dist(half(recent_best), c['units'])}). "
+                       "A week raised by 20% or more was followed by more injuries (Damsted and colleagues, 2019). [P]")
     else:
         target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": comeback[0] if comeback else 0.80 * prior3,
                   "postrace": min(0.5 * ref, 25), "tuneup": 0.75 * ref,
@@ -314,7 +336,7 @@ def plan(st, c, L, races):
         return None
 
     k1o = pick([3, 2, 4])
-    two_keys = n >= 5
+    two_keys = n >= 5 and target >= 20       # under 20 miles a week two sessions and a long run alone are more than the week holds (found on real athletes' histories)
     k2o = pick([5, 4, 2]) if two_keys and k1o is not None else None
     two_keys = k2o is not None
     key1 = (Ld + k1o) % 7 if k1o is not None else None
@@ -346,7 +368,7 @@ def plan(st, c, L, races):
     # marathon-pace long run
     mp_long = 0
     since_long = (mon - st["last_mp_long"]).days if st["last_mp_long"] else 99
-    if gtype == "marathon" and mode == "build" and specific and wtr >= 4 and since_long >= 13 and st["prev_mp_mid"] >= 5:
+    if gtype == "marathon" and mode == "build" and specific and wtr >= 4 and since_long >= 13 and st["prev_mp_mid"] >= 5 and not st.get("no_mp_long"):
         mp_long = next((m for m in MP_LONG_LADDER if m > st["prev_mp_long"] + 0.5), MP_LONG_LADDER[-1])
         if wtr <= 5:
             mp_long = min(mp_long, 6)

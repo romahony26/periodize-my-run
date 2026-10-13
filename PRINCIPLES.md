@@ -97,7 +97,8 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     reliable injury threshold (Impellizzeri and colleagues, 2020). Large jumps are another matter: more than about 30% over two
     weeks was linked with some injuries (Nielsen and colleagues, 2014), and runners preparing for a half marathon who raised a
     week by 20% to 60% had more injuries in the following three weeks than those who raised it by less than 20% (Damsted and
-    colleagues, 2019). Periodize My Run's 6%, or 3% on new ground, stays well clear of both.
+    colleagues, 2019). Periodize My Run's 6%, or 3% on new ground, stays well clear of both, and no build week is planned more than 20% above the best of
+    the last three (principle 104).
 22. **What matters most is the single longest run.** [R] (*moderate*) In a study of over 5,000 runners, a run more than 10% longer
     than the longest of the previous 30 days was linked with more overuse injuries, while week-to-week mileage change was not
     (Schuster Brandt Frandsen and colleagues, 2025). Periodize My Run never plans a long run more than 10% beyond your longest in the
@@ -488,6 +489,20 @@ two or a missed log from a missed day. [P]
     3.7% for the fastest third of runners and 9.5% for the slowest third, which is what principle 87 says about slower runners holding
     a smaller fraction of their speed. Weekly volume and the longest run lowered the held-out error only from 6.7% to 6.3%. The app
     does not use training runs as race results: it learns its own lean from your races (principle 41).
+
+104. **A build week is not planned more than 20% above the best of the last three.** [P] Running the planner on real athletes'
+    histories (below) showed that, after a dip, a week could land 25 to 40% above recent weeks: two sessions and a long run have a
+    minimum size, and so does a marathon-pace long run. Two changes follow. Under 20 miles of planned running a week, one session
+    replaces two; and a marathon-pace long run is held back a week when it would lift the week past the line. This cut build weeks more
+    than 20% above the best of the last three from 3.3% to 0.6%, at the cost of about 6% fewer marathon-pace long runs over a build
+    (2.85 to 2.68 on average, with 6% of athletes getting none instead of 3%). The 20% line comes from the finding that raising a week by 20% to 60% was followed by more injuries (Damsted and colleagues,
+    2019). [P]
+105. **The planner was run on 1,500 real athletes' eight-week histories, 18 weeks each (`tools/validate_engine.py`).** [P] No crash and no
+    hard days back to back. Planned peaks were about three quarters of what these runners actually ran (34 against 47 miles at the
+    median), and the same for slow and fast runners because only eight weeks of history were given, where the app uses years. Runners who
+    ran more than the plan's peak finished about 3.6% faster than their speed predicted, which fits principle 99 but is
+    biased towards the runners who stayed healthy enough to race: the injured are not in the data, so it says nothing about whether
+    running that much is safe.
 
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
