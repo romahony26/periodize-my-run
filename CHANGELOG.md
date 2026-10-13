@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.5 - 2026-10-14
+### Added
+- A Plan scorecard on the Fitness page: the last 12 weeks' planned and run miles, the share of key sessions and long runs done, and, after a race, the prediction the app made 8, 4 and 2 weeks before it set against the result. Predictions for each coming A or B race are now saved every week so this is the forecast of the time, not one rebuilt afterwards.
+- A note when a marathon build has its long run over half of several weeks, which is how the plan shows that the volume is low for the distance (found on real athletes' histories).
+### Changed
+- `tools/validate_engine.py --long` runs the planner on every day the file holds before the build; the results are in principle 106.
+
 ## 2.10.0-beta.4 - 2026-10-14
 ### Fixed
 - After a dip in running, a build week could be planned 25 to 40% above the best of the last three weeks, because two sessions and a long run, or a marathon-pace long run, have a minimum size. Under 20 miles a week one session now replaces two, and a marathon-pace long run is held back a week when it would cause such a jump. Found by running the planner on 1,500 real athletes' histories from a public dataset; such weeks fell from 3.3% to 0.6% of build weeks.

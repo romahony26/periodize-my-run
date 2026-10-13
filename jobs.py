@@ -173,6 +173,27 @@ def week_message(today=None):
     return "\n".join(lines)
 
 
+def log_forecasts(rs, st, c, mon, today):
+    """Keep what was predicted, week by week, for every race still to come, so that when the race is run the prediction made at the time
+    (not one rebuilt afterwards) is what is checked. One entry per race per week; the current week is overwritten, so it is the last
+    prediction of the week."""
+    try:
+        book = db.get("forecast_book") or {}
+        for r in rs:
+            if r["date"] < today or r["priority"] not in ("A", "B"):
+                continue
+            now_s, full_s = assess.projection({"tp": st["tp"], "endurance": st["endurance"]}, c, r["miles"])
+            e = book.setdefault(f"{r['date'].isoformat()}|{round(r['miles'], 1)}", {})
+            e[mon.isoformat()] = [round(now_s), round(full_s)]
+            for k in sorted(e)[:-40]:
+                del e[k]
+        for k in [k for k in book if k.split("|")[0] < (today - dt.timedelta(days=400)).isoformat()]:
+            del book[k]
+        db.put("forecast_book", book)
+    except Exception as e:        # noqa: BLE001 - a log entry must never stop planning
+        log.warning("Forecast log not updated: %s", type(e).__name__)
+
+
 def replan(force=False):
     """Plan the current week from actual data, and the following week provisionally."""
     c, prof, rs, L = context()
@@ -188,6 +209,7 @@ def replan(force=False):
         log.warning("Not enough running data in the last eight weeks to plan from")
         return
     pl = engine.plan(st, c, L, rs)
+    log_forecasts(rs, st, c, mon, today)
     cur = db.rows("SELECT final FROM weeks WHERE monday=?", (mon.isoformat(),))
     if force or not cur or not cur[0]["final"]:
         _store_week(mon, st, pl, True, c, today)

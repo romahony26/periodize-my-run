@@ -265,6 +265,71 @@ def shoes(units="mi"):
     return out[::-1]
 
 
+def scorecard(c, today, weeks=12):
+    """How the plan has gone for this athlete: each week's planned and run miles, the key sessions (Key and Long days) done, and the
+    predictions made *at the time* for races since, set against the result. A session is done when a run of at least 70% of its planned
+    distance was logged that day. Observational and about this one athlete: it shows whether the plan is being followed and whether
+    its forecasts held, not whether the plan causes the result."""
+    import results
+    mon = today - dt.timedelta(days=today.weekday())
+    rows = []
+    for k in range(weeks, 0, -1):
+        a, b = mon - dt.timedelta(weeks=k), mon - dt.timedelta(weeks=k - 1)
+        plan = db.rows("SELECT date, type, miles FROM plan WHERE date>=? AND date<? AND miles>0", (a.isoformat(), b.isoformat()))
+        if not plan:
+            continue
+        runs = {}
+        for r in db.rows("SELECT date, SUM(dist_m) m FROM activities WHERE sport='running' AND date>=? AND date<? GROUP BY date", (a.isoformat(), b.isoformat())):
+            runs[r["date"]] = (r["m"] or 0) / MI
+        pm = sum(p["miles"] for p in plan)
+        keys = [p for p in plan if p["type"] in ("Key", "Long")]
+        done = sum(1 for p in keys if runs.get(p["date"], 0) >= 0.7 * p["miles"])
+        rows.append({"week": a.isoformat(), "planned": round(pm, 1), "done": round(sum(runs.values()), 1), "keys": len(keys), "keys_done": done})
+    out = {"weeks": rows, "adherence": None, "keys": None, "forecasts": []}
+    if rows:
+        out["adherence"] = round(100 * sum(r["done"] for r in rows) / max(sum(r["planned"] for r in rows), 1))
+        kp = sum(r["keys"] for r in rows)
+        out["keys"] = round(100 * sum(r["keys_done"] for r in rows) / kp) if kp else None
+    book = db.get("forecast_book") or {}
+    for r in results.listing(c["units"]):
+        if not r["counts"] or not r.get("flat_s") or not r.get("dist_m") or r["date"] > today.isoformat():
+            continue
+        try:
+            day = dt.date.fromisoformat(r["date"])
+        except (TypeError, ValueError):
+            continue
+        for key, entries in book.items():
+            kd, _, km = key.partition("|")
+            try:
+                if kd != r["date"] or abs(float(km) * MI - r["dist_m"]) > 0.03 * r["dist_m"]:
+                    continue
+            except ValueError:
+                continue
+            made = {}
+            for monday, (now_s, _full) in entries.items():
+                weeks_out = ((day - dt.timedelta(days=day.weekday())) - dt.date.fromisoformat(monday)).days // 7     # whole weeks before race week
+                if weeks_out in (8, 4, 2):
+                    made[weeks_out] = now_s
+            if made:
+                out["forecasts"].append({"date": r["date"], "name": r["name"], "actual_s": round(r["flat_s"]),
+                                         "made": {str(k): {"s": v, "error": round(100 * (v - r["flat_s"]) / r["flat_s"], 1)} for k, v in sorted(made.items(), reverse=True)}})
+    return out
+
+
+def shape(season, goal_miles):
+    """A marathon plan whose long run is more than half of its week in several build weeks. That happens when the volume limit (set by
+    the athlete's own recent running, since no longer block has been proven) is low for the distance, and it is how the plan shows that
+    the run-up is short for the goal. Found by planning 1,500 real athletes' histories: it is common under 15 miles a week.
+    Not a research threshold: the 50% is this project's choice, and the note makes no claim about injury."""
+    if not goal_miles or goal_miles < 20:
+        return None
+    heavy = [w for w in season if w.get("mode") == "build" and w.get("total", 0) >= 8 and w.get("long", 0) / w["total"] > 0.5]
+    if len(heavy) < 3:
+        return None
+    peak = max((w["total"] for w in season), default=0)
+    return {"weeks": len(heavy), "peak": round(peak), "long": round(max(w["long"] for w in season))}
+
+
 def cross_training(today, weeks=4):
     """Time in the last `weeks` weeks on activities other than running, by sport, what else is loading the legs and heart.
     It is shown beside the running load and is not counted in it: no study gives a fair exchange rate between a bike hour and a run hour."""

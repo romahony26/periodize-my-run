@@ -504,6 +504,21 @@ two or a missed log from a missed day. [P]
     biased towards the runners who stayed healthy enough to race: the injured are not in the data, so it says nothing about whether
     running that much is safe.
 
+106. **Whole history makes the plan safer and still conservative.** [P] Giving the planner every day the file held before the build (17 to
+    25 weeks, where the earlier run used eight) cut build weeks more than 20% above the best of the last three from 0.6% to 0.3%, and
+    raised the median planned peak from 34 to 38 miles against 55 actually run by this more committed group. The plan builds at about 6%
+    a week, with a down week every fourth, so over 18 weeks it cannot reach what the fastest-building runners did. That rate is a design
+    choice: weekly mileage change itself was not linked to injury (Schuster Brandt Frandsen and colleagues, 2025), only a long single
+    run and jumps of 20% or more (Damsted and colleagues, 2019) were.
+107. **A low-volume runner with a marathon goal is told how the plan shows the gap.** [P] Among runners starting under 15 miles a week, the
+    planned long run was more than half the week in two thirds of build weeks, because the volume limit comes from recent running while the
+    long run is sized for the distance. When that happens in three or more build weeks of a marathon or longer, the plan says so, and
+    suggests a longer run-up, a shorter race first, or a finishing goal. The 50% is this project's choice; no study sets one.
+108. **The plan is scored against what you did, and its predictions are kept.** [P] Each week's planned and run miles, and the share of key
+    sessions and long runs completed (a run of 70% of the distance counts), are shown for the last 12 weeks. The race prediction for each
+    coming A or B race is saved every week, so after the race the one made 8, 4 and 2 weeks before it is set against the result, not a
+    prediction rebuilt afterwards. It cannot show that the plan caused a result.
+
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
 Listed so they are not mistaken for principles.

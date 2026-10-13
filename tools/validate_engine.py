@@ -2,7 +2,9 @@
 
 Not part of the running app. Needs pyarrow and numpy and the public dataset (see validate_public.py):
 
-  python tools/validate_engine.py /path/to/run_ww_2019_d.parquet [athletes]
+  python tools/validate_engine.py /path/to/run_ww_2019_d.parquet [athletes] [--long]
+
+--long gives the planner every day the file holds before the build (17 to 25 weeks) as the app's profile would use it, instead of eight weeks.
 
 For each autumn-Major marathoner it builds the planner's state from the eight weeks before an 18-week build (weekly miles, longest run,
 threshold from the best training run, running days from their own habit), plans all 18 weeks with the athlete's goal as the marathon, and
@@ -67,9 +69,21 @@ def state_for(dist, dur, a, start, mon0):
     return st, hist
 
 
-def build(st, hist, races, c0):
+def whole_history(dist, a, start):
+    """The same profile fields the app derives from the whole activity list, from every day the file has before the build."""
+    runs = [{"date": (dt.date(2019, 1, 1) + dt.timedelta(days=i)).isoformat(), "dist_m": float(dist[a, i]) * 1000}
+            for i in range(start) if dist[a, i] > 0]
+    wk = profile.weekly_miles(runs)
+    excused = [dt.date.fromisoformat(r["date"]) for r in runs if r["dist_m"] >= 20 * profile.MI]
+    recent = list(wk.values())[-8:]
+    return {"recent8": sum(recent) / max(len(recent), 1), "best8_3y": profile.best_block(wk, dt.date.min), "hrmax_observed": 190,
+            "proven8_3y": profile.proven_block(wk, dt.date.min, excused, []), "proven8_all": profile.proven_block(wk, dt.date.min, excused, []),
+            "weeks_unbroken": 99, "weeks": len(wk)}
+
+
+def build(st, hist, races, c0, prof=None):
     mean = float(np.mean(hist)) * KM
-    prof = {"best8_3y": max(mean, max(np.mean(hist[i:i + 4]) for i in range(5)) * KM), "recent8": mean, "hrmax_observed": 190}
+    prof = prof or {"best8_3y": max(mean, max(np.mean(hist[i:i + 4]) for i in range(5)) * KM), "recent8": mean, "hrmax_observed": 190}
     c = dict(c0, run_days=int(min(6, max(3, round(np.mean([w["runs"] for w in st["weeks"]]))))))
     L = profile.limits(prof, c, 26.219)
     plans = []
@@ -80,7 +94,7 @@ def build(st, hist, races, c0):
     return plans
 
 
-def main(path, limit=600):
+def main(path, limit=600, long_history=False):
     dist, dur, majors, ids = athletes(path)
     c0 = dict(db.DEFAULTS, aero_test=True, aero_test_weeks=4, aero_format="short", aero_runs=True)
     rows = []
@@ -101,7 +115,9 @@ def main(path, limit=600):
                     continue
                 st, hist = got
                 races = [{"name": "M", "date": mon0 + dt.timedelta(days=7 * WEEKS - 1), "miles": 26.219, "priority": "A", "goal_time": None}]
-                plans = build(st, hist, races, c0)
+                plans = build(st, hist, races, c0, whole_history(dist, a, start) if long_history else None)
+                if long_history and (dist[a, :start] > 0).sum() < 60:
+                    continue
                 rows.append({"hist": [h * KM for h in hist], "actual": actual, "plan": [p["total"] for p in plans], "mode": [p["mode"] for p in plans],
                              "mp_long": sum(1 for p in plans if p["done"]["mp_long"]), "mins": mins})
                 break
@@ -126,4 +142,4 @@ def report(rows):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 600)
+    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 600, "--long" in sys.argv)
