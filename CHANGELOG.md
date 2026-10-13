@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.9 - 2026-10-14
+### Changed
+- The top right panel now switches to tomorrow's session as soon as any run is logged today, whatever its length. The 70% rule was removed: the app plans one run a day, so there is no second session to wait for.
+
 ## 2.10.0-beta.8 - 2026-10-14
 ### Added
 - Once today's run is done, the top right panel of the Plan page shows tomorrow's session instead of today's: its steps and paces, what it is for, the hour the weather suits, and a line with what you ran today. A run counts as done when at least 70% of the planned distance is logged, or any run on a day with nothing planned. A short run of a planned long one leaves today's card in place.
