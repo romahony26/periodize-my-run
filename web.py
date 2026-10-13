@@ -467,7 +467,8 @@ def _days(c, today, L=None):
         if a:
             v = a["m"] / a["s"] if a["s"] else None
             item["done"] = {"dist": engine.dist(round(a["m"] / assess.MI, 1), "mi") if c["units"] == "mi" else f"{a['m'] / 1000:.1f} km",
-                            "pace": engine.pace(v, c["units"]) + "/" + c["units"] if v else "", "runs": a["n"], "id": a["id"], "weather": a["wx"]}
+                            "pace": engine.pace(v, c["units"]) + "/" + c["units"] if v else "", "runs": a["n"], "id": a["id"], "weather": a["wx"],
+                            "miles": round(a["m"] / assess.MI, 2)}
         if d <= today:
             f = _fresh(d, c)
             if f:

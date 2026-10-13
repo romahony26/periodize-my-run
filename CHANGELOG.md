@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.8 - 2026-10-14
+### Added
+- Once today's run is done, the top right panel of the Plan page shows tomorrow's session instead of today's: its steps and paces, what it is for, the hour the weather suits, and a line with what you ran today. A run counts as done when at least 70% of the planned distance is logged, or any run on a day with nothing planned. A short run of a planned long one leaves today's card in place.
+
 ## 2.10.0-beta.7 - 2026-10-14
 ### Fixed
 - The Plan page was broken in 2.10.0-beta.1 to beta.6: the new Settings save bar reused the name of the small bars that show each day's score, so 21 of them turned into a large bar fixed across the bottom of the screen and the day cards lost their bars. The save bar and the on/off switches now have their own names, and a test fails if any page has a fixed element other than the tab bar, toast and dialogs.

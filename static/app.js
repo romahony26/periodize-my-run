@@ -138,6 +138,20 @@ function planView(){
       ${(fc=>`<p class="small" style="margin:12px 0 0">${fc.gap?`The forecast is <b class="${fc.gap[0]==='ahead'?'green':'amber'}">${fc.gap[1]} ${fc.gap[0]==='ahead'?'ahead of':'behind'}</b> your goal. `:''}It assumes you complete <b>${fc.pct}%</b> of the plan${fc.chosen?`, the figure you set${fc.history_pct!==null?` (your last two years averaged ${fc.history_pct}%${fc.plan_pct!==null&&fc.plan_days>=7?`; this plan so far ${fc.plan_pct}%`:''})`:''}`:fc.plan_weight>=100?', your record on this plan so far':fc.plan_weight>0?`, a blend of your history (${fc.history_pct}%) and this plan so far (${fc.plan_pct}%)`:fc.history_pct!==null?', your average over the last two years':', a general figure until there is history'}.</p>
       <p class="xs mute" style="margin:6px 0 0">Complete all of it: <b class="num">${fc.all}</b> · Complete ${fc.poor_pct}%: <b class="num">${fc.poor}</b>${fc.out_of_reach?' · Your goal is beyond the best you have shown in three years; a new best along the way will move the forecast.':fc.needs_all?' · Your goal is within reach only if nearly all of the plan gets done.':''}</p>`)(g.forecast)}</div>`}
   else h+=`<div class="card hero c6"><p class="eyebrow">Goal</p><p class="h">No goal race yet</p><p class="mute small">Add one under Races & status and the plan will build toward it.</p></div>`;
+  // once today's run is done (a run of at least 70% of the planned distance, or any run on a day with nothing planned), the card shows tomorrow
+  const iso=(d,n)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
+  const tomorrow=S.days.find(d=>d.date===iso(S.today,1));
+  const doneToday=!!(t.done&&t.done.miles>0&&(t.miles?t.done.miles>=0.7*t.miles:true));
+  if(doneToday&&tomorrow&&tomorrow.label){
+    const x=tomorrow;
+    h+=`<div class="card c6" id="tomorrowcard"><p class="eyebrow">Tomorrow <span class="chip green"><i></i>Today's run is done</span></p>
+    <p class="h">${E(x.label)} <span class="mute num" style="font-weight:600">${E(x.dist||'')}</span></p>
+    ${stepList(x.text)}
+    ${x.wx?`<p class="xs mute" style="margin:6px 0 0">${x.wx.wet?'☂':'☀'} Around ${x.wx.hour}:00 · ${E(wxTip(x.wx))}</p>`:''}
+    ${x.purpose?`<p class="small mute" style="margin:10px 0 0">${E(x.purpose)}</p>`:''}
+    ${x.note?`<p class="xs mute" style="margin:6px 0 0">${E(x.note)}</p>`:''}${x.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(x.strength)}</span></p>`:''}
+    <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p></div>`;
+  } else
   h+=`<div class="card c6"><p class="eyebrow">Today ${r&&r.date===S.today?`<span class="chip ${r.level}"><i></i>${lev[r.level]}</span>`:''}</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}</span></p>
     ${stepList(t.text)}
