@@ -275,7 +275,10 @@ def scorecard(c, today, weeks=12):
     rows = []
     for k in range(weeks, 0, -1):
         a, b = mon - dt.timedelta(weeks=k), mon - dt.timedelta(weeks=k - 1)
-        plan = db.rows("SELECT date, type, miles FROM plan WHERE date>=? AND date<? AND miles>0", (a.isoformat(), b.isoformat()))
+        every = db.rows("SELECT date, type, miles FROM plan WHERE date>=? AND date<?", (a.isoformat(), b.isoformat()))
+        if len(every) < 6:          # a week the plan only partly covers would make the athlete look as if they ran more than planned
+            continue
+        plan = [p for p in every if (p["miles"] or 0) > 0]
         if not plan:
             continue
         runs = {}

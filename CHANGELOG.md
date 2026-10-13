@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.6 - 2026-10-14
+### Fixed
+- The Plan scorecard counted a week the plan only partly covered (the app's first week, for example), which made it look as if you ran 150% of the plan. A week now counts only when the plan covers at least six of its days.
+
 ## 2.10.0-beta.5 - 2026-10-14
 ### Added
 - A Plan scorecard on the Fitness page: the last 12 weeks' planned and run miles, the share of key sessions and long runs done, and, after a race, the prediction the app made 8, 4 and 2 weeks before it set against the result. Predictions for each coming A or B race are now saved every week so this is the forecast of the time, not one rebuilt afterwards.
