@@ -80,7 +80,7 @@ let fastT=null, LASTUI=0, DIRTY=false;
 document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('select,input,textarea,label'))LASTUI=Date.now()},true);
 document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
 document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
-document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea,button.sw')){LASTUI=Date.now();if(view==='settings'){DIRTY=true;const sb=$('#sbar');if(sb&&e.target.closest('[data-replan]'))sb.hidden=false}}},true);
+document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea,button.tgl')){LASTUI=Date.now();if(view==='settings'){DIRTY=true;const sb=$('#savebar');if(sb&&e.target.closest('[data-replan]'))sb.hidden=false}}},true);
 const holdUI=()=>{const a=document.activeElement;return !!SEL||Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
 async function load(auto){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE||(auto&&holdUI())){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(()=>load(true),1000)}catch(e){}}
 function authView(kind){
@@ -310,8 +310,8 @@ function racesView(){
     <div><label for="se">Until (empty = every day is rest until you press Better)</label><input id="se" type="date"></div><div><label for="sn">Note</label><input id="sn" placeholder="e.g. cold, calf, travel"></div><button class="btn" id="sadd">Save</button> <button class="ghost" id="scancel" style="display:none">Cancel edit</button> <button class="ghost" id="sday" title="Sets Until to the same day as From">Just that day</button></div></div></div>`;
 }
 const opt=(v,l,cur)=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`;
-const yn=(id,cur,dis)=>`<button type="button" class="sw" role="switch" id="${id}" value="${cur?1:0}" aria-checked="${cur?'true':'false'}" ${dis?'disabled':''}><i></i><span>${cur?'On':'Off'}</span></button>`;
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button.sw');if(!b||b.disabled)return;
+const yn=(id,cur,dis)=>`<button type="button" class="tgl" role="switch" id="${id}" value="${cur?1:0}" aria-checked="${cur?'true':'false'}" ${dis?'disabled':''}><i></i><span>${cur?'On':'Off'}</span></button>`;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button.tgl');if(!b||b.disabled)return;
   b.value=b.value==='1'?'0':'1';b.setAttribute('aria-checked',b.value==='1'?'true':'false');b.lastChild.textContent=b.value==='1'?'On':'Off';
   b.dispatchEvent(new Event('change',{bubbles:true}))});
 function windowFields(){const h=S.heat||{},row=(label,p,w,anyl)=>`<div><label>${label}</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-label="${label}"><select id="${p}from" aria-label="${label}: earliest start">${opt('',anyl,w?w[0]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[0]:'')).join('')}</select><span class="mute">to</span><select id="${p}to" aria-label="${label}: latest start">${opt('',anyl,w?w[1]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[1]:'')).join('')}</select></div></div>`;
@@ -370,7 +370,7 @@ function settingsView(){const s=S.settings;
     <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button> <a class="ghost" href="/api/export">Download backup</a></p></div>`;
   return `${statusStrip()}${tabs}
   ${P('train',train)}${P('watch',connections('data'))}${P('env',connections('env'))}${P('backup',backup)}${P('about',aboutCard()+removeCard())}
-  <div class="sbar" id="sbar" hidden><span>You have unsaved changes to how you train.</span><button class="btn" id="ssave2">Save and replan</button></div>${UNI&&view==='settings'?removeModal():''}`}
+  <div class="savebar" id="savebar" hidden><span>You have unsaved changes to how you train.</span><button class="btn" id="ssave2">Save and replan</button></div>${UNI&&view==='settings'?removeModal():''}`}
 let TERMS=null, TOPEN={};
 async function loadTerms(){try{TERMS=await api('terms')}catch(e){TERMS={text:''}}render()}
 function md(t){return E(t||'').split(/\n\n+/).map(b=>{b=b.trim();if(!b||b==='---')return '';if(b.startsWith('# '))return '';

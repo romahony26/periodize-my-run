@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.7 - 2026-10-14
+### Fixed
+- The Plan page was broken in 2.10.0-beta.1 to beta.6: the new Settings save bar reused the name of the small bars that show each day's score, so 21 of them turned into a large bar fixed across the bottom of the screen and the day cards lost their bars. The save bar and the on/off switches now have their own names, and a test fails if any page has a fixed element other than the tab bar, toast and dialogs.
+
 ## 2.10.0-beta.6 - 2026-10-14
 ### Fixed
 - The Plan scorecard counted a week the plan only partly covered (the app's first week, for example), which made it look as if you ran 150% of the plan. A week now counts only when the plan covers at least six of its days.
