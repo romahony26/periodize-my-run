@@ -551,6 +551,9 @@ def _plan(st, c, L, races):
             week[j] = {"type": "Rest", "label": "Rest", "steps": None, "miles": 0} if a_race or j == i + 1 else \
                 {"type": "Easy", "label": "Easy", "steps": [("d", 4, "easy")], "miles": 4}
 
+    for j in c.get("blocked_days") or []:        # a race week's fixed layout (sharpener, shakeout) must not use a day the athlete cannot run
+        if 0 <= j <= 6 and week[j]["type"] != "Race" and week[j]["miles"]:
+            week[j] = {"type": "Rest", "label": "Rest", "steps": None, "miles": 0, "note": ""}
     strength = {(Ld + 1) % 7: "Strength A", (key1 + 1) % 7 if key1 is not None else (Ld + 4) % 7: "Strength B"} if c["strength"] and mode != "race" and (wtr is None or wtr > 2) else {}
     if specific and strength:
         strength = {(Ld + 1) % 7: "Strength A"}      # one session a week in the race-specific phase keeps the gains at less cost

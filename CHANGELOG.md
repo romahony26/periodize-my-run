@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.12 - 2026-10-14
+### Fixed
+- In a race week, the fixed sharpener and shakeout could land on a day you had marked as one you cannot run. Blocked days are now left as rest in a race week too. Found by a randomised test of the planner over thousands of generated athletes, which now runs with the other checks.
+### Added
+- Tests for code nothing reached before (found with coverage): the taper and miles-or-hard learning, the Explain my plan page and the trend helpers.
+- `tests/test_live.py` checks the real Open-Meteo and GitHub replies still match what the app expects. It runs only with `LIVE=1`.
+
 ## 2.10.0-beta.11 - 2026-10-14
 ### Changed
 - The top right panel switches to tomorrow only for a run of half a mile or more, so a warm-up or an accidental start does not count as the day's run.
