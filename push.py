@@ -117,10 +117,15 @@ def strength_workout(name):
             "workoutSegments": [{"segmentOrder": 1, "sportType": STRENGTH_SPORT, "workoutSteps": [step]}]}
 
 
+def _already_gone(e):
+    """True if a failed delete means the workout is no longer there (Garmin answers 404), so there is nothing left to delete."""
+    return "404" in str(e) or "not found" in str(e).lower() or "NotFound" in type(e).__name__
+
+
 def _upsert(date, w, old_id, old_hash, id_col, hash_col, dry_run, counts):
     """Make one calendar entry match `w` (None = nothing should be there). counts = [sent, removed, same]."""
     h = hashlib.sha256(json.dumps(w, sort_keys=True).encode()).hexdigest() if w else None
-    if h == old_hash and (old_id or not w):
+    if h == old_hash and bool(old_id) == bool(w):    # same content, and an id exactly when something should be there
         counts[2] += 1
         return
     if dry_run:
@@ -134,7 +139,11 @@ def _upsert(date, w, old_id, old_hash, id_col, hash_col, dry_run, counts):
         except garmin.GaveUp:
             raise
         except Exception as e:
-            log.warning("Could not delete workout %s (%s); continuing", old_id, type(e).__name__)
+            if not _already_gone(e):
+                # Still on the calendar. Forgetting it here and sending a new one would put two workouts on the day, so keep the
+                # record and try again on the next run.
+                log.warning("Could not delete workout %s on %s (%s); leaving the day alone until it can be", old_id, date, type(e).__name__)
+                return
         db.run(f"UPDATE plan SET {id_col}=NULL, {hash_col}=NULL WHERE date=?", (date,))  # nosec B608
     if not w:
         return
@@ -219,5 +228,9 @@ def sync_calendar(c, dry_run=False):
         _upsert(r["date"], workout(day, tp, c, slow) if tp else None, r["garmin_id"], r["pushed_hash"], "garmin_id", "pushed_hash", dry_run, counts)
         sw = strength_workout(r["strength"]) if c["strength"] and c["push_strength"] else None
         _upsert(r["date"], sw, r["strength_id"], r["strength_hash"], "strength_id", "strength_hash", dry_run, counts)
+    later = db.rows("SELECT * FROM plan WHERE date>? AND (garmin_id IS NOT NULL OR strength_id IS NOT NULL) ORDER BY date", (end.isoformat(),))
+    for r in later:          # sent when the window was wider (push_days lowered, or the plan moved): take it off so only the window is on the watch
+        _upsert(r["date"], None, r["garmin_id"], r["pushed_hash"], "garmin_id", "pushed_hash", dry_run, counts)
+        _upsert(r["date"], None, r["strength_id"], r["strength_hash"], "strength_id", "strength_hash", dry_run, counts)
     log.info("Garmin calendar%s: %d sent, %d replaced or removed, %d unchanged", " (preview)" if dry_run else "", *counts)
     return tuple(counts)

@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.9.3-beta.16 - 2026-10-13
+### Fixed
+- Too many workouts could end up on the watch. When Garmin refused to delete an old workout, the app forgot it and sent a new one, leaving two on the day; it now keeps the record and tries again on the next run.
+- Lowering "days kept on the watch" left the workouts beyond the new limit on the Garmin calendar. They are now taken off.
+- A workout that was uploaded but never scheduled was never removed once its day had nothing planned. It is now deleted.
+
 ## 2.9.3-beta.15 - 2026-10-13
 ### Fixed
 - A day's pop-out scrolled back to the top by itself, because the page's automatic refresh redrew it. The refresh now waits while a pop-out is open and catches up when you close it.
