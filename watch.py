@@ -74,12 +74,14 @@ def sync_rest(kind, c, progress=lambda m: None):
             garmin.backfill_vo2max(progress)
         progress("Downloading recent runs")
         garmin.sync_details(c["detail_weeks"], progress)
+        garmin.sync_feel()
         progress("Downloading sleep, HRV and heart rate")
         garmin.sync_daily(63 if kind == "setup" or db.rows("SELECT 1 FROM daily WHERE steps IS NOT NULL LIMIT 1") == [] else 10, progress)
         garmin.sync_extras()
         garmin.sync_activity_steps(63 if db.rows("SELECT 1 FROM activities WHERE steps IS NOT NULL LIMIT 1") == [] else 10)
     if kind == "readiness":
         garmin.sync_daily(2, progress)
+        garmin.sync_feel()
 
 
 def save():

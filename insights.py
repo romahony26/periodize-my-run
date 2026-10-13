@@ -265,8 +265,47 @@ def shoes(units="mi"):
     return out[::-1]
 
 
+def cross_training(today, weeks=4):
+    """Time in the last `weeks` weeks on activities other than running, by sport, what else is loading the legs and heart.
+    It is shown beside the running load and is not counted in it: no study gives a fair exchange rate between a bike hour and a run hour."""
+    since = (today - dt.timedelta(weeks=weeks)).isoformat()
+    by = {}
+    for r in db.rows("SELECT sport, SUM(timer_s) s, COUNT(*) n FROM activities WHERE sport!='running' AND sport IS NOT NULL AND date>? AND date<=? GROUP BY sport", (since, today.isoformat())):
+        if (r["s"] or 0) >= 600:
+            by[r["sport"]] = {"hours": round(r["s"] / 3600, 1), "n": r["n"]}
+    total = round(sum(v["hours"] for v in by.values()), 1)
+    return {"weeks": weeks, "total_h": total, "by": by} if by else None
+
+
+def energy(today):
+    """A pattern that can go with low energy availability (REDs), read from what the watch already records: weight falling by 3% or
+    more over eight weeks, while a recovery sign has been present and running is not light. Low energy availability harms health and
+    performance and is easy to miss (Mountjoy and colleagues, 2023). This is a pattern, never a diagnosis: the screening that settles
+    it is a conversation with a doctor or sports dietitian, which a watch cannot do."""
+    w = db.rows("SELECT date, weight_kg FROM daily WHERE weight_kg IS NOT NULL AND date>? AND date<=? ORDER BY date", ((today - dt.timedelta(days=56)).isoformat(), today.isoformat()))
+    if len(w) < 6 or (dt.date.fromisoformat(w[-1]["date"]) - dt.date.fromisoformat(w[0]["date"])).days < 35:
+        return None
+    first = sum(x["weight_kg"] for x in w[:3]) / 3
+    last = sum(x["weight_kg"] for x in w[-3:]) / 3
+    loss = 100 * (first - last) / first
+    if loss < 3.0:
+        return None
+    rd = db.get("readiness") or {}
+    if (rd.get("points") or 0) < 1:
+        return None
+    miles = sum((r["dist_m"] or 0) for r in db.rows("SELECT dist_m FROM activities WHERE sport='running' AND date>? AND date<=?", ((today - dt.timedelta(days=28)).isoformat(), today.isoformat()))) / MI / 4
+    if miles < 15:
+        return None
+    return {"loss_pct": round(loss, 1), "miles": round(miles)}
+
+
 def warnings(today, units="mi", sex=None, hrmax=None):
     out = spikes(today, units)
+    e = energy(today)
+    if e:
+        out.append({"kind": "energy", "date": today.isoformat(), "text": f"Your weight has fallen about {e['loss_pct']}% over eight weeks while you run about {e['miles']} miles a week and your recovery signs are off. "
+                    "Together these can go with not eating enough for the training (low energy availability), which harms health and performance. "
+                    "It may be nothing, and a watch cannot tell. If it is deliberate or you are unsure, it is worth a conversation with a doctor or a sports dietitian before building further."})
     if sex == "F" and any(w["kind"] == "spike" for w in out):
         out.append({"kind": "bone", "date": today.isoformat(), "text": "Bone stress injuries are about twice as common in women runners as in men. "
                     "Pain on a bone that sharpens as a run goes on, or that you can press with one finger, is a reason to stop and have it looked at."})

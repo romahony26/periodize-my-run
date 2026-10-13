@@ -152,7 +152,7 @@ It then reads your history and builds the plan, showing progress as it goes.
   desktop, iCloud Drive), so there is an off-site copy with no sign-in inside
   Periodize My Run.
 - A calendar file for Apple Calendar, Outlook or Google Calendar.
-- The coming days' runs as .fit workout files (a zip), for watches other than Garmin that import FIT workouts.
+- The coming days' runs as .fit workout files (a zip), for Garmin watches (USB NewFiles folder) and apps that import FIT workouts; COROS, Suunto and Polar are not confirmed to import them.
 
 **Running it**
 - Installer for macOS and Raspberry Pi; starts at boot and stays running.

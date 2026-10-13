@@ -189,18 +189,14 @@ def sync_summaries(full=False, progress=lambda m: None):
         with db.connect() as c:
             for a in page:
                 aid = str(a.get("activityId"))
-                feel, rpe = a.get("directWorkoutFeel"), a.get("directWorkoutRpe")
                 if aid in known:
-                    if feel is not None or rpe is not None:   # rated on the watch after the run was first read
-                        with db.connect() as c:
-                            c.execute("UPDATE activities SET feel=COALESCE(feel,?), rpe=COALESCE(rpe,?) WHERE id=? AND feel IS NULL AND rpe IS NULL", (feel, rpe, aid))
                     continue
                 local = (a.get("startTimeLocal") or "")[:10]
-                c.execute("INSERT OR IGNORE INTO activities(id,start,date,sport,name,dist_m,timer_s,avg_hr,max_hr,ascent_m,best5k,best10k,steps,vo2max,gap_ratio,training_effect,garmin_load,feel,rpe) "
-                          "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                c.execute("INSERT OR IGNORE INTO activities(id,start,date,sport,name,dist_m,timer_s,avg_hr,max_hr,ascent_m,best5k,best10k,steps,vo2max,gap_ratio,training_effect,garmin_load) "
+                          "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                           (aid, a.get("startTimeGMT"), local, _sport(a), a.get("activityName"), a.get("distance"),
                            a.get("movingDuration") or a.get("duration"), a.get("averageHR"), a.get("maxHR"), a.get("elevationGain"),
-                           a.get("fastestSplit_5000"), a.get("fastestSplit_10000"), a.get("steps"), a.get("vO2MaxValue"), _gap(a), a.get("aerobicTrainingEffect"), a.get("activityTrainingLoad"), feel, rpe))
+                           a.get("fastestSplit_5000"), a.get("fastestSplit_10000"), a.get("steps"), a.get("vO2MaxValue"), _gap(a), a.get("aerobicTrainingEffect"), a.get("activityTrainingLoad")))
                 fresh += 1
         new += fresh
         start += len(page)
@@ -236,6 +232,27 @@ def backfill_vo2max(progress=lambda m: None):
         if len(page) < 100:
             break
     db.put("vo2max_backfilled", True)
+
+
+def sync_feel(days=4):
+    """The feel and effort rating given on the watch after a run, for runs of the last `days` days. The activity list does not carry it:
+    it is in the single-activity summary (summaryDTO.directWorkoutFeel, 0-100 in steps of 25; directWorkoutRpe, 10-100 for effort 1-10).
+    Looked at again for a few days because it is usually entered after the run was first read."""
+    g, got = client(), 0
+    since = (dt.date.today() - dt.timedelta(days=days)).isoformat()
+    for r in db.rows("SELECT id FROM activities WHERE sport='running' AND date>=? AND feel IS NULL AND rpe IS NULL", (since,)):
+        try:
+            s = (call(f"activity summary {r['id']}", g.get_activity, r["id"]) or {}).get("summaryDTO") or {}
+        except GaveUp:
+            raise
+        except Exception as e:
+            log.error("Activity %s rating failed: %s", r["id"], type(e).__name__)
+            continue
+        feel, rpe = s.get("directWorkoutFeel"), s.get("directWorkoutRpe")
+        if isinstance(feel, (int, float)) or isinstance(rpe, (int, float)):
+            db.run("UPDATE activities SET feel=?, rpe=? WHERE id=?", (feel if isinstance(feel, (int, float)) else None, rpe if isinstance(rpe, (int, float)) else None, r["id"]))
+            got += 1
+    return got
 
 
 def sync_details(weeks, progress=lambda m: None):

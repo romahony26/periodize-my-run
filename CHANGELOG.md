@@ -3,6 +3,15 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.2 - 2026-10-13
+### Fixed
+- The feel and effort rating from your watch was never read: Garmin keeps it in each run's own summary, not in the activity list. It is now fetched for runs of the last four days (checked on your account, where the fields exist).
+- The workout files page claimed COROS, Suunto and Polar can import them. That is not confirmed for any of the three, so it now says Garmin watches (USB NewFiles folder) and apps that import FIT workouts.
+### Added
+- Other training (cycling, swimming and so on) from the last four weeks is listed beside the running load on the Fitness page. It is shown, not counted.
+- A note when your weight has fallen 3% or more over eight weeks while a recovery sign is present and you run 15 miles a week or more, suggesting a conversation with a doctor or sports dietitian. A pattern, not a diagnosis.
+- Principle 96 names the marathon-pace long run as the durability session, with the research behind it.
+
 ## 2.10.0-beta.1 - 2026-10-13
 ### Added
 - Settings is reorganised into five tabs: Training, Watch and data, Weather and maps, Backups and About. A strip at the top shows at a glance whether the watch is connected, whether workouts are being sent, and whether weather and the app password are on. The page is about half as long.
@@ -12,7 +21,7 @@ The app's Change log page is drawn from this file.
 - Training monotony and strain (Foster, 1998) and the week against your last four weeks are shown on the Fitness page. A warning appears only when a week is 20% heavier than your last four and has monotony of 2 or more.
 - Heat exposure: with weather on, the Fitness page's race-day forecast says how many of your runs in the last 14 days were in real heat (WBGT 18 or more) and why that matters before a hot race. No pace is changed by it.
 - A Monday message (through the daily message address) with last week against its plan and what this week is and why.
-- Workout files: the coming days' runs download as .fit workout files in one zip, for COROS, Suunto, Polar, Wahoo and other watches that import FIT workouts. Nothing is sent anywhere.
+- Workout files: the coming days' runs download as .fit workout files in one zip, for watches and apps that import FIT workouts. Nothing is sent anywhere.
 - Eight more studies in the research list: Morton and colleagues (1990), Foster (1998), Granero-Gallegos and colleagues (2020), Hoogkamer and colleagues (2018), Casado and colleagues (2022), Fokkema and colleagues (2020), Swain and colleagues (2020) and van Poppel and colleagues (2021). Racinais and colleagues (2015) is now marked as read. New principles 92 to 95 explain each use.
 
 ## 2.9.3-beta.16 - 2026-10-13

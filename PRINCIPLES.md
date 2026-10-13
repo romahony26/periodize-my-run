@@ -438,7 +438,23 @@ of ultra training, so read these as the best available reasoning, not proven met
     benefit is not applied to the paces, because the consensus gives no figure to use. [P]
 95. **Plans can be taken to other watches as a file.** [P] The coming days' sessions can be downloaded as FIT workout files (the format
     Garmin publishes), with the same pace and heart-rate targets as the Garmin calendar. Nothing is sent; whether a given watch accepts a
-    FIT workout is up to that watch.
+    FIT workout is up to that watch. Garmin watches read them from the NewFiles folder; COROS, Suunto and Polar have not been
+    confirmed to import structured workouts from a file.
+
+96. **The marathon-pace long run is the durability session.** [R] (*moderate*) How well pace and economy hold up after hours of running
+    is an independent determinant of marathon performance, apart from aerobic capacity and threshold (Jones, 2024; Maunder and
+    colleagues, 2021), and it falls less in faster runners (Smyth and colleagues, 2022). Both low and high intensity training improved it
+    (Matomäki and colleagues, 2023), and strength training improved the durability of running economy late in 90 minutes of running
+    (Zanini and colleagues, 2025) (*limited*). Periodize My Run's marathon-pace long run puts 3 easy miles first and the marathon-pace
+    block after them, so that pace is practised on tired legs, and keeps the strength sessions through the specific phase (principle 33).
+    How much durability work is enough has not been tested, so the amount is the same ladder as before. [P]
+97. **Other training is shown, not counted.** [P] Cycling, swimming and other activities from the last four weeks are listed beside the
+    running load. No study gives a fair exchange rate between a cycling hour and a running hour, so none is invented.
+98. **A pattern that can go with not eating enough for the training is flagged, never diagnosed.** [R] (*moderate*) Low energy
+    availability harms health and performance, and athletes often do not recognise it (Mountjoy and colleagues, 2023). A weight loss
+    of 3% or more over eight weeks, with a recovery sign present and running of at least 15 miles a week, raises a note suggesting a
+    conversation with a doctor or sports dietitian. The 3% and 15 miles are this project's choice, and a watch cannot screen for the
+    condition itself. [P]
 
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
@@ -464,7 +480,8 @@ Listed so they are not mistaken for principles.
 - **Ultra predictions** come from road fitness and ignore terrain, heat, night and altitude; for ultras the pacing plan shows how
   to spread effort, not times to hit.
 - **Low energy availability** (not eating enough for the training) harms health and performance (Mountjoy and colleagues, 2023);
-  Periodize My Run does not screen for it.
+  Periodize My Run only flags a weight-loss pattern (principle 98); it cannot screen for the condition, which needs a conversation.
+- **Altitude** is not planned: no adjustment for a high race or for training at height.
 
 ## References
 

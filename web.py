@@ -606,7 +606,7 @@ def state():
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
         compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")), uninstall=_uninstall_ready(),
         update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
-        heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "window_weekend": _w if (_w := db.get("run_window_weekend")) and heat._win(_w) else None, "located": bool((db.get("heat_forecast") or {}).get("loc")),
+        cross=insights.cross_training(today), heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "window_weekend": _w if (_w := db.get("run_window_weekend")) and heat._win(_w) else None, "located": bool((db.get("heat_forecast") or {}).get("loc")),
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None,
               "exposure": heat.exposure(today)},
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
