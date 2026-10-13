@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.11 - 2026-10-14
+### Changed
+- The top right panel switches to tomorrow only for a run of half a mile or more, so a warm-up or an accidental start does not count as the day's run.
+### Fixed
+- The kept race forecasts were listed among the settings in a settings backup. They are history, not a setting: they come back with a full restore and are no longer in the settings file.
+
 ## 2.10.0-beta.10 - 2026-10-14
 ### Changed
 - The rules were tested against a public training log of 74 competitive runners with 575 recorded injuries (DataverseNL, CC0). What held: a jump in the longest run (1.33 times the injury rate), a very hard rated session (1.89 times), and, weakly, a week 20% above the best of the last two (1.25 times). What did not: training monotony (1.06 times, no signal) and a poor rating after a run (fewer injuries, not more).
