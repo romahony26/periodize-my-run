@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.13 - 2026-10-14
+### Added
+- Checks only, no change to the app: the daily job is tested end to end against a stand-in Garmin (order of steps, nothing sent when sending is off, a refusal stops cleanly, other sources never call Garmin), and every page and Settings tab is checked at phone, tablet and desktop width for sideways scroll, anything wider than the screen, anything fixed to the screen and console errors.
+
 ## 2.10.0-beta.12 - 2026-10-14
 ### Fixed
 - In a race week, the fixed sharpener and shakeout could land on a day you had marked as one you cannot run. Blocked days are now left as rest in a race week too. Found by a randomised test of the planner over thousands of generated athletes, which now runs with the other checks.
