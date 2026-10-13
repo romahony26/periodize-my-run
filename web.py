@@ -599,7 +599,7 @@ def state():
              "miles_week": round(sp["week"] * 7 * 0.75 / assess.MI, 1)} if sp else None
     lo = jobs.last_ok()
     return jsonify(
-        version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=insights.warnings(today, c["units"], c.get("sex"), L["hrmax"] if L else None) if db.get("setup_done") else [],
+        version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=(insights.warnings(today, c["units"], c.get("sex"), L["hrmax"] if L else None) + ([{"kind": "monotony", "date": today.isoformat(), "text": f"This week is {form['week_vs_4w']}% heavier than your last four, with very little easy-hard variation (monotony {form['monotony']}). Make at least one day clearly easy or a rest day: weeks like this went with illness in athletes (Foster, 1998)."}] if form and form.get("monotony_warn") else [])) if db.get("setup_done") else [],
         timing=insights.timing(today, L["hrmax"] if L else None, c["sleep_7night_min_h"]) if db.get("setup_done") else None, shoes=insights.shoes(c["units"]),
         drift=insights.drift_history(today) if db.get("setup_done") else [], best_grade=best_grade, about_you={"sex": c.get("sex"), "birth_date": c.get("birth_date"), "gel_carbs_g": c.get("gel_carbs_g")},
         notify_set=bool(vault.get("notify_url")),
@@ -607,7 +607,8 @@ def state():
         compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")), uninstall=_uninstall_ready(),
         update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
         heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "window_weekend": _w if (_w := db.get("run_window_weekend")) and heat._win(_w) else None, "located": bool((db.get("heat_forecast") or {}).get("loc")),
-              "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None},
+              "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None,
+              "exposure": heat.exposure(today)},
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
         job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
@@ -1124,6 +1125,21 @@ def backup_now():
 @app.get("/api/calendar.ics")
 def calendar_file():
     return app.response_class(calfile.ics(db.cfg()), mimetype="text/calendar", headers={"Content-Disposition": "attachment; filename=periodize.ics"})
+
+
+@app.get("/api/workouts.zip")
+def workout_files():
+    """The coming days' runs as FIT workout files, for watches other than Garmin."""
+    import io
+    import re
+    import zipfile
+
+    import fitworkout
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for date, w in push.planned_workouts(db.cfg()):
+            z.writestr(f"{date} {re.sub(r'[^A-Za-z0-9 ._-]', '', w['workoutName'])}.fit", fitworkout.build(w))
+    return app.response_class(buf.getvalue(), mimetype="application/zip", headers={"Content-Disposition": "attachment; filename=periodize-workouts.zip"})
 
 
 @app.post("/api/shoes")

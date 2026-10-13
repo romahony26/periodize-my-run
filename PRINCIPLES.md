@@ -72,7 +72,8 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     "pyramid": lots of easy running, a fair amount around threshold and marathon pace, and a little very fast running (Haugen and
     colleagues, 2022; Muniz-Pumares and colleagues, 2024). A strictly "polarised" pattern, all easy or very hard, improved some
     laboratory measures in short trials (Stöggl and Sperlich, 2014) but has not been shown to give better race results (Silva
-    Oliveira and colleagues, 2024).
+    Oliveira and colleagues, 2024). A systematic review of highly trained and elite distance runners found the same pyramid, with
+    marathoners leaning further that way than 1500 m runners (Casado and colleagues, 2022) (*moderate*).
 14. **Easy means easy.** [R] (*moderate*) The best-documented training error is running easy days harder than intended and hard
     days easier (Foster and colleagues, 2001). Periodize My Run scores every run on how closely it matched the planned mix of easy,
     moderate and hard minutes. [P]
@@ -100,7 +101,8 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
 22. **What matters most is the single longest run.** [R] (*moderate*) In a study of over 5,000 runners, a run more than 10% longer
     than the longest of the previous 30 days was linked with more overuse injuries, while week-to-week mileage change was not
     (Schuster Brandt Frandsen and colleagues, 2025). Periodize My Run never plans a long run more than 10% beyond your longest in the
-    last 30 days.
+    last 30 days. Among recreational marathon and half-marathon runners, high weekly volume and long endurance runs went with faster finishes and
+    were not related to more injuries (Fokkema and colleagues, 2020) (*limited*: questionnaires, not a trial).
 23. **Your limits come from what you have held without breaking down, not from your recent average.** [P] The peak week is
     taken from your best eight-week block that was followed by six sound weeks: no two weeks in a row under 35% of the block,
     and no time recorded as sick or injured. Rest after a race, a very long run or a holiday does not count against a block. The
@@ -112,7 +114,7 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     what it has already been trained to carry (Damsted and colleagues, 2019, tested whether the schedule a runner had been
     following changes the tolerable jump, and found no clear effect) (*limited*).
 24. **Previous injury is the strongest known risk factor for the next one.** [R] (*strong*) (Saragiotto and colleagues, 2014;
-    van der Worp and colleagues, 2015; Hulme and colleagues, 2017) In a year-long study of recreational runners, a history of
+    van der Worp and colleagues, 2015; Hulme and colleagues, 2017; van Poppel and colleagues, 2021) In a year-long study of recreational runners, a history of
     injury roughly doubled the injury rate, while weekly distance, age and sex showed no clear link (Desai and colleagues, 2021). After an injury Periodize My Run returns you on easy running for twice as long as you were out,
     up to 14 days. [P]
 25. **After any break, build back gradually.** [C] Two or more weeks well below your usual level, whatever the reason, are followed
@@ -200,7 +202,7 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
 46. **Load is minutes weighted by intensity.** [R] (*moderate*) Easy, moderate and hard minutes count 1, 2 and 3 (Lucia and
     colleagues, 2003).
 47. **Fitness and fatigue are both responses to load, on different time scales.** [R] (*moderate* as a concept) Fitness builds and
-    fades over weeks, fatigue over days; "form" is the difference (Banister, 1991). The model fits past data well but predicts an
+    fades over weeks, fatigue over days; "form" is the difference (Banister, 1991; Morton and colleagues, 1990). The model fits past data well but predicts an
     individual's future performance poorly (Hellard and colleagues, 2006), so Periodize My Run shows it as a guide and never plans from
     it. The 42-day and 7-day time constants are convention. [C]
 48. **Execution is measured against the plan.** [P] A run is scored on how far its easy, moderate and hard minutes departed from
@@ -217,7 +219,7 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     laboratory measures for trends, not single nights (Dial and colleagues, 2025) (*moderate*).
 51. **Expect small gains from readiness-based adjustment, not miracles.** [R] (*strong*) Training guided by heart-rate
     variability gives small benefits and fewer non-responders compared with a fixed plan, not large gains (Düking and colleagues,
-    2021; Manresa-Rocamora and colleagues, 2021).
+    2021; Manresa-Rocamora and colleagues, 2021; Granero-Gallegos and colleagues, 2020).
 52. **Poor recovery eases the fast running, not the easy running.** [P] Each warning sign slows the day's fast paces by a small
     fixed amount (about 1.2% to start, then learned from your own runs), up to four signs.
 53. **When the signs persist or pile up, the session becomes an easy run.** [R] (*moderate*) In the trials of readiness-guided
@@ -245,7 +247,7 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
 ## 10. Racing
 
 55. **Even effort is the fastest way to cover a course.** [R] (*moderate*) Recreational marathoners who start faster than they can
-    sustain are the ones who "hit the wall" (Smyth, 2021). Periodize My Run gives a starting pace and asks for no faster in the first
+    sustain are the ones who "hit the wall" (Smyth, 2021), and runners with more experience and higher weekly volume slowed least in the second half (Swain and colleagues, 2020) (*limited*). Periodize My Run gives a starting pace and asks for no faster in the first
     half. On a hilly course, even effort means slower uphill and faster downhill: a course file gives an even-effort split for
     every mile. [C]
 56. **Fuel long efforts.** [R] (*strong*) About 30 to 60 g of carbohydrate an hour for efforts of 1 to 2.5 hours, and up to 90 g
@@ -257,7 +259,7 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
     weight. On race day: caffeine at about 3 mg per kg improves endurance by a few per cent (Southward and colleagues, 2018), but
     only if you have tried it in training; drink to thirst, because drinking too much is the serious risk for most runners
     (Hew-Butler and colleagues, 2015); no ibuprofen or similar painkillers, which were linked with more serious problems during
-    marathons (Küster and colleagues, 2013) (*moderate*); and race in shoes you have already run in at race pace. [C]
+    marathons (Küster and colleagues, 2013) (*moderate*); and race in shoes you have already run in at race pace. Racing shoes with a stiff plate and soft foam cut the energy cost of running by about 4% in 18 high-calibre runners (Hoogkamer and colleagues, 2018) (*moderate*), which is a reason to choose them and a stronger reason to run in them first. [C]
 59. **Heat slows you; plan for it.** [R] (*strong*) Across 1,258 endurance races, performance was best at a wet-bulb globe
     temperature (WBGT, which combines temperature, humidity, sun and wind) of 7.5 to 15 °C, about 10 to 17.5 °C of air
     temperature, and fell by 0.3 to 0.4% for each degree outside that range (Mantzios and colleagues, 2022). Marathon times
@@ -415,15 +417,40 @@ of ultra training, so read these as the best available reasoning, not proven met
     wind and rain are shown beside it, and no figure is changed for them. A very windy day is a reason to judge a session by
     effort, not pace. [C]
 
+## 17. How runs felt, steady weeks, and getting used to heat
+
+92. **How a run felt, as you rated it on the watch, counts as a recovery sign.** [R] (*strong* that self-report tracks response) Self-reported
+    measures of fatigue and effort track the response to training at least as well as the objective measures (Saw and colleagues,
+    2016). Garmin watches can ask for a feel and an effort rating after a run; nothing is ever typed into Periodize My Run. A last run
+    (yesterday or today) rated "weak" or "very weak", or an effort of 9 or more out of 10, counts as one warning sign; two such runs in
+    the last four days count as two. They are added to the sleep, HRV and resting heart rate signs and ease the fast running the same
+    way. Whether a watch records the rating depends on the watch and on you answering it. [P]
+93. **Weeks with little hard-easy variation, on a heavy load, went with illness.** [R] (*limited*) In 25 experienced athletes, illnesses
+    clustered where thresholds of training strain (weekly load times monotony, the week's mean daily load divided by its standard
+    deviation) was exceeded (Foster, 1998). Those thresholds were individual, and the study is small. Periodize My Run shows monotony and
+    strain on the Fitness page and warns only when monotony is 2 or more and the week is 20% heavier than your previous four weeks,
+    because a steady week at your usual load is normal for a runner. The 2.0 line is coaching convention and the 20% is this
+    project's choice. [C] [P]
+94. **Getting used to heat takes repeated hot runs over one to two weeks.** [R] (*strong*) Heat acclimatisation, the most important
+    thing an athlete can do to reduce the strain of the heat, comprises repeated exercise-heat exposures over 1 to 2 weeks (Racinais and
+    colleagues, 2015). With weather switched on, the Fitness page counts your runs of 30 minutes or more at a WBGT of 18 °C or more in
+    the last 14 days, and the race-day forecast says how many you have had. The 18 °C line is this project's choice. The size of the
+    benefit is not applied to the paces, because the consensus gives no figure to use. [P]
+95. **Plans can be taken to other watches as a file.** [P] The coming days' sessions can be downloaded as FIT workout files (the format
+    Garmin publishes), with the same pace and heart-rate targets as the Garmin calendar. Nothing is sent; whether a given watch accepts a
+    FIT workout is up to that watch.
+
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
 Listed so they are not mistaken for principles.
 
-- **How you feel is not yet counted.** Self-reported fatigue, soreness and mood track the response to training at least as well as
-  device measures (Saw and colleagues, 2016) (*strong*). Periodize My Run can record them but does not yet use them.
+- **Feel is read only when the watch records it.** Self-reported fatigue, soreness and mood track the response to training at least as
+  well as device measures (Saw and colleagues, 2016) (*strong*). Periodize My Run reads the feel and effort rating a Garmin watch can
+  record after a run (principle 92), and nothing else: soreness and mood are not asked about. Whether Garmin returns the rating for
+  your account has been tested only against stand-in data.
 - **Weather** is used only if you switch it on, since it needs a weather service. Heat is estimated from temperature and
   humidity, not measured sun or wind, and takes no account of how used to heat you are, although two weeks of training in
-  heat reduces its effect (Racinais and colleagues, 2015). Runs without a stored GPS track use your usual location, which is
+  heat reduces its effect (Racinais and colleagues, 2015); the count of hot runs is shown (principle 94) but does not change a pace. Runs without a stored GPS track use your usual location, which is
   wrong for runs done elsewhere.
 - **From age 50** only the down-week rhythm changes, not the spacing of hard days.
 - **Time of day is reported, not planned.** Periodize My Run does not know when you will run a planned session, so it cannot warn
@@ -469,8 +496,11 @@ on a detail.
 - Ely MR, Cheuvront SN, Roberts WO, Montain SJ (2007). Impact of weather on marathon-running performance. *Med Sci Sports Exerc*.
 - Esteve-Lanao J, Foster C, Seiler S, Lucia A (2007). Impact of training intensity distribution on performance in endurance athletes. *J Strength Cond Res* 21:943–949.
 - Feely C, Smyth B, Caulfield B, Lawlor A (2022). Estimating the cost of training disruptions on marathon performance. *Front Sports Act Living*. *Abstract read.*
+- Foster C (1998). Monitoring training in athletes with reference to overtraining syndrome. *Med Sci Sports Exerc* 30:1164–1168. *Abstract read.*
 - Foster C and colleagues (2001). Differences in perceptions of training by coaches and athletes. *S Afr J Sports Med*. *From memory.*
+- Fokkema T, van Damme AADN, Fornerod MWJ, de Vos RJ (2020). Training for a (half-)marathon: training volume and longest endurance run related to performance and running injuries. *Scand J Med Sci Sports*. *Abstract read.*
 - Frimpong E, Mograss M, Zvionow T, Dang-Vu TT (2021). The effects of evening high-intensity exercise on sleep in healthy adults: a systematic review and meta-analysis. *Sleep Med Rev*. *Abstract read.*
+- Granero-Gallegos A, González-Quílez A, Plews D, Carrasco-Poyatos M (2020). HRV-based training for improving VO2max in endurance athletes: a systematic review with meta-analysis. *Int J Environ Res Public Health* 17:7999. *Abstract read.*
 - Gillinov S and colleagues (2017). Variable accuracy of wearable heart rate monitors during aerobic exercise. *Med Sci Sports Exerc* 49:1697–1703.
 - Giovanelli N and colleagues (2019). Do poles save energy during steep uphill walking? *Eur J Appl Physiol*.
 - Giovanelli N, Ortiz ALR, Henninger K, Kram R (2016). Energetics of vertical kilometer foot races; is steeper cheaper? *J Appl Physiol* 120:370–375.
@@ -479,6 +509,7 @@ on a detail.
 - Hecksteden A and colleagues (2015). Individual response to exercise training: a statistical perspective. *J Appl Physiol*. *Abstract read.*
 - Hellard P and colleagues (2006). Assessing the limitations of the Banister model in monitoring training. *J Sports Sci* 24:509–520.
 - Hew-Butler T and colleagues (2015). Statement of the Third International Exercise-Associated Hyponatremia Consensus Development Conference. *Clin J Sport Med* 25:303–320.
+- Hoogkamer W, Kipp S, Frank JH, Farina EM, Luo G, Kram R (2018). A comparison of the energetic cost of running in marathon racing shoes. *Sports Med* 48:1009–1019. *Abstract read.*
 - Hollander K and colleagues (2021). Sex-specific differences in running injuries: a systematic review with meta-analysis and meta-regression. *Sports Med*. *Abstract read.*
 - Hulme A, Nielsen RO, Timpka T, Verhagen E, Finch C (2017). Risk and protective factors for middle- and long-distance running-related injury. *Sports Med*. *Abstract read.*
 - Hunter B, Muniz-Pumares D (2025). Durability of parameters associated with endurance running in marathoners. *Eur J Sport Sci* 25:e70073.
@@ -509,6 +540,7 @@ on a detail.
 - Montero D, Lundby C (2017). Refuting the myth of non-response to exercise training: 'non-responders' do respond to higher dose of training. *J Physiol*. *Abstract read.*
 - Mountjoy M and colleagues (2023). 2023 International Olympic Committee's consensus statement on Relative Energy Deficiency in Sport (REDs). *Br J Sports Med*.
 - Mujika I, Padilla S (2000). Detraining: loss of training-induced physiological and performance adaptations. Parts I and II. *Sports Med* 30:79–87 and 145–154.
+- Morton RH, Fitz-Clarke JR, Banister EW (1990). Modeling human performance in running. *J Appl Physiol* 69:1171–1177. *Abstract read.*
 - Muniz-Pumares D and colleagues (2024). The training intensity distribution of marathon runners across performance levels. *Sports Med*.
 - Nielsen RØ and colleagues (2014). Excessive progression in weekly running distance and risk of running-related injuries. *J Orthop Sports Phys Ther*.
 - Paavolainen L and colleagues (1999). Explosive-strength training improves 5-km running time by improving running economy and muscle power. *J Appl Physiol* 86:1527–1533.
@@ -518,9 +550,10 @@ on a detail.
 - Pugh LGCE (1971). The influence of wind resistance in running and walking and the mechanical efficiency of work against horizontal or vertical forces. *J Physiol*. *Abstract read.*
 - Raysmith BP, Drew MK (2016). Performance success or failure is influenced by weeks lost to injury and illness in elite Australian track and field athletes: a 5-year prospective study. *J Sci Med Sport* 19:778–783.
 - Riegel PS (1981). Athletic records and human endurance. *Am Sci* 69:285–290.
-- Racinais S and colleagues (2015). Consensus recommendations on training and competing in the heat. *Scand J Med Sci Sports*. *Title and record confirmed; full text downloaded, not yet read.*
+- Racinais S and colleagues (2015). Consensus recommendations on training and competing in the heat. *Scand J Med Sci Sports* 25 Suppl 1:6–19. *Abstract read.*
 - Rosenblat MA, Perrotta AS, Thomas SG (2020). Effect of high-intensity interval training versus sprint interval training on time-trial performance: a systematic review and meta-analysis. *Sports Med*.
 - Ruuska PS and colleagues (2012). Self-rated mental stress and exercise training response in healthy subjects. *Front Physiol*. *Abstract read.*
+- Casado A and colleagues (2022). Training periodization, methods, intensity distribution, and volume in highly trained and elite distance runners: a systematic review. *Int J Sports Physiol Perform*. *Abstract read.*
 - Sandbakk Ø and colleagues (2025). Best-practice training characteristics within Olympic endurance sports as described by Norwegian world-class coaches. *Sports Med Open* 11:45.
 - Saragiotto BT and colleagues (2014). What are the main risk factors for running-related injuries? *Sports Med*.
 - Sargent C, Lastella M, Halson SL, Roach GD (2014). The impact of training schedules on the sleep and fatigue of elite athletes. *Chronobiol Int*. *Abstract read.*
@@ -538,6 +571,7 @@ on a detail.
 - Stults-Kolehmainen MA, Bartholomew JB, Sinha R (2014). Chronic psychological stress impairs recovery of muscular function and somatic sensations over a 96-hour period. *J Strength Cond Res*. *Abstract read.*
 - Stutz J, Eiholzer R, Spengler CM (2019). Effects of evening exercise on sleep in healthy participants: a systematic review and meta-analysis. *Sports Med*. *Abstract read.*
 - Stull R (2011). Wet-bulb temperature from relative humidity and air temperature. *J Appl Meteorol Climatol* 50:2267–2269. *From memory; only its formula is used.*
+- Swain P, Biggins J, Gordon D (2020). Marathon pacing ability: training characteristics and previous experience. *Eur J Sport Sci*. *Abstract read.*
 - Tanaka H, Seals DR (2008). Endurance exercise performance in Masters athletes: age-associated changes and underlying physiological mechanisms. *J Physiol* 586:55–63.
 - Thomas C, Jones H, Whitworth-Turner C, Louis J (2020). High-intensity exercise in the evening does not disrupt sleep in endurance runners. *Eur J Appl Physiol*. *Abstract read.*
 - Thomas DT, Erdman KA, Burke LM (2016). Nutrition and athletic performance: joint position statement. *Med Sci Sports Exerc* 48:543–568.
@@ -545,6 +579,7 @@ on a detail.
 - Tiller NB, Millet GY (2024). Decoding ultramarathon: muscle damage as the main impediment to performance. *Sports Med* 55:535–543.
 - Tønnessen E, Sandbakk Ø, Sandbakk SB, Seiler S, Haugen T (2024). Training session models in endurance sports: a Norwegian perspective on best practice recommendations. *Sports Med* 54:2935–2953.
 - van der Worp MP and colleagues (2015). Injuries in runners: a systematic review on risk factors and sex differences. *PLoS One*.
+- van Poppel D and colleagues (2021). Risk factors for overuse injuries in short- and long-distance running: a systematic review. *J Sport Health Sci*. *Abstract read.*
 - Vernillo G and colleagues (2017). Biomechanics and physiology of uphill and downhill running. *Sports Med* 47:615–629.
 - Vickers AJ, Vertosick EA (2016). An empirical study of race times in recreational endurance runners. *BMC Sports Sci Med Rehabil*.
 - U.S. Food and Drug Administration (2008). Boxed warning on fluoroquinolone antibiotics: tendinitis and tendon rupture. Not peer-reviewed; a regulator's safety communication. *From memory.*

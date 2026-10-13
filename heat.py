@@ -311,6 +311,26 @@ def track(progress=lambda m: None, today=None):
     return done
 
 
+HOT = 18.0          # WBGT (deg C) from which a run counts as heat exposure: clearly past the 15 where the slowdown starts
+EXPOSE_DAYS = 14    # Racinais and colleagues (2015): heat acclimatisation takes repeated exercise-heat exposures over 1-2 weeks
+
+
+def exposure(today):
+    """How many of the last two weeks' runs of 30 minutes or more were in the heat (WBGT 18 or more). None when weather is off."""
+    if not db.get("heat_adjust"):
+        return None
+    since = (today - dt.timedelta(days=EXPOSE_DAYS)).isoformat()
+    n = days = 0
+    seen = set()
+    for r in db.rows("SELECT date, weather, timer_s FROM activities WHERE sport='running' AND date>? AND date<=? AND weather IS NOT NULL AND weather!='{}'", (since, today.isoformat())):
+        w = of(r)
+        if w and (w.get("wbgt") or 0) >= HOT and (r["timer_s"] or 0) >= 1800:
+            n += 1
+            seen.add(r["date"])
+    days = len(seen)
+    return {"runs": n, "days": days, "window": EXPOSE_DAYS, "hot": HOT}
+
+
 def of(row):
     """The stored weather of an activity row, or None."""
     try:

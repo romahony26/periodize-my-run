@@ -3,6 +3,18 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.1 - 2026-10-13
+### Added
+- Settings is reorganised into five tabs: Training, Watch and data, Weather and maps, Backups and About. A strip at the top shows at a glance whether the watch is connected, whether workouts are being sent, and whether weather and the app password are on. The page is about half as long.
+- A bar appears at the bottom when you have changed How you train or Advanced, so "Save and replan" is always in reach. Other switches and choices still save as you set them.
+- Yes/No dropdowns are now on/off switches, and the Advanced fields are collapsed behind "Show advanced settings", each saying what Auto will use.
+- How a run felt now counts. When your Garmin watch records the feel or effort rating you gave after a run, a last run rated weak (or an effort of 9 or more out of 10) counts as one recovery warning sign, and two such runs in four days count as two. Nothing is typed in; it is read only when the watch has it.
+- Training monotony and strain (Foster, 1998) and the week against your last four weeks are shown on the Fitness page. A warning appears only when a week is 20% heavier than your last four and has monotony of 2 or more.
+- Heat exposure: with weather on, the Fitness page's race-day forecast says how many of your runs in the last 14 days were in real heat (WBGT 18 or more) and why that matters before a hot race. No pace is changed by it.
+- A Monday message (through the daily message address) with last week against its plan and what this week is and why.
+- Workout files: the coming days' runs download as .fit workout files in one zip, for COROS, Suunto, Polar, Wahoo and other watches that import FIT workouts. Nothing is sent anywhere.
+- Eight more studies in the research list: Morton and colleagues (1990), Foster (1998), Granero-Gallegos and colleagues (2020), Hoogkamer and colleagues (2018), Casado and colleagues (2022), Fokkema and colleagues (2020), Swain and colleagues (2020) and van Poppel and colleagues (2021). Racinais and colleagues (2015) is now marked as read. New principles 92 to 95 explain each use.
+
 ## 2.9.3-beta.16 - 2026-10-13
 ### Fixed
 - Too many workouts could end up on the watch. When Garmin refused to delete an old workout, the app forgot it and sent a new one, leaving two on the day; it now keeps the record and tries again on the next run.

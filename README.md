@@ -89,7 +89,8 @@ It then reads your history and builds the plan, showing progress as it goes.
 - Eases today's fast running by up to about 5% after poor sleep, low HRV,
   a raised resting heart rate, or a heavy day on your feet.
 - Counts steps taken outside your runs as background load.
-- Optional daily message with today's session.
+- Optional daily message with today's session, and on Mondays last week against its plan and what this week is and why.
+- A run you rated on your Garmin watch (feel or effort) counts as a recovery sign when it was hard going.
 
 **Weather (optional)**
 - Switch on weather and every outdoor run is given the temperature, humidity,
@@ -151,6 +152,7 @@ It then reads your history and builds the plan, showing progress as it goes.
   desktop, iCloud Drive), so there is an off-site copy with no sign-in inside
   Periodize My Run.
 - A calendar file for Apple Calendar, Outlook or Google Calendar.
+- The coming days' runs as .fit workout files (a zip), for watches other than Garmin that import FIT workouts.
 
 **Running it**
 - Installer for macOS and Raspberry Pi; starts at boot and stays running.

@@ -79,7 +79,7 @@ let fastT=null, LASTUI=0, DIRTY=false;
 document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('select,input,textarea,label'))LASTUI=Date.now()},true);
 document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
 document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
-document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea')){LASTUI=Date.now();if(view==='settings')DIRTY=true}},true);
+document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea,button.sw')){LASTUI=Date.now();if(view==='settings'){DIRTY=true;const sb=$('#sbar');if(sb&&e.target.closest('[data-replan]'))sb.hidden=false}}},true);
 const holdUI=()=>{const a=document.activeElement;return !!SEL||Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
 async function load(auto){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE||(auto&&holdUI())){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(()=>load(true),1000)}catch(e){}}
 function authView(kind){
@@ -133,7 +133,7 @@ function planView(){
       <div class="stats"><div class="stat"><div class="v num">${g.now}</div><div class="k">If you raced today</div></div>
       <div class="stat" style="border-color:var(--brand)"><div class="v num">${g.forecast.time}</div><div class="k">Race-day forecast${g.forecast.change?` · <span class="${g.forecast.change<0?'green':'amber'}">${g.forecast.change<0?'▼':'▲'} ${fmt(Math.abs(g.forecast.change))} this week</span>`:''}</div></div>
       <div class="stat"><div class="v num">${E(g.target||'—')}</div><div class="k">Your goal</div></div></div>
-      ${g.heat?`<p class="small" style="margin:10px 0 0">☀ Race-day weather around 9:00: <b>${g.heat.temp}°C, dew point ${g.heat.dew}°C</b>. ${g.heat.pct===null?'<b class="amber">Very hot and humid: race for the finish, not a time, and start well inside your pace.</b>':g.heat.pct>0?`Expect about <b>${g.heat.pct}%</b> slower than the forecast above; start that much slower.`:'No slowdown expected for the heat.'}</p>`:''}
+      ${g.heat?`<p class="small" style="margin:10px 0 0">☀ Race-day weather around 9:00: <b>${g.heat.temp}°C, dew point ${g.heat.dew}°C</b>. ${g.heat.pct===null?'<b class="amber">Very hot and humid: race for the finish, not a time, and start well inside your pace.</b>':g.heat.pct>0?`Expect about <b>${g.heat.pct}%</b> slower than the forecast above; start that much slower.`:'No slowdown expected for the heat.'}${g.heat.pct!==0&&S.heat&&S.heat.exposure?` In the last ${S.heat.exposure.window} days you ran ${S.heat.exposure.days} day${S.heat.exposure.days===1?'':'s'} in real heat. Getting used to heat takes repeated hot runs over one to two weeks (Racinais and colleagues, 2015), so a few runs at the warmest hour of the day in the fortnight before race day help.`:''}</p>`:''}
       ${(fc=>`<p class="small" style="margin:12px 0 0">${fc.gap?`The forecast is <b class="${fc.gap[0]==='ahead'?'green':'amber'}">${fc.gap[1]} ${fc.gap[0]==='ahead'?'ahead of':'behind'}</b> your goal. `:''}It assumes you complete <b>${fc.pct}%</b> of the plan${fc.chosen?`, the figure you set${fc.history_pct!==null?` (your last two years averaged ${fc.history_pct}%${fc.plan_pct!==null&&fc.plan_days>=7?`; this plan so far ${fc.plan_pct}%`:''})`:''}`:fc.plan_weight>=100?', your record on this plan so far':fc.plan_weight>0?`, a blend of your history (${fc.history_pct}%) and this plan so far (${fc.plan_pct}%)`:fc.history_pct!==null?', your average over the last two years':', a general figure until there is history'}.</p>
       <p class="xs mute" style="margin:6px 0 0">Complete all of it: <b class="num">${fc.all}</b> · Complete ${fc.poor_pct}%: <b class="num">${fc.poor}</b>${fc.out_of_reach?' · Your goal is beyond the best you have shown in three years; a new best along the way will move the forecast.':fc.needs_all?' · Your goal is within reach only if nearly all of the plan gets done.':''}</p>`)(g.forecast)}</div>`}
   else h+=`<div class="card hero c6"><p class="eyebrow">Goal</p><p class="h">No goal race yet</p><p class="mute small">Add one under Races & status and the plan will build toward it.</p></div>`;
@@ -232,7 +232,7 @@ function youView(){
       <div class="stat"><div class="v num ${F.form<-20?'red':F.form<-10?'amber':'green'}">${F.form>0?'+':''}${Math.round(F.form)}</div><div class="k">Form · ${F.form<-20?'deep in the red: ease off':F.form<-10?'building hard':F.form<5?'building':'fresh'}</div></div></div>
     ${(rows=>{const tip=s=>nice(s[6])+': fitness '+Math.round(s[1])+', fatigue '+Math.round(s[2])+', form '+(s[3]>0?'+':'')+Math.round(s[3])+', load that day '+s[4];
       return lineChart(rows,1,'var(--brand)','Fitness, last '+rows.length+' days',v=>Math.round(v),false,tip)+lineChart(rows,2,'var(--amber)','Fatigue',v=>Math.round(v),false,tip)+lineChart(rows,3,'var(--race)','Form',v=>Math.round(v),false,tip)})(F.days.map((d,i)=>[i,d.fitness,d.fatigue,d.form,d.load,0,d.date]))}
-    <p class="xs mute" style="margin:8px 0 0">Load this week ${F.week}, last week ${F.prev_week}. Fitness is your daily load averaged over about six weeks, fatigue over one; form is the difference. See How it works.</p></div>
+    <p class="xs mute" style="margin:8px 0 0">Load this week ${F.week}, last week ${F.prev_week}${F.week_vs_4w!=null?` (${F.week_vs_4w>0?'+':''}${F.week_vs_4w}% on your last four weeks)`:''}.${F.monotony!=null?` Monotony ${F.monotony}, strain ${F.strain}: monotony is how little your days vary, and above 2 in a heavy week went with illness (Foster, 1998).`:''} Fitness is your daily load averaged over about six weeks, fatigue over one; form is the difference. See How it works.</p></div>
   <div class="card" id="driftcard"><p class="eyebrow" style="display:flex;align-items:center">Aerobic drift on long runs ${trendBtn('durability')}</p>${TR&&TR.durability?dirTag(TR.durability.dir,TR.durability.window):''}${S.drift&&S.drift.length?`<table><tr><th>Date</th><th class="r">Run</th><th class="r">Drift</th></tr>${S.drift.slice().reverse().slice(0,7).map(d=>`<tr><td>${nice(d.date)}</td><td class="r num">${U()==='mi'?d.mi+' mi':Math.round(d.mi*KM)+' km'}</td><td class="r num ${d.drift<=5?'green':'amber'}"><b>${d.drift}%</b></td></tr>`).join('')}</table>
     <p class="xs mute" style="margin:8px 0 0">How much pace per heartbeat faded in the second half. Lower is better; under 5% is the usual rule of thumb. Heat and hills raise it.</p>`:'<p class="small mute">Appears after a steady run of 70 minutes or more.</p>'}</div>`)(S.form):''}
   <div class="card c12" id="shoecard"><p class="eyebrow">Shoes</p>${S.shoes.length?`<table>${S.shoes.map(s=>`<tr><td><b>${E(s.name)}</b> ${s.current?'<span class="tag green">in use</span>':s.retired?'<span class="tag">retired</span>':''}</td><td class="mute">since ${nice(s.start)} ${s.start.slice(0,4)}</td><td class="r num ${s.over?'amber':''}"><b>${s.dist} ${U()}</b>${s.alert?` <span class="mute">of ${s.alert}</span>`:''}</td><td class="r num mute">${s.runs} runs</td><td class="r"><button class="ghost" data-shdel="${s.id}" aria-label="Remove ${E(s.name)}">Remove</button></td></tr>`).join('')}</table>`:'<p class="small mute">No shoes yet. Add the pair you run in and its distance is counted from your runs.</p>'}
@@ -303,12 +303,15 @@ function racesView(){
     <div><label for="se">Until (empty = every day is rest until you press Better)</label><input id="se" type="date"></div><div><label for="sn">Note</label><input id="sn" placeholder="e.g. cold, calf, travel"></div><button class="btn" id="sadd">Save</button> <button class="ghost" id="scancel" style="display:none">Cancel edit</button> <button class="ghost" id="sday" title="Sets Until to the same day as From">Just that day</button></div></div></div>`;
 }
 const opt=(v,l,cur)=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`;
-const yn=(id,cur,dis)=>`<select id="${id}" ${dis?'disabled':''}>${opt(1,'Yes',cur?1:0)}${opt(0,'No',cur?1:0)}</select>`;
+const yn=(id,cur,dis)=>`<button type="button" class="sw" role="switch" id="${id}" value="${cur?1:0}" aria-checked="${cur?'true':'false'}" ${dis?'disabled':''}><i></i><span>${cur?'On':'Off'}</span></button>`;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button.sw');if(!b||b.disabled)return;
+  b.value=b.value==='1'?'0':'1';b.setAttribute('aria-checked',b.value==='1'?'true':'false');b.lastChild.textContent=b.value==='1'?'On':'Off';
+  b.dispatchEvent(new Event('change',{bubbles:true}))});
 function windowFields(){const h=S.heat||{},row=(label,p,w,anyl)=>`<div><label>${label}</label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" role="group" aria-label="${label}"><select id="${p}from" aria-label="${label}: earliest start">${opt('',anyl,w?w[0]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[0]:'')).join('')}</select><span class="mute">to</span><select id="${p}to" aria-label="${label}: latest start">${opt('',anyl,w?w[1]:'')}${Array.from({length:24},(_,i)=>opt(i,i+':00',w?w[1]:'')).join('')}</select></div></div>`;
   return `<div id="hours" style="margin-top:14px;padding:2px 0;border-radius:10px;transition:box-shadow .3s"><div class="lab">Hours you can run <span class="mute">(earliest and latest start)</span></div>
   <div class="row">${row('Weekdays (Mon to Fri)','rw',h.window,'Any hour')}${row('Weekends (Sat, Sun)','rx',h.window_weekend,'Same as weekdays')}</div>
-  <p style="margin:10px 0 0"><button class="btn" id="rwsave">Save hours</button> <span class="xs mute">The weather forecast picks the best time to run inside these hours and inside daylight. Needs weather tracking on (Connections).</span></p></div>`}
-function gotoHours(){MORE=false;SEL=null;view='settings';render();scrollTo({top:0});
+  <p style="margin:10px 0 0"><button class="btn" id="rwsave">Save hours</button> <span class="xs mute">The weather forecast picks the best time to run inside these hours and inside daylight. Needs weather tracking on (Weather and maps tab).</span></p></div>`}
+function gotoHours(){MORE=false;SEL=null;view='settings';STAB='train';render();scrollTo({top:0});
   setTimeout(()=>{const e=$('#hours');if(!e)return;e.scrollIntoView({block:'center',behavior:'smooth'});e.style.boxShadow='0 0 0 3px var(--brand)';setTimeout(()=>{e.style.boxShadow='none'},1800)},60)}
 function rwRead(p){const a=$('#'+p+'from').value,b=$('#'+p+'to').value;if(a===''&&b==='')return null;const w=[a===''?0:+a,b===''?23:+b];return w[0]>w[1]?false:w}
 function prefs(s){return `<div class="row"><div><label for="units">Distances in</label><select id="units">${opt('mi','Miles',s.units)}${opt('km','Kilometres',s.units)}</select></div>
@@ -324,34 +327,43 @@ function prefs(s){return `<div class="row"><div><label for="units">Distances in<
   <p class="xs mute">Set the sync time for after you usually wake and your watch has synced, so last night's sleep is counted.</p>`}
 function prefsRead(){return {week_start:+$('#week_start').value,units:$('#units').value,run_days:+$('#run_days').value,long_day:+$('#long_day').value,run_time:$('#run_time').value,push_enabled:$('#push_enabled').value==='1',
   blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
+let STAB=(()=>{try{return localStorage.getItem('stab')||'train'}catch(e){return 'train'}})();
+const STABS=[['train','Training'],['watch','Watch and data'],['env','Weather and maps'],['backup','Backups'],['about','About']];
+function setStab(t){STAB=t;try{localStorage.setItem('stab',t)}catch(e){}
+  $$('[data-p]').forEach(x=>x.hidden=x.dataset.p!==t);$$('[data-stab]').forEach(b=>{const on=b.dataset.stab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')})}
+function statusStrip(){const gm=S.garmin,w=S.watch||{source:'garmin'},chip=(ok,t)=>`<span class="chip ${ok?'green':'unknown'}"><i></i>${t}</span>`;
+  const src=w.source==='garmin'?chip(gm.connected,gm.connected?'Garmin connected':'Garmin not connected'):chip(w.connected,E(w.name||'Watch')+(w.connected?' connected':' not connected'));
+  return `<div class="sstrip">${src}${chip(S.settings.push_enabled&&w.source==='garmin','Workouts '+(S.settings.push_enabled&&w.source==='garmin'?'sent to the watch':'not sent to the watch'))}${chip(S.heat&&S.heat.on,'Weather '+(S.heat&&S.heat.on?'on':'off'))}${chip(S.has_password,'App password '+(S.has_password?'set':'not set'))}</div>`}
 function settingsView(){const s=S.settings;
-  return `<div class="grid sgrid"><div class="card c12"><p class="eyebrow">How you train</p>${prefs(s)}${windowFields()}</div>
-  <div class="card c12"><p class="eyebrow">Advanced</p><div class="fgrid">
-    <div><label for="hrmax">Maximum heart rate (empty: use ${S.profile.hrmax_observed||'observed'})</label><input id="hrmax" type="number" value="${s.hrmax||''}"></div>
-    <div><label for="peak">Peak week in miles (empty: use ${S.limits.peak_miles}, from your history)</label><input id="peak" type="number" value="${s.peak_miles_override||''}"></div>
-    <div><label for="forecast_completion">Plan completion assumed in the forecast</label><select id="forecast_completion">${opt('','From my history and this plan',s.forecast_completion?Math.round(s.forecast_completion*100):'')}${[70,75,80,85,90,95,100].map(n=>opt(n,n+'%',s.forecast_completion?Math.round(s.forecast_completion*100):'')).join('')}</select></div>
-    <div><label for="aero_test_weeks">Aerobic test</label><select id="aero_test_weeks">${opt(0,'Off',s.aero_test?s.aero_test_weeks:0)}${[4,5,6,8].map(n=>opt(n,'Every '+n+' weeks',s.aero_test?s.aero_test_weeks:0)).join('')}</select></div>
-    <div><label for="aero_format">Aerobic test format</label><select id="aero_format">${opt('short','Short: mile stages, then 500 m all out (about 6 miles)',s.aero_format)}${opt('original',"Long: 2400 m stages with rests (about 10 miles)",s.aero_format)}</select></div>
+  const tabs=`<div class="stabs" role="tablist" aria-label="Settings sections">${STABS.map(([k,t])=>`<button role="tab" class="${STAB===k?'on':''}" data-stab="${k}" aria-selected="${STAB===k}">${t}</button>`).join('')}</div>`;
+  const P=(k,html)=>`<div class="grid sgrid" data-p="${k}" ${STAB===k?'':'hidden'}>${html}</div>`;
+  const train=`<div class="card c12" data-replan><p class="eyebrow">How you train</p>${prefs(s)}${windowFields()}</div>
+  <div class="card c12" data-replan><p class="eyebrow">Advanced</p><p class="xs mute" style="margin:0">Leave these alone unless you know you need them: each one starts from your own history.</p>
+   <details class="adv"><summary>Show advanced settings</summary><div class="fgrid">
+    <div><label for="hrmax">Maximum heart rate</label><input id="hrmax" type="number" value="${s.hrmax||''}" placeholder="Auto: ${S.profile.hrmax_observed||'observed'}"></div>
+    <div><label for="peak">Peak week in miles</label><input id="peak" type="number" value="${s.peak_miles_override||''}" placeholder="Auto: ${S.limits.peak_miles}, from your history"></div>
+    <div><label for="forecast_completion">Plan completion assumed in the forecast</label><select id="forecast_completion">${opt('','Auto: from my history and this plan',s.forecast_completion?Math.round(s.forecast_completion*100):'')}${[70,75,80,85,90,95,100].map(n=>opt(n,n+'%',s.forecast_completion?Math.round(s.forecast_completion*100):'')).join('')}</select></div>
+    <div><label for="aero_test_weeks">Aerobic test (how often)</label><select id="aero_test_weeks">${opt(0,'Off',s.aero_test?s.aero_test_weeks:0)}${[4,5,6,8].map(n=>opt(n,'Every '+n+' weeks',s.aero_test?s.aero_test_weeks:0)).join('')}</select></div>
+    <div><label for="aero_format">Aerobic test (format)</label><select id="aero_format">${opt('short','Short: about 6 miles',s.aero_format)}${opt('original','Long: about 10 miles, with rests',s.aero_format)}</select></div>
     <div><label for="aero_runs">Aerobic runs by heart rate</label>${yn('aero_runs',s.aero_runs)}</div>
     <div><label for="weeks_ahead">Provisional weeks shown ahead</label><select id="weeks_ahead">${[1,2,3,4,5].map(n=>opt(n,n,s.weeks_ahead)).join('')}</select></div>
     <div><label for="push_days">Days kept on the watch</label><select id="push_days">${[7,14,21].map(n=>opt(n,n,s.push_days)).join('')}</select></div>
-    <div><label for="notify">Daily message address (optional)</label><input id="notify" style="width:100%" value="${E(s.notify_url||'')}" placeholder="https://ntfy.sh/your-private-topic"><p class="xs mute" style="margin:6px 0 0">A morning message with the day's session. Save first, then send a test.</p><p style="margin:8px 0 0"><button class="ghost" id="ntest" ${S.notify_set?'':'disabled'}>Send a test message</button></p></div></div>
-    <div class="row" style="align-items:center;margin-top:18px;border-top:1px solid var(--line);padding-top:16px"><button class="btn" id="ssave">Save and replan</button><span class="xs mute">Applies to How you train and Advanced.</span>
-    <a class="ghost" style="margin-left:auto" href="/api/export">Download backup</a><span class="small mute">App password: ${S.has_password?'set':'not set'}</span></div></div>
-  <div class="card" id="youcard"><p class="eyebrow">About you</p><p class="xs mute" style="margin-top:0">Used only for age grading and fuelling. Read from Garmin once; clear them to stop age grading.</p>
-    <label for="ysex">Sex (for age-grade standards, race pacing and injury advice)</label><select id="ysex">${opt('','Not set',S.about_you.sex||'')}${opt('F','Female',S.about_you.sex||'')}${opt('M','Male',S.about_you.sex||'')}</select>
-    <label for="ydob">Date of birth</label><input id="ydob" type="date" value="${E(S.about_you.birth_date||'')}">
-    <label for="ygel">Carbohydrate in one of your gels (g)</label><input id="ygel" type="number" min="10" max="60" value="${S.about_you.gel_carbs_g}">
-    <p style="margin:12px 0 0"><button class="ghost" id="ysave">Save</button></p></div>
-  <div class="card"><p class="eyebrow">Backups</p><p class="xs mute" style="margin-top:0">Made every night and thinned as they age: daily for 7 days, weekly for 4 weeks, monthly for 3 months. Restoring saves the current state first, so it can be undone.</p>
-    <label for="abk">Automatic backups</label>${yn('abk',S.auto_backup)}
-    <label for="bsel">Backup</label><select id="bsel">${S.backups.map(b=>`<option value="${E(b.name)}" data-part="local">${E(b.made.replace('T',' '))} (${b.size_kb} KB)</option>`).join('')||'<option value="">None yet</option>'}</select>
-    <label for="bwhat">What to restore</label><select id="bwhat"><option value="full">Everything</option><option value="config">Settings and races only</option><option value="plan">The plan only</option></select>
-    <p class="xs mute">For a copy off this computer, use Download backup above, or see How it works for a daily copy into a cloud folder.</p>
-    <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button></p></div>
-  ${connections()}
-  ${aboutCard()}
-  ${removeCard()}</div>${UNI&&view==='settings'?removeModal():''}`}
+    <div><label for="notify">Daily message address (optional)</label><input id="notify" style="width:100%" value="${E(s.notify_url||'')}" placeholder="https://ntfy.sh/your-private-topic"><p class="xs mute" style="margin:6px 0 0">A morning message with the day's session. Save first, then send a test.</p><p style="margin:8px 0 0"><button class="ghost" id="ntest" ${S.notify_set?'':'disabled'}>Send a test message</button></p></div></div></details>
+    <div class="row" style="align-items:center;margin-top:18px;border-top:1px solid var(--line);padding-top:16px"><button class="btn" id="ssave">Save and replan</button><span class="xs mute">Applies to How you train and Advanced. Switches and choices elsewhere save as you set them.</span></div></div>
+  <div class="card c12" id="youcard"><p class="eyebrow">About you</p><p class="xs mute" style="margin-top:0">Used only for age grading and fuelling. Read from Garmin once; clear them to stop age grading.</p>
+    <div class="fgrid"><div><label for="ysex">Sex (for age-grade standards, race pacing and injury advice)</label><select id="ysex">${opt('','Not set',S.about_you.sex||'')}${opt('F','Female',S.about_you.sex||'')}${opt('M','Male',S.about_you.sex||'')}</select></div>
+    <div><label for="ydob">Date of birth</label><input id="ydob" type="date" value="${E(S.about_you.birth_date||'')}"></div>
+    <div><label for="ygel">Carbohydrate in one of your gels (g)</label><input id="ygel" type="number" min="10" max="60" value="${S.about_you.gel_carbs_g}"></div></div>
+    <p style="margin:12px 0 0"><button class="ghost" id="ysave">Save</button></p></div>`;
+  const backup=`<div class="card c12"><p class="eyebrow">Backups</p><p class="xs mute" style="margin-top:0">Made every night and thinned as they age: daily for 7 days, weekly for 4 weeks, monthly for 3 months. Restoring saves the current state first, so it can be undone.</p>
+    <div class="fgrid"><div><label for="abk">Automatic backups</label>${yn('abk',S.auto_backup)}</div>
+    <div><label for="bsel">Backup</label><select id="bsel">${S.backups.map(b=>`<option value="${E(b.name)}" data-part="local">${E(b.made.replace('T',' '))} (${b.size_kb} KB)</option>`).join('')||'<option value="">None yet</option>'}</select></div>
+    <div><label for="bwhat">What to restore</label><select id="bwhat"><option value="full">Everything</option><option value="config">Settings and races only</option><option value="plan">The plan only</option></select></div></div>
+    <p class="xs mute">For a copy off this computer, download a backup below, or see How it works for a daily copy into a cloud folder.</p>
+    <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button> <a class="ghost" href="/api/export">Download backup</a></p></div>`;
+  return `${statusStrip()}${tabs}
+  ${P('train',train)}${P('watch',connections('data'))}${P('env',connections('env'))}${P('backup',backup)}${P('about',aboutCard()+removeCard())}
+  <div class="sbar" id="sbar" hidden><span>You have unsaved changes to how you train.</span><button class="btn" id="ssave2">Save and replan</button></div>${UNI&&view==='settings'?removeModal():''}`}
 let TERMS=null, TOPEN={};
 async function loadTerms(){try{TERMS=await api('terms')}catch(e){TERMS={text:''}}render()}
 function md(t){return E(t||'').split(/\n\n+/).map(b=>{b=b.trim();if(!b||b==='---')return '';if(b.startsWith('# '))return '';
@@ -412,26 +424,30 @@ function corosCard(head,chip){const w=S.watch||{source:'garmin'};
     <ul class="clist"><li>Reads your runs through COROS's unofficial web interface, which COROS can change or block at any time. Your region (Europe, USA or China) is found automatically.</li><li>Runs only: no sleep or HRV, so sessions are not adjusted day by day. Nothing is ever sent to your COROS account or watch.</li></ul>
     ${w.coros?`<p class="cact"><button class="ghost" id="cordis">Disconnect COROS</button></p>`:`<label for="cem">COROS email</label><input id="cem" type="email" style="width:100%" autocomplete="username"><label for="cpw">COROS password</label><input id="cpw" type="password" style="width:100%" autocomplete="current-password">
     <p class="xs mute">Sent once to COROS and never stored; only the access token is kept, encrypted.</p><p class="cact"><button class="btn" id="corgo">Sign in to COROS</button></p>`}</div>`}
-function connections(){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="chip ${ok?'green':warn?'amber':'unknown'}"><i></i>${ok?yes:no}</span>`;
+function connections(part){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span class="chip ${ok?'green':warn?'amber':'unknown'}"><i></i>${ok?yes:no}</span>`;
   const head=(icon,name,c)=>`<div class="chead"><span class="cicon" aria-hidden="true">${icon}</span><b>${name}</b><span style="margin-left:auto">${c}</span></div>`;
-  return `<div class="c12 sechead"><h2>Connections</h2><p class="small mute">Where your data comes from and where copies go. Tokens are kept encrypted on this computer; no passwords are stored.</p></div>
+  const data=`<div class="c12 sechead"><h2>Watch and data</h2><p class="small mute">Where your data comes from and where copies go. Tokens are kept encrypted on this computer; no passwords are stored.</p></div>
   <div class="card c6 conn" id="cgarmin">${head('⌚','Garmin',chip(gm.connected,'Connected','Not connected'))}
     <p class="small">${gm.connected?'Signed in'+(gm.name?' as <b>'+E(gm.name)+'</b>':'')+'.':'Not connected. The plan cannot sync without it.'}</p>
-    <ul class="clist"><li>Reads your runs, sleep, HRV, resting heart rate and steps once a day.</li><li>${S.settings.push_enabled?`Sends the next ${S.settings.push_days} days of workouts to your watch, and checks every four hours that they are still there.`:'Sending workouts to your watch is switched off (How you train, above).'}</li><li>Your password was used once to sign in and was not stored.</li></ul>
+    <ul class="clist"><li>Reads your runs, sleep, HRV, resting heart rate and steps once a day.</li><li>${S.settings.push_enabled?`Sends the next ${S.settings.push_days} days of workouts to your watch, and checks every four hours that they are still there.`:'Sending workouts to your watch is switched off (Training tab).'}</li><li>Your password was used once to sign in and was not stored.</li></ul>
     ${gm.connected?'<p class="cact"><button class="ghost" id="gmdis">Disconnect Garmin</button></p><p class="xs mute">To revoke access everywhere, change your Garmin password.</p>':''}</div>
   ${corosCard(head,chip)}
   ${watchCard(head,chip)}
   <div class="card c6 conn" id="ccal">${head('▦','Calendar file',chip(true,'Ready',''))}
     <p class="small">The next sessions as a file for Apple Calendar, Outlook or Google Calendar. Import it by hand; nothing is sent anywhere.</p>
     <p class="cact"><a class="ghost" href="/api/calendar.ics">Download calendar file</a></p></div>
-  <div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
+  <div class="card c6 conn" id="cfit">${head('⇩','Workout files (FIT)',chip(true,'Ready',''))}
+    <p class="small">The coming days' runs, with their pace targets, as .fit workout files in one zip. COROS, Suunto, Polar, Wahoo and other watches or apps that import FIT workouts can use them. Import by hand; nothing is sent anywhere, and whether your watch accepts the file is up to the watch.</p>
+    <p class="cact"><a class="ghost" href="/api/workouts.zip">Download the next ${S.settings.push_days} days</a></p></div>`;
+  const env=`<div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
     <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), shows each coming day's forecast with the best hour to start between sunrise and sunset, judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
     <label for="heatsw">Track the weather and adjust for it</label>${yn('heatsw',S.heat&&S.heat.on)}
     <p class="xs" style="margin:8px 0 0"><a href="#" data-gohours>Set the hours you can run</a> <span class="mute">(the best time of day is chosen inside them)</span></p>
     ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
   <div class="card c12 conn" id="cmaps">${head('◎','Maps (OpenStreetMap)',chip(S.map_tiles,'Real maps on','Outline only'))}
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
-    <label for="mapsw">Show runs on a real map</label>${yn('mapsw',S.map_tiles)}</div>`}
+    <label for="mapsw">Show runs on a real map</label>${yn('mapsw',S.map_tiles)}</div>`;
+  return part==='env'?env:data}
 function aboutView(){if(!ABOUT)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
   return '<div class="grid">'+ABOUT.map(s=>`<div class="card c6"><p class="eyebrow">${E(s.title)}</p><ul class="why" style="margin:0">${s.items.map(i=>`<li>${E(i)}</li>`).join('')}</ul></div>`).join('')+refsCard()+'</div>'}
 function logView(){return `<div class="grid"><div class="card c12"><p class="eyebrow">Activity log <button class="ghost" id="lr">Refresh</button></p><pre>${E(logs.join(''))||'Loading…'}</pre></div></div>`}
@@ -671,6 +687,8 @@ function bind(){
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});
   $$('[data-sdel]').forEach(b=>b.onclick=async()=>{await api('status/'+b.dataset.sdel,null,'DELETE');await load()});
   $$('[data-gohours]').forEach(a=>a.onclick=e=>{e.preventDefault();gotoHours()});
+  $$('[data-stab]').forEach(b=>b.onclick=()=>setStab(b.dataset.stab));
+  on('#ssave2',()=>$('#ssave').click());
   on('#rwsave',async()=>{const w=rwRead('rw'),x=rwRead('rx');if(w===false||x===false)return toast('The earliest start must not be after the latest.','err');
     await api('settings',{run_window:w,run_window_weekend:x});toast('Hours saved');await load()});
   on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot run.','err');

@@ -6,6 +6,9 @@ Sources, where there is one:
     that fade over 42 and 7 days. Form is fitness minus fatigue. The 42 and 7 are the conventional values, not fitted to the athlete.
   - Spike warning: Frandsen and colleagues (2025, 5,200 runners): a run more than 10% longer than the longest run of the previous
     30 days went with more overuse injuries. The same study found no link with week-to-week mileage change, so there is no weekly warning.
+  - Monotony and strain: Foster (1998), from session-RPE load in a small group of athletes: high load with little day-to-day variation
+    went with illness and poor condition. Monotony above 2 means little hard-easy variation; it is warned about only in a week that
+    is 20% heavier than the athlete's own previous four weeks, because a steady easy week is normal. Evidence is limited.
   - Fuelling: Jeukendrup (2014): about 30 g of carbohydrate an hour for 1-2 hours, up to 60 g for 2-3 hours, up to 90 g beyond 2.5 hours.
   - Aerobic drift under 5% is a common coaching rule of thumb, not a research threshold.
   - Run timing: Leota and colleagues (2025, 14,689 people): hard exercise ending within 4 hours of sleep went with later, shorter sleep
@@ -21,6 +24,7 @@ from assess import MI
 
 FIT_DAYS, FAT_DAYS = 42, 7
 SPIKE = 1.10
+MONOTONY, HEAVY = 2.0, 1.2     # Foster (1998): monotony above 2 in a heavy week went with illness; the 1.2 is this project's own choice
 
 
 def treadmill(r):
@@ -52,8 +56,30 @@ def form(today, tp, hrmax, show=120):
         d += dt.timedelta(days=1)
     now = out[-1]
     wk = lambda a, b: sum(x["load"] for x in out[len(out) - b:len(out) - a] or [])
-    return {"days": out, "fitness": now["fitness"], "fatigue": now["fatigue"], "form": round(now["fitness"] - now["fatigue"], 1),
-            "week": wk(0, 7), "prev_week": wk(7, 14), "fitness_4w_ago": out[-29]["fitness"] if len(out) > 29 else None}
+    res = {"days": out, "fitness": now["fitness"], "fatigue": now["fatigue"], "form": round(now["fitness"] - now["fatigue"], 1),
+           "week": wk(0, 7), "prev_week": wk(7, 14), "fitness_4w_ago": out[-29]["fitness"] if len(out) > 29 else None}
+    res.update(monotony(out))
+    return res
+
+
+def monotony(days):
+    """Foster's training monotony (the week's mean daily load over its spread) and strain (week load times monotony), and the week
+    against the athlete's own previous four weeks. `days` is the daily series, oldest first, the last entry being today."""
+    last = [x["load"] for x in days[-7:]]
+    out = {"monotony": None, "strain": None, "week_vs_4w": None, "monotony_warn": False}
+    if len(last) < 7:
+        return out
+    mean_ = sum(last) / 7
+    sd = (sum((v - mean_) ** 2 for v in last) / 7) ** 0.5
+    if sd > 0:
+        out["monotony"] = round(mean_ / sd, 2)
+        out["strain"] = round(sum(last) * mean_ / sd)
+    before = [x["load"] for x in days[-35:-7]]
+    if len(before) == 28 and sum(before) > 0:
+        typical = sum(before) / 4
+        out["week_vs_4w"] = round(100 * (sum(last) / typical - 1))
+        out["monotony_warn"] = bool(out["monotony"] and out["monotony"] >= MONOTONY and sum(last) >= HEAVY * typical)
+    return out
 
 
 def spikes(today, units="mi"):

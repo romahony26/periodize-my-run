@@ -189,14 +189,18 @@ def sync_summaries(full=False, progress=lambda m: None):
         with db.connect() as c:
             for a in page:
                 aid = str(a.get("activityId"))
+                feel, rpe = a.get("directWorkoutFeel"), a.get("directWorkoutRpe")
                 if aid in known:
+                    if feel is not None or rpe is not None:   # rated on the watch after the run was first read
+                        with db.connect() as c:
+                            c.execute("UPDATE activities SET feel=COALESCE(feel,?), rpe=COALESCE(rpe,?) WHERE id=? AND feel IS NULL AND rpe IS NULL", (feel, rpe, aid))
                     continue
                 local = (a.get("startTimeLocal") or "")[:10]
-                c.execute("INSERT OR IGNORE INTO activities(id,start,date,sport,name,dist_m,timer_s,avg_hr,max_hr,ascent_m,best5k,best10k,steps,vo2max,gap_ratio,training_effect,garmin_load) "
-                          "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                c.execute("INSERT OR IGNORE INTO activities(id,start,date,sport,name,dist_m,timer_s,avg_hr,max_hr,ascent_m,best5k,best10k,steps,vo2max,gap_ratio,training_effect,garmin_load,feel,rpe) "
+                          "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                           (aid, a.get("startTimeGMT"), local, _sport(a), a.get("activityName"), a.get("distance"),
                            a.get("movingDuration") or a.get("duration"), a.get("averageHR"), a.get("maxHR"), a.get("elevationGain"),
-                           a.get("fastestSplit_5000"), a.get("fastestSplit_10000"), a.get("steps"), a.get("vO2MaxValue"), _gap(a), a.get("aerobicTrainingEffect"), a.get("activityTrainingLoad")))
+                           a.get("fastestSplit_5000"), a.get("fastestSplit_10000"), a.get("steps"), a.get("vO2MaxValue"), _gap(a), a.get("aerobicTrainingEffect"), a.get("activityTrainingLoad"), feel, rpe))
                 fresh += 1
         new += fresh
         start += len(page)

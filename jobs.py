@@ -143,6 +143,36 @@ def today_message():
     return out
 
 
+def week_message(today=None):
+    """Monday's short review: last week against its plan, and what this week is and why. None when there is no plan to review."""
+    c, today = db.cfg(), today or dt.date.today()
+    mon = today - dt.timedelta(days=today.weekday())
+    prev = mon - dt.timedelta(days=7)
+    now = db.rows("SELECT mode,target,why FROM weeks WHERE monday=?", (mon.isoformat(),))
+    if not now:
+        return None
+    was = db.rows("SELECT target FROM weeks WHERE monday=?", (prev.isoformat(),))
+    planned = db.rows("SELECT SUM(miles) m, COUNT(CASE WHEN miles>0 THEN 1 END) n FROM plan WHERE date>=? AND date<?", (prev.isoformat(), mon.isoformat()))[0]
+    done = db.rows("SELECT SUM(dist_m) m, COUNT(*) n FROM activities WHERE sport='running' AND date>=? AND date<?", (prev.isoformat(), mon.isoformat()))[0]
+    lines = []
+    if planned["m"]:
+        got = (done["m"] or 0) / 1609.344
+        lines.append(f"Last week: {engine.dist(round(got, 1), c['units'])} in {done['n']} run{'s' if done['n'] != 1 else ''} against {engine.dist(round(planned['m'], 1), c['units'])} planned "
+                     f"({round(100 * got / planned['m'])}%).")
+    why = json.loads(now[0]["why"]) if now[0]["why"] else []
+    tgt = engine.dist(round(now[0]["target"], 1), c["units"]) if now[0]["target"] else None
+    head = f"This week: {now[0]['mode']}" + (f", about {tgt}" if tgt else "")
+    if was and was[0]["target"] and now[0]["target"]:
+        d = now[0]["target"] - was[0]["target"]
+        if abs(d) >= 0.5:
+            head += f" ({'up' if d > 0 else 'down'} {engine.dist(round(abs(d), 1), c['units'])} on last week)"
+    lines.append(head + ".")
+    if why:
+        text = " ".join(str(x) for x in why[:2])
+        lines.append("Why: " + (text if len(text) <= 300 else text[:297].rsplit(" ", 1)[0] + "..."))
+    return "\n".join(lines)
+
+
 def replan(force=False):
     """Plan the current week from actual data, and the following week provisionally."""
     c, prof, rs, L = context()
@@ -361,6 +391,11 @@ def run(kind):
             if m and db.get("notified") != dt.date.today().isoformat() and (db.get("readiness") or {}).get("level") != "unknown":
                 notify(m)
                 db.put("notified", dt.date.today().isoformat())
+            if kind == "daily" and dt.date.today().weekday() == 0 and db.get("notified_week") != dt.date.today().isoformat():
+                wm = week_message()      # Monday: last week against its plan, and what this week is and why
+                if wm:
+                    notify(wm)
+                    db.put("notified_week", dt.date.today().isoformat())
     except watch.GaveUp as e:
         ok, msg = False, f"Garmin kept refusing requests ({e}). Progress is saved; it will resume on the next run."
         log.error("=== %s stopped: %s ===", kind, msg)

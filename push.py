@@ -117,6 +117,23 @@ def strength_workout(name):
             "workoutSegments": [{"segmentOrder": 1, "sportType": STRENGTH_SPORT, "workoutSteps": [step]}]}
 
 
+def planned_workouts(c, days=None, start=None):
+    """[(date, Garmin-style workout dict)] for the planned running days from `start` (today) for `days` days (push_days)."""
+    start = start or dt.date.today()
+    end = start + dt.timedelta(days=int(days or c["push_days"]) - 1)
+    tps = {r["monday"]: r["tp"] for r in db.rows("SELECT monday,tp FROM weeks")}
+    out = []
+    for r in db.rows("SELECT * FROM plan WHERE date>=? AND date<=? ORDER BY date", (start.isoformat(), end.isoformat())):
+        d = dt.date.fromisoformat(r["date"])
+        tp = tps.get((d - dt.timedelta(days=d.weekday())).isoformat())
+        adj = json.loads(r["adjust"]) if r["adjust"] else {}
+        day = engine.as_run(dict(r, steps=json.loads(r["steps"]) if r["steps"] else None), adj)
+        w = workout(day, tp, c, adj.get("slow", 0.0)) if tp else None
+        if w:
+            out.append((r["date"], w))
+    return out
+
+
 def _already_gone(e):
     """True if a failed delete means the workout is no longer there (Garmin answers 404), so there is nothing left to delete."""
     return "404" in str(e) or "not found" in str(e).lower() or "NotFound" in type(e).__name__
