@@ -16,25 +16,6 @@
 - `main` — stable releases only
 - `beta` — development, tagged as `-beta.N`
 
-## Local Setup
-
-Python venv in `.venv/`. Install dependencies:
-```bash
-python3 -m venv .venv
-source .venv/bin/activate  # on Mac
-pip install -r requirements.txt
-```
-
-Run locally: `python web.py` (or check `install.sh` for the exact command).
-
-## Testing Before Commit
-
-1. Start the app locally: `python web.py`
-2. Open http://localhost:5000 in a browser
-3. Test your change end-to-end (golden path + edge cases)
-4. Check for regressions in unrelated features
-5. Stop the app and commit
-
 ## CHANGELOG & Releases
 
 Every commit needs a versioned entry in `CHANGELOG.md`:
@@ -48,14 +29,8 @@ git tag v2.9.1-beta.7
 git push origin v2.9.1-beta.7
 ```
 
-**Why:** The app's update checker looks for GitHub releases. Without tags, new versions don't appear in the update feature.
+**Why:** The app's update checker reads GitHub tags. Without a tag, a new version does not appear in the update feature.
 
 ## Deployment
 
-**Mac:** App restarts automatically when updated via the built-in updater.
-
-**Pi:** Known issue — venv setup sometimes fails on Pi. If SSH deployment breaks, it's likely a Python environment issue on the Pi side, not the code.
-
-## Permissions
-
-File editing, git, bash, and read permissions are enabled. Use them freely.
+The Pi does not run `/opt/periodize-my-run` directly: it runs the version folder named in `~/.periodize-my-run/versions/current` (the updater's layout). To deploy by hand, unpack the tag into `versions/<version>`, write the version into `current`, and restart `periodize-my-run`.
