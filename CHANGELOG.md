@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.14 - 2026-10-14
+### Changed
+- On a phone, today's session now comes before the goal card on the Plan page. The goal card shows the forecast gap in one line and keeps how it is built under "How this forecast is built".
+- The Fitness page is in four sections, Now, Progress, Predictions and Records, with a tab row; it was one scroll of 19 cards (about 3,900 px) and each section is now about 800 to 1,450 px. Your last section is remembered.
+- Long grey explanations on the Fitness page are folded under "What is this?"; the numbers stay in view.
+- Empty lists (shoes, race results) shrink to a heading and one line, with the form under it.
+
 ## 2.10.0-beta.13 - 2026-10-14
 ### Added
 - Checks only, no change to the app: the daily job is tested end to end against a stand-in Garmin (order of steps, nothing sent when sending is off, a refusal stops cleanly, other sources never call Garmin), and every page and Settings tab is checked at phone, tablet and desktop width for sideways scroll, anything wider than the screen, anything fixed to the screen and console errors.

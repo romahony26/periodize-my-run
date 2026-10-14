@@ -81,7 +81,7 @@ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closes
 document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
 document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
 document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea,button.tgl')){LASTUI=Date.now();if(view==='settings'){DIRTY=true;const sb=$('#savebar');if(sb&&e.target.closest('[data-replan]'))sb.hidden=false}}},true);
-const holdUI=()=>{const a=document.activeElement;return !!SEL||Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
+const holdUI=()=>{const a=document.activeElement;return !!SEL||!!document.querySelector('details.note[open]')||Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
 async function load(auto){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE||(auto&&holdUI())){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(()=>load(true),1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';
@@ -114,7 +114,46 @@ function render(){
   if(j.error&&!j.running)h+=`<div class="alert err">The last sync had a problem: ${E(j.error)}</div>`;
   if(S.stale)h+=`<div class="alert">No successful sync in 7 days. Check the Log tab, then press Sync.</div>`;
   $('#main').innerHTML=h+({plan:planView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])()+(MORE?moreSheet():'');
-  bind();bindCharts();
+  polish();bind();bindCharts();
+}
+
+/* After a page is drawn: the long explanations fold away, empty cards shrink to one line, the Fitness page splits into four sections,
+   and (on a phone) today's session comes before the goal. Done on the drawn page so every card keeps its own code. */
+let FTAB=(()=>{try{return localStorage.getItem('ftab')||'now'}catch(e){return 'now'}})();
+const FSECS=[['now','Now'],['progress','Progress'],['pred','Predictions'],['records','Records']];
+const FMAP=[['Threshold pace','now'],['Race-specific endurance','now'],['Steps outside','now'],['Fitness, fatigue','now'],['Aerobic drift','now'],['Recovery trends','now'],['When you run','now'],
+  ['Is it working','progress'],['Plan scorecard','progress'],['Plan against actual','progress'],['Last eight weeks','progress'],['Paces now','progress'],
+  ['Race predictor','pred'],['How accurate','pred'],['VO2max','pred'],
+  ['Race results','records'],['Personal bests','records'],['Shoes','records'],['Your history','records'],['Your limits','records']];
+function foldNotes(root){root.querySelectorAll('p.xs.mute').forEach(p=>{
+  if(p.id||p.closest('details,table,.modal,.ov')||p.textContent.length<150||p.parentElement.classList.contains('stat')||/^(Load this week|Warning signs)/.test(p.textContent))return;     // numbers stay in view
+  const d=document.createElement('details');d.className='note';d.innerHTML='<summary>What is this?</summary>';p.replaceWith(d);d.append(p)})}
+function setFtab(t){FTAB=t;try{localStorage.setItem('ftab',t)}catch(e){}
+  $$('[data-fsec]').forEach(c=>c.hidden=c.dataset.fsec!==t);$$('[data-ftab]').forEach(b=>{const on=b.dataset.ftab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')})}
+function polish(){const m=$('#main');if(!m)return;
+  if(view==='plan'){
+    const g=m.querySelector('.hero');if(g){g.id='goalcard';
+      const fp=[...g.querySelectorAll('p.small')].find(p=>p.textContent.includes('It assumes you complete'));
+      if(fp){const html=fp.innerHTML,i=html.indexOf('. It assumes'),det=document.createElement('details');det.className='note';det.innerHTML='<summary>How this forecast is built</summary>';
+        const body=document.createElement('p');body.className='small';body.style.margin='6px 0 0';
+        if(i>0){fp.innerHTML=html.slice(0,i+1);body.innerHTML=html.slice(i+2);det.append(body);const xs=fp.nextElementSibling;if(xs&&xs.matches('p.xs'))det.append(xs);fp.after(det)}
+        else{body.innerHTML=html;det.append(body);const xs=fp.nextElementSibling;if(xs&&xs.matches('p.xs'))det.append(xs);fp.replaceWith(det)}}}
+    const cards=[...m.querySelectorAll('.grid > .card.c6')];const td=cards.find(c=>c.id==='tomorrowcard')||cards.find(c=>/^(Today|Tomorrow)/.test((c.querySelector('.eyebrow')||{}).textContent||''));
+    if(td&&!td.id)td.id='todaycard';
+  }
+  if(view==='you'){const grid=m.querySelector('.grid');if(!grid)return;
+    const cards=[...grid.children].filter(c=>c.classList.contains('card'));
+    cards.forEach(c=>{const t=((c.querySelector('.eyebrow')||{}).textContent||'').trim();const hit=FMAP.find(([k])=>t.startsWith(k));c.dataset.fsec=hit?hit[1]:'now'});
+    // an empty list collapses to its heading and one line
+    const sh=$('#shoecard');if(sh&&!S.shoes.length){const rest=[...sh.children].filter(x=>!x.classList.contains('eyebrow'));const d=document.createElement('details');d.className='note';
+      d.innerHTML='<summary>No shoes yet: add a pair</summary>';rest.forEach(x=>d.append(x));sh.append(d)}
+    const rr=cards.find(c=>/^Race results/.test((c.querySelector('.eyebrow')||{}).textContent||''));
+    if(rr&&!S.results.length){const kids=[...rr.children].filter(x=>!x.classList.contains('eyebrow'));const keep=kids.find(x=>x.matches('p.small'));const d=document.createElement('details');d.className='note';
+      d.innerHTML='<summary>Add a result by hand or import a log</summary>';kids.filter(x=>x!==keep).forEach(x=>d.append(x));rr.append(d)}
+    foldNotes(grid);
+    const bar=document.createElement('div');bar.className='stabs';bar.setAttribute('role','tablist');bar.setAttribute('aria-label','Fitness sections');
+    bar.innerHTML=FSECS.map(([k,t])=>`<button role="tab" data-ftab="${k}">${t}</button>`).join('');
+    grid.before(bar);bar.querySelectorAll('button').forEach(b=>b.onclick=()=>setFtab(b.dataset.ftab));setFtab(FTAB)}
 }
 function ring(pct,label){const c=2*Math.PI*30;return `<svg class="ring" viewBox="0 0 74 74"><circle cx="37" cy="37" r="30" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="37" cy="37" r="30" fill="none" stroke="url(#lg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct)}" transform="rotate(-90 37 37)"/><text x="37" y="42" text-anchor="middle">${label}</text></svg>`}
 function chart(title,rows,val,tip,label){
