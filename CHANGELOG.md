@@ -3,6 +3,15 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.15 - 2026-10-14
+### Fixed
+- Principles 54 and 54a gave the wrong source for how long respiratory illness lasts in athletes and for the "neck check". The figures (7.1 days; 20% of illnesses costing more than a day of training; only 4 of 54 studies reporting days until return to sport) come from Snyders and colleagues (2022), and the neck check's weak basis from Hull and colleagues (2020). Derman and colleagues (2022) is a review of risk factors, and it lists increased training monotony and lack of tapering among them.
+- Principle 70 (start slower in an ultra) was marked as research and named no study. It now cites Suter and colleagues (2020), and the part the abstract does not support is marked as coaching practice.
+- Durability studies Maunder (2021) and Matomäki (2023) were cited but missing from the reference list; now added, with the limit that Matomäki studied adults on a bicycle.
+- Several references had wrong or partial titles, authors or pages; they now match their published record (Lucia 2003, Thomas 2016, Mountjoy 2023, Impellizzeri 2020).
+### Added
+- `tools/check_references.py` checks the principles and references against each other, and with `--live` against Europe PMC and Crossref (113 of 122 matched by the tool, 6 are books, data or notices, and 4 remain marked from memory because no index holds them). It runs with the other checks.
+
 ## 2.10.0-beta.14 - 2026-10-14
 ### Changed
 - On a phone, today's session now comes before the goal card on the Plan page. The goal card shows the forecast gap in one line and keeps how it is built under "How this forecast is built".

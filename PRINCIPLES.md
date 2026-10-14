@@ -24,6 +24,14 @@ ultramarathons and mountain races have almost no training trials at all, so sect
 race data and coaching practice, and say so. Women and older runners are under-represented. Averages hide wide individual
 differences in almost every finding. That is why Periodize My Run keeps measuring the athlete against their own history.
 
+## How the references are checked
+
+`tools/check_references.py` reads this file and checks it against itself: every principle carries a mark, every principle marked **[R]**
+names a study, every study named in a principle is in the reference list, and every study in the list is named. With `--live` it looks
+each article up in Europe PMC (and Crossref for journals PubMed does not index) and compares title, first author and year. Entries
+marked *From memory* are the four no index holds (a book chapter, a South African journal, a meteorology journal and a regulator's
+notice); the others were matched to their published record. This is how the 2022 respiratory-illness citation was found to name the wrong paper.
+
 ## 1. Foundations
 
 1. **Consistency beats any single session.** [R] (*moderate*) Over five years of elite athletes, those who completed most of
@@ -230,12 +238,12 @@ differences in almost every finding. That is why Periodize My Run keeps measurin
 54. **Illness means rest, then a gradual return.** [C] While sick, no running. Afterwards, easy running for as many days as you
     were out plus two (at least three, up to ten), building from half distance. Two entries that touch are one illness. The return
     is longer than the time out because symptoms of an acute respiratory illness last about a week on average in athletes
-    (Derman and colleagues, 2022), and the graded return-to-exercise templates, written for COVID-19 and not validated for other
+    (7.1 days, 95% interval 6.2 to 8.0, across 54 studies and 31,065 athletes: Snyders and colleagues, 2022), and the graded return-to-exercise templates, written for COVID-19 and not validated for other
     illnesses, run to about a week or more of easy steps before full training (Elliott and colleagues, 2020). No study tests the
     exact length; the numbers are this project's choice. [P]
 54a. **For two weeks after an illness, a poor recovery sign eases the long run and the sessions.** [P] The "neck check" used to
-    decide whether to run while ill has no scientific support, and evidence-based guidance on returning after a respiratory illness
-    is lacking (Derman and colleagues, 2022). On a morning in the two weeks after an illness you recorded, any readiness warning
+    decide whether to run while ill rests on a weak scientific basis (Hull and colleagues, 2020), and only 4 of the 54 studies in
+    a review reported days until return to sport after a respiratory illness (Snyders and colleagues, 2022). On a morning in the two weeks after an illness you recorded, any readiness warning
     sign, or a resting heart rate 4 or more above your own normal, turns a long run into an easy run of about 60% of its distance
     (up to 8 miles) and a session into easy running, and says why. This borrows the rule that readiness-guided training swapped hard
     days for easy ones when morning signs were poor (Düking and colleagues, 2021), and applies it with a lower threshold because
@@ -307,8 +315,10 @@ of ultra training, so read these as the best available reasoning, not proven met
 69. **Volume and experience matter most.** [R] (*moderate*) Previous ultra finishes, marathon best and weekly training volume
     predict ultra performance best (Knechtle and colleagues, 2010). Long runs stay easy, and in the specific phase a medium run
     the day before the long run practises running on tired legs. [C]
-70. **Start slower than feels necessary.** [R] (*moderate*) Almost every ultra runner slows down; the fastest start relatively
-    slower and hold their speed most evenly (race records from Western States and the Ultra-Trail du Mont-Blanc).
+70. **Start slower than feels necessary.** [R] (*moderate*) Across 13,829 results from the Ultra-Trail du Mont-Blanc, a steadier
+    pace went with a faster finish, in men and women and in every age group (Suter and colleagues, 2020). Pacing at the Western States
+    100 has been analysed for 3,837 finishers by sex, age and performance level (Markovic and colleagues, 2025); the abstract was read
+    and not the paper, so the common advice that the fastest runners start relatively slower is kept as coaching practice. [C]
 71. **Eat from the start, and keep eating.** [R] (*strong*) At least 30 to 50 g of carbohydrate an hour, more if your gut is
     trained to it (Tiller and colleagues, 2019). Drink to thirst; drinking too much, not too little, causes the dangerous fall in
     blood sodium (Hew-Butler and colleagues, 2015).
@@ -432,7 +442,8 @@ of ultra training, so read these as the best available reasoning, not proven met
     deviation) was exceeded, with individual thresholds (Foster, 1998). In 42,766 days of the 74 competitive runners' log, a monotony
     of 2 or more on daily distance went with an injury rate of 1.06 times that of other days (95% interval 0.80 to 1.38), and the
     top tenth of strain with 0.80 times. Illness was Foster's outcome and injury is the log's, so this does not refute the study, but it
-    gives no reason to warn on it. Periodize My Run shows monotony and strain on the Fitness page and no longer raises a watch-out. [P]
+    gives no reason to warn on it. A review of 48 studies (19,390 athletes) does list increased training monotony and lack of tapering among
+    the risk factors for acute respiratory illness (Derman and colleagues, 2022), so monotony is kept on the page. Periodize My Run shows monotony and strain on the Fitness page and no longer raises a watch-out. [P]
 94. **Getting used to heat takes repeated hot runs over one to two weeks.** [R] (*strong*) Heat acclimatisation, the most important
     thing an athlete can do to reduce the strain of the heat, comprises repeated exercise-heat exposures over 1 to 2 weeks (Racinais and
     colleagues, 2015). With weather switched on, the Fitness page counts your runs of 30 minutes or more at a WBGT of 18 °C or more in
@@ -446,7 +457,7 @@ of ultra training, so read these as the best available reasoning, not proven met
 96. **The marathon-pace long run is the durability session.** [R] (*moderate*) How well pace and economy hold up after hours of running
     is an independent determinant of marathon performance, apart from aerobic capacity and threshold (Jones, 2024; Maunder and
     colleagues, 2021), and it falls less in faster runners (Smyth and colleagues, 2022). Both low and high intensity training improved it
-    (Matomäki and colleagues, 2023), and strength training improved the durability of running economy late in 90 minutes of running
+    in sedentary and recreationally active adults on a bicycle (Matomäki and colleagues, 2023) (*limited* for runners), and strength training improved the durability of running economy late in 90 minutes of running
     (Zanini and colleagues, 2025) (*limited*). Periodize My Run's marathon-pace long run puts 3 easy miles first and the marathon-pace
     block after them, so that pace is practised on tired legs, and keeps the strength sessions through the specific phase (principle 33).
     How much durability work is enough has not been tested, so the amount is the same ladder as before. [P]
@@ -569,7 +580,7 @@ Research named above. Only findings are used; no text, tables or figures are rep
 (title, authors, journal and main finding) in October 2026 unless marked *from memory*; for those, check the paper before relying
 on a detail.
 
-- Bangsbo J and colleagues (2009). Reduced volume and increased training intensity elevate muscle Na+-K+ pump α2-subunit expression as well as short- and long-term work capacity in humans. *J Appl Physiol*. *From memory; finding search-confirmed.*
+- Bangsbo J and colleagues (2009). Reduced volume and increased training intensity elevate muscle Na+-K+ pump α2-subunit expression as well as short- and long-term work capacity in humans. *J Appl Physiol*. *Record confirmed.*
 - Afonseca LA, Watanabe RN, Duarte M (2022). A worldwide comparison of long-distance running training in 2019 and 2020: associated effects of the COVID-19 pandemic. *PeerJ* 10:e13192. Data: figshare 10.6084/m9.figshare.16620238, CC BY 4.0. *Dataset description read; analysis is this project's own.*
 - Lövdal SS, den Hartigh RJR, Azzopardi G (2021). Injury prediction in competitive runners with machine learning. *Int J Sports Physiol Perform* 16:1522–1531. Data: DataverseNL doi:10.34894/UWU9PV, CC0. *Dataset record and README read; analysis is this project's own; volume and pages from memory.*
 - Banister EW (1991). Modeling elite athletic performance. In: *Physiological Testing of Elite Athletes*. Human Kinetics. *From memory; a book chapter.*
@@ -586,11 +597,13 @@ on a detail.
 - Daniels J, Gilbert J (1979). *Oxygen Power: Performance Tables for Distance Runners*. A book; only its two published equations (the oxygen cost of running at a speed, and the fraction of capacity held for a given time) are used, not its tables. Not peer-reviewed.
 - Deaner RO, Carter RE, Joyner MJ, Hunter SK (2015). Men are more likely than women to slow in the marathon. *Med Sci Sports Exerc*. *Abstract read.*
 - Desai P, Jungmalm J, Börjesson M, Karlsson J, Grau S (2021). Recreational runners with a history of injury are twice as likely to sustain a running-related injury as runners with no history of injury: a 1-year prospective cohort study. *J Orthop Sports Phys Ther* 51:144–150. *Abstract read.*
-- Derman W and colleagues (2022). Incidence of and risk factors for acute respiratory illness in athletes: a systematic review and meta-analysis by an IOC consensus subgroup. *Br J Sports Med*. *From memory; finding search-confirmed (about 20% of illnesses cost more than a day of training; symptoms last about 7 days on average; the neck check has no scientific support).*
+- Derman W, Badenhorst M, Eken M, Gomez-Ezeiza J, Fitzpatrick J, Gleeson M, Kunorozva L, Mjosund K, Mountjoy M, Sewry N, Schwellnus M (2022). Risk factors associated with acute respiratory illnesses in athletes: a systematic review by a subgroup of the IOC consensus on "acute respiratory illness in the athlete". *Br J Sports Med* 56:639–650. *Abstract read.*
+- Snyders C, Pyne DB, Sewry N, Hull JH, Kaulback K, Schwellnus M (2022). Acute respiratory illness and return to sport: a systematic review and meta-analysis by a subgroup of the IOC consensus on "acute respiratory illness in the athlete". *Br J Sports Med* 56:223–231. *Abstract read.*
+- Hull JH, Loosemore M, Schwellnus M (2020). Respiratory health in athletes: facing the COVID-19 challenge. *Lancet Respir Med* 8:557–558. *Text read for the neck check.*
 - Dial MB and colleagues (2025). Validation of nocturnal resting heart rate and heart rate variability in consumer wearables. *Physiol Rep*.
 - Doherty C and colleagues (2020). An evaluation of the training determinants of marathon performance: a meta-analysis with meta-regression. *J Sci Med Sport* 23:182–188.
 - Düking P and colleagues (2021). Monitoring and adapting endurance training on the basis of heart rate variability monitored by wearable technologies. *J Sci Med Sport*.
-- Elliott N and colleagues (2020). Infographic. Graduated return to play guidance following COVID-19 infection. *Br J Sports Med*. *From memory; check the paper before relying on a detail.*
+- Elliott N and colleagues (2020). Infographic. Graduated return to play guidance following COVID-19 infection. *Br J Sports Med*. *Record confirmed.*
 - El Helou N and colleagues (2012). Impact of environmental parameters on marathon running performance. *PLoS One*. *Abstract read.*
 - Ely MR, Cheuvront SN, Roberts WO, Montain SJ (2007). Impact of weather on marathon-running performance. *Med Sci Sports Exerc*.
 - Esteve-Lanao J, Foster C, Seiler S, Lucia A (2007). Impact of training intensity distribution on performance in endurance athletes. *J Strength Cond Res* 21:943–949.
@@ -612,10 +625,10 @@ on a detail.
 - Hollander K and colleagues (2021). Sex-specific differences in running injuries: a systematic review with meta-analysis and meta-regression. *Sports Med*. *Abstract read.*
 - Hulme A, Nielsen RO, Timpka T, Verhagen E, Finch C (2017). Risk and protective factors for middle- and long-distance running-related injury. *Sports Med*. *Abstract read.*
 - Hunter B, Muniz-Pumares D (2025). Durability of parameters associated with endurance running in marathoners. *Eur J Sport Sci* 25:e70073.
-- Iaia FM and colleagues (2009). Four weeks of speed endurance training reduces energy expenditure during exercise and maintains muscle oxidative capacity despite a reduction in training volume. *J Appl Physiol*. *From memory; finding search-confirmed.*
-- Impellizzeri FM and colleagues (2020). Acute:chronic workload ratio: conceptual issues and fundamental pitfalls. *Int J Sports Physiol Perform*.
+- Iaia FM and colleagues (2009). Four weeks of speed endurance training reduces energy expenditure during exercise and maintains muscle oxidative capacity despite a reduction in training volume. *J Appl Physiol*. *Record confirmed.*
+- Impellizzeri FM, Tenan MS, Kempton T, Novak A, Coutts AJ (2020). Acute:chronic workload ratio: conceptual issues and fundamental pitfalls. *Int J Sports Physiol Perform* 15:907–913. *Record confirmed.*
 - Ivarsson A and colleagues (2017). Psychosocial factors and sport injuries: meta-analyses for prediction and prevention. *Sports Med*. *Abstract read.*
-- Jeukendrup A (2014). A step towards personalized sports nutrition: carbohydrate intake during exercise. *Sports Med*. *From memory.*
+- Jeukendrup A (2014). A step towards personalized sports nutrition: carbohydrate intake during exercise. *Sports Med*. *Record confirmed.*
 - Jones A (2025). Road running age standards. Public domain (CC0).
 - Jones AM (2024). The fourth dimension: physiological resilience as an independent determinant of endurance exercise performance. *J Physiol* 602:4113–4128.
 - Joyner MJ, Coyle EF (2008). Endurance exercise performance: the physiology of champions. *J Physiol* 586:35–44.
@@ -625,19 +638,22 @@ on a detail.
 - Lipman GS and colleagues (2017). Ibuprofen versus placebo effect on acute kidney injury in ultramarathons: a randomised controlled trial. *Emerg Med J* 34:637–642.
 - Llanos-Lagos C, Ramirez-Campillo R, Moran J, Sáez de Villarreal E (2024). Effect of strength training programs in middle- and long-distance runners' economy at different running speeds: a systematic review with meta-analysis. *Sports Med* 54.
 - Lopes TR and colleagues (2023). How much does sleep deprivation impair endurance performance? A systematic review and meta-analysis. *Eur J Sport Sci* 23:1279–1292.
-- Lucia A and colleagues (2003). Tour de France versus Vuelta a España: which is harder? *Med Sci Sports Exerc*. *From memory.*
+- Lucia A, Hoyos J, Santalla A, Earnest C, Chicharro JL (2003). Tour de France versus Vuelta a España: which is harder? *Med Sci Sports Exerc* 35:872–878. *Record confirmed.*
 - Manresa-Rocamora A and colleagues (2021). Heart rate variability-guided training for enhancing cardiac-vagal modulation, aerobic fitness, and endurance performance. *Int J Environ Res Public Health*.
 - Mantzios K and colleagues (2022). Effects of weather parameters on endurance running performance: discipline-specific analysis of 1258 races. *Med Sci Sports Exerc*. *Abstract read.*
+- Markovic S, Cuk I, Nikolaidis PT, Weiss K, Rosemann T, Scheer V, Thuany M, Knechtle B (2025). Pacing in ultra-marathon running: the Western States 100-mile endurance run 2006–2023. *Sci Rep* 15:8926. *Abstract read (part).*
 - Martin T, Arnal PJ, Hoffman MD, Millet GY (2018). Sleep habits and strategies of ultramarathon runners. *PLoS One* 13:e0194705.
 - Martínez-Navarro I and colleagues (2021). The week after running a marathon: effects of running vs elliptical training vs resting. *Eur J Sport Sci*.
+- Matomäki P, Heinonen OJ, Nummela A, Laukkanen J, Auvinen EP, Pirkola L, Kyröläinen H (2023). Durability is improved by both low and high intensity endurance training. *Front Physiol* 14:1128111. *Abstract read. Sedentary and recreationally active adults, cycling: not runners.*
+- Maunder E, Seiler S, Mildenhall MJ, Kilding AE, Plews DJ (2021). The importance of "durability" in the physiological profiling of endurance athletes. *Sports Med* 51:1619–1628. *Abstract read.*
 - McNulty KL and colleagues (2020). The effects of menstrual cycle phase on exercise performance in eumenorrheic women: a systematic review and meta-analysis. *Sports Med*. *Abstract's conclusion read; authors and year from memory.*
 - Meeusen R and colleagues (2013). Prevention, diagnosis, and treatment of the overtraining syndrome: joint consensus statement of the ECSS and the ACSM. *Med Sci Sports Exerc* 45:186–205.
 - Midgley AW, McNaughton LR, Wilkinson M (2006). Is there an optimal training intensity for enhancing the maximal oxygen uptake of distance runners? *Sports Med* 36:117–132.
 - Miller DJ, Sargent C, Roach GD (2022). A validation of six wearable devices for estimating sleep, heart rate and heart rate variability in healthy adults. *Sensors*. *Abstract read.*
-- Minetti AE and colleagues (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *J Appl Physiol*. *From memory.*
+- Minetti AE and colleagues (2002). Energy cost of walking and running at extreme uphill and downhill slopes. *J Appl Physiol*. *Record confirmed.*
 - Mølmen KS, Øfsteng SJ, Rønnestad BR (2019). Block periodization of endurance training: a systematic review and meta-analysis. *Open Access J Sports Med*.
 - Montero D, Lundby C (2017). Refuting the myth of non-response to exercise training: 'non-responders' do respond to higher dose of training. *J Physiol*. *Abstract read.*
-- Mountjoy M and colleagues (2023). 2023 International Olympic Committee's consensus statement on Relative Energy Deficiency in Sport (REDs). *Br J Sports Med*.
+- Mountjoy M and colleagues (2023). 2023 International Olympic Committee's (IOC) consensus statement on Relative Energy Deficiency in Sport (REDs). *Br J Sports Med* 57:1073–1097. *Record confirmed.*
 - Mujika I, Padilla S (2000). Detraining: loss of training-induced physiological and performance adaptations. Parts I and II. *Sports Med* 30:79–87 and 145–154.
 - Morton RH, Fitz-Clarke JR, Banister EW (1990). Modeling human performance in running. *J Appl Physiol* 69:1171–1177. *Abstract read.*
 - Muniz-Pumares D and colleagues (2024). The training intensity distribution of marathon runners across performance levels. *Sports Med*.
@@ -671,9 +687,10 @@ on a detail.
 - Stutz J, Eiholzer R, Spengler CM (2019). Effects of evening exercise on sleep in healthy participants: a systematic review and meta-analysis. *Sports Med*. *Abstract read.*
 - Stull R (2011). Wet-bulb temperature from relative humidity and air temperature. *J Appl Meteorol Climatol* 50:2267–2269. *From memory; only its formula is used.*
 - Swain P, Biggins J, Gordon D (2020). Marathon pacing ability: training characteristics and previous experience. *Eur J Sport Sci*. *Abstract read.*
+- Suter D, Sousa CV, Hill L, Scheer V, Nikolaidis PT, Knechtle B (2020). Even pacing is associated with faster finishing times in ultramarathon distance trail running: the "Ultra-Trail du Mont Blanc" 2008–2019. *Int J Environ Res Public Health* 17:7074. *Abstract read.*
 - Tanaka H, Seals DR (2008). Endurance exercise performance in Masters athletes: age-associated changes and underlying physiological mechanisms. *J Physiol* 586:55–63.
 - Thomas C, Jones H, Whitworth-Turner C, Louis J (2020). High-intensity exercise in the evening does not disrupt sleep in endurance runners. *Eur J Appl Physiol*. *Abstract read.*
-- Thomas DT, Erdman KA, Burke LM (2016). Nutrition and athletic performance: joint position statement. *Med Sci Sports Exerc* 48:543–568.
+- Thomas DT, Erdman KA, Burke LM (2016). American College of Sports Medicine joint position statement: nutrition and athletic performance. *Med Sci Sports Exerc* 48:543–568.
 - Tiller NB and colleagues (2019). International Society of Sports Nutrition position stand: nutritional considerations for single-stage ultra-marathon training and racing. *J Int Soc Sports Nutr* 16:50.
 - Tiller NB, Millet GY (2024). Decoding ultramarathon: muscle damage as the main impediment to performance. *Sports Med* 55:535–543.
 - Tønnessen E, Sandbakk Ø, Sandbakk SB, Seiler S, Haugen T (2024). Training session models in endurance sports: a Norwegian perspective on best practice recommendations. *Sports Med* 54:2935–2953.
@@ -685,5 +702,5 @@ on a detail.
 - Vihma T (2010). Effects of weather on the performance of marathon runners. *Int J Biometeorol*. *Abstract read.*
 - Walsh NP and colleagues (2021). Sleep and the athlete: narrative review and 2021 expert consensus recommendations. *Br J Sports Med* 55:356–368.
 - Wang Z and colleagues (2023). Effects of tapering on performance in endurance athletes: a systematic review and meta-analysis. *PLoS One*.
-- Wingo JE, Ganio MS, Cureton KJ (2012). Cardiovascular drift during heat stress: implications for exercise prescription. *Exerc Sport Sci Rev*. *From memory.*
+- Wingo JE, Ganio MS, Cureton KJ (2012). Cardiovascular drift during heat stress: implications for exercise prescription. *Exerc Sport Sci Rev*. *Record confirmed.*
 - Zanini M, Folland JP and colleagues (2025). Strength training improves running economy durability and fatigued high-intensity performance in well-trained male runners: a randomized control trial. *Med Sci Sports Exerc*.
