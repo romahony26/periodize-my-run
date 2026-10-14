@@ -35,8 +35,8 @@ class Stop(Exception):
     pass
 
 
-def run(cmd, **kw):
-    return subprocess.run(cmd, capture_output=True, text=True, cwd=kw.pop("cwd", APP), **kw)  # noqa: S603, S607 - git, ssh and python, by name
+def run(cmd, text=True, **kw):
+    return subprocess.run(cmd, capture_output=True, text=text, cwd=kw.pop("cwd", APP), **kw)  # noqa: S603, S607 - git, ssh and python, by name
 
 
 def ssh(command, host=HOST, timeout=120):
