@@ -129,7 +129,7 @@ function foldNotes(root){root.querySelectorAll('p.xs.mute').forEach(p=>{
   if(p.id||p.closest('details,table,.modal,.ov')||p.textContent.length<150||p.parentElement.classList.contains('stat')||/^(Load this week|Warning signs)/.test(p.textContent))return;     // numbers stay in view
   const d=document.createElement('details');d.className='note';d.innerHTML='<summary>What is this?</summary>';p.replaceWith(d);d.append(p)})}
 function setFtab(t){FTAB=t;try{localStorage.setItem('ftab',t)}catch(e){}
-  $$('[data-fsec]').forEach(c=>c.hidden=c.dataset.fsec!==t);$$('[data-ftab]').forEach(b=>{const on=b.dataset.ftab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')})}
+  $$('[data-fsec]').forEach(c=>c.hidden=c.dataset.fsec!==t);$$('[data-ftab]').forEach(b=>{const on=b.dataset.ftab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});const l=$('.stabs[aria-label="Fitness sections"]');if(l)rove(l)}
 function polish(){const m=$('#main');if(!m)return;
   if(view==='plan'){
     const g=m.querySelector('.hero');if(g){g.id='goalcard';
@@ -153,8 +153,9 @@ function polish(){const m=$('#main');if(!m)return;
     foldNotes(grid);
     const bar=document.createElement('div');bar.className='stabs';bar.setAttribute('role','tablist');bar.setAttribute('aria-label','Fitness sections');
     bar.innerHTML=FSECS.map(([k,t])=>`<button role="tab" data-ftab="${k}">${t}</button>`).join('');
-    grid.before(bar);bar.querySelectorAll('button').forEach(b=>b.onclick=()=>setFtab(b.dataset.ftab));setFtab(FTAB)}
+    grid.before(bar);bar.querySelectorAll('button').forEach(b=>b.onclick=()=>setFtab(b.dataset.ftab));tabKeys(bar,b=>setFtab(b.dataset.ftab));setFtab(FTAB)}
 }
+const skel=(n=3)=>`<div class="skel" role="status" aria-live="polite" aria-label="Loading">${Array.from({length:n},(_,i)=>`<i style="width:${[92,78,64,86][i%4]}%"></i>`).join('')}<span class="sr">Loading</span></div>`;
 function ring(pct,label){const c=2*Math.PI*30;return `<svg class="ring" viewBox="0 0 74 74"><circle cx="37" cy="37" r="30" fill="none" stroke="var(--line)" stroke-width="6"/><circle cx="37" cy="37" r="30" fill="none" stroke="url(#lg)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-pct)}" transform="rotate(-90 37 37)"/><text x="37" y="42" text-anchor="middle">${label}</text></svg>`}
 function chart(title,rows,val,tip,label){
   if(!rows||rows.length<2)return '';
@@ -194,6 +195,7 @@ function planView(){
   h+=`<div class="card c6"><p class="eyebrow">Today ${r&&r.date===S.today?`<span class="chip ${r.level}"><i></i>${lev[r.level]}</span>`:''}</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}</span></p>
     ${stepList(t.text)}
+    ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button></div>`:''}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
     ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}</p>`:''}
     ${r&&r.date===S.today?`<p class="xs mute" style="margin:10px 0 0">${E(r.reasons.join(' · '))}</p>${r.sleep_h||r.hrv?`<p class="xs mute" style="margin:4px 0 0">Last night: ${[r.sleep_h?r.sleep_h.toFixed(1)+' h sleep':'',r.sleep_score?'sleep score '+r.sleep_score:'',r.hrv?'HRV '+Math.round(r.hrv):'',r.rhr?'resting HR '+Math.round(r.rhr):''].filter(Boolean).join(' · ')}</p>`:''}`:''}
@@ -387,16 +389,22 @@ function prefs(s){return `<div class="row"><div><label for="units">Distances in<
   <p class="xs mute">Set the sync time for after you usually wake and your watch has synced, so last night's sleep is counted.</p>`}
 function prefsRead(){return {week_start:+$('#week_start').value,units:$('#units').value,run_days:+$('#run_days').value,long_day:+$('#long_day').value,run_time:$('#run_time').value,push_enabled:$('#push_enabled').value==='1',
   blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
+/* Arrow keys, Home and End move between the tabs of a row, and only the selected tab is in the tab order (the pattern screen readers expect). */
+function tabKeys(list,activate){if(!list||list.dataset.keys)return;list.dataset.keys='1';
+  list.addEventListener('keydown',e=>{const tabs=[...list.querySelectorAll('[role=tab]')],i=tabs.indexOf(document.activeElement);if(i<0)return;
+    const to={ArrowRight:(i+1)%tabs.length,ArrowLeft:(i-1+tabs.length)%tabs.length,Home:0,End:tabs.length-1}[e.key];
+    if(to===undefined)return;e.preventDefault();tabs[to].focus();activate(tabs[to])})}
+function rove(list){list.querySelectorAll('[role=tab]').forEach(b=>b.tabIndex=b.getAttribute('aria-selected')==='true'?0:-1)}
 let STAB=(()=>{try{return localStorage.getItem('stab')||'train'}catch(e){return 'train'}})();
 const STABS=[['train','Training'],['watch','Watch and data'],['env','Weather and maps'],['backup','Backups'],['about','About']];
 function setStab(t){STAB=t;try{localStorage.setItem('stab',t)}catch(e){}
-  $$('[data-p]').forEach(x=>x.hidden=x.dataset.p!==t);$$('[data-stab]').forEach(b=>{const on=b.dataset.stab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')})}
+  $$('[data-p]').forEach(x=>x.hidden=x.dataset.p!==t);$$('[data-stab]').forEach(b=>{const on=b.dataset.stab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});const l=$('.stabs[aria-label="Settings sections"]');if(l)rove(l)}
 function statusStrip(){const gm=S.garmin,w=S.watch||{source:'garmin'},chip=(ok,t)=>`<span class="chip ${ok?'green':'unknown'}"><i></i>${t}</span>`;
   const src=w.source==='garmin'?chip(gm.connected,gm.connected?'Garmin connected':'Garmin not connected'):chip(w.connected,E(w.name||'Watch')+(w.connected?' connected':' not connected'));
   return `<div class="sstrip">${src}${chip(S.settings.push_enabled&&w.source==='garmin','Workouts '+(S.settings.push_enabled&&w.source==='garmin'?'sent to the watch':'not sent to the watch'))}${chip(S.heat&&S.heat.on,'Weather '+(S.heat&&S.heat.on?'on':'off'))}${chip(S.has_password,'App password '+(S.has_password?'set':'not set'))}</div>`}
 function settingsView(){const s=S.settings;
-  const tabs=`<div class="stabs" role="tablist" aria-label="Settings sections">${STABS.map(([k,t])=>`<button role="tab" class="${STAB===k?'on':''}" data-stab="${k}" aria-selected="${STAB===k}">${t}</button>`).join('')}</div>`;
-  const P=(k,html)=>`<div class="grid sgrid" data-p="${k}" ${STAB===k?'':'hidden'}>${html}</div>`;
+  const tabs=`<div class="stabs" role="tablist" aria-label="Settings sections">${STABS.map(([k,t])=>`<button role="tab" id="stab-${k}" aria-controls="sp-${k}" tabindex="${STAB===k?0:-1}" class="${STAB===k?'on':''}" data-stab="${k}" aria-selected="${STAB===k}">${t}</button>`).join('')}</div>`;
+  const P=(k,html)=>`<div class="grid sgrid" id="sp-${k}" role="tabpanel" aria-labelledby="stab-${k}" data-p="${k}" ${STAB===k?'':'hidden'}>${html}</div>`;
   const train=`<div class="card c12" data-replan><p class="eyebrow">How you train</p>${prefs(s)}${windowFields()}</div>
   <div class="card c12" data-replan><p class="eyebrow">Advanced</p><p class="xs mute" style="margin:0">Leave these alone unless you know you need them: each one starts from your own history.</p>
    <details class="adv"><summary>Show advanced settings</summary><div class="fgrid">
@@ -508,11 +516,11 @@ function connections(part){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span clas
     <p class="small">Shows each run on a real map. Map images are loaded from OpenStreetMap when you open a run, so its servers see which area you are looking at. No account, name or run data is sent. Switched off, routes are drawn as an outline and nothing is loaded from outside.</p>
     <label for="mapsw">Show runs on a real map</label>${yn('mapsw',S.map_tiles)}</div>`;
   return part==='env'?env:data}
-function aboutView(){if(!ABOUT)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
+function aboutView(){if(!ABOUT)return `<div class="grid"><div class="card c12 loading">${skel(4)}</div></div>`;
   return '<div class="grid">'+ABOUT.map(s=>`<div class="card c6"><p class="eyebrow">${E(s.title)}</p><ul class="why" style="margin:0">${s.items.map(i=>`<li>${E(i)}</li>`).join('')}</ul></div>`).join('')+refsCard()+'</div>'}
-function logView(){return `<div class="grid"><div class="card c12"><p class="eyebrow">Activity log <button class="ghost" id="lr">Refresh</button></p><pre>${E(logs.join(''))||'Loading…'}</pre></div></div>`}
+function logView(){return `<div class="grid"><div class="card c12"><p class="eyebrow">Activity log <button class="ghost" id="lr">Refresh</button></p><pre tabindex="0" role="region" aria-label="Activity log">${E(logs.join(''))||'Loading…'}</pre></div></div>`}
 function histView(){
-  if(!HIST)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
+  if(!HIST)return `<div class="grid"><div class="card c12 loading">${skel(4)}</div></div>`;
   const H=HIST;
   let h=`<div class="grid"><div class="card"><p class="eyebrow">Execution, last 12 weeks</p>${H.average!==null?`<div class="big num ${scc(H.average)}">${H.average}</div><p class="small mute">average over ${H.count} planned session${H.count===1?'':'s'}</p>`:'<p class="small mute">No planned sessions have passed yet.</p>'}</div>
     <div class="card c8" id="exectrend"><p class="eyebrow">Execution score over time</p>${H.weeks.length>1?chart('Average execution score',H.weeks,x=>x.avg,x=>'Week of '+nice(x.week)+': '+x.avg+' over '+x.n+' sessions',x=>nice(x.week)):`<p class="small mute">${H.weeks.length?`Week of ${nice(H.weeks[0].week)}: ${H.weeks[0].avg} over ${H.weeks[0].n} session${H.weeks[0].n===1?'':'s'}. A chart appears after a second week.`:'Builds up week by week from the day the app started planning for you.'}</p>`}
@@ -617,7 +625,7 @@ function trendModal(){if(!TRV)return '';const t=TR&&TR[TRV];
   return `<div class="ov" id="tov"><div class="modal" style="width:min(680px,100%)" role="dialog" aria-modal="true" aria-labelledby="tmt"><p class="eyebrow"><span id="tmt">${E(t?t.title:'Trend')}</span> ${t?dirTag(t.dir,t.window):''}<button class="ghost" id="trex" style="margin-left:auto" aria-label="Close">Close</button></p>
     ${body}${t?`<p class="small" style="margin:10px 0 0">${E(t.text)}</p>${t.change!=null&&TRV!=='steps'?`<p class="xs mute" style="margin:6px 0 0">Change over ${E(t.window)}: <b class="num">${t.change>0?'+':''}${t.change}${TRV==='speed'?'%':TRV==='base'?' points':' points of drift'}</b></p>`:''}`:''}</div></div>`}
 function accuracyCard(){const A=TR&&TR.races;
-  if(!A)return TR?'':`<div class="card c12" id="acccard"><p class="eyebrow">How accurate are the predictions?</p><p class="small mute"><span class="spin"></span>Loading</p></div>`;
+  if(!A)return TR?'':`<div class="card c12 loading" id="acccard"><p class="eyebrow">How accurate are the predictions?</p>${skel(3)}</div>`;
   const lean=Math.abs(A.bias)<1?'They are about right on average.':A.bias>0?`On average they are <b>${A.bias}% slower</b> than you actually ran: on the cautious side.`:`On average they are <b>${Math.abs(A.bias)}% faster</b> than you actually ran: on the optimistic side.`;
   return `<div class="card c12" id="acccard"><p class="eyebrow">How accurate are the predictions?</p>
     <p class="small" style="margin:0">Over your last ${A.n} race${A.n>1?'s':''}, predictions were off by <b>${A.mean_abs}%</b> on average. ${lean}</p>
@@ -625,14 +633,14 @@ function accuracyCard(){const A=TR&&TR.races;
       ${A.rows.map(r=>`<tr><td class="num">${nice(r.date)} ${r.date.slice(0,4)}</td><td>${E(r.distance)}${r.name!==r.distance?` <span class="mute xs">${E(r.name)}</span>`:''}</td><td class="r num">${r.predicted}</td><td class="r num" ${r.weather?`title="${E(r.weather)}"`:''}><b>${r.actual}</b>${r.weather&&r.weather.includes('Worth')?' <span class="xs mute">☀</span>':''}</td><td class="r num ${Math.abs(r.error)<=2?'green':Math.abs(r.error)<=5?'':'amber'}">${r.error>0?'+':''}${r.error}%</td></tr>`).join('')}</table></div>
     <p class="xs mute" style="margin:8px 0 0">Each prediction is rebuilt from what was known the Monday before the race, with today's rules, and compared with your time adjusted to a flat course where the course is known, and to neutral weather where the day's weather is known (marked ☀). A plus means the prediction was slower than you ran. Wind, pacing and how hard you raced all add to the gap.</p></div>`}
 function recoveryCard(){const R=TR&&TR.recovery;
-  if(!R)return `<div class="card c12" id="reccard"><p class="eyebrow">Recovery trends</p><p class="small mute">${TR?'Builds up once a few weeks of sleep and HRV are in.':'<span class="spin"></span>Loading'}</p></div>`;
+  if(!R)return `<div class="card c12${TR?'':' loading'}" id="reccard"><p class="eyebrow">Recovery trends</p>${TR?'<p class="small mute">Builds up once a few weeks of sleep and HRV are in.</p>':skel(4)}</div>`;
   const one=(k,color,invert)=>{const x=R[k];if(!x||x.rows.length<3)return '';const ser=x.rows.map(r=>[dayNum(r.date),r.v]);const fv=v=>v+' '+x.unit;
     return `<div style="grid-column:span 4;min-width:0">${lineChart(ser,1,color,x.label,fv,invert,s=>{const r=x.rows.find(y=>dayNum(y.date)===s[0]);return nice(r.date)+': '+fv(r.v)})}
       <p class="xs mute" style="margin:4px 0 0">${x.normal?`Your normal ${x.normal[0]} ${x.unit} (±${x.normal[1]}) `:''}${dirTag(x.dir,'7 days against your normal')}</p></div>`};
   return `<div class="card c12" id="reccard"><p class="eyebrow">Recovery trends</p><div class="grid" style="gap:18px">${one('hrv','var(--green)',false)}${one('rhr','var(--amber)',true)}${one('sleep_h','var(--brand)',false)}</div>
     <p class="xs mute" style="margin:8px 0 0">7-day averages over 12 weeks, the way the research reads them: one night is noise, a week-long drift is real. Higher HRV, lower resting heart rate and more sleep are better, so each chart is drawn with better as up. These are the same figures the daily adjustment uses.</p></div>`}
 let CLALL=false;
-function changesView(){if(!CHANGES)return '<div class="grid"><div class="card c12"><span class="spin"></span>Loading</div></div>';
+function changesView(){if(!CHANGES)return `<div class="grid"><div class="card c12 loading">${skel(4)}</div></div>`;
   const col={Added:'green',Changed:'amber',Removed:'red',Fixed:'unknown'}, SHOW=6;
   const inline=t=>E(t).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
   const list=CLALL?CHANGES:CHANGES.slice(0,SHOW);
@@ -743,11 +751,15 @@ function bind(){
     $('#sml').textContent=k==='recovering'?'While recovering I want to run':'On holiday I want to run';
     $('#sm').innerHTML=Object.entries(m).map(([v,l])=>`<option value="${v}" ${v==='easy'?'selected':''}>${E(l)}</option>`).join('')};
   if($('#sk'))$('#sk').onchange=()=>modeFor($('#sk').value);
+  on('#qa-swap',async()=>{const x=new Date(S.today+'T12:00');x.setDate(x.getDate()+1);const to=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+    const r=await api('plan/move',{from:S.today,to});r.warning?toast(r.warning,'warn'):toast('Swapped with tomorrow. Updating your watch.');await load()});
+  on('#qa-sick',async()=>{await api('status',{kind:'sick',mode:'',start:S.today,end:S.today,note:''});toast('Rest today. Replanning with a gentle return.');await load()});
   on('#sday',async()=>{const d=$('#ss').value||S.today;await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:d,end:d,note:$('#sn').value});toast('Saved for one day. Replanning.');await load()});
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});
   $$('[data-sdel]').forEach(b=>b.onclick=async()=>{await api('status/'+b.dataset.sdel,null,'DELETE');await load()});
   $$('[data-gohours]').forEach(a=>a.onclick=e=>{e.preventDefault();gotoHours()});
   $$('[data-stab]').forEach(b=>b.onclick=()=>setStab(b.dataset.stab));
+  tabKeys($('.stabs[aria-label="Settings sections"]'),b=>setStab(b.dataset.stab));
   on('#ssave2',()=>$('#ssave').click());
   on('#rwsave',async()=>{const w=rwRead('rw'),x=rwRead('rx');if(w===false||x===false)return toast('The earliest start must not be after the latest.','err');
     await api('settings',{run_window:w,run_window_weekend:x});toast('Hours saved');await load()});

@@ -3,6 +3,20 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.16 - 2026-10-14
+### Added
+- Quick actions on today's card: "Swap with tomorrow" and "I'm unwell today". They appear only on a day with a planned run that has not been done.
+- The settings and Fitness tab rows work from the keyboard: arrow keys, Home and End move between tabs, and only the selected tab is a tab stop.
+- `tools/deploy.py` puts a tag on the Pi, checks that it answers as the right version with the state the page needs and no tracebacks, and puts the old version back if it does not. It also keeps a copy of the tests, which are not in git.
+- Every page and tab is measured in light and dark at three widths for text under 11 px, text cut off, cards on top of each other and empty cards; dark mode is checked for contrast; tap targets are checked on a phone; and card positions are compared with a recorded baseline.
+- Coverage of the app's code rose from 85% to 91%: every Garmin read is tested against a stand-in client in the real reply shapes, and so are the notification rules, when syncs are due and each way today's session is changed.
+- `tools/mutation_check.py` makes small changes to the rules and reports which the tests do not notice. The first sample of 70 found 26 unnoticed (63% caught); after pinning the numbers that define the pace zones, race factors and thresholds, and the day-part and sleep comparisons, the same sample catches 83%.
+- Generated cases check that the race equivalence is its own inverse, that rank correlation is bounded, and that every day the planner can produce becomes a valid Garmin workout and a FIT file an independent reader accepts.
+### Changed
+- The Fitness page's loading cards show a placeholder that holds their height, so the page no longer jumps when they fill, and say "Loading" to a screen reader.
+- The Fitness, fatigue and form chart starts at your first run instead of drawing weeks of flat zeros before it.
+- Small text is at least 11 px everywhere, and the small icon links on a day are 30 px square, so they are easier to hit on a phone.
+
 ## 2.10.0-beta.15 - 2026-10-14
 ### Fixed
 - Principles 54 and 54a gave the wrong source for how long respiratory illness lasts in athletes and for the "neck check". The figures (7.1 days; 20% of illnesses costing more than a day of training; only 4 of 54 studies reporting days until return to sport) come from Snyders and colleagues (2022), and the neck check's weak basis from Hull and colleagues (2020). Derman and colleagues (2022) is a review of risk factors, and it lists increased training monotony and lack of tapering among them.

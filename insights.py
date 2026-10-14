@@ -56,8 +56,11 @@ def form(today, tp, hrmax, show=120):
         d += dt.timedelta(days=1)
     now = out[-1]
     wk = lambda a, b: sum(x["load"] for x in out[len(out) - b:len(out) - a] or [])
-    res = {"days": out, "fitness": now["fitness"], "fatigue": now["fatigue"], "form": round(now["fitness"] - now["fatigue"], 1),
-           "week": wk(0, 7), "prev_week": wk(7, 14), "fitness_4w_ago": out[-29]["fitness"] if len(out) > 29 else None}
+    four_weeks_ago = out[-29]["fitness"] if len(out) > 29 else None
+    first = next((i for i, x in enumerate(out) if x["load"] > 0), 0)      # the days before the first run are not a trend: they were a flat line at zero
+    shown = out[max(0, min(first - 3, len(out) - 21)):]
+    res = {"days": shown, "fitness": now["fitness"], "fatigue": now["fatigue"], "form": round(now["fitness"] - now["fatigue"], 1),
+           "week": wk(0, 7), "prev_week": wk(7, 14), "fitness_4w_ago": four_weeks_ago}
     res.update(monotony(out))
     return res
 

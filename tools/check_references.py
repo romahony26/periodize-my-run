@@ -92,7 +92,10 @@ def _get(url, tries=4):
     import time
     for k in range(tries):
         try:
-            with urllib.request.urlopen(url, timeout=30) as f:  # noqa: S310 - fixed https hosts
+            if not url.startswith("https://"):
+                raise ValueError("only https addresses are fetched")
+            # https only, and only the two index hosts named above
+            with urllib.request.urlopen(url, timeout=30) as f:  # noqa: S310  # nosec B310
                 return json.load(f)
         except urllib.error.HTTPError as e:
             if e.code != 429 or k == tries - 1:
