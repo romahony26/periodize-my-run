@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.17 - 2026-10-16
+### Added
+- "Extra volume in build weeks" in Settings, under Advanced: off (0%) by default, or +5%, +10% or +15%. It raises build weeks after the usual 20% rise limit, so it goes past what the research supports (Damsted and colleagues, 2019); the week's explanation says so. Return, down, taper and race weeks are never raised.
+
 ## 2.10.0-beta.16 - 2026-10-14
 ### Added
 - Quick actions on today's card: "Swap with tomorrow" and "I'm unwell today". They appear only on a day with a planned run that has not been done.

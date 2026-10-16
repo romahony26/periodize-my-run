@@ -312,6 +312,12 @@ def _plan(st, c, L, races):
             target = 1.20 * recent_best
             why.append(f"Volume rise limited to 20% above your best of the last three weeks ({dist(half(recent_best), c['units'])}). "
                        "A week raised by 20% or more was followed by more injuries (Damsted and colleagues, 2019). [P]")
+        boost = c.get("volume_boost") or 0.0
+        if boost and not quality_new and not gap:
+            # the athlete's own choice, applied after the limit above, so it is the one rule in this block they can override; build weeks only
+            target *= 1 + boost
+            why.append(f"Volume raised a further {boost:.0%} because you set extra volume. This goes past the 20% limit above, which is the research-backed figure; "
+                       "set it back to 0% if injuries or illness start to show.")
     else:
         target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": comeback[0] if comeback else 0.80 * prior3,
                   "postrace": min(0.5 * ref, 25), "tuneup": 0.75 * ref,

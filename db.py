@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT
 DEFAULTS = {
     "units": "km", "long_day": 6, "run_days": 6, "strength": True,
     "run_time": "06:30", "push_enabled": True, "push_days": 21, "easy_target": "none", "pace_window": 0.015,
-    "hrmax": None, "weekly_increase": 0.06, "build_weeks_before_down": 3, "min_miles": 8, "blocked_days": [], "week_start": 0, "forecast_completion": None, "auto_backup": True, "aero_test": False, "aero_format": "original", "aero_test_weeks": 6, "aero_runs": False, "aero_lthr": None, "weeks_ahead": 3, "push_strength": True, "seed_threshold": None, "notify_url": "",
+    "hrmax": None, "weekly_increase": 0.06, "volume_boost": 0.0, "build_weeks_before_down": 3, "min_miles": 8, "blocked_days": [], "week_start": 0, "forecast_completion": None, "auto_backup": True, "aero_test": False, "aero_format": "original", "aero_test_weeks": 6, "aero_runs": False, "aero_lthr": None, "weeks_ahead": 3, "push_strength": True, "seed_threshold": None, "notify_url": "",
     "min_easy_run_miles": 3.5, "max_easy_run_miles": 10, "race_carbs_g_per_h": 60, "map_tiles": False, "heat_adjust": False, "update_check": True, "gel_carbs_g": 25, "sex": None, "birth_date": None,
     "threshold_hr_fraction": 0.89, "hilly_m_per_km": 12, "max_weekly_gain": 0.015, "max_weekly_loss": 0.005,
     "max_endurance_penalty": 0.05, "rhr_rise_bpm": 2, "hrv_drop_fraction": 0.90, "sleep_7night_min_h": 6.0,
