@@ -3,7 +3,7 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
-## 2.10.0-beta.19 - 2026-10-18
+## 2.10.0 - 2026-10-18
 ### Fixed
 - Code scanning: restoring a backup now takes the file from the backups folder's own listing, and installing a version checks that its folder is inside the versions folder, so neither can be pointed elsewhere by the request.
 - Code scanning: a failed Garmin sign-in, Garmin code, backup or restore no longer sends the library's error text to the page. The page gets a fixed message and the detail (with passwords and tokens removed) goes to the log.
