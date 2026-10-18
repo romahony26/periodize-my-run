@@ -200,7 +200,9 @@ def install(v):
     import backup
     backup.make(dt.datetime.now().strftime("%H%M%S") + "-pre")
     os.makedirs(VERSIONS, mode=0o700, exist_ok=True)
-    target = os.path.join(VERSIONS, v)
+    target = os.path.realpath(os.path.join(VERSIONS, v))
+    if not target.startswith(os.path.realpath(VERSIONS) + os.sep):
+        raise ValueError("Not a version number.")
     if not os.path.isfile(os.path.join(target, "web.py")):
         with tempfile.TemporaryDirectory(dir=VERSIONS) as tmp:
             src = _unpack(_fetch(v), tmp)

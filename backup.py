@@ -241,10 +241,12 @@ def restore_from(path, what="full"):
 
 def restore(name, what="full"):
     """Restore from a backup on this computer."""
-    if not NAME.match(name or "") or not name.endswith(".db") or not os.path.exists(os.path.join(DIR, name)):
+    # the path comes from the folder's own listing, never from the request
+    found = next((f for f in os.listdir(DIR) if f == name and f.endswith(".db") and NAME.match(f)), None) if os.path.isdir(DIR) else None
+    if found is None:
         raise ValueError("No such backup.")
-    restore_from(os.path.join(DIR, name), what)
-    return name
+    restore_from(os.path.join(DIR, found), what)
+    return found
 
 
 def listing():

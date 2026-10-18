@@ -629,8 +629,8 @@ def garmin_login():
     try:
         return jsonify(result=garmin.start_login(j.get("email", "").strip(), j.get("password", "")))
     except Exception as e:
-        log.error("Garmin login failed: %s", type(e).__name__)
-        return jsonify(error=f"Garmin login failed: {scrub(str(e))[:200]}"), 400
+        log.error("Garmin login failed: %s: %s", type(e).__name__, scrub(str(e))[:200])
+        return jsonify(error="Garmin login failed. Check your email and password and try again. The reason is in the log."), 400
 
 
 @app.post("/api/garmin/mfa")
@@ -638,8 +638,8 @@ def garmin_mfa():
     try:
         return jsonify(result=garmin.finish_mfa((request.json or {}).get("code", "").strip()))
     except Exception as e:
-        log.error("Garmin two-step login failed: %s", type(e).__name__)
-        return jsonify(error=f"Code not accepted: {scrub(str(e))[:200]}"), 400
+        log.error("Garmin two-step login failed: %s: %s", type(e).__name__, scrub(str(e))[:200])
+        return jsonify(error="Code not accepted. Check it and try again. The reason is in the log."), 400
 
 
 @app.post("/api/settings")
@@ -758,8 +758,10 @@ def race_course(rid):
             db.run("UPDATE races SET climb_m=?, course=NULL WHERE id=?", (cm, rid))
         else:
             db.run("UPDATE races SET course=NULL, climb_m=NULL WHERE id=?", (rid,))
-    except (ValueError, TypeError) as e:
+    except ValueError as e:
         return jsonify(error=str(e) or "That course could not be read."), 400
+    except TypeError:
+        return jsonify(error="That course could not be read."), 400
     return jsonify(ok=True)
 
 
@@ -1122,7 +1124,8 @@ def backup_now():
     except ValueError as e:
         return jsonify(error=str(e)), 400
     except RuntimeError as e:
-        return jsonify(error=scrub(str(e))[:200]), 400
+        log.error("Backup failed: %s", scrub(str(e))[:200])
+        return jsonify(error="The backup could not be made or restored. The reason is in the log."), 400
 
 
 @app.get("/api/calendar.ics")
