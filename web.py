@@ -868,8 +868,8 @@ def status_save():
         db.run("UPDATE status SET end=? WHERE id=?", (j.get("end") or dt.date.today().isoformat(), j["id"]))
         log.info("Status %s ended", j["id"])
     else:
-        if j.get("kind") not in ("sick", "injured", "holiday", "recovering"):
-            return jsonify(error="Choose sick, injured, recovering or holiday."), 400
+        if j.get("kind") not in ("sick", "injured", "holiday", "recovering", "travel"):
+            return jsonify(error="Choose sick, injured, recovering, holiday or work trip."), 400
         mode = j.get("mode") if j["kind"] in ("holiday", "recovering") else None
         if j["kind"] == "holiday" and mode not in engine.HOLIDAY_MODES:
             return jsonify(error="Choose how you want to run on holiday."), 400
@@ -1476,6 +1476,11 @@ def about():
             "Sessions only keeps the quality sessions and drops everything else. Easy runs only turns sessions and the long run into shorter easy runs.",
             "Strength reminders are dropped while you are away. A race during a holiday is left as planned.",
             "There is no return period after a holiday. If your running dropped a lot, the next weekly review treats it as a return week automatically.",
+        ]),
+        ("Work trips and jet lag", [
+            "Add a work trip with its dates. Every run in that time becomes a short easy run (up to 5 miles) marked optional, and strength reminders are dropped. Rest days stay rest days.",
+            "Skipped runs on a trip are not counted as missed and do not affect the next weekly review. A race during a trip is left as planned.",
+            "There is no return period afterwards. A night or two of short sleep lowers endurance the next day (Lopes et al. 2023; Craven et al. 2022), which is why the runs are easy and optional, not dropped from the plan altogether.",
         ]),
         ("Sick or injured", [
             "While marked sick or injured, every day is rest.",

@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.0-beta.18 - 2026-10-18
+### Added
+- "Work trip / jet lag" next to Holiday on the Races page. For the dates you give, every run becomes a short easy run (up to 5 miles) marked optional, strength reminders are dropped and rest days stay rest. Skipped runs on a trip are not counted as missed, and the time is not counted against a training block. Race days are left as planned.
+
 ## 2.10.0-beta.17 - 2026-10-16
 ### Added
 - "Extra volume in build weeks" in Settings, under Advanced: off (0%) by default, or +5%, +10% or +15%. It raises build weeks after the usual 20% rise limit, so it goes past what the research supports (Damsted and colleagues, 2019); the week's explanation says so. Return, down, taper and race weeks are never raised.

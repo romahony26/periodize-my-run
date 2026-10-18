@@ -672,6 +672,15 @@ def _holiday(d, mode):
             d.update(rest)
 
 
+def _travel(d):
+    """Reshape one planned day for a work trip: every run is short, easy and optional, and strength is dropped."""
+    note = "Work trip or jet lag: optional. Run only if you feel up to it, and keep it easy. Skipping it costs you nothing."
+    if d["type"] in ("Rest", "Race"):
+        return
+    mi_ = max(half(min(d["miles"], 5)), 2)
+    d.update({"type": "Easy", "label": "Easy (optional)", "steps": [("d", mi_, "easy")], "miles": mi_, "strength": "", "note": note})
+
+
 RECOVERY_MODES = {
     "easy": "Easy running only",
     "tendon": "Easy running only, flat and slow (an antibiotic that can affect tendons)",
@@ -741,7 +750,7 @@ def _recovering(d, mode):
 
 
 def apply_status(days, statuses):
-    """Overlay sick, injured, recovering and holiday periods on planned days.
+    """Overlay sick, injured, recovering, holiday and work-trip periods on planned days.
 
     Sick or injured: rest while unwell, then easy running for a return period. Entries that touch are one episode, so a week written as
     two entries does not get two short returns. Recovering: easy running only, for as long as it is switched on. Holiday: the
@@ -750,12 +759,14 @@ def apply_status(days, statuses):
     spans = {"sick": episodes(statuses, ("sick",)), "injured": episodes(statuses, ("injured",))}
     for d in days:
         for s in statuses:
-            if s["kind"] in ("holiday", "recovering"):
+            if s["kind"] in ("holiday", "recovering", "travel"):
                 start = dt.date.fromisoformat(s["start"])
                 end = dt.date.fromisoformat(s["end"]) if s["end"] else None
                 if d["date"] >= start and (end is None or d["date"] <= end):
                     if s["kind"] == "holiday":
                         _holiday(d, s.get("mode") if s.get("mode") in HOLIDAY_MODES else "easy")
+                    elif s["kind"] == "travel":
+                        _travel(d)
                     else:
                         _recovering(d, s.get("mode") if s.get("mode") in RECOVERY_MODES else "easy")
         for kind, word in (("sick", "Sick"), ("injured", "Injured")):

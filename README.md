@@ -139,6 +139,8 @@ It then reads your history and builds the plan, showing progress as it goes.
 - Add a holiday and choose how to run while away: no running, easy runs
   only, easy runs and the long run, sessions only, sessions and the long
   run, or as normal.
+- Add a work trip (jet lag): every run becomes a short, easy, optional one
+  and skipping costs nothing.
 - Plan against actual, week by week. Weight trend.
 - "How it works" page generated from the live rules and your settings.
 - Backup download. Activity log.
