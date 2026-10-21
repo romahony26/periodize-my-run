@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.2 - 2026-10-21
+### Changed
+- The Daily adjustment slider also governs the two weeks after an illness. Before, any one warning sign in that window turned a session into an easy run. Now it takes 1 point at 100%, 2 at 75%, 3 at 50% (the default) and 4 at 25%, and nothing at 0%.
+
 ## 2.10.1-beta.1 - 2026-10-21
 ### Added
 - "Daily adjustment" slider in Settings (0 to 100%, steps of 25). It sets how much poor sleep or recovery changes a session: 0% never changes it, 100% is the full rules as before.

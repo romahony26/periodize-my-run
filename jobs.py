@@ -327,8 +327,11 @@ def adjust():
                         " The session comes back once you have recovered."})
         # inside the weeks after an illness, any warning sign eases the long run and turns a session into easy running: a relapse
         # costs far more than a gentle few days (see PRINCIPLES.md, illness)
+        # the slider also sets how many points it takes: 1 at 100%, up to 4 at 25%, and none at 0%
         ill = engine.illness_signs(r, today, db.rows("SELECT * FROM status"))
-        if ill and row[0]["type"] in ("Long", "Key") and not (adj and adj.get("easy")):
+        if dyn < 100 and r["points"] < 1 + round((100 - dyn) / 25):
+            ill = []
+        if ill and dyn > 0 and row[0]["type"] in ("Long", "Key") and not (adj and adj.get("easy")):
             planned = row[0]["miles"] or 0
             cap = max(engine.half(min(planned * 0.6, 8)), 3) if row[0]["type"] == "Long" else None
             adj = {"slow": 0.0, "level": r["level"], "reasons": ill, "easy": True, "recovery": True,
