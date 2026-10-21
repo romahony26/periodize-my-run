@@ -1471,7 +1471,7 @@ def about():
             "The windows come from the research. The exact point values are the app's own choice.",
             f"Each point eases today's fast running by {calibrate.value('slow_per_point'):.1%}, up to four points. Easy running is not changed.",
             f"How strongly it responds is set by the Daily adjustment slider in Settings (now {c['readiness_response']}%). At 100% the easing above applies in full, and 3+ points, or a point or more on three mornings running, turn the session into an easy run of the same distance, on the watch too. Lower settings ease paces proportionally less and need more points (4 at 75%, 5 at 50%, 6 at 25%); the three-mornings rule applies at 75% and above. At 50% (the default), which also covers the two weeks after an illness (where it takes 3 points instead of 1), a poor night's sleep eases paces but does not replace the session. At 0% sessions are never changed. An easy-run change shows the planned session and comes back once you have recovered.",
-            "Every scheduled contact with Garmin (the daily sync and the four-hourly syncs after it) is moved by its own random amount, up to 30 minutes either way, so installs do not all reach Garmin at the same moment.",
+            "Every scheduled contact with Garmin (the daily sync, which is moved up to 30 minutes either way, and the hourly syncs after it, each at its own random time past the hour) is moved by its own random amount, so installs do not all reach Garmin at the same moment.",
             "The easing per point is measured from your own runs once there are enough; see What it has learned about you.",
         ]),
         ("Holidays", [
@@ -1500,7 +1500,7 @@ def about():
             f"Status: {yn(c['push_enabled'])}. The next {c['push_days']} days are kept on your Garmin calendar as structured workouts with pace targets on the fast parts.",
             f"Easy and steady runs: {'pace range alerts' if c['easy_target'] == 'pace' else 'no pace alerts'}.",
             "A day is re-sent only when it changes: a replan, a move, or today's pace adjustment. Only workouts made by this app (names starting PZ) are ever deleted.",
-            "Every four hours (around 02:00, 06:00, 10:00, 14:00, 18:00 and 22:00 UTC, each moved by up to 30 minutes at random) the app syncs again: it reads new runs, updates the plan, and puts back any workout missing from your Garmin calendar, such as one deleted in Garmin Connect.",
+            "Every hour, at a random time past the hour, the app syncs again: it reads new runs, updates the plan, and puts back any workout missing from your Garmin calendar, such as one deleted in Garmin Connect.",
         ]),
         ("Moving sessions", [
             "Drag any future day onto another to swap them. It warns if two hard days end up back to back.",

@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.4 - 2026-10-21
+### Changed
+- The app now syncs with Garmin every hour instead of every four hours. Each hourly sync happens at its own random time past the hour (anywhere from 0 to 59 minutes), so installs do not all reach Garmin together.
+
 ## 2.10.1-beta.3 - 2026-10-21
 ### Fixed
 - Updated certifi from 2026.7.22 to 2026.10.19, which fixes the known vulnerability PYSEC-2026-4320.

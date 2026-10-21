@@ -454,7 +454,7 @@ def last_ok(kinds=("setup", "daily")):
     return dt.datetime.fromisoformat(r[0]["finished"]) if r else None
 
 
-CHECK_HOURS_UTC = (2, 6, 10, 14, 18, 22)
+CHECK_HOURS_UTC = tuple(range(24))      # a sync slot every hour
 JITTER_S = 1800      # every scheduled contact with Garmin moves up to 30 minutes either way
 
 
@@ -473,15 +473,20 @@ def jitter(tag):
     return dt.timedelta(seconds=int.from_bytes(h[:4], "big") % (2 * JITTER_S + 1) - JITTER_S)
 
 
+def check_offset(tag):
+    """A fixed random offset, from 0 to 59 minutes past the hour, for one hourly sync slot (same seed and rules as `jitter`)."""
+    return dt.timedelta(seconds=int((jitter(tag) + dt.timedelta(seconds=JITTER_S)).total_seconds()) * 3599 // (2 * JITTER_S))
+
+
 def _local(t):
     return t.astimezone().replace(tzinfo=None)
 
 
 def _check_due(now):
-    """True when a sync slot (every four hours, UTC, each moved by its own jitter) has passed since the last successful sync."""
+    """True when a sync slot (every hour, each at its own random time past the hour) has passed since the last successful sync."""
     utc = now.astimezone(dt.UTC)
     slots = [(utc.replace(hour=h, minute=0, second=0, microsecond=0) + dt.timedelta(days=d)) for d in (-1, 0, 1) for h in CHECK_HOURS_UTC]
-    due = [t + jitter("check " + t.isoformat()) for t in slots]
+    due = [t + check_offset("check " + t.isoformat()) for t in slots]
     passed = [t for t in due if t <= utc]
     if not passed:
         return False
@@ -504,7 +509,7 @@ def daily_due(now):
 
 def scheduler():
     """Runs for the life of the app. Once a day at the chosen time it downloads, reviews and sends; it catches up after downtime,
-    and re-checks the morning's sleep and HRV until the watch has synced. Every four hours (02:00, 06:00, 10:00 ... UTC) it syncs again,
+    and re-checks the morning's sleep and HRV until the watch has synced. Every hour, at a random time past the hour, it syncs again,
     so new runs are read, the plan follows them, and the Garmin calendar is kept holding the planned workouts for the next `push_days`
     days."""
     last_try = None
