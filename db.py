@@ -41,7 +41,7 @@ DEFAULTS = {
     "min_easy_run_miles": 3.5, "max_easy_run_miles": 10, "race_carbs_g_per_h": 60, "map_tiles": False, "heat_adjust": False, "update_check": True, "gel_carbs_g": 25, "sex": None, "birth_date": None,
     "threshold_hr_fraction": 0.89, "hilly_m_per_km": 12, "max_weekly_gain": 0.015, "max_weekly_loss": 0.005,
     "max_endurance_penalty": 0.05, "rhr_rise_bpm": 2, "hrv_drop_fraction": 0.90, "sleep_7night_min_h": 6.0,
-    "easy_pace_drop_fraction": 0.03, "steps_week_ratio": 1.3, "steps_week_min_extra": 3000, "steps_day_ratio": 1.5, "steps_day_min_extra": 8000, "flags_to_back_off": 2, "detail_weeks": 26, "daily_adjust": True,
+    "easy_pace_drop_fraction": 0.03, "steps_week_ratio": 1.3, "steps_week_min_extra": 3000, "steps_day_ratio": 1.5, "steps_day_min_extra": 8000, "flags_to_back_off": 2, "detail_weeks": 26, "daily_adjust": True, "readiness_response": 50,
     "pause_min_s": 2.0, "pause_max_s": 6.0, "long_pause_chance": 0.08, "long_pause_min_s": 10.0, "long_pause_max_s": 25.0,
     "retries": 4, "error_wait_s": 15, "rate_limit_wait_s": 120,
 }

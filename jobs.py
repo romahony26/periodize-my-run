@@ -312,13 +312,18 @@ def adjust():
     if row and c["daily_adjust"]:
         steps = json.loads(row[0]["steps"]) if row[0]["steps"] else []
         fast = row[0]["type"] != "Race" and any((s[0] == "d" and s[2] in engine.QUALITY) or s[0] == "r" for s in steps)
-        adj = {"slow": r["slow"], "reasons": r["reasons"], "level": r["level"]} if fast and r["slow"] > 0 else None
+        # the "Daily adjustment" slider: 100 is the full rules, lower values ease paces less and need more warning signs before a
+        # session becomes an easy run, and 0 leaves the session alone
+        dyn = c["readiness_response"]
+        slow = r["slow"] * dyn / 100
+        adj = {"slow": slow, "reasons": r["reasons"], "level": r["level"]} if fast and dyn > 0 and slow > 0 else None
         # a bad morning, or a warning sign three mornings running, turns the session into an easy run: when signs persist, the
         # trials of readiness-guided training swapped hard days for easy ones rather than only slowing them
         run3 = all(hist.get((today - dt.timedelta(days=i)).isoformat(), 0) >= 1 for i in range(3))
-        if adj and (r["level"] == "red" or run3):
+        enough = r["points"] >= 3 + round((100 - dyn) / 25)
+        if adj and (enough or (run3 and dyn >= 75)):
             adj.update({"easy": True, "slow": 0.0, "advice": "Changed to an easy run today because " +
-                        ("several warning signs agree." if r["level"] == "red" else "a warning sign has lasted three mornings.") +
+                        ("several warning signs agree." if enough else "a warning sign has lasted three mornings.") +
                         " The session comes back once you have recovered."})
         # inside the weeks after an illness, any warning sign eases the long run and turns a session into easy running: a relapse
         # costs far more than a gentle few days (see PRINCIPLES.md, illness)

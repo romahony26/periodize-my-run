@@ -70,7 +70,7 @@ class Cookies(SecureCookieSessionInterface):
 
 app.session_interface = Cookies()
 app.config.update(SESSION_COOKIE_SAMESITE="Strict", SESSION_COOKIE_HTTPONLY=True)
-SETTINGS = ["units", "long_day", "run_days", "strength", "run_time", "push_enabled", "push_days", "easy_target", "daily_adjust",
+SETTINGS = ["units", "long_day", "run_days", "strength", "run_time", "push_enabled", "push_days", "easy_target", "daily_adjust", "readiness_response",
             "hrmax", "peak_miles_override", "weekly_increase", "volume_boost", "detail_weeks", "blocked_days", "notify_url", "weeks_ahead",
             "aero_test", "aero_test_weeks", "aero_runs", "aero_format", "forecast_completion", "week_start"]
 
@@ -86,7 +86,7 @@ def _is_int(v, lo, hi):
 # What each setting may hold. A value that fails its check is refused, so nothing malformed can be stored and break the planner later.
 VALID = {
     "units": lambda v: v in ("mi", "km"), "long_day": lambda v: _is_int(v, 0, 6), "run_days": lambda v: _is_int(v, 3, 6), "week_start": lambda v: _is_int(v, 0, 6),
-    "strength": lambda v: isinstance(v, bool), "push_enabled": lambda v: isinstance(v, bool), "daily_adjust": lambda v: isinstance(v, bool),
+    "strength": lambda v: isinstance(v, bool), "push_enabled": lambda v: isinstance(v, bool), "daily_adjust": lambda v: isinstance(v, bool), "readiness_response": lambda v: _is_int(v, 0, 100),
     "aero_test": lambda v: isinstance(v, bool), "aero_runs": lambda v: isinstance(v, bool),
     "run_time": lambda v: isinstance(v, str) and bool(re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v)), "push_days": lambda v: v in (7, 14, 21) and not isinstance(v, bool),
     "easy_target": lambda v: v in ("none", "pace"), "aero_format": lambda v: v in ("short", "original"), "aero_test_weeks": lambda v: _is_int(v, 4, 8),
@@ -1470,7 +1470,7 @@ def about():
             "Trend points: 7-day HRV half a spread below your normal = 1 (a full spread below, outside your normal range = 2); 7-day resting heart rate 3 above normal = 1 (5 above = 2).",
             "The windows come from the research. The exact point values are the app's own choice.",
             f"Each point eases today's fast running by {calibrate.value('slow_per_point'):.1%}, up to four points. Easy running is not changed.",
-            "At 3+ points, or a point or more on three mornings running, the session becomes an easy run of the same distance, on the watch too. The planned session is still shown, and comes back once you have recovered.",
+            f"How strongly it responds is set by the Daily adjustment slider in Settings (now {c['readiness_response']}%). At 100% the easing above applies in full, and 3+ points, or a point or more on three mornings running, turn the session into an easy run of the same distance, on the watch too. Lower settings ease paces proportionally less and need more points (4 at 75%, 5 at 50%, 6 at 25%); the three-mornings rule applies at 75% and above. At 50% (the default) a poor night's sleep eases paces but does not replace the session. At 0% sessions are never changed. An easy-run change shows the planned session and comes back once you have recovered.",
             "Every scheduled contact with Garmin (the daily sync and the four-hourly syncs after it) is moved by its own random amount, up to 30 minutes either way, so installs do not all reach Garmin at the same moment.",
             "The easing per point is measured from your own runs once there are enough; see What it has learned about you.",
         ]),

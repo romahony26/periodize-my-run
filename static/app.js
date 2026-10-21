@@ -384,11 +384,12 @@ function prefs(s){return `<div class="row"><div><label for="units">Distances in<
   <div class="lab" id="bl">Days you cannot run</div><div id="blocked" class="checks" role="group" aria-labelledby="bl">${DOW.map((d,i)=>`<label><input type="checkbox" value="${i}" ${(s.blocked_days||[]).includes(i)?'checked':''}>${d.slice(0,3)}</label>`).join('')}</div>
   <div class="row"><div><label for="push_enabled">Send workouts to my watch</label>${yn('push_enabled',s.push_enabled)}</div>
   <div><label for="daily_adjust">Ease paces on poor recovery</label>${yn('daily_adjust',s.daily_adjust)}</div>
+  <div><label for="readiness_response">Daily adjustment: ${s.readiness_response}%</label><input id="readiness_response" type="range" min="0" max="100" step="25" value="${s.readiness_response}" aria-describedby="rr_help" oninput="this.previous=0;this.parentNode.firstChild.textContent='Daily adjustment: '+this.value+'%'"><p class="xs mute" id="rr_help" style="margin:6px 0 0">How much poor sleep or recovery changes a session. Left: never. Middle: eases paces; only several signs together turn a session into an easy run. Right: the strictest.</p></div>
   <div><label for="strength">Strength sessions</label>${yn('strength',s.strength)}</div>
   <div><label for="easy_target">Easy runs on the watch</label><select id="easy_target">${opt('none','No pace alerts',s.easy_target)}${opt('pace','Pace range alerts',s.easy_target)}</select></div></div>
   <p class="xs mute">Set the sync time for after you usually wake and your watch has synced, so last night's sleep is counted.</p>`}
 function prefsRead(){return {week_start:+$('#week_start').value,units:$('#units').value,run_days:+$('#run_days').value,long_day:+$('#long_day').value,run_time:$('#run_time').value,push_enabled:$('#push_enabled').value==='1',
-  blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
+  blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',readiness_response:+$('#readiness_response').value,easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
 /* Arrow keys, Home and End move between the tabs of a row, and only the selected tab is in the tab order (the pattern screen readers expect). */
 function tabKeys(list,activate){if(!list||list.dataset.keys)return;list.dataset.keys='1';
   list.addEventListener('keydown',e=>{const tabs=[...list.querySelectorAll('[role=tab]')],i=tabs.indexOf(document.activeElement);if(i<0)return;

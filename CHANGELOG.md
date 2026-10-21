@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.1 - 2026-10-21
+### Added
+- "Daily adjustment" slider in Settings (0 to 100%, steps of 25). It sets how much poor sleep or recovery changes a session: 0% never changes it, 100% is the full rules as before.
+### Changed
+- The default is 50%. A poor night's sleep now eases fast paces but no longer replaces the session with an easy run; that takes more warning signs together (5 points at 50%, against 3 before). The three-mornings rule applies at 75% and above.
+
 ## 2.10.0 - 2026-10-18
 ### Fixed
 - Code scanning: restoring a backup now takes the file from the backups folder's own listing, and installing a version checks that its folder is inside the versions folder, so neither can be pointed elsewhere by the request.
