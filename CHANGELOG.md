@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.3 - 2026-10-21
+### Fixed
+- Updated certifi from 2026.7.22 to 2026.10.19, which fixes the known vulnerability PYSEC-2026-4320.
+
 ## 2.10.1-beta.2 - 2026-10-21
 ### Changed
 - The Daily adjustment slider also governs the two weeks after an illness. Before, any one warning sign in that window turned a session into an easy run. Now it takes 1 point at 100%, 2 at 75%, 3 at 50% (the default) and 4 at 25%, and nothing at 0%.
