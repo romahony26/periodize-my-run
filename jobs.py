@@ -18,6 +18,7 @@ import metwarn
 import aerobic
 import profile
 import push
+import rawsync
 import results
 import trends
 import respond
@@ -467,6 +468,14 @@ def run(kind):
                 if wm:
                     notify(wm)
                     db.put("notified_week", dt.date.today().isoformat())
+        if kind in ("setup", "daily") and watch.name() == "garmin" and watch.connected():
+            _progress("Saving everything else Garmin keeps for each day")      # last, so a long slice never delays the plan, the watch or the message
+            try:
+                rawsync.run()
+            except watch.GaveUp:
+                raise
+            except Exception:          # an extra, never a reason to call the day's sync failed
+                log.error("Saving the daily Garmin records failed\n%s", traceback.format_exc())
     except watch.GaveUp as e:
         ok, msg = False, f"Garmin kept refusing requests ({e}). Progress is saved; it will resume on the next run."
         log.error("=== %s stopped: %s ===", kind, msg)

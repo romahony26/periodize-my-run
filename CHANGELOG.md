@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.7 - 2026-10-24
+### Changed
+- Saving the daily Garmin records now runs at the very end of the sync, after the plan, the push to the watch and the morning message, and in slices of at most 30 minutes, so a long download of history can never delay them. A failure in it no longer makes the day's sync count as failed.
+
 ## 2.10.1-beta.6 - 2026-10-24
 ### Added
 - Wind now slows fast running. The allowance is a model anchored to Pugh's 1971 measurement that air resistance is about 7.5 to 8% of the energy cost of running at 21.5 km/h and that the cost of running into a wind rises with the square of its speed: on a loop route, against the wind half the way and with it the other half, at the same effort, with the forecast wind scaled to running height. About 2% at a forecast 20 km/h, 4.5% at 30 and 7% at 40, up to 15%. It adds to the heat allowance, counts in the choice of best start hour, and is shown on Today with the gusts.

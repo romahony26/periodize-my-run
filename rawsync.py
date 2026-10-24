@@ -30,7 +30,7 @@ BATTERY_DAYS = 28            # Body Battery is read for a run of days in one req
 EMPTY_STOP = 240             # days in a row with no sleep and no daily record: the start of the wearable history
 FAILS_OFF = 5                # refusals in a row before a kind is left out
 RECENT = 2                   # days that are read again, because they were not finished when last read
-SLICE_S = 45 * 60            # how long one slice may run
+SLICE_S = 30 * 60            # how long one slice may run
 
 
 def _pack(x):
