@@ -405,11 +405,41 @@ def _progress(m):
     status["progress"] = m
 
 
+QUEUED = ("replan", "readiness", "push")      # jobs that only bring things up to date, so asking again while one runs means "once more when it ends"
+_qlock = threading.Lock()
+_again = set()
+
+
 def run(kind):
-    """Run one job now (blocking). kind: setup | daily | replan | readiness | push."""
-    if not _lock.acquire(blocking=False):
-        return False
-    status.update({"running": kind, "progress": "Starting", "error": None})
+    """Run one job now (blocking). kind: setup | daily | replan | readiness | push.
+
+    A change made while a job is running (a setting, a race, a holiday) is not lost: its replan, readiness or push is queued and runs
+    straight after, with nothing in between that looks idle. Only the heavy kinds, setup and daily, are refused while another job runs."""
+    with _qlock:
+        if not _lock.acquire(blocking=False):
+            if kind in QUEUED:
+                _again.add(kind)
+            return False
+        status.update({"running": kind, "progress": "Starting", "error": None})
+    ok = False
+    while kind:
+        try:
+            ok = _job(kind)
+        except Exception:          # a job that dies before it can report must still let go of the lock
+            log.error("=== %s crashed ===\n%s", kind, traceback.format_exc())
+            ok = False
+            status.update({"error": f"{kind} failed unexpectedly"})
+        with _qlock:
+            kind = _again.pop() if _again else None
+            if kind:
+                status.update({"running": kind, "progress": "Starting", "error": None})
+            else:
+                status.update({"running": None, "progress": ""})
+                _lock.release()
+    return ok
+
+
+def _job(kind):
     jid = db.run("INSERT INTO jobs(kind,started) VALUES(?,?)", (kind, dt.datetime.now().isoformat(timespec="seconds")))
     log.info("=== %s started ===", kind)
     ok, msg = True, ""
@@ -468,14 +498,6 @@ def run(kind):
                 if wm:
                     notify(wm)
                     db.put("notified_week", dt.date.today().isoformat())
-        if kind in ("setup", "daily") and watch.name() == "garmin" and watch.connected():
-            _progress("Saving everything else Garmin keeps for each day")      # last, so a long slice never delays the plan, the watch or the message
-            try:
-                rawsync.run()
-            except watch.GaveUp:
-                raise
-            except Exception:          # an extra, never a reason to call the day's sync failed
-                log.error("Saving the daily Garmin records failed\n%s", traceback.format_exc())
     except watch.GaveUp as e:
         ok, msg = False, f"Garmin kept refusing requests ({e}). Progress is saved; it will resume on the next run."
         log.error("=== %s stopped: %s ===", kind, msg)
@@ -486,15 +508,22 @@ def run(kind):
     db.run("UPDATE jobs SET finished=?, ok=?, message=? WHERE id=?", (dt.datetime.now().isoformat(timespec="seconds"), int(ok), msg, jid))
     if ok:
         log.info("=== %s finished: %s ===", kind, msg or "done")
-    status.update({"running": None, "progress": "", "error": None if ok else msg})
-    _lock.release()
+    status.update({"error": None if ok else msg})
     return ok
 
 
 def start(kind):
-    if status["running"]:
-        return False
-    threading.Thread(target=run, args=(kind,), daemon=True).start()
+    with _qlock:
+        if status["running"]:
+            if kind in QUEUED:
+                _again.add(kind)       # see run: not lost, it runs once the current job ends
+            return False
+    t = threading.Thread(target=run, args=(kind,), daemon=True)
+    t.start()
+    for _ in range(300):        # return once the job has marked itself as running (or has already finished), so a caller that looks at once never sees "idle" before it begins
+        if status["running"] or not t.is_alive():
+            break
+        time.sleep(0.01)
     return True
 
 
@@ -557,6 +586,29 @@ def daily_due(now):
     return now.replace(hour=hh, minute=mm, second=0, microsecond=0) + jitter("daily " + now.date().isoformat())
 
 
+_history = {"thread": None}
+
+
+def _history_due(now):
+    """Is there Garmin history to fill, and is nothing else using Garmin? It never runs during a sync or while Garmin has limited it."""
+    if not (db.get("setup_done") and watch.name() == "garmin" and watch.connected()) or status["running"]:
+        return False
+    t = _history["thread"]
+    return not (t and t.is_alive()) and not rawsync.paused(now) and rawsync.has_gaps(now.date())
+
+
+def _history_start():
+    """Fill the gaps in the daily Garmin records in a thread of its own, so the sync job and its lock are never held by it. It stops
+    between requests the moment a sync starts, and the scheduler starts it again once the sync is over."""
+    def work():
+        try:
+            rawsync.run(stop=lambda: bool(status["running"]))
+        except Exception:
+            log.error("Saving the daily Garmin records failed\n%s", traceback.format_exc())
+    _history["thread"] = threading.Thread(target=work, name="garmin-history", daemon=True)
+    _history["thread"].start()
+
+
 def scheduler():
     """Runs for the life of the app. Once a day at the chosen time it downloads, reviews and sends; it catches up after downtime,
     and re-checks the morning's sleep and HRV until the watch has synced. Every hour, at a random time past the hour, it syncs again,
@@ -582,6 +634,8 @@ def scheduler():
                 elif not recently_tried and _check_due(now):
                     last_try = now
                     run("daily")      # the full sync, not only the calendar check: runs done later in the day arrive within hours
+            if _history_due(dt.datetime.now()):
+                _history_start()
             if db.get("setup_done") and db.get("update_check") and _update_due(dt.datetime.now()):
                 updates.check()
         except Exception:

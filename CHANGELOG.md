@@ -3,6 +3,15 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.8 - 2026-10-24
+### Changed
+- The download of daily Garmin records now fills gaps only: a day and kind not yet held, or held from before the day ended. Today is never read, because the ordinary sync already has it. With no gap it makes no request to Garmin at all.
+- It runs in a thread of its own, started by the scheduler, and no longer inside the sync job. It stops between requests the moment a sync starts and carries on once the sync is over, so it cannot delay or lengthen a sync or hold its lock. When Garmin limits the requests it rests for an hour.
+
+### Fixed
+- A change made while a replan, readiness check or push was running (a setting, a race, a holiday, a moved session) was silently dropped, so the plan stayed out of date until the next sync. On a busy or slow machine two quick changes could do it. Now it runs straight after the current job, once however many were asked for, with nothing in between that looks idle. Sync and first-time setup are still refused while another job runs. A job that crashes before it can report now always lets go of the lock and lets the next one run.
+- Starting a job now returns only once the job has begun, so a page or a test that looks at once never sees "idle" before it starts.
+
 ## 2.10.1-beta.7 - 2026-10-24
 ### Changed
 - Saving the daily Garmin records now runs at the very end of the sync, after the plan, the push to the watch and the morning message, and in slices of at most 30 minutes, so a long download of history can never delay them. A failure in it no longer makes the day's sync count as failed.
