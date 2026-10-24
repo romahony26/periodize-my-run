@@ -3,6 +3,12 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.5 - 2026-10-24
+### Added
+- Everything else Garmin keeps for each day is now saved whole (compressed) instead of three numbers being picked out and the rest thrown away: sleep stages, stress, Body Battery, breathing, blood oxygen, Training Readiness and Status, VO2max, the all-day heart rate, floors and intensity minutes. The newest days come first and it works back, in time-boxed slices after the daily sync, until 240 days in a row hold nothing. It carries on by itself after a restart or a Garmin rate limit, leaves out a kind that Garmin will not give for the account, and re-reads the last two days because a day is not finished until the next morning. Settings shows how far back it has got. Nothing uses the records yet.
+### Changed
+- The database gains a garmin_raw table (schema 21).
+
 ## 2.10.1-beta.4 - 2026-10-21
 ### Changed
 - The app now syncs with Garmin every hour instead of every four hours. Each hourly sync happens at its own random time past the hour (anywhere from 0 to 59 minutes), so installs do not all reach Garmin together.

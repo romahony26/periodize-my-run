@@ -500,6 +500,7 @@ function connections(part){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span clas
   <div class="card c6 conn" id="cgarmin">${head('⌚','Garmin',chip(gm.connected,'Connected','Not connected'))}
     <p class="small">${gm.connected?'Signed in'+(gm.name?' as <b>'+E(gm.name)+'</b>':'')+'.':'Not connected. The plan cannot sync without it.'}</p>
     <ul class="clist"><li>Reads your runs, sleep, HRV, resting heart rate and steps once a day.</li><li>${S.settings.push_enabled?`Sends the next ${S.settings.push_days} days of workouts to your watch, and checks every four hours that they are still there.`:'Sending workouts to your watch is switched off (Training tab).'}</li><li>Your password was used once to sign in and was not stored.</li></ul>
+    ${gm.connected&&gm.history?`<p class="xs mute" style="margin:8px 0 0">Everything else Garmin keeps for each day (sleep stages, stress, Body Battery, breathing, blood oxygen, readiness, VO2max and the all-day heart rate) is being saved whole, newest first. ${gm.history.done?`Done: ${gm.history.days.toLocaleString()} days, back to ${E(gm.history.back_to||'')}.`:`${gm.history.days.toLocaleString()} days so far, reading ${E(gm.history.reading||'')}. It carries on by itself and can take days.`}</p>`:''}
     ${gm.connected?'<p class="cact"><button class="ghost" id="gmdis">Disconnect Garmin</button></p><p class="xs mute">To revoke access everywhere, change your Garmin password.</p>':''}</div>
   ${corosCard(head,chip)}
   ${watchCard(head,chip)}

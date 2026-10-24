@@ -17,6 +17,7 @@ import os
 import db
 import fitrun
 import garmin
+import rawsync
 from log import log
 
 GaveUp = garmin.GaveUp
@@ -78,6 +79,8 @@ def sync_rest(kind, c, progress=lambda m: None):
         progress("Downloading sleep, HRV and heart rate")
         garmin.sync_daily(63 if kind == "setup" or db.rows("SELECT 1 FROM daily WHERE steps IS NOT NULL LIMIT 1") == [] else 10, progress)
         garmin.sync_extras()
+        progress("Saving everything else Garmin keeps for each day")
+        rawsync.run()
         garmin.sync_activity_steps(63 if db.rows("SELECT 1 FROM activities WHERE steps IS NOT NULL LIMIT 1") == [] else 10)
     if kind == "readiness":
         garmin.sync_daily(2, progress)

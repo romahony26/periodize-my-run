@@ -45,6 +45,7 @@ import watch
 import aerobic
 import jobs
 import profile
+import rawsync
 import push
 import results
 import vault
@@ -613,7 +614,7 @@ def state():
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None,
               "exposure": heat.exposure(today)},
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
-               "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
+               "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name"), "history": rawsync.status()},
         job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
         settings={k: (vault.get("notify_url") or "") if k == "notify_url" else c.get(k) for k in SETTINGS}, limits=L, profile=prof, races=[{k: v for k, v in r.items() if k != "course"} | {"has_course": bool(r.get("course"))} for r in rs], statuses=db.rows("SELECT * FROM status ORDER BY start DESC"),
 holiday_modes=engine.HOLIDAY_MODES, recovery_modes=engine.RECOVERY_MODES, fitness=fitness,
@@ -1304,6 +1305,7 @@ def about():
             f"Your whole Garmin activity list, in summary: {n_act['n'] or 0:,} activities stored. Used for best times, highest sustained mileage, maximum heart rate and breaks from running.",
             f"Second-by-second files for runs in the last {c['detail_weeks']} weeks: {n_act['d'] or 0} stored. Used to measure pace, heart rate and time at each intensity.",
             "Resting heart rate, sleep, overnight HRV and weight for the last 9 weeks, then each new day.",
+            "Every other record Garmin keeps for each day (sleep stages, stress, Body Battery, breathing, blood oxygen, Training Readiness and Status, VO2max, all-day heart rate, floors, intensity minutes), saved whole and compressed, newest first and back to the start of your watch history. Nothing reads it yet: it is kept so later questions can be answered without asking Garmin again.",
             "Planning looks at the 8 weeks before each Monday.",
         ]),
         ("Your personal limits (from your history)", [
