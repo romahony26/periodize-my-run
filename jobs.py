@@ -14,6 +14,7 @@ import db
 import engine
 import execution
 import heat
+import metwarn
 import aerobic
 import profile
 import push
@@ -296,6 +297,32 @@ def reshuffle(today=None):
     return out
 
 
+def _weather_safety(adj, plan, today, level, c):
+    """An Orange or Red Met Éireann warning for the run hour, or a forecast of thunder, ice, heavy snow or damaging wind, turns the run into
+    an easy one (Red: no outdoor run). The warning itself is shown unchanged elsewhere; this is only the app's advice about it."""
+    if not c.get("heat_adjust") or plan["type"] in ("Race", "Rest"):
+        return adj
+    hr = heat.run_hour(today)
+    warn, f = metwarn.hold(today, hr), heat.at(today, hr)
+    why = (f or {}).get("severe")
+    if not warn and not why:
+        return adj
+    if warn:
+        red = warn["severity"] == "Extreme"
+        reason = f"Met Éireann has an {warn['event']} warning (issued {warn['sent'][:16].replace('T', ' ')}) that covers your run time"
+        advice = ("Do not run outdoors today: rest, or use a treadmill." if red else
+                  "Changed to an easy run today: keep off exposed routes, or use a treadmill, and cut it short if it turns bad.") + " The session comes back once the warning has ended."
+    else:
+        reason = f"{why} is forecast at {hr}:00"
+        advice = "Changed to an easy run today: it is not safe for hard running outdoors. Use a treadmill, or run at another hour if there is a safer one."
+    if adj and adj.get("easy"):
+        adj["reasons"] = adj["reasons"] + [reason]
+        adj["advice"] = adj.get("advice", "") + " " + advice
+        adj["weather"] = True
+        return adj
+    return {"slow": 0.0, "level": level, "reasons": [reason], "easy": True, "weather": True, "advice": advice}
+
+
 def adjust():
     """Today's readiness, and today's pace adjustment."""
     c = db.cfg()
@@ -309,12 +336,17 @@ def adjust():
     db.put("readiness_log", hist)
     db.run("UPDATE plan SET adjust=NULL WHERE date>?", (today.isoformat(),))
     row = db.rows("SELECT * FROM plan WHERE date=?", (today.isoformat(),))
-    if row and c["daily_adjust"]:
+    if c.get("heat_adjust"):
+        try:
+            metwarn.refresh()
+        except Exception:
+            log.error("Met Éireann warnings failed\n%s", traceback.format_exc())
+    if row and (c["daily_adjust"] or c.get("heat_adjust")):
         steps = json.loads(row[0]["steps"]) if row[0]["steps"] else []
         fast = row[0]["type"] != "Race" and any((s[0] == "d" and s[2] in engine.QUALITY) or s[0] == "r" for s in steps)
         # the "Daily adjustment" slider: 100 is the full rules, lower values ease paces less and need more warning signs before a
         # session becomes an easy run, and 0 leaves the session alone
-        dyn = c["readiness_response"]
+        dyn = c["readiness_response"] if c["daily_adjust"] else 0       # with only the weather switched on, recovery changes nothing
         slow = r["slow"] * dyn / 100
         adj = {"slow": slow, "reasons": r["reasons"], "level": r["level"]} if fast and dyn > 0 and slow > 0 else None
         # a bad morning, or a warning sign three mornings running, turns the session into an easy run: when signs persist, the
@@ -351,6 +383,15 @@ def adjust():
                 adj["slow"] = round(adj["slow"] + h["pct"] / 100, 4)
                 adj["reasons"] = adj["reasons"] + [f"{say}: paces eased {h['pct']:g}% for the heat"]
                 adj["heat"] = h
+        # wind slows fast running, whatever the temperature: a modelled allowance for a loop route at the same effort (see heat.wind_pct)
+        if h and not (adj and adj.get("easy")) and h.get("wind_pct"):
+            adj = adj or {"slow": 0.0, "reasons": [], "level": r["level"]}
+            adj["slow"] = round(adj["slow"] + h["wind_pct"] / 100, 4)
+            adj["reasons"] = adj["reasons"] + [f"the forecast wind at {h['hour']}:00 is {heat.mph_or_kmh(h['wind'], c['units'])}"
+                                               f"{'' if not h.get('gust') else ', gusting to ' + heat.mph_or_kmh(h['gust'], c['units'])}: "
+                                               f"paces eased {h['wind_pct']:g}% for the wind on a loop route"]
+            adj["wind"] = h["wind_pct"]
+        adj = _weather_safety(adj, row[0], today, r["level"], c)
         db.run("UPDATE plan SET adjust=? WHERE date=?", (json.dumps(adj) if adj else None, today.isoformat()))
     if r["level"] == "unknown" and not watch.has_recovery_data():
         r["reasons"] = [f"{watch.NAMES[watch.name()]} gives no sleep or heart-rate variability, so sessions are not adjusted day by day."]

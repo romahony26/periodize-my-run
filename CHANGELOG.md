@@ -3,6 +3,17 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.6 - 2026-10-24
+### Added
+- Wind now slows fast running. The allowance is a model anchored to Pugh's 1971 measurement that air resistance is about 7.5 to 8% of the energy cost of running at 21.5 km/h and that the cost of running into a wind rises with the square of its speed: on a loop route, against the wind half the way and with it the other half, at the same effort, with the forecast wind scaled to running height. About 2% at a forecast 20 km/h, 4.5% at 30 and 7% at 40, up to 15%. It adds to the heat allowance, counts in the choice of best start hour, and is shown on Today with the gusts.
+- Met Éireann weather warnings, read from its public feed (www.met.ie; no account, nothing about you sent; your county is worked out on this computer from the rounded location the weather already uses). The warnings for your county, its province or all of Ireland are shown on Today and in each day's detail exactly as issued, with the credit and licence statements Met Éireann requires, and are removed when they expire. If the feed cannot be read for three hours none is shown and the page says so. An Orange or Red warning for wind, snow or ice, thunderstorm, fog, heat, low temperature, rain or flood that covers your start hour turns today's run into an easy one (Red: no outdoor run). Yellow warnings are shown and change nothing.
+- A forecast of thunder, freezing rain, heavy snow, or wind of 55 km/h (gusts 90 km/h) or more at your start hour also turns the run into an easy one with advice to use a treadmill.
+- "Wind and weather warnings" in the explanations.
+### Changed
+- The weather switch now also covers the weather rules without the recovery adjustment: with "Ease paces on poor recovery" off, wind, heat and the warnings still apply.
+### Fixed
+- The notes on the weather said wind had no effect once temperature was allowed for, and cited a paper (El Helou and colleagues, 2012) that never looked at wind. Both are removed.
+
 ## 2.10.1-beta.5 - 2026-10-24
 ### Added
 - Everything else Garmin keeps for each day is now saved whole (compressed) instead of three numbers being picked out and the rest thrown away: sleep stages, stress, Body Battery, breathing, blood oxygen, Training Readiness and Status, VO2max, the all-day heart rate, floors and intensity minutes. The newest days come first and it works back, in time-boxed slices after the daily sync, until 240 days in a row hold nothing. It carries on by itself after a restart or a Garmin rate limit, leaves out a kind that Garmin will not give for the account, and re-reads the last two days because a day is not finished until the next morning. Settings shows how far back it has got. Nothing uses the records yet.

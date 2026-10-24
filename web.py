@@ -44,6 +44,7 @@ import coros
 import watch
 import aerobic
 import jobs
+import metwarn
 import profile
 import rawsync
 import push
@@ -105,6 +106,22 @@ def _hash(pw, salt, rounds=PBKDF2_ROUNDS):
 
 
 PROXY_HEADERS = ("X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "Forwarded", "X-Real-Ip", "Via", "Tailscale-User-Login", "Cf-Connecting-Ip")
+
+
+def _warnings(today):
+    """Met Éireann's current warnings for the next three days, as issued, with the attribution the licence requires. None with the weather off."""
+    if not db.get("heat_adjust"):
+        return None
+    out = None
+    for i in range(3):
+        day = today + dt.timedelta(days=i)
+        f = metwarn.for_day(day)
+        if f is None:
+            return None
+        out = out or ({k: f[k] for k in ("county", "fetched", "stale", "attribution")} | {"days": {}})
+        if f["items"]:
+            out["days"][day.isoformat()] = f["items"]
+    return out
 
 
 def _local():
@@ -612,7 +629,7 @@ def state():
         update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
         cross=insights.cross_training(today), scorecard=insights.scorecard(c, today), heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "window_weekend": _w if (_w := db.get("run_window_weekend")) and heat._win(_w) else None, "located": bool((db.get("heat_forecast") or {}).get("loc")),
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None,
-              "exposure": heat.exposure(today)},
+              "exposure": heat.exposure(today)}, met_warnings=_warnings(today),
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name"), "history": rawsync.status()},
         job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
@@ -1465,6 +1482,15 @@ def about():
         ("Maps", [
             "Each run's route is drawn as an outline by default, and nothing is loaded from outside.",
             "If you switch on real maps (Settings, Connections), map images are loaded from OpenStreetMap when you open a run. OpenStreetMap's servers then see which area you are looking at. No account, name or run data is sent.",
+        ]),
+        ("Wind and weather warnings", [
+            "With the weather switched on, wind slows today's fast running. Air resistance is about 7.5 to 8% of the energy cost of running at 21.5 km/h in still air, and the cost of running into a wind rises with the square of its speed (Pugh, 1971). A tailwind gives back less than a headwind costs (Davies, 1980), so on a loop route a wind always costs time. These figures are as published summaries report them; the papers themselves could not be retrieved to check them.",
+            f"The allowance is a model built on that figure: the route runs against the wind for half the way and with it for the other half, at the same effort throughout, and the extra time is the allowance. The forecast wind is for 10 m up, so it is scaled to {heat.RUN_HEIGHT:.0%} of its speed at running height. It comes to about 2% at a forecast 20 km/h, 4.5% at 30 km/h and 7% at 40 km/h, up to {heat.MAX_WIND_PCT:g}%. The running cost, the scaling and the loop-route assumption are the app's own choices, so this is a modelled allowance, not a measurement. Race results cannot show it, because a race averages its headwind and tailwind legs.",
+            "It is added to the heat allowance for fast running only; easy running is not paced. The best start hour counts wind and heat together.",
+            f"Thunder, freezing rain, heavy snow, or a wind of {heat.GALE_KMH:g} km/h (gusts {heat.GUST_KMH:g} km/h) or more at your start hour, turn the run into an easy one with advice to use a treadmill. Those wind levels are where Met Éireann's yellow wind warning starts. The thunder rule follows athletic trainers' guidance to go indoors when lightning is near; these are safety rules, not findings from a trial.",
+            "In Ireland the app also reads Met Éireann's public warnings feed (www.met.ie/warningsxml/rss.xml). It finds your county from the rounded location the weather already uses, and shows the warnings for your county, its province or all of Ireland, exactly as issued, for today and the next two days.",
+            "An Orange (Severe) or Red (Extreme) warning for wind, snow or ice, thunderstorm, fog, heat, low temperature, rain or flood that covers your start hour turns today's run into an easy one; for Red the advice is not to run outdoors. A Yellow warning is shown and changes nothing. Coastal and sea warnings are not used. Which warnings matter, and these levels, are the app's own judgement, in line with Met Éireann's own advice at each level.",
+            "Licence: Copyright Met Éireann. Source: www.met.ie. Published under Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/), with Met Éireann's added rules that warnings are shown without material change, kept up to date and removed when they expire. Met Éireann does not accept any liability whatsoever for any error or omission in the data, their availability, or for any loss or damage arising from their use. If the feed cannot be read for three hours, no warning is shown and the page says so.",
         ]),
         ("Daily adjustment", [
             f"Status: {yn(c['daily_adjust'])}. Runs at {c['run_time']}. A bad night's sleep eases today's session; HRV and resting heart rate ease it only when their 7-day average has drifted.",
