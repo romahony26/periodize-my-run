@@ -193,6 +193,43 @@ def _save(off, held, day, finished, full=None):
                            "days": len({d for d, _ in held}), "reading": day.isoformat()})
 
 
+def fill_daily(today=None):
+    """Copy the sleep, resting heart rate, HRV and steps already held in garmin_raw into the daily table, for days it lacks them.
+    It asks Garmin for nothing. The last three days are left to the ordinary sync, and a value already in daily is never replaced.
+    Returns the number of days changed."""
+    today = today or dt.date.today()
+    cutoff = (today - dt.timedelta(days=3)).isoformat()
+    mine = {"stats", "sleep", "hrv"}
+    body = {}
+    for r in db.rows("SELECT date,kind,body FROM garmin_raw WHERE body IS NOT NULL AND date<=?", (cutoff,)):
+        if r["kind"] in mine:
+            body[(r["date"], r["kind"])] = unpack(r["body"])
+    have = {r["date"]: r for r in db.rows("SELECT date,rhr,sleep_h,hrv,sleep_score,sleep_start,steps FROM daily")}
+    n = 0
+    with db.connect() as c:
+        for day in sorted({d for d, _ in body}):
+            stats, sleep, hrv = (body.get((day, k)) or {} for k in ("stats", "sleep", "hrv"))
+            dto = sleep.get("dailySleepDTO") or {}
+            secs, ms = dto.get("sleepTimeSeconds"), dto.get("sleepStartTimestampLocal")
+            new = {"rhr": stats.get("restingHeartRate"),
+                   "sleep_h": round(secs / 3600, 2) if secs else None,
+                   "hrv": (hrv.get("hrvSummary") or {}).get("lastNightAvg"),
+                   "sleep_score": ((dto.get("sleepScores") or {}).get("overall") or {}).get("value"),
+                   "sleep_start": dt.datetime.fromtimestamp(ms / 1000, dt.UTC).strftime("%H:%M") if isinstance(ms, (int, float)) and ms > 0 else None,
+                   "steps": stats.get("totalSteps")}
+            old = have.get(day) or {}
+            add = {k: v for k, v in new.items() if v is not None and old.get(k) is None}
+            if not add:
+                continue
+            c.execute("INSERT OR IGNORE INTO daily(date) VALUES(?)", (day,))
+            c.execute("UPDATE daily SET rhr=COALESCE(rhr,?), sleep_h=COALESCE(sleep_h,?), hrv=COALESCE(hrv,?), sleep_score=COALESCE(sleep_score,?), "
+                      "sleep_start=COALESCE(sleep_start,?), steps=COALESCE(steps,?) WHERE date=?", (*new.values(), day))
+            n += 1
+    if n:
+        log.info("Daily records filled from the Garmin data already held: %d days", n)
+    return n
+
+
 def status():
     """What the Settings page says about it: None until it has started."""
     s = db.get("raw_history")
