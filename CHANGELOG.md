@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.5 - 2026-10-25
+### Changed
+- Volume now climbs steadily back toward a level you have held before. Past the most you held for eight weeks in the last year, each build week rises by a small step (a third of the weekly rate, 2% by default: about a mile), up from half the rate (3%), and the week says what it is rebuilding toward when your history holds a higher level. The ceilings are unchanged (the cap for the phase, 20% above your best of the last three weeks, and the level you held before without breaking down afterwards).
+
+### Fixed
+- Volume stalled once past the level held in the last year: a down week pulled the four-week average down, so each build started a little lower than the last and the totals hovered. A build week now starts from the best three-week average of the last six weeks, and from last week if it was a build week, so volume climbs across down weeks.
+
 ## 2.10.2-beta.4 - 2026-10-25
 ### Added
 - A final check on every week, whatever has changed it: no two hard days (quality session, long run, race) are left side by side. The later quality session becomes an easy run; the long run and a race never move for it.

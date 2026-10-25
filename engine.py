@@ -294,16 +294,26 @@ def _plan(st, c, L, races):
         base = max(ref, 0.92 * max(last4 or [0]))
         proven = L.get("proven_miles") or cap           # the most held for 8 weeks in the last year without breaking down after
         gap = (L.get("weeks_unbroken") if L.get("weeks_unbroken") is not None else 99) < 3
+        # a down week pulls the average down, so each build would start a little lower than the last and the volume never climbed:
+        # a build week starts from the best 3-week average of the last 6 weeks, and from last week if that was a build week [P]
+        level = max((mean(wk[i:i + 3]) for i in range(max(len(wk) - 6, 0), len(wk) - 2)), default=0.0)
+        past = L.get("past_miles") or 0.0
+        if not (quality_new or gap) and level > base and wk[-1] >= 0.85 * level:
+            base = max(base, level, wk[-1])
+        elif not (quality_new or gap) and level > base:
+            base = max(base, level)
         grow = 1.0 if quality_new or gap else 1 + c["weekly_increase"]
         new_ground = not (quality_new or gap) and base * grow > proven
-        if new_ground:      # up to the proven level at the usual rate, beyond it at half: consistency before more miles
-            grow = max(1 + c["weekly_increase"] / 2, min(grow, proven / base if base else grow))
+        step = c["weekly_increase"] / 3         # past the level held in the last year: a third of the usual rate, about a mile a week
+        if new_ground:      # up to the proven level at the usual rate, beyond it by a small step: consistency before more miles
+            grow = max(1 + step, min(grow, proven / base if base else grow))
         target = min(base * grow, cap)
         why.append("Volume held level because fast running is being reintroduced; one change at a time." if quality_new
                    else "Volume held level: there was a week or more without running in the last three weeks. The routine comes back before the miles do." if gap
                    else f"Volume is at your cap for this phase ({dist(cap, c['units'])})." if target >= cap
-                   else f"Volume up {grow - 1:.0%}, half the usual rate: this is more than you have held for eight weeks in the last year "
-                        f"({dist(half(proven), c['units'])}), and weeks strung together count for more than a faster build." if new_ground
+                   else f"Volume up {grow - 1:.0%}, a small step: this is more than you have held for eight weeks in the last year "
+                        f"({dist(half(proven), c['units'])}). " + (f"Rebuilding toward {dist(half(past), c['units'])}, which you have held before; " if past > proven else "")
+                        + "weeks strung together count for more than a faster build." if new_ground
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
         recent_best = max(wk[-3:] or [0])
         if recent_best >= 8 and target > 1.20 * recent_best:
