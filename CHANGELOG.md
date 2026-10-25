@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1 - 2026-10-25
+### Fixed
+- Code scanning: the "information exposure through an exception" alerts in web.py are cleared (see 2.10.1-beta.10).
+- Sleep, resting heart rate, HRV and steps held in the saved Garmin records now reach the daily table (see 2.10.1-beta.9).
+- A change made while a replan, readiness check or push was running is no longer dropped (see 2.10.1-beta.8).
+### Changed
+- Everything from the 2.10.1 betas, listed below: the daily adjustment setting, wind and Met Éireann warnings, and the Garmin history download that no longer delays a sync.
+
 ## 2.10.1-beta.10 - 2026-10-25
 ### Fixed
 - Code scanning: the five "information exposure through an exception" alerts in web.py (race course, race log import, update, COROS sign-in and backup). The page already showed only messages this app wrote; they are now read from the error's own message rather than its text form, so no library or stack detail can reach the page. What you see is unchanged.
