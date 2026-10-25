@@ -305,7 +305,38 @@ def assess(c, L, monday, prev_tp=None):
         if now < before * (1 - c["easy_pace_drop_fraction"]):
             flags.append(f"easy pace at {elo}–{ehi} bpm has slowed by more than 3% in two weeks")
     st["flags"], st["health"] = flags, health
+    st["recovery"] = recovery_trend(health, flags, c)
     return st
+
+
+def recovery_trend(health, flags, c):
+    """How well the athlete is absorbing the training, from the same markers as the flags: {level: good | ok | hold, steady: [...]}.
+
+    good: every marker that can be read is steady or better against the athlete's own normal, and at least two can be read. hold: a
+    warning flag is up. ok: anything else, including too little data. The build rate follows it (see engine.plan).
+    """
+    steady, read = [], 0
+    if "hrv" in health:
+        read += 1
+        now, base = health["hrv"]
+        if now >= base * 0.97:
+            steady.append(f"HRV {now:.0f} against your normal {base:.0f}")
+    if "rhr" in health:
+        read += 1
+        now, base = health["rhr"]
+        if now - base <= 1:
+            steady.append(f"resting heart rate {now:.0f} against your normal {base:.0f}")
+    if "sleep" in health:
+        read += 1
+        if health["sleep"] >= c["sleep_7night_min_h"] + 1:
+            steady.append(f"sleep {health['sleep']:.1f} h a night")
+    if "easy_pace" in health:
+        read += 1
+        now, before = health["easy_pace"]
+        if now >= before * 0.99:
+            steady.append("easy pace at the same heart rate holding or faster")
+    level = "hold" if flags else "good" if read >= 2 and len(steady) == read else "ok"
+    return {"level": level, "steady": steady, "flags": list(flags)}
 
 
 def race_time(v_ref, miles, endurance, c, slope):

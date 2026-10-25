@@ -97,9 +97,11 @@ notice); the others were matched to their published record. This is how the 2022
 19. **Volume is built before intensity, and general work before race-specific work.** [R] (*moderate*) This is how world-class
     distance runners organise a season (Haugen and colleagues, 2022), and how Norwegian world-class coaches describe best practice
     (Sandbakk and colleagues, 2025).
-20. **Volume rises gently, and more gently on new ground.** [P] In a building week, distance rises by about 6% on your recent
-    level, as far as the most you have held for eight weeks in the last year. Beyond that the rise is halved, to about 3%. Before
-    the race-specific phase it stops at 90% of your peak.
+20. **Volume rises gently, and recovery sets how fast.** [P] In a building week, distance rises by up to about 6% on your recent
+    level. Past the most you have held for eight weeks in the last year, the step follows how well you are recovering, read from
+    your own HRV, resting heart rate, sleep and easy pace against your own normal: the full 6% while all of them are steady,
+    half while they are only fair, and level while a warning flag is up. A build week starts from your best three-week average
+    of the last six, so a down week does not lower the next build. Before the race-specific phase it stops at 90% of your peak.
 21. **The old "10% a week" rule is not what prevents injury.** [R] (*strong*) In a randomised trial, a gentler weekly build did
     not reduce injuries in new runners (Buist and colleagues, 2008), and ratios of this week's load to the last month's are not a
     reliable injury threshold (Impellizzeri and colleagues, 2020). Large jumps are another matter: more than about 30% over two

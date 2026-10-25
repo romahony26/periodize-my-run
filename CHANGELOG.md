@@ -3,6 +3,11 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.6 - 2026-10-25
+### Changed
+- Your recovery now sets how fast the volume climbs. Each week the app reads your HRV, resting heart rate, sleep and easy pace against your own normal. While all of them are steady or better, a build week rises by the full weekly rate (6% by default), even past the most you held in the last year. While they are only fair (one drifting, or too little data), the step past that level is half (3%). When a warning flag is up, the volume is held level until it clears. Replaces the fixed 2% step of 2.10.2-beta.5. The ceilings are unchanged: the phase cap, 20% above your best of the last three weeks, and the level you have held before.
+- Later weeks in the plan assume fair recovery, since how you will recover is not known yet; the plan is redone as it comes in.
+
 ## 2.10.2-beta.5 - 2026-10-25
 ### Changed
 - Volume now climbs steadily back toward a level you have held before. Past the most you held for eight weeks in the last year, each build week rises by a small step (a third of the weekly rate, 2% by default: about a mile), up from half the rate (3%), and the week says what it is rebuilding toward when your history holds a higher level. The ceilings are unchanged (the cap for the phase, 20% above your best of the last three weeks, and the level you held before without breaking down afterwards).

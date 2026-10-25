@@ -302,18 +302,23 @@ def _plan(st, c, L, races):
             base = max(base, level, wk[-1])
         elif not (quality_new or gap) and level > base:
             base = max(base, level)
-        grow = 1.0 if quality_new or gap else 1 + c["weekly_increase"]
-        new_ground = not (quality_new or gap) and base * grow > proven
-        step = c["weekly_increase"] / 3         # past the level held in the last year: a third of the usual rate, about a mile a week
-        if new_ground:      # up to the proven level at the usual rate, beyond it by a small step: consistency before more miles
+        rec = st.get("recovery") or {"level": "ok", "steady": [], "flags": []}
+        hold = rec["level"] == "hold" and not (quality_new or gap)
+        grow = 1.0 if quality_new or gap or hold else 1 + c["weekly_increase"]
+        new_ground = not (quality_new or gap or hold) and base * grow > proven
+        # past the level held in the last year, recovery sets the step: full rate while it is good, half while it is only fair [P]
+        step = c["weekly_increase"] if rec["level"] == "good" else c["weekly_increase"] / 2
+        if new_ground:      # up to the proven level at the usual rate, beyond it at the step: consistency before more miles
             grow = max(1 + step, min(grow, proven / base if base else grow))
         target = min(base * grow, cap)
+        toward = f", toward {dist(half(past), c['units'])}, which you have held before" if past > proven else ""
         why.append("Volume held level because fast running is being reintroduced; one change at a time." if quality_new
                    else "Volume held level: there was a week or more without running in the last three weeks. The routine comes back before the miles do." if gap
+                   else "Volume held level: your recovery is showing strain (" + "; ".join(rec["flags"]) + "). The build carries on when it clears." if hold
                    else f"Volume is at your cap for this phase ({dist(cap, c['units'])})." if target >= cap
-                   else f"Volume up {grow - 1:.0%}, a small step: this is more than you have held for eight weeks in the last year "
-                        f"({dist(half(proven), c['units'])}). " + (f"Rebuilding toward {dist(half(past), c['units'])}, which you have held before; " if past > proven else "")
-                        + "weeks strung together count for more than a faster build." if new_ground
+                   else f"Volume up {grow - 1:.0%}: your recovery is good ({'; '.join(rec['steady'][:3])}), so the build carries on{toward}." if rec["level"] == "good"
+                   else f"Volume up {grow - 1:.0%}{toward}: more than you have held for eight weeks in the last year ({dist(half(proven), c['units'])}), "
+                        "so a smaller step until your recovery markers are all steady." if new_ground
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
         recent_best = max(wk[-3:] or [0])
         if recent_best >= 8 and target > 1.20 * recent_best:
@@ -636,6 +641,8 @@ def project(st, pl):
     nxt["weeks"] = st["weeks"][1:] + [{"start": st["monday"], "mi": pl["total"], "runs": sum(1 for x in pl["days"] if x["miles"]),
                                        "long": pl["long"], "fast_mi": fast, "t_min": d["t_min"]}]
     nxt["longest_30d"], nxt["longest_10d"] = max(st["longest_30d"], pl["long"]), pl["long"]
+    if (st.get("recovery") or {}).get("level") in ("good", "hold"):      # how recovery will be in later weeks is not known: fair, not good or held
+        nxt["recovery"] = {"level": "ok", "steady": [], "flags": []}
     nxt["prev_t_min"] = max(st["prev_t_min"], d["t_min"])
     nxt["prev_mp_mid"] = max(st["prev_mp_mid"], d["mp_mid"])
     nxt["prev_lthr_mi"] = max(st.get("prev_lthr_mi", 0), d.get("lthr_mi", 0))
