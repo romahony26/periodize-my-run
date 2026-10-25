@@ -44,7 +44,9 @@ import coros
 import watch
 import aerobic
 import jobs
+import metwarn
 import profile
+import rawsync
 import push
 import results
 import vault
@@ -70,7 +72,7 @@ class Cookies(SecureCookieSessionInterface):
 
 app.session_interface = Cookies()
 app.config.update(SESSION_COOKIE_SAMESITE="Strict", SESSION_COOKIE_HTTPONLY=True)
-SETTINGS = ["units", "long_day", "run_days", "strength", "run_time", "push_enabled", "push_days", "easy_target", "daily_adjust",
+SETTINGS = ["units", "long_day", "run_days", "strength", "run_time", "push_enabled", "push_days", "easy_target", "daily_adjust", "readiness_response",
             "hrmax", "peak_miles_override", "weekly_increase", "volume_boost", "detail_weeks", "blocked_days", "notify_url", "weeks_ahead",
             "aero_test", "aero_test_weeks", "aero_runs", "aero_format", "forecast_completion", "week_start"]
 
@@ -86,7 +88,7 @@ def _is_int(v, lo, hi):
 # What each setting may hold. A value that fails its check is refused, so nothing malformed can be stored and break the planner later.
 VALID = {
     "units": lambda v: v in ("mi", "km"), "long_day": lambda v: _is_int(v, 0, 6), "run_days": lambda v: _is_int(v, 3, 6), "week_start": lambda v: _is_int(v, 0, 6),
-    "strength": lambda v: isinstance(v, bool), "push_enabled": lambda v: isinstance(v, bool), "daily_adjust": lambda v: isinstance(v, bool),
+    "strength": lambda v: isinstance(v, bool), "push_enabled": lambda v: isinstance(v, bool), "daily_adjust": lambda v: isinstance(v, bool), "readiness_response": lambda v: _is_int(v, 0, 100),
     "aero_test": lambda v: isinstance(v, bool), "aero_runs": lambda v: isinstance(v, bool),
     "run_time": lambda v: isinstance(v, str) and bool(re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v)), "push_days": lambda v: v in (7, 14, 21) and not isinstance(v, bool),
     "easy_target": lambda v: v in ("none", "pace"), "aero_format": lambda v: v in ("short", "original"), "aero_test_weeks": lambda v: _is_int(v, 4, 8),
@@ -104,6 +106,28 @@ def _hash(pw, salt, rounds=PBKDF2_ROUNDS):
 
 
 PROXY_HEADERS = ("X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Proto", "Forwarded", "X-Real-Ip", "Via", "Tailscale-User-Login", "Cf-Connecting-Ip")
+
+
+def _warnings(today):
+    """Met Éireann's current warnings for the next three days, as issued, with the attribution the licence requires. None with the weather off."""
+    if not db.get("heat_adjust"):
+        return None
+    out = None
+    for i in range(3):
+        day = today + dt.timedelta(days=i)
+        f = metwarn.for_day(day)
+        if f is None:
+            return None
+        out = out or ({k: f[k] for k in ("county", "fetched", "stale", "attribution")} | {"days": {}})
+        if f["items"]:
+            out["days"][day.isoformat()] = f["items"]
+    return out
+
+
+def _why(e, default="That could not be done."):
+    """The message a ValueError was raised with, which this app wrote for the person to read."""
+    msg = e.args[0] if e.args else None
+    return msg if isinstance(msg, str) and msg else default
 
 
 def _local():
@@ -611,9 +635,9 @@ def state():
         update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
         cross=insights.cross_training(today), scorecard=insights.scorecard(c, today), heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "window_weekend": _w if (_w := db.get("run_window_weekend")) and heat._win(_w) else None, "located": bool((db.get("heat_forecast") or {}).get("loc")),
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None,
-              "exposure": heat.exposure(today)},
+              "exposure": heat.exposure(today)}, met_warnings=_warnings(today),
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
-               "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name")},
+               "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name"), "history": rawsync.status()},
         job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
         settings={k: (vault.get("notify_url") or "") if k == "notify_url" else c.get(k) for k in SETTINGS}, limits=L, profile=prof, races=[{k: v for k, v in r.items() if k != "course"} | {"has_course": bool(r.get("course"))} for r in rs], statuses=db.rows("SELECT * FROM status ORDER BY start DESC"),
 holiday_modes=engine.HOLIDAY_MODES, recovery_modes=engine.RECOVERY_MODES, fitness=fitness,
@@ -759,7 +783,7 @@ def race_course(rid):
         else:
             db.run("UPDATE races SET course=NULL, climb_m=NULL WHERE id=?", (rid,))
     except ValueError as e:
-        return jsonify(error=str(e) or "That course could not be read."), 400
+        return jsonify(error=_why(e, "That course could not be read.")), 400
     except TypeError:
         return jsonify(error="That course could not be read."), 400
     return jsonify(ok=True)
@@ -827,7 +851,7 @@ def result_import():
     try:
         out = results.import_csv((request.json or {}).get("csv") or "")
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     log.info("Race log imported: %s", out)
     if db.get("setup_done"):
         jobs.start("replan")
@@ -975,7 +999,7 @@ def updates_act():
         else:
             return jsonify(error="Unknown action."), 400
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     except (requests.RequestException, OSError) as e:
         log.error("Update failed: %s", type(e).__name__)
         return jsonify(error="The update could not be completed. Nothing was changed."), 400
@@ -1015,7 +1039,7 @@ def coros_login():
     try:
         return jsonify(result=coros.login(str(j.get("email") or "").strip(), str(j.get("password") or "")))
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     except (coros.Unrecognised, requests.RequestException) as e:
         log.error("COROS sign-in failed: %s", type(e).__name__)
         return jsonify(error="COROS did not accept the sign-in. Check the email and password, and that the account has signed in to COROS's Training Hub before."), 400
@@ -1122,7 +1146,7 @@ def backup_now():
             return jsonify(ok=True, restored=done)
         return jsonify(ok=True, made=backup.make(dt.datetime.now().strftime("%H%M%S")))
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     except RuntimeError as e:
         log.error("Backup failed: %s", scrub(str(e))[:200])
         return jsonify(error="The backup could not be made or restored. The reason is in the log."), 400
@@ -1304,6 +1328,7 @@ def about():
             f"Your whole Garmin activity list, in summary: {n_act['n'] or 0:,} activities stored. Used for best times, highest sustained mileage, maximum heart rate and breaks from running.",
             f"Second-by-second files for runs in the last {c['detail_weeks']} weeks: {n_act['d'] or 0} stored. Used to measure pace, heart rate and time at each intensity.",
             "Resting heart rate, sleep, overnight HRV and weight for the last 9 weeks, then each new day.",
+            "Every other record Garmin keeps for each day (sleep stages, stress, Body Battery, breathing, blood oxygen, Training Readiness and Status, VO2max, all-day heart rate, floors, intensity minutes), saved whole and compressed, newest first and back to the start of your watch history. Nothing reads it yet: it is kept so later questions can be answered without asking Garmin again.",
             "Planning looks at the 8 weeks before each Monday.",
         ]),
         ("Your personal limits (from your history)", [
@@ -1464,14 +1489,23 @@ def about():
             "Each run's route is drawn as an outline by default, and nothing is loaded from outside.",
             "If you switch on real maps (Settings, Connections), map images are loaded from OpenStreetMap when you open a run. OpenStreetMap's servers then see which area you are looking at. No account, name or run data is sent.",
         ]),
+        ("Wind and weather warnings", [
+            "With the weather switched on, wind slows today's fast running. Air resistance is about 7.5 to 8% of the energy cost of running at 21.5 km/h in still air, and the cost of running into a wind rises with the square of its speed (Pugh, 1971). A tailwind gives back less than a headwind costs (Davies, 1980), so on a loop route a wind always costs time. These figures are as published summaries report them; the papers themselves could not be retrieved to check them.",
+            f"The allowance is a model built on that figure: the route runs against the wind for half the way and with it for the other half, at the same effort throughout, and the extra time is the allowance. The forecast wind is for 10 m up, so it is scaled to {heat.RUN_HEIGHT:.0%} of its speed at running height. It comes to about 2% at a forecast 20 km/h, 4.5% at 30 km/h and 7% at 40 km/h, up to {heat.MAX_WIND_PCT:g}%. The running cost, the scaling and the loop-route assumption are the app's own choices, so this is a modelled allowance, not a measurement. Race results cannot show it, because a race averages its headwind and tailwind legs.",
+            "It is added to the heat allowance for fast running only; easy running is not paced. The best start hour counts wind and heat together.",
+            f"Thunder, freezing rain, heavy snow, or a wind of {heat.GALE_KMH:g} km/h (gusts {heat.GUST_KMH:g} km/h) or more at your start hour, turn the run into an easy one with advice to use a treadmill. Those wind levels are where Met Éireann's yellow wind warning starts. The thunder rule follows athletic trainers' guidance to go indoors when lightning is near; these are safety rules, not findings from a trial.",
+            "In Ireland the app also reads Met Éireann's public warnings feed (www.met.ie/warningsxml/rss.xml). It finds your county from the rounded location the weather already uses, and shows the warnings for your county, its province or all of Ireland, exactly as issued, for today and the next two days.",
+            "An Orange (Severe) or Red (Extreme) warning for wind, snow or ice, thunderstorm, fog, heat, low temperature, rain or flood that covers your start hour turns today's run into an easy one; for Red the advice is not to run outdoors. A Yellow warning is shown and changes nothing. Coastal and sea warnings are not used. Which warnings matter, and these levels, are the app's own judgement, in line with Met Éireann's own advice at each level.",
+            "Licence: Copyright Met Éireann. Source: www.met.ie. Published under Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/), with Met Éireann's added rules that warnings are shown without material change, kept up to date and removed when they expire. Met Éireann does not accept any liability whatsoever for any error or omission in the data, their availability, or for any loss or damage arising from their use. If the feed cannot be read for three hours, no warning is shown and the page says so.",
+        ]),
         ("Daily adjustment", [
             f"Status: {yn(c['daily_adjust'])}. Runs at {c['run_time']}. A bad night's sleep eases today's session; HRV and resting heart rate ease it only when their 7-day average has drifted.",
             "Sleep points, against your own normal: last night an hour or more under = 1 (two hours under, or under 5 hours = 2); last night's sleep score below your normal range = 1 (far below = 2); the last 3 nights averaging an hour under = 1. Sleep counts for at most 2.",
             "Trend points: 7-day HRV half a spread below your normal = 1 (a full spread below, outside your normal range = 2); 7-day resting heart rate 3 above normal = 1 (5 above = 2).",
             "The windows come from the research. The exact point values are the app's own choice.",
             f"Each point eases today's fast running by {calibrate.value('slow_per_point'):.1%}, up to four points. Easy running is not changed.",
-            "At 3+ points, or a point or more on three mornings running, the session becomes an easy run of the same distance, on the watch too. The planned session is still shown, and comes back once you have recovered.",
-            "Every scheduled contact with Garmin (the daily sync and the four-hourly syncs after it) is moved by its own random amount, up to 30 minutes either way, so installs do not all reach Garmin at the same moment.",
+            f"How strongly it responds is set by the Daily adjustment slider in Settings (now {c['readiness_response']}%). At 100% the easing above applies in full, and 3+ points, or a point or more on three mornings running, turn the session into an easy run of the same distance, on the watch too. Lower settings ease paces proportionally less and need more points (4 at 75%, 5 at 50%, 6 at 25%); the three-mornings rule applies at 75% and above. At 50% (the default), which also covers the two weeks after an illness (where it takes 3 points instead of 1), a poor night's sleep eases paces but does not replace the session. At 0% sessions are never changed. An easy-run change shows the planned session and comes back once you have recovered.",
+            "Every scheduled contact with Garmin (the daily sync, which is moved up to 30 minutes either way, and the hourly syncs after it, each at its own random time past the hour) is moved by its own random amount, so installs do not all reach Garmin at the same moment.",
             "The easing per point is measured from your own runs once there are enough; see What it has learned about you.",
         ]),
         ("Holidays", [
@@ -1500,7 +1534,7 @@ def about():
             f"Status: {yn(c['push_enabled'])}. The next {c['push_days']} days are kept on your Garmin calendar as structured workouts with pace targets on the fast parts.",
             f"Easy and steady runs: {'pace range alerts' if c['easy_target'] == 'pace' else 'no pace alerts'}.",
             "A day is re-sent only when it changes: a replan, a move, or today's pace adjustment. Only workouts made by this app (names starting PZ) are ever deleted.",
-            "Every four hours (around 02:00, 06:00, 10:00, 14:00, 18:00 and 22:00 UTC, each moved by up to 30 minutes at random) the app syncs again: it reads new runs, updates the plan, and puts back any workout missing from your Garmin calendar, such as one deleted in Garmin Connect.",
+            "Every hour, at a random time past the hour, the app syncs again: it reads new runs, updates the plan, and puts back any workout missing from your Garmin calendar, such as one deleted in Garmin Connect.",
         ]),
         ("Moving sessions", [
             "Drag any future day onto another to swap them. It warns if two hard days end up back to back.",

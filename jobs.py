@@ -14,9 +14,11 @@ import db
 import engine
 import execution
 import heat
+import metwarn
 import aerobic
 import profile
 import push
+import rawsync
 import results
 import trends
 import respond
@@ -296,6 +298,32 @@ def reshuffle(today=None):
     return out
 
 
+def _weather_safety(adj, plan, today, level, c):
+    """An Orange or Red Met Éireann warning for the run hour, or a forecast of thunder, ice, heavy snow or damaging wind, turns the run into
+    an easy one (Red: no outdoor run). The warning itself is shown unchanged elsewhere; this is only the app's advice about it."""
+    if not c.get("heat_adjust") or plan["type"] in ("Race", "Rest"):
+        return adj
+    hr = heat.run_hour(today)
+    warn, f = metwarn.hold(today, hr), heat.at(today, hr)
+    why = (f or {}).get("severe")
+    if not warn and not why:
+        return adj
+    if warn:
+        red = warn["severity"] == "Extreme"
+        reason = f"Met Éireann has an {warn['event']} warning (issued {warn['sent'][:16].replace('T', ' ')}) that covers your run time"
+        advice = ("Do not run outdoors today: rest, or use a treadmill." if red else
+                  "Changed to an easy run today: keep off exposed routes, or use a treadmill, and cut it short if it turns bad.") + " The session comes back once the warning has ended."
+    else:
+        reason = f"{why} is forecast at {hr}:00"
+        advice = "Changed to an easy run today: it is not safe for hard running outdoors. Use a treadmill, or run at another hour if there is a safer one."
+    if adj and adj.get("easy"):
+        adj["reasons"] = adj["reasons"] + [reason]
+        adj["advice"] = adj.get("advice", "") + " " + advice
+        adj["weather"] = True
+        return adj
+    return {"slow": 0.0, "level": level, "reasons": [reason], "easy": True, "weather": True, "advice": advice}
+
+
 def adjust():
     """Today's readiness, and today's pace adjustment."""
     c = db.cfg()
@@ -309,21 +337,34 @@ def adjust():
     db.put("readiness_log", hist)
     db.run("UPDATE plan SET adjust=NULL WHERE date>?", (today.isoformat(),))
     row = db.rows("SELECT * FROM plan WHERE date=?", (today.isoformat(),))
-    if row and c["daily_adjust"]:
+    if c.get("heat_adjust"):
+        try:
+            metwarn.refresh()
+        except Exception:
+            log.error("Met Éireann warnings failed\n%s", traceback.format_exc())
+    if row and (c["daily_adjust"] or c.get("heat_adjust")):
         steps = json.loads(row[0]["steps"]) if row[0]["steps"] else []
         fast = row[0]["type"] != "Race" and any((s[0] == "d" and s[2] in engine.QUALITY) or s[0] == "r" for s in steps)
-        adj = {"slow": r["slow"], "reasons": r["reasons"], "level": r["level"]} if fast and r["slow"] > 0 else None
+        # the "Daily adjustment" slider: 100 is the full rules, lower values ease paces less and need more warning signs before a
+        # session becomes an easy run, and 0 leaves the session alone
+        dyn = c["readiness_response"] if c["daily_adjust"] else 0       # with only the weather switched on, recovery changes nothing
+        slow = r["slow"] * dyn / 100
+        adj = {"slow": slow, "reasons": r["reasons"], "level": r["level"]} if fast and dyn > 0 and slow > 0 else None
         # a bad morning, or a warning sign three mornings running, turns the session into an easy run: when signs persist, the
         # trials of readiness-guided training swapped hard days for easy ones rather than only slowing them
         run3 = all(hist.get((today - dt.timedelta(days=i)).isoformat(), 0) >= 1 for i in range(3))
-        if adj and (r["level"] == "red" or run3):
+        enough = r["points"] >= 3 + round((100 - dyn) / 25)
+        if adj and (enough or (run3 and dyn >= 75)):
             adj.update({"easy": True, "slow": 0.0, "advice": "Changed to an easy run today because " +
-                        ("several warning signs agree." if r["level"] == "red" else "a warning sign has lasted three mornings.") +
+                        ("several warning signs agree." if enough else "a warning sign has lasted three mornings.") +
                         " The session comes back once you have recovered."})
         # inside the weeks after an illness, any warning sign eases the long run and turns a session into easy running: a relapse
         # costs far more than a gentle few days (see PRINCIPLES.md, illness)
+        # the slider also sets how many points it takes: 1 at 100%, up to 4 at 25%, and none at 0%
         ill = engine.illness_signs(r, today, db.rows("SELECT * FROM status"))
-        if ill and row[0]["type"] in ("Long", "Key") and not (adj and adj.get("easy")):
+        if dyn < 100 and r["points"] < 1 + round((100 - dyn) / 25):
+            ill = []
+        if ill and dyn > 0 and row[0]["type"] in ("Long", "Key") and not (adj and adj.get("easy")):
             planned = row[0]["miles"] or 0
             cap = max(engine.half(min(planned * 0.6, 8)), 3) if row[0]["type"] == "Long" else None
             adj = {"slow": 0.0, "level": r["level"], "reasons": ill, "easy": True, "recovery": True,
@@ -343,6 +384,15 @@ def adjust():
                 adj["slow"] = round(adj["slow"] + h["pct"] / 100, 4)
                 adj["reasons"] = adj["reasons"] + [f"{say}: paces eased {h['pct']:g}% for the heat"]
                 adj["heat"] = h
+        # wind slows fast running, whatever the temperature: a modelled allowance for a loop route at the same effort (see heat.wind_pct)
+        if h and not (adj and adj.get("easy")) and h.get("wind_pct"):
+            adj = adj or {"slow": 0.0, "reasons": [], "level": r["level"]}
+            adj["slow"] = round(adj["slow"] + h["wind_pct"] / 100, 4)
+            adj["reasons"] = adj["reasons"] + [f"the forecast wind at {h['hour']}:00 is {heat.mph_or_kmh(h['wind'], c['units'])}"
+                                               f"{'' if not h.get('gust') else ', gusting to ' + heat.mph_or_kmh(h['gust'], c['units'])}: "
+                                               f"paces eased {h['wind_pct']:g}% for the wind on a loop route"]
+            adj["wind"] = h["wind_pct"]
+        adj = _weather_safety(adj, row[0], today, r["level"], c)
         db.run("UPDATE plan SET adjust=? WHERE date=?", (json.dumps(adj) if adj else None, today.isoformat()))
     if r["level"] == "unknown" and not watch.has_recovery_data():
         r["reasons"] = [f"{watch.NAMES[watch.name()]} gives no sleep or heart-rate variability, so sessions are not adjusted day by day."]
@@ -355,11 +405,41 @@ def _progress(m):
     status["progress"] = m
 
 
+QUEUED = ("replan", "readiness", "push")      # jobs that only bring things up to date, so asking again while one runs means "once more when it ends"
+_qlock = threading.Lock()
+_again = set()
+
+
 def run(kind):
-    """Run one job now (blocking). kind: setup | daily | replan | readiness | push."""
-    if not _lock.acquire(blocking=False):
-        return False
-    status.update({"running": kind, "progress": "Starting", "error": None})
+    """Run one job now (blocking). kind: setup | daily | replan | readiness | push.
+
+    A change made while a job is running (a setting, a race, a holiday) is not lost: its replan, readiness or push is queued and runs
+    straight after, with nothing in between that looks idle. Only the heavy kinds, setup and daily, are refused while another job runs."""
+    with _qlock:
+        if not _lock.acquire(blocking=False):
+            if kind in QUEUED:
+                _again.add(kind)
+            return False
+        status.update({"running": kind, "progress": "Starting", "error": None})
+    ok = False
+    while kind:
+        try:
+            ok = _job(kind)
+        except Exception:          # a job that dies before it can report must still let go of the lock
+            log.error("=== %s crashed ===\n%s", kind, traceback.format_exc())
+            ok = False
+            status.update({"error": f"{kind} failed unexpectedly"})
+        with _qlock:
+            kind = _again.pop() if _again else None
+            if kind:
+                status.update({"running": kind, "progress": "Starting", "error": None})
+            else:
+                status.update({"running": None, "progress": ""})
+                _lock.release()
+    return ok
+
+
+def _job(kind):
     jid = db.run("INSERT INTO jobs(kind,started) VALUES(?,?)", (kind, dt.datetime.now().isoformat(timespec="seconds")))
     log.info("=== %s started ===", kind)
     ok, msg = True, ""
@@ -428,15 +508,22 @@ def run(kind):
     db.run("UPDATE jobs SET finished=?, ok=?, message=? WHERE id=?", (dt.datetime.now().isoformat(timespec="seconds"), int(ok), msg, jid))
     if ok:
         log.info("=== %s finished: %s ===", kind, msg or "done")
-    status.update({"running": None, "progress": "", "error": None if ok else msg})
-    _lock.release()
+    status.update({"error": None if ok else msg})
     return ok
 
 
 def start(kind):
-    if status["running"]:
-        return False
-    threading.Thread(target=run, args=(kind,), daemon=True).start()
+    with _qlock:
+        if status["running"]:
+            if kind in QUEUED:
+                _again.add(kind)       # see run: not lost, it runs once the current job ends
+            return False
+    t = threading.Thread(target=run, args=(kind,), daemon=True)
+    t.start()
+    for _ in range(300):        # return once the job has marked itself as running (or has already finished), so a caller that looks at once never sees "idle" before it begins
+        if status["running"] or not t.is_alive():
+            break
+        time.sleep(0.01)
     return True
 
 
@@ -446,7 +533,7 @@ def last_ok(kinds=("setup", "daily")):
     return dt.datetime.fromisoformat(r[0]["finished"]) if r else None
 
 
-CHECK_HOURS_UTC = (2, 6, 10, 14, 18, 22)
+CHECK_HOURS_UTC = tuple(range(24))      # a sync slot every hour
 JITTER_S = 1800      # every scheduled contact with Garmin moves up to 30 minutes either way
 
 
@@ -465,15 +552,20 @@ def jitter(tag):
     return dt.timedelta(seconds=int.from_bytes(h[:4], "big") % (2 * JITTER_S + 1) - JITTER_S)
 
 
+def check_offset(tag):
+    """A fixed random offset, from 0 to 59 minutes past the hour, for one hourly sync slot (same seed and rules as `jitter`)."""
+    return dt.timedelta(seconds=int((jitter(tag) + dt.timedelta(seconds=JITTER_S)).total_seconds()) * 3599 // (2 * JITTER_S))
+
+
 def _local(t):
     return t.astimezone().replace(tzinfo=None)
 
 
 def _check_due(now):
-    """True when a sync slot (every four hours, UTC, each moved by its own jitter) has passed since the last successful sync."""
+    """True when a sync slot (every hour, each at its own random time past the hour) has passed since the last successful sync."""
     utc = now.astimezone(dt.UTC)
     slots = [(utc.replace(hour=h, minute=0, second=0, microsecond=0) + dt.timedelta(days=d)) for d in (-1, 0, 1) for h in CHECK_HOURS_UTC]
-    due = [t + jitter("check " + t.isoformat()) for t in slots]
+    due = [t + check_offset("check " + t.isoformat()) for t in slots]
     passed = [t for t in due if t <= utc]
     if not passed:
         return False
@@ -494,9 +586,32 @@ def daily_due(now):
     return now.replace(hour=hh, minute=mm, second=0, microsecond=0) + jitter("daily " + now.date().isoformat())
 
 
+_history = {"thread": None}
+
+
+def _history_due(now):
+    """Is there Garmin history to fill, and is nothing else using Garmin? It never runs during a sync or while Garmin has limited it."""
+    if not (db.get("setup_done") and watch.name() == "garmin" and watch.connected()) or status["running"]:
+        return False
+    t = _history["thread"]
+    return not (t and t.is_alive()) and not rawsync.paused(now) and rawsync.has_gaps(now.date())
+
+
+def _history_start():
+    """Fill the gaps in the daily Garmin records in a thread of its own, so the sync job and its lock are never held by it. It stops
+    between requests the moment a sync starts, and the scheduler starts it again once the sync is over."""
+    def work():
+        try:
+            rawsync.run(stop=lambda: bool(status["running"]))
+        except Exception:
+            log.error("Saving the daily Garmin records failed\n%s", traceback.format_exc())
+    _history["thread"] = threading.Thread(target=work, name="garmin-history", daemon=True)
+    _history["thread"].start()
+
+
 def scheduler():
     """Runs for the life of the app. Once a day at the chosen time it downloads, reviews and sends; it catches up after downtime,
-    and re-checks the morning's sleep and HRV until the watch has synced. Every four hours (02:00, 06:00, 10:00 ... UTC) it syncs again,
+    and re-checks the morning's sleep and HRV until the watch has synced. Every hour, at a random time past the hour, it syncs again,
     so new runs are read, the plan follows them, and the Garmin calendar is kept holding the planned workouts for the next `push_days`
     days."""
     last_try = None
@@ -519,6 +634,8 @@ def scheduler():
                 elif not recently_tried and _check_due(now):
                     last_try = now
                     run("daily")      # the full sync, not only the calendar check: runs done later in the day arrive within hours
+            if _history_due(dt.datetime.now()):
+                _history_start()
             if db.get("setup_done") and db.get("update_check") and _update_due(dt.datetime.now()):
                 updates.check()
         except Exception:

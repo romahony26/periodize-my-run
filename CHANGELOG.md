@@ -3,6 +3,62 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.1-beta.10 - 2026-10-25
+### Fixed
+- Code scanning: the five "information exposure through an exception" alerts in web.py (race course, race log import, update, COROS sign-in and backup). The page already showed only messages this app wrote; they are now read from the error's own message rather than its text form, so no library or stack detail can reach the page. What you see is unchanged.
+
+## 2.10.1-beta.9 - 2026-10-25
+### Fixed
+- Sleep, resting heart rate, HRV and steps held in the saved Garmin records now reach the daily table. The saved records go back to May 2023, but the daily table only held what the ordinary sync had read, from February 2026. Each sync now copies what is missing from the saved records, asks Garmin for nothing, and never replaces a value already held. The last three days are left to the ordinary sync.
+
+## 2.10.1-beta.8 - 2026-10-24
+### Changed
+- The download of daily Garmin records now fills gaps only: a day and kind not yet held, or held from before the day ended. Today is never read, because the ordinary sync already has it. With no gap it makes no request to Garmin at all.
+- It runs in a thread of its own, started by the scheduler, and no longer inside the sync job. It stops between requests the moment a sync starts and carries on once the sync is over, so it cannot delay or lengthen a sync or hold its lock. When Garmin limits the requests it rests for an hour.
+
+### Fixed
+- A change made while a replan, readiness check or push was running (a setting, a race, a holiday, a moved session) was silently dropped, so the plan stayed out of date until the next sync. On a busy or slow machine two quick changes could do it. Now it runs straight after the current job, once however many were asked for, with nothing in between that looks idle. Sync and first-time setup are still refused while another job runs. A job that crashes before it can report now always lets go of the lock and lets the next one run.
+- Starting a job now returns only once the job has begun, so a page or a test that looks at once never sees "idle" before it starts.
+
+## 2.10.1-beta.7 - 2026-10-24
+### Changed
+- Saving the daily Garmin records now runs at the very end of the sync, after the plan, the push to the watch and the morning message, and in slices of at most 30 minutes, so a long download of history can never delay them. A failure in it no longer makes the day's sync count as failed.
+
+## 2.10.1-beta.6 - 2026-10-24
+### Added
+- Wind now slows fast running. The allowance is a model anchored to Pugh's 1971 measurement that air resistance is about 7.5 to 8% of the energy cost of running at 21.5 km/h and that the cost of running into a wind rises with the square of its speed: on a loop route, against the wind half the way and with it the other half, at the same effort, with the forecast wind scaled to running height. About 2% at a forecast 20 km/h, 4.5% at 30 and 7% at 40, up to 15%. It adds to the heat allowance, counts in the choice of best start hour, and is shown on Today with the gusts.
+- Met Éireann weather warnings, read from its public feed (www.met.ie; no account, nothing about you sent; your county is worked out on this computer from the rounded location the weather already uses). The warnings for your county, its province or all of Ireland are shown on Today and in each day's detail exactly as issued, with the credit and licence statements Met Éireann requires, and are removed when they expire. If the feed cannot be read for three hours none is shown and the page says so. An Orange or Red warning for wind, snow or ice, thunderstorm, fog, heat, low temperature, rain or flood that covers your start hour turns today's run into an easy one (Red: no outdoor run). Yellow warnings are shown and change nothing.
+- A forecast of thunder, freezing rain, heavy snow, or wind of 55 km/h (gusts 90 km/h) or more at your start hour also turns the run into an easy one with advice to use a treadmill.
+- "Wind and weather warnings" in the explanations.
+### Changed
+- The weather switch now also covers the weather rules without the recovery adjustment: with "Ease paces on poor recovery" off, wind, heat and the warnings still apply.
+### Fixed
+- The notes on the weather said wind had no effect once temperature was allowed for, and cited a paper (El Helou and colleagues, 2012) that never looked at wind. Both are removed.
+
+## 2.10.1-beta.5 - 2026-10-24
+### Added
+- Everything else Garmin keeps for each day is now saved whole (compressed) instead of three numbers being picked out and the rest thrown away: sleep stages, stress, Body Battery, breathing, blood oxygen, Training Readiness and Status, VO2max, the all-day heart rate, floors and intensity minutes. The newest days come first and it works back, in time-boxed slices after the daily sync, until 240 days in a row hold nothing. It carries on by itself after a restart or a Garmin rate limit, leaves out a kind that Garmin will not give for the account, and re-reads the last two days because a day is not finished until the next morning. Settings shows how far back it has got. Nothing uses the records yet.
+### Changed
+- The database gains a garmin_raw table (schema 21).
+
+## 2.10.1-beta.4 - 2026-10-21
+### Changed
+- The app now syncs with Garmin every hour instead of every four hours. Each hourly sync happens at its own random time past the hour (anywhere from 0 to 59 minutes), so installs do not all reach Garmin together.
+
+## 2.10.1-beta.3 - 2026-10-21
+### Fixed
+- Updated certifi from 2026.7.22 to 2026.10.19, which fixes the known vulnerability PYSEC-2026-4320.
+
+## 2.10.1-beta.2 - 2026-10-21
+### Changed
+- The Daily adjustment slider also governs the two weeks after an illness. Before, any one warning sign in that window turned a session into an easy run. Now it takes 1 point at 100%, 2 at 75%, 3 at 50% (the default) and 4 at 25%, and nothing at 0%.
+
+## 2.10.1-beta.1 - 2026-10-21
+### Added
+- "Daily adjustment" slider in Settings (0 to 100%, steps of 25). It sets how much poor sleep or recovery changes a session: 0% never changes it, 100% is the full rules as before.
+### Changed
+- The default is 50%. A poor night's sleep now eases fast paces but no longer replaces the session with an easy run; that takes more warning signs together (5 points at 50%, against 3 before). The three-mornings rule applies at 75% and above.
+
 ## 2.10.0 - 2026-10-18
 ### Fixed
 - Code scanning: restoring a backup now takes the file from the backups folder's own listing, and installing a version checks that its folder is inside the versions folder, so neither can be pointed elsewhere by the request.

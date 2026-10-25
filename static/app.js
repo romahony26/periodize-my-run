@@ -46,6 +46,20 @@ function wxCharts(w){
     tip:x=>`${hh(x[0])} · ${x[3]===null?'too hot for hard running':(x[3]||0)+'% slower'} (${Math.round(x[1])}°C)`},Object.assign({},common,{}))):'';
   const tab=`<details style="margin-top:8px"><summary class="xs mute" style="cursor:pointer">Hourly figures</summary><table class="xs" style="margin-top:6px"><tr><th>Hour</th><th class="r">Air °C</th><th class="r">Slower %</th><th class="r">Rain mm</th><th class="r">Chance %</th></tr>${r.map(x=>`<tr><td>${hh(x[0])}${x[0]===w.hour?' ★':''}</td><td class="r num">${x[1]}</td><td class="r num">${x[3]===null?'too hot':x[3]}</td><td class="r num">${x[4]??''}</td><td class="r num">${x[5]??''}</td></tr>`).join('')}</table></details>`;
   return t+rain+heat+`<p class="xs mute" style="margin:6px 0 0">The vertical line marks the best hour${common.win?'; the tinted band is your running window':''}. ${anyHeat?'':'No hour of the day costs any pace for heat. '}Daylight hours only.</p>`+tab}
+function metWarn(m,day){
+  /* Met Éireann's warnings as issued (wording, level, times and area are not changed), with the credit its licence requires. */
+  if(!m)return '';
+  const when=t=>{const d=new Date(t);return isNaN(d)?t:d.toLocaleString('en-IE',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+  const col=e=>/^Red/.test(e)?'red':/^Orange/.test(e)?'amber':'';
+  const items=(m.days&&m.days[day])||[];
+  const attr=`<p class="xs mute" style="margin:6px 0 0">${m.attribution.map(E).join(' · ')}</p>`;
+  if(m.stale)return `<div class="metwarn"><p class="xs mute" style="margin:6px 0 0"><b>Met Éireann warnings</b> could not be refreshed in the last three hours, so none is shown. Check <a href="https://www.met.ie/warnings" target="_blank" rel="noopener noreferrer">www.met.ie/warnings</a>.</p>${attr}</div>`;
+  if(!m.county)return '';
+  return `<div class="metwarn"><p class="lab2" style="margin:10px 0 0">Met Éireann warnings for ${E(m.county)}</p>`+
+    (items.length?items.map(w=>`<div class="small" style="margin:6px 0 0"><b class="${col(w.event)}">${E(w.event)}</b> · ${E(w.severity)}, ${E(w.certainty)}<br>${E(w.headline)}<br>
+      <span style="white-space:pre-line">${E(w.description)}</span><br>
+      <span class="xs mute" title="${E(w.onset)} to ${E(w.expires)}, issued ${E(w.sent)}">From ${E(when(w.onset))} until ${E(when(w.expires))} · issued ${E(when(w.sent))} · ${E(w.area)}</span></div>`).join('')
+      :`<p class="xs mute" style="margin:4px 0 0">No warning in force for ${E(m.county)}.</p>`)+attr+'</div>'}
 function wxWind(k){return U()==='mi'?Math.round(k/1.609344)+' mph':k+' km/h'}
 function wxTip(w){return wxLines(w).join(' ')}
 function wxBest(w){
@@ -197,7 +211,8 @@ function planView(){
     ${stepList(t.text)}
     ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button></div>`:''}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
-    ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}</p>`:''}
+    ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}${S.heat.today.wind!=null?` · wind ${wxWind(S.heat.today.wind)}${S.heat.today.gust?`, gusts ${wxWind(S.heat.today.gust)}`:''}${S.heat.today.wind_pct?` · about ${S.heat.today.wind_pct}% slower for the wind`:''}`:''}</p>`:''}
+    ${metWarn(S.met_warnings,S.today)}
     ${r&&r.date===S.today?`<p class="xs mute" style="margin:10px 0 0">${E(r.reasons.join(' · '))}</p>${r.sleep_h||r.hrv?`<p class="xs mute" style="margin:4px 0 0">Last night: ${[r.sleep_h?r.sleep_h.toFixed(1)+' h sleep':'',r.sleep_score?'sleep score '+r.sleep_score:'',r.hrv?'HRV '+Math.round(r.hrv):'',r.rhr?'resting HR '+Math.round(r.rhr):''].filter(Boolean).join(' · ')}</p>`:''}`:''}
     ${t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''}${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}</div>`;
   h+='</div>';
@@ -227,6 +242,7 @@ function planView(){
     <p class="eyebrow"><span id="mt">${sd.dow} ${nice(sd.date)} ${sd.date.slice(0,4)}</span><button class="ghost" id="selx" style="margin-left:auto" aria-label="Close">Close</button></p>
     <p class="h">${E(sd.label||'No session planned')} <span class="mute num" style="font-weight:600">${E(sd.dist||'')}</span></p>
     ${sd.wx?wxBest(sd.wx):''}
+    ${metWarn(S.met_warnings,sd.date)}
     ${sd.type&&sd.type!=='Rest'?`<p class="lab2">${a?'Original session':'Session'}</p>${stepList(a?sd.original:sd.text)}`:''}
     ${a?`<p class="lab2">Tuned for today <span class="chip amber" style="margin-left:6px"><i></i>paces eased ${(a.slow*100).toFixed(1)}%</span></p>${stepList(sd.text)}
       <p class="small" style="margin:8px 0 0">Why: ${E((a.reasons||[]).join('; '))}. ${E(a.advice||'')}</p>`
@@ -384,11 +400,12 @@ function prefs(s){return `<div class="row"><div><label for="units">Distances in<
   <div class="lab" id="bl">Days you cannot run</div><div id="blocked" class="checks" role="group" aria-labelledby="bl">${DOW.map((d,i)=>`<label><input type="checkbox" value="${i}" ${(s.blocked_days||[]).includes(i)?'checked':''}>${d.slice(0,3)}</label>`).join('')}</div>
   <div class="row"><div><label for="push_enabled">Send workouts to my watch</label>${yn('push_enabled',s.push_enabled)}</div>
   <div><label for="daily_adjust">Ease paces on poor recovery</label>${yn('daily_adjust',s.daily_adjust)}</div>
+  <div><label for="readiness_response">Daily adjustment: ${s.readiness_response}%</label><input id="readiness_response" type="range" min="0" max="100" step="25" value="${s.readiness_response}" aria-describedby="rr_help" oninput="this.previous=0;this.parentNode.firstChild.textContent='Daily adjustment: '+this.value+'%'"><p class="xs mute" id="rr_help" style="margin:6px 0 0">How much poor sleep or recovery changes a session. Left: never. Middle: eases paces; only several signs together turn a session into an easy run. Right: the strictest.</p></div>
   <div><label for="strength">Strength sessions</label>${yn('strength',s.strength)}</div>
   <div><label for="easy_target">Easy runs on the watch</label><select id="easy_target">${opt('none','No pace alerts',s.easy_target)}${opt('pace','Pace range alerts',s.easy_target)}</select></div></div>
   <p class="xs mute">Set the sync time for after you usually wake and your watch has synced, so last night's sleep is counted.</p>`}
 function prefsRead(){return {week_start:+$('#week_start').value,units:$('#units').value,run_days:+$('#run_days').value,long_day:+$('#long_day').value,run_time:$('#run_time').value,push_enabled:$('#push_enabled').value==='1',
-  blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
+  blocked_days:$$('#blocked input:checked').map(x=>+x.value),daily_adjust:$('#daily_adjust').value==='1',readiness_response:+$('#readiness_response').value,easy_target:$('#easy_target').value,strength:$('#strength').value==='1'}}
 /* Arrow keys, Home and End move between the tabs of a row, and only the selected tab is in the tab order (the pattern screen readers expect). */
 function tabKeys(list,activate){if(!list||list.dataset.keys)return;list.dataset.keys='1';
   list.addEventListener('keydown',e=>{const tabs=[...list.querySelectorAll('[role=tab]')],i=tabs.indexOf(document.activeElement);if(i<0)return;
@@ -499,6 +516,7 @@ function connections(part){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span clas
   <div class="card c6 conn" id="cgarmin">${head('⌚','Garmin',chip(gm.connected,'Connected','Not connected'))}
     <p class="small">${gm.connected?'Signed in'+(gm.name?' as <b>'+E(gm.name)+'</b>':'')+'.':'Not connected. The plan cannot sync without it.'}</p>
     <ul class="clist"><li>Reads your runs, sleep, HRV, resting heart rate and steps once a day.</li><li>${S.settings.push_enabled?`Sends the next ${S.settings.push_days} days of workouts to your watch, and checks every four hours that they are still there.`:'Sending workouts to your watch is switched off (Training tab).'}</li><li>Your password was used once to sign in and was not stored.</li></ul>
+    ${gm.connected&&gm.history?`<p class="xs mute" style="margin:8px 0 0">Everything else Garmin keeps for each day (sleep stages, stress, Body Battery, breathing, blood oxygen, readiness, VO2max and the all-day heart rate) is being saved whole, newest first. ${gm.history.done?`Done: ${gm.history.days.toLocaleString()} days, back to ${E(gm.history.back_to||'')}.`:`${gm.history.days.toLocaleString()} days so far, reading ${E(gm.history.reading||'')}. It carries on by itself and can take days.`}</p>`:''}
     ${gm.connected?'<p class="cact"><button class="ghost" id="gmdis">Disconnect Garmin</button></p><p class="xs mute">To revoke access everywhere, change your Garmin password.</p>':''}</div>
   ${corosCard(head,chip)}
   ${watchCard(head,chip)}
@@ -508,8 +526,8 @@ function connections(part){const gm=S.garmin, chip=(ok,yes,no,warn)=>`<span clas
   <div class="card c6 conn" id="cfit">${head('⇩','Workout files (FIT)',chip(true,'Ready',''))}
     <p class="small">The coming days' runs, with their pace targets, as .fit workout files in one zip. Garmin watches load them from the NewFiles folder over USB, and apps that import FIT workouts (intervals.icu, for example, which can pass them on to other watches) can read them. COROS, Suunto and Polar have not been confirmed to import structured workouts from a file. Nothing is sent anywhere.</p>
     <p class="cact"><a class="ghost" href="/api/workouts.zip">Download the next ${S.settings.push_days} days</a></p></div>`;
-  const env=`<div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo)',chip(S.heat&&S.heat.on,'On','Off'))}
-    <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), shows each coming day's forecast with the best hour to start between sunrise and sunset, judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. Off unless you switch it on.</p>
+  const env=`<div class="card c12 conn" id="cheat">${head('☀','Weather (Open-Meteo and Met Éireann)',chip(S.heat&&S.heat.on,'On','Off'))}
+    <p class="small">Records the weather each run was done in (temperature, humidity, wind and rain), shows each coming day's forecast with the best hour to start between sunrise and sunset, judges your fitness on what each run was worth in neutral weather, eases fast paces on hot, humid days and in a strong wind, turns a run into an easy one for thunder, ice, heavy snow, damaging wind or an Orange or Red Met Éireann warning, and shows the race-day forecast for your goal race once it is within 16 days. The weather comes from Open-Meteo (free, no account). The only things sent are rough locations, rounded to about 10 km, of where your runs started, and their dates. In Ireland it also reads Met Éireann's public warnings feed (www.met.ie, free, no account): nothing about you is sent, because the feed is the same for everyone and your county is worked out here. Warnings are shown exactly as Met Éireann issues them, with the credit its licence asks for. Off unless you switch it on.</p>
     <label for="heatsw">Track the weather and adjust for it</label>${yn('heatsw',S.heat&&S.heat.on)}
     <p class="xs" style="margin:8px 0 0"><a href="#" data-gohours>Set the hours you can run</a> <span class="mute">(the best time of day is chosen inside them)</span></p>
     ${S.heat&&S.heat.on&&!S.heat.located?'<p class="xs mute" style="margin:6px 0 0">Waiting for the first forecast: it is read at the next sync, once a run with GPS is found.</p>':''}</div>
@@ -688,7 +706,7 @@ function wizard(){
     if(j.error)h+=`<div class="alert err" style="margin-top:14px">${E(j.error)}</div><button class="btn" id="retry">Try again</button>`;
   }else if(wiz.step===1){
     h+=stepper(1)+`<p class="h">Welcome</p><p class="small">Periodize My Run builds a running plan from your own running history (Garmin or COROS) and keeps adjusting it from what you do. Setup takes a few minutes of your time, then 10 to 30 minutes of its own.</p>
-      <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except your watch's service, the weather service if you switch heat adjustment on, and a daily version check with GitHub.</li>
+      <ul class="why"><li><b>It runs on this computer.</b> Your data stays here. Nothing is sent anywhere except your watch's service, the weather services (Open-Meteo and Met Éireann) if you switch heat adjustment on, and a daily version check with GitHub.</li>
       <li><b>No passwords are kept.</b> Your Garmin or COROS password is used once to sign in; only an access token is stored, encrypted.</li>
       <li><b>No AI is used.</b> The plan comes from fixed rules and your data, and every decision is explained.</li>
       <li><b>It is not medical advice.</b> For pain that changes your stride, chest symptoms or illness with fever, stop and see a clinician.</li></ul>

@@ -5,7 +5,7 @@ your watch's.
     0.1 degrees (about 10 km), taken from the start of your latest outdoor run with GPS. Nothing else about you is sent.
   - The forecast is read for the hour you usually start running (the median start hour of your runs in the last four weeks).
   - For each coming day the plan also shows the best hour to start, between sunrise and an hour before sunset: a dry hour if there is
-    one, then the hour that costs least pace for the weather, then the one nearest your usual hour. Rain and wind are shown, not used.
+    one, then the hour that costs least pace for the weather (heat and wind together), then the one nearest your usual hour.
   - A running window (earliest and latest start hour, in Settings; one for weekdays and optionally one for weekends) narrows those hours, and holds the hour used for today's heat easing
     inside it.
   - The location is the start of your latest GPS run, so on holiday the forecast follows you from your first run there.
@@ -16,8 +16,10 @@ your watch's.
     full sun on a still day is harder than the figure says.
   - Every outdoor run is also given the weather it was run in (temperature, dew point, wind and rain), read once from the same
     service for the run's rounded start location and hour. Fitness is then judged on what the run was worth in neutral weather,
-    so a hot or very cold spell is not read as lost fitness. Wind and rain are recorded and shown but do not change any figure:
-    in race data they had no effect of their own once temperature was allowed for (El Helou and colleagues, 2012; Vihma, 2010).
+    so a hot or very cold spell is not read as lost fitness. Wind and rain are recorded and shown but do not change that figure.
+  - Wind does slow today's fast running: see wind_pct below for the model and its assumptions. Race data cannot show it, because a race
+    averages the headwind and tailwind legs and its winds are usually light; the earlier reading that wind has no effect was wrong
+    (El Helou and colleagues, 2012, never analysed wind).
 """
 import datetime as dt
 import json
@@ -31,7 +33,7 @@ from log import log
 
 API = "https://api.open-meteo.com/v1/forecast"
 REFRESH_S = 3 * 3600
-FORECAST_V = 2                # bumped when the saved forecast gains fields, so an older one is read again
+FORECAST_V = 3                # bumped when the saved forecast gains fields, so an older one is read again
 ARCHIVE = "https://archive-api.open-meteo.com/v1/archive"
 BEST_WBGT = (7.5, 15.0)      # the range in which endurance running performance peaks (Mantzios and colleagues, 2022)
 PCT_PER_DEGREE = 0.35        # per cent slower for each degree of WBGT outside it: the middle of their 0.3 to 0.4
@@ -73,6 +75,68 @@ def worth(temp_c, dew_c):
     w = wbgt(temp_c, dew_c)
     cold = min(max(BEST_WBGT[0] - w, 0.0) * PCT_PER_DEGREE, MAX_COLD_PCT)      # the evidence for cold is weaker, so it counts for less
     return round(max(min(max(w - BEST_WBGT[1], 0.0) * PCT_PER_DEGREE, MAX_PCT), cold), 1)
+
+
+# ---- wind
+# Drag on a runner grows with the square of the speed of the air against them. Pugh (1971, J Physiol) measured air resistance as about
+# 7.5 to 8% of the energy cost of running at 21.5 km/h in still air, and that the cost of running into a wind rises with the square of
+# its speed. The model below is anchored to that figure. Davies (1980, J Appl Physiol) reported that a tailwind gives back less than a
+# headwind costs, which the model reproduces: on a loop the route runs against the wind for half the way and with it for the other half,
+# at the same effort throughout, and the extra time is the allowance. The running cost, the 7.75% anchor and the scaling of the forecast
+# wind to running height are the app's own assumptions, so the figure is a modelled allowance, not a measurement.
+RUN_COST = 4.0               # energy cost of running, J per kg per metre (about 1 kcal per kg per km, di Prampero's classic figure)
+PUGH_SPEED, PUGH_SHARE = 5.97, 0.0775       # m/s (21.5 km/h) and the share of the cost that was air resistance there
+DRAG_K = PUGH_SHARE / (1 - PUGH_SHARE) * RUN_COST / PUGH_SPEED ** 2
+RUN_HEIGHT = 0.6             # forecast wind is for 10 m; at running height in open country it is about 0.6 of that (logarithmic wind profile)
+QUALITY_MPS = 4.4            # a representative speed for the fast running that is eased (about 6:05 a mile)
+MAX_WIND_PCT = 15.0
+WIND_FLOOR_PCT = 1.0         # less than this is not worth a change to a pace
+GALE_KMH, GUST_KMH = 55.0, 90.0      # Met Eireann's yellow wind warning starts at a mean speed of 55 km/h or gusts of 90 km/h
+THUNDER = (95, 96, 99)               # WMO weather codes: thunderstorm, with or without hail
+FREEZING = (56, 57, 66, 67)          # freezing drizzle or rain: ice underfoot
+HEAVY_SNOW = (75, 86)
+
+
+def mph_or_kmh(kmh, units):
+    return f"{kmh / 1.609344:.0f} mph" if units == "mi" else f"{kmh:.0f} km/h"
+
+
+def _cost(v, w):
+    return RUN_COST * v + DRAG_K * (v + w) * abs(v + w) * v
+
+
+def _speed(power, w):
+    lo, hi = 0.2, 15.0
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if _cost(mid, w) < power:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2
+
+
+def wind_pct(wind_kmh, speed=QUALITY_MPS):
+    """Per cent slower to hold the same effort on a loop route in this forecast wind (10 m, km/h). 0.0 below the floor or with no wind."""
+    if not wind_kmh or wind_kmh <= 0:
+        return 0.0
+    w = wind_kmh * RUN_HEIGHT / 3.6
+    p = _cost(speed, 0.0)
+    pct = (0.5 * (speed / _speed(p, w) + speed / _speed(p, -w)) - 1) * 100
+    return round(min(pct, MAX_WIND_PCT), 1) if pct >= WIND_FLOOR_PCT else 0.0
+
+
+def severe(gust_kmh, wind_kmh, code):
+    """Why the forecast hour is unsafe for hard running outdoors, or None: thunder, ice, heavy snow, or wind at Met Eireann's yellow level."""
+    if code in THUNDER:
+        return "thunderstorm"
+    if code in FREEZING:
+        return "freezing rain, so ice underfoot"
+    if code in HEAVY_SNOW:
+        return "heavy snow"
+    if (gust_kmh or 0) >= GUST_KMH or (wind_kmh or 0) >= GALE_KMH:
+        return "damaging wind"
+    return None
 
 
 def location():
@@ -136,15 +200,15 @@ def forecast(force=False, cached_only=False):
         return cached
     try:
         r = requests.get(API, params={"latitude": loc[0], "longitude": loc[1],
-                                      "hourly": "temperature_2m,dew_point_2m,wind_speed_10m,precipitation,precipitation_probability",
+                                      "hourly": "temperature_2m,dew_point_2m,wind_speed_10m,precipitation,precipitation_probability,wind_gusts_10m,weather_code",
                                       "daily": "sunrise,sunset", "forecast_days": 16, "timezone": "auto"}, timeout=20, allow_redirects=False)
         body = r.json() if r.status_code == 200 else {}
         h = body.get("hourly")
         cols = [(h or {}).get(k) for k in ("time", "temperature_2m", "dew_point_2m")]
         if not all(isinstance(x, list) and len(x) == len(cols[0]) for x in cols):
             raise ValueError("unexpected reply")
-        # wind, rain and the rain chance are shown, not used in any figure, so a reply without them is still good
-        extra = [(h or {}).get(k) for k in ("wind_speed_10m", "precipitation", "precipitation_probability")]
+        # wind, rain, the rain chance, gusts and the weather code do not break the heat figure, so a reply without them is still good
+        extra = [(h or {}).get(k) for k in ("wind_speed_10m", "precipitation", "precipitation_probability", "wind_gusts_10m", "weather_code")]
         extra = [x if isinstance(x, list) and len(x) == len(cols[0]) else [None] * len(cols[0]) for x in extra]
         d = body.get("daily") or {}
         sun = {}
@@ -158,7 +222,7 @@ def forecast(force=False, cached_only=False):
     off = body.get("utc_offset_seconds")
     out = {"v": FORECAST_V, "loc": list(loc), "at": now.isoformat(timespec="seconds"), "sun": sun,
            "offset": off if isinstance(off, int) and not isinstance(off, bool) else None,
-           "hours": {t: [a, b, w, p, c] for t, a, b, w, p, c in zip(*cols, *extra, strict=True)}}
+           "hours": {t: [a, b, w, p, c, g, k] for t, a, b, w, p, c, g, k in zip(*cols, *extra, strict=True)}}
     db.put("heat_forecast", out)
     return out
 
@@ -172,7 +236,9 @@ def at(day, hour, cached_only=False):
     if not v or v[0] is None or v[1] is None:
         return None
     pct = slowdown(v[0], v[1])
-    return {"temp": round(v[0]), "dew": round(v[1]), "pct": pct, "hour": hour}
+    v = list(v) + [None] * (7 - len(v))
+    return {"temp": round(v[0]), "dew": round(v[1]), "pct": pct, "hour": hour, "wind": None if v[2] is None else round(v[2]), "gust": None if v[5] is None else round(v[5]),
+            "code": v[6], "wind_pct": wind_pct(v[2]), "severe": severe(v[5], v[2], v[6])}
 
 
 def _hm(text):
@@ -188,7 +254,7 @@ def day_plan(day, usual, now=None, f=None, win=None):
     the day is marked `dark`: it is your choice of hours, and the plan says so.
     Dry hours are preferred, because nobody plans a run for the wet; then the hour that costs least pace for the weather
     (`worth`: heat from a wet-bulb globe temperature of 15 C up, cold counted less); then the one nearest the hour you usually start.
-    Wind and rain are shown but never change a pace: they had no effect of their own in race data once temperature was allowed for.
+    Wind adds its own allowance (wind_pct) to the cost of an hour; rain is shown but does not change a pace.
     """
     f = f or forecast(cached_only=True)
     if not f or not f.get("hours"):
@@ -215,7 +281,7 @@ def day_plan(day, usual, now=None, f=None, win=None):
     for h in range(lo, hi + 1):
         v = f["hours"].get(f"{k}T{h:02d}:00")
         if v and v[0] is not None and v[1] is not None:
-            v = list(v) + [None] * (5 - len(v))
+            v = list(v) + [None] * (7 - len(v))
             hrs.append((h, v))
     if not hrs:
         return None
@@ -223,17 +289,18 @@ def day_plan(day, usual, now=None, f=None, win=None):
     def wet(v):
         return (v[3] or 0) >= WET_MM or (v[4] or 0) >= WET_CHANCE
     pool = [x for x in hrs if not wet(x[1])] or hrs
-    h, v = min(pool, key=lambda x: (worth(x[1][0], x[1][1]), abs(x[0] - usual), x[0]))
+    h, v = min(pool, key=lambda x: (worth(x[1][0], x[1][1]) + wind_pct(x[1][2]), abs(x[0] - usual), x[0]))
     # the whole of daylight (not only the hours that could be chosen) for the charts: [hour, temp, dew, per cent slower, rain mm, chance]
     a, z = (_hm(sun[0]) // 60, -(-_hm(sun[1]) // 60)) if sun else FALLBACK_DAY
     rows = []
     for x in range(max(a, 0), min(z, 23) + 1):
         u = f["hours"].get(f"{k}T{x:02d}:00")
         if u and u[0] is not None and u[1] is not None:
-            u = list(u) + [None] * (5 - len(u))
+            u = list(u) + [None] * (7 - len(u))
             rows.append([x, round(u[0], 1), round(u[1], 1), slowdown(u[0], u[1]), None if u[3] is None else round(u[3], 1), u[4]])
     out = {"hourly": rows, "date": k, "hour": h, "temp": round(v[0]), "dew": round(v[1]), "pct": slowdown(v[0], v[1]),
-           "wind": round(v[2]) if v[2] is not None else None, "rain": round(v[3], 1) if v[3] is not None else None,
+           "wind": round(v[2]) if v[2] is not None else None, "gust": round(v[5]) if v[5] is not None else None, "wind_pct": wind_pct(v[2]),
+           "severe": severe(v[5], v[2], v[6]), "rain": round(v[3], 1) if v[3] is not None else None,
            "chance": round(v[4]) if v[4] is not None else None, "wet": wet(v), "dry_hours": len([x for x in hrs if not wet(x[1])]),
            "sunrise": sun[0] if sun else None, "sunset": sun[1] if sun else None, "dark": dark, "window": list(win) if win else None,
            "low": round(min(x[1][0] for x in hrs)), "high": round(max(x[1][0] for x in hrs)),
