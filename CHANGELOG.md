@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.11 - 2026-10-25
+### Fixed
+- The plan outline to the goal race assumed the full step was never earned. Each projected week now counts as run as planned, so after three projected weeks the outline climbs at the full step, as it will if you run the plan.
+
 ## 2.10.2-beta.10 - 2026-10-25
 ### Changed
 - Past the most you held in the last year, the weekly step is now the full 6% once you have run at least 95% of the planned miles in each of the last three weeks, and stays at half (3%) otherwise. A warning sign still holds the volume level. It rewards what you have shown you can hold, not a watch reading. (The code arrived in 2.10.2-beta.9, tagged without its changelog entry.)
