@@ -749,6 +749,42 @@ def _recovering(d, mode):
         d.update({"type": "Easy", "label": "Easy", "steps": [("d", mi_, "easy")], "miles": mi_, "note": note})
 
 
+def _away(d, statuses):
+    """Is this day spent away from the long run: on a work trip, or on a holiday that does not keep the long run?"""
+    for s in statuses:
+        if (s["kind"] == "travel" or (s["kind"] == "holiday" and s.get("mode") not in ("easy_long", "sessions_long", "normal"))) \
+                and dt.date.fromisoformat(s["start"]) <= d["date"] and (not s["end"] or d["date"] <= dt.date.fromisoformat(s["end"])):
+            return True
+    return False
+
+
+def _unwell(d, statuses):
+    return any(s["kind"] in ("sick", "injured") and dt.date.fromisoformat(s["start"]) <= d["date"]
+               and (not s["end"] or d["date"] <= dt.date.fromisoformat(s["end"])) for s in statuses)
+
+
+def keep_long_run(days, statuses):
+    """A long run that falls on a day away is moved to a day at home in the same week, so the week keeps its long run.
+
+    The other weekend day is preferred (Sunday's long run goes to Saturday), then the nearest day, the day before first. The easy or
+    rest day it replaces takes the long run's place on the day away. Only an easy or rest day is used; the week's quality sessions stay put.
+    """
+    for d in days:
+        if d["type"] != "Long" or not _away(d, statuses):
+            continue
+        homes = [e for e in days if e["type"] in ("Easy", "Rest") and not _away(e, statuses) and not _unwell(e, statuses)]
+        if not homes:
+            continue
+        pick = min(homes, key=lambda e: (e["date"].weekday() < 5, abs((e["date"] - d["date"]).days), e["date"] > d["date"]))
+        keys = ("type", "label", "steps", "miles", "note")
+        away_, home_ = {k: d[k] for k in keys}, {k: pick[k] for k in keys}
+        d.update(home_)
+        pick.update(away_)
+        pick["note"] = (pick["note"] + " " if pick["note"] else "") + f"Moved from {d['date']:%A}, when you are away."
+        break
+    return days
+
+
 def apply_status(days, statuses):
     """Overlay sick, injured, recovering, holiday and work-trip periods on planned days.
 
@@ -757,6 +793,7 @@ def apply_status(days, statuses):
     athlete's chosen way of running while away.
     """
     spans = {"sick": episodes(statuses, ("sick",)), "injured": episodes(statuses, ("injured",))}
+    keep_long_run(days, statuses)
     for d in days:
         for s in statuses:
             if s["kind"] in ("holiday", "recovering", "travel"):
