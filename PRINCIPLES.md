@@ -43,8 +43,10 @@ notice); the others were matched to their published record. This is how the 2022
 3. **Trends, not single days.** [R] (*strong*) One night's heart-rate variability or one slow run is mostly noise. Periodize My Run acts
    on averages over days and weeks (Plews and colleagues, 2012, 2013).
 4. **No single warning sign decides.** [R] (*strong*) Overreaching and overtraining have no single reliable marker; they are
-   recognised when several signs agree and other causes are ruled out (Meeusen and colleagues, 2013). A recovery week is
-   triggered only when two independent warning signs appear together. [P]
+   recognised when several signs agree and other causes are ruled out (Meeusen and colleagues, 2013). Sleep, HRV and resting heart rate
+   move together and are noisy, so a recovery week needs two warning signs in two weeks running (or three at once); two signs in a single
+   week only hold the volume level. Easy pace at a heart rate is shown but is not a warning sign, because heat, wind, hills and watch error
+   move it by a few per cent. [P]
 5. **Pain and illness override the plan.** [C] A planner cannot examine you. Pain that changes your stride or builds during a
    run, or illness with fever or chest symptoms, means stop and see a clinician.
 
@@ -178,6 +180,18 @@ this project's own choices, not findings from trials. [C] [P]
 - **Days of illness or injury are never used** for a moved session. [P]
 - **A week that is away from start to finish** has no long run to place: every run is short, easy and optional. [P]
 
+### Goal-driven volume, and the midweek medium-long run
+
+- **A marathon goal time sets how much volume the plan may build toward.** [C] Across marathoners, more weekly distance goes with faster
+  times (Doherty and colleagues, 2020; Fokkema and colleagues, 2020), and the project's own check of 6,582 marathons found 5 to 7% faster per
+  standard deviation (principle 99). No study gives a mileage for a time. The rule of thumb used is 55 miles a week for 3:00, a mile more for each
+  minute faster (65 for 2:50), within 40 and 90. The ceiling rises toward it but never past half again on the most you have held in the last
+  three years; the weekly step is still 6%, or 3% past what you have held, and a warning sign holds it. [C] [P]
+- **A marathon, half-marathon or ultra build has a midweek medium-long run** (about a quarter of the week, 8 to 14 miles, easy with a steady
+  finish), alternating with the heart-rate aerobic run. It adds the aerobic miles that marathon endurance needs without a third hard
+  session. [C]
+- **More than one goal race is flagged.** Training can peak for one race at a time, so the plan says so and the Races page notes it. [C]
+
 ## 6. The shape of a season
 
 34. **Load rises in steps, with lighter weeks.** [C] After three full weeks, the next is a down week at about three quarters of
@@ -242,13 +256,16 @@ this project's own choices, not findings from trials. [C] [P]
 49. **Sleep matters from a single night.** [R] (*strong*) One short night measurably reduces endurance performance the next day,
     mostly through how hard the effort feels (Lopes and colleagues, 2023; Craven and colleagues, 2022). Periodize My Run reads last night
     on its own, and the last three nights together because sleep debt builds.
-50. **Heart-rate variability and resting heart rate are read as weekly trends.** [R] (*strong*) A single reading is noisy. A
+50. **Heart-rate variability and resting heart rate are read as weekly trends.** [R] (*moderate*) A single reading is noisy. A
     7-day average against your own normal range is the established method, and a shift of about half your normal spread is the
-    smallest change treated as real (Plews and colleagues, 2012, 2013). Garmin's overnight readings agree well enough with
-    laboratory measures for trends, not single nights (Dial and colleagues, 2025) (*moderate*).
-51. **Expect small gains from readiness-based adjustment, not miracles.** [R] (*strong*) Training guided by heart-rate
-    variability gives small benefits and fewer non-responders compared with a fixed plan, not large gains (Düking and colleagues,
-    2021; Manresa-Rocamora and colleagues, 2021; Granero-Gallegos and colleagues, 2020).
+    smallest change treated as real (Plews and colleagues, 2012, 2013). In the one validation study read for this project, a Garmin
+    watch's overnight HRV agreed least well with a chest-strap reference of the five devices tested (about 10% error), and its resting
+    heart rate could not be checked at all (Dial and colleagues, 2025) (*limited*). So the readings are used to hold the build back and to
+    colour the day, never as a green light.
+51. **Expect small gains from readiness-based adjustment, not miracles.** [R] (*strong*) Training guided by heart-rate variability
+    gave small, non-significant average gains over a fixed plan in the pooled trials, with some sign of fewer non-responders; the gain came
+    mostly from doing fewer hard sessions (Düking and colleagues, 2021; Manresa-Rocamora and colleagues, 2021; Granero-Gallegos and
+    colleagues, 2020).
 52. **Poor recovery eases the fast running, not the easy running.** [P] Each warning sign slows the day's fast paces by a small
     fixed amount (about 1.2% to start, then learned from your own runs), up to four signs.
 53. **When the signs persist or pile up, the session becomes an easy run.** [R] (*moderate*) In the trials of readiness-guided
@@ -404,18 +421,18 @@ of ultra training, so read these as the best available reasoning, not proven met
     colleagues, 2015), and people who do not improve on one dose do improve on a larger one (Montero and Lundby, 2017).
     Periodize My Run reads your whole history for two patterns, and lets each move the plan only a little and only when it is
     clear. Both are associations in one person's record, not experiments, and are shown with their sample size. [P]
-85. **Your taper is set from your own races, inside the range the research supports.** [R] (*strong*) Across trials the largest
+85. **Your taper could be set from your own races, inside the range the research supports (off by default).** [R] (*strong*) Across trials the largest
     gains came from a two-week taper with volume cut by 41 to 60% and the fast running kept (Bosquet and colleagues, 2007). In
     158,000 recreational marathon runners, three weeks of steadily falling volume went with a 2.6% faster time than a minimal
     taper (Smyth and Lawlor, 2021) (*moderate*). For each of your past races of 15 km or more, Periodize My Run compares how
     deeply the last week was cut with how close the race was to your best level of the time. With six or more races and a clear
     pattern (a rank correlation of 0.4 or more), the taper is cut 5 points deeper or lighter; otherwise the research average
     stands. A deep taper may simply mark the races you cared about, so this is a hint, not proof. [P]
-86. **Miles or hard running: which has raised your fitness.** [P] Across the eight-week blocks in your history, the change in
+86. **Miles or hard running: which has raised your fitness (shown; off by default).** [P] Across the eight-week blocks in your history, the change in
     your watch's fitness estimate is compared with the miles and the number of hard runs in each block, after allowing for the
     level you started from. If miles clearly matter more, then before the race-specific phase every other week has one hard
     session, not two, with the same distance. If hard running matters more, both sessions stay. The watch's estimate is
-    approximate (principle 75), which is why the pattern has to be strong before it counts.
+    approximate (principle 75), which is why the pattern has to be strong before it counts. Principles 85 and 86 rest on few data points and a noisy watch estimate, so they are shown and change the plan only when the setting `apply_learned` is switched on.
 87. **What decides a marathon time, and why runners stall.** [R] (*moderate*) Marathon pace is set by aerobic capacity, the
     fraction of it that can be held, and running economy (Joyner and Coyle, 2008), and by how well those hold up over hours
     (Jones, 2024). Faster runners hold a higher fraction of their critical speed: 93% for a 2:30 marathon against 79% for a 6:00
@@ -441,13 +458,12 @@ of ultra training, so read these as the best available reasoning, not proven met
     optimum range as well as above it (Mantzios and colleagues, 2022), and in the laboratory cold air did not by itself reduce
     endurance performance (Cheuvront and colleagues, 2005) (*limited*). Because the two disagree, Periodize My Run allows
     for cold when judging fitness only up to 1.5%, and does not ease the paces of a session for it. [P]
-91. **Wind and rain are recorded, not adjusted for.** [R] (*moderate*) Running into wind costs energy that rises with the square
-    of the wind speed, and running close behind another runner removes most of it (Pugh, 1970, 1971). But in marathon results
-    wind, humidity and rain had no effect of their own once temperature was allowed for (El Helou and colleagues, 2012;
-    Vihma, 2010): on a course that turns, a headwind is partly given back, and rain mostly comes with cooler air. So a run's
-    wind and rain are shown beside it, and no figure is changed for them. A very windy day is a reason to judge a session by
-    effort, not pace. [C]
-
+91. **Wind slows fast running; rain is recorded.** [R] (*moderate*) Running into wind costs energy that rises with the square of the wind
+    speed, and running close behind another runner removes most of it (Pugh, 1970, 1971). In marathon results wind, humidity and rain had no
+    effect of their own once temperature was allowed for (El Helou and colleagues, 2012; Vihma, 2010), because on a course that turns a headwind
+    is partly given back and rain mostly comes with cooler air. Since version 2.10.1 the app eases fast paces for forecast wind on a loop route
+    (about 2% at 20 km/h, 4.5% at 30, 7% at 40, up to 15%), a model anchored to Pugh's measurement with this project's own scaling, not a fitted
+    figure. Rain changes nothing. A very windy day is still a reason to judge a session by effort, not pace. [P]
 ## 17. How runs felt, steady weeks, and getting used to heat
 
 92. **A very hard effort on the watch counts as a recovery sign; a poor rating does not.** [R] (*moderate*) Self-reported measures of

@@ -74,7 +74,7 @@ app.session_interface = Cookies()
 app.config.update(SESSION_COOKIE_SAMESITE="Strict", SESSION_COOKIE_HTTPONLY=True)
 SETTINGS = ["units", "long_day", "run_days", "strength", "run_time", "push_enabled", "push_days", "easy_target", "daily_adjust", "readiness_response",
             "hrmax", "peak_miles_override", "weekly_increase", "volume_boost", "detail_weeks", "blocked_days", "notify_url", "weeks_ahead",
-            "aero_test", "aero_test_weeks", "aero_runs", "aero_format", "forecast_completion", "week_start"]
+            "aero_test", "aero_test_weeks", "aero_runs", "aero_format", "forecast_completion", "week_start", "apply_learned"]
 
 
 def _is_num(v, lo, hi):
@@ -89,7 +89,7 @@ def _is_int(v, lo, hi):
 VALID = {
     "units": lambda v: v in ("mi", "km"), "long_day": lambda v: _is_int(v, 0, 6), "run_days": lambda v: _is_int(v, 3, 6), "week_start": lambda v: _is_int(v, 0, 6),
     "strength": lambda v: isinstance(v, bool), "push_enabled": lambda v: isinstance(v, bool), "daily_adjust": lambda v: isinstance(v, bool), "readiness_response": lambda v: _is_int(v, 0, 100),
-    "aero_test": lambda v: isinstance(v, bool), "aero_runs": lambda v: isinstance(v, bool),
+    "aero_test": lambda v: isinstance(v, bool), "aero_runs": lambda v: isinstance(v, bool), "apply_learned": lambda v: isinstance(v, bool),
     "run_time": lambda v: isinstance(v, str) and bool(re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v)), "push_days": lambda v: v in (7, 14, 21) and not isinstance(v, bool),
     "easy_target": lambda v: v in ("none", "pace"), "aero_format": lambda v: v in ("short", "original"), "aero_test_weeks": lambda v: _is_int(v, 4, 8),
     "hrmax": lambda v: v is None or _is_num(v, 120, 230), "peak_miles_override": lambda v: v is None or _is_num(v, 10, 150),
@@ -510,7 +510,7 @@ def state():
     prof = db.get("profile")
     rs = db.rows("SELECT * FROM races ORDER BY date")
     goal = next((r for r in rs if r["priority"] == "A" and r["date"] >= today.isoformat()), None)
-    L = profile.limits(prof, c, goal["miles"] if goal else None) if prof else None
+    L = profile.limits(prof, c, goal["miles"] if goal else None, goal.get("goal_time") if goal else None) if prof else None
     mon = today - dt.timedelta(days=today.weekday())
     wk = db.rows("SELECT * FROM weeks WHERE monday=?", (mon.isoformat(),))
     fitness = None
@@ -1317,7 +1317,7 @@ def about():
     prof = db.get("profile")
     rs = db.rows("SELECT * FROM races ORDER BY date")
     goal = next((r for r in rs if r["priority"] == "A" and r["date"] >= today.isoformat()), None)
-    L = profile.limits(prof, c, goal["miles"] if goal else None) if prof else {}
+    L = profile.limits(prof, c, goal["miles"] if goal else None, goal.get("goal_time") if goal else None) if prof else {}
     D = lambda m: engine.dist(m, c["units"])
     n_act = db.rows("SELECT COUNT(*) n, SUM(detail IS NOT NULL) d FROM activities")[0]
     yn = lambda b: "on" if b else "off"

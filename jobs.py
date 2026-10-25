@@ -44,7 +44,7 @@ def context():
     prof = db.get("profile") or profile.derive()
     rs = races()
     goal = engine.goal_race(rs, dt.date.today())
-    return c, prof, rs, profile.limits(prof, c, goal["miles"] if goal else None) if prof else None
+    return c, prof, rs, profile.limits(prof, c, goal["miles"] if goal else None, goal["goal_time"] if goal else None) if prof else None
 
 
 def _store_week(monday, st, pl, final, c, today):
@@ -210,6 +210,8 @@ def replan(force=False):
     if st is None:
         log.warning("Not enough running data in the last eight weeks to plan from")
         return
+    prevw = db.rows("SELECT summary FROM weeks WHERE monday=?", ((mon - dt.timedelta(days=7)).isoformat(),))
+    st["flags_prev"] = (json.loads(prevw[0]["summary"]) if prevw and prevw[0]["summary"] else {}).get("flags") if prevw else None
     pl = engine.plan(st, c, L, rs)
     log_forecasts(rs, st, c, mon, today)
     cur = db.rows("SELECT final FROM weeks WHERE monday=?", (mon.isoformat(),))

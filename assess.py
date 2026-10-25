@@ -310,8 +310,7 @@ def assess(c, L, monday, prev_tp=None):
     before = easy_v([r for r in flat if r["date"] < monday - dt.timedelta(days=14)])
     if now and before:
         health["easy_pace"] = (now, before)
-        if now < before * (1 - c["easy_pace_drop_fraction"]):
-            flags.append(f"easy pace at {elo}–{ehi} bpm has slowed by more than 3% in two weeks")
+        # shown, not a warning flag: pace at a fixed heart rate moves a few percent with heat, wind, hills and watch error
     st["flags"], st["health"] = flags, health
     bands = {}
     for key, floor in (("hrv", 3.0), ("rhr", 1.5)):

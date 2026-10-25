@@ -151,9 +151,39 @@ def peak_from(prof):
     return max(p3 * 1.10, 20), "110% of the highest 8-week average you have held without breaking down afterwards, in the last 3 years"
 
 
-def limits(prof, c, goal_miles):
+def goal_minutes(goal_time):
+    """'2:50:00' or '39:30' as minutes, or None."""
+    try:
+        parts = [int(x) for x in str(goal_time).strip().split(":")]
+    except ValueError:
+        return None
+    if len(parts) == 3:
+        return parts[0] * 60 + parts[1] + parts[2] / 60
+    return parts[0] + parts[1] / 60 if len(parts) == 2 else None
+
+
+def goal_volume(goal_time, goal_miles):
+    """The weekly miles a marathon goal time usually takes: 55 at 3:00, a mile more for each minute faster, within 40 and 90.
+
+    A coaching rule of thumb [C]: no study sets a number. Across marathoners, more weekly distance goes with faster times (Doherty and
+    colleagues, 2020; Fokkema and colleagues, 2020), and this file's own check on 6,582 marathons found about 5 to 7% faster per standard
+    deviation of volume. Only for a marathon-length goal that has a goal time."""
+    mins = goal_minutes(goal_time) if goal_time else None
+    if mins is None or not 20 <= (goal_miles or 0) <= 30 or not 110 <= mins <= 330:
+        return None
+    return min(max(55 + (180 - mins), 40), 90)
+
+
+def limits(prof, c, goal_miles, goal_time=None):
     """Personal planning limits from history. Rules of thumb; every value can be overridden in settings."""
     peak, peak_why = peak_from(prof)
+    need = goal_volume(goal_time, goal_miles)
+    held = prof.get("proven8_3y") or prof.get("best8_3y") or prof.get("recent8") or 0.0
+    if need and need > peak and held:
+        lifted = min(need, 1.5 * held)
+        if lifted > peak:
+            peak, peak_why = lifted, (f"what a {goal_time} marathon usually takes ({need:.0f} miles a week), no more than half again on the most you have "
+                                      "held in the last 3 years; the build still rises a small step at a time and holds when recovery slips")
     peak = min(round(peak / 5) * 5, 90)
     if goal_miles is None or goal_miles < 10:
         long_spec, spec_weeks = min(max(0.30 * peak, 8), 16), 10
@@ -167,8 +197,9 @@ def limits(prof, c, goal_miles):
     return {
         "peak_why": "the peak week you set" if c.get("peak_miles_override") else peak_why,
         "weeks_unbroken": prof.get("weeks_unbroken"),
-        "taper_shift": ((db.get("response") or {}).get("taper") or {}).get("shift", 0.0),       # the athlete's own record, see respond.py
-        "emphasis": ((db.get("response") or {}).get("emphasis") or {}).get("kind"),
+        # learned from the athlete's own record (respond.py): shown, but only applied when switched on, as both rest on few data points
+        "taper_shift": ((db.get("response") or {}).get("taper") or {}).get("shift", 0.0) if c.get("apply_learned") else 0.0,
+        "emphasis": ((db.get("response") or {}).get("emphasis") or {}).get("kind") if c.get("apply_learned") else None,
         "past_miles": faded_all(prof, prof.get("proven8_3y") or 0.0, prof.get("proven8_all") or 0.0),
         "proven_miles": prof.get("proven8_year") or prof.get("proven8_3y") or prof.get("best8_3y") or prof["recent8"],
         "peak_miles": c.get("peak_miles_override") or peak, "base_cap_miles": round(0.9 * (c.get("peak_miles_override") or peak)),

@@ -3,6 +3,18 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.8 - 2026-10-25
+### Added
+- A race's importance (goal race or tune-up) and goal time can now be changed on the Races page, with a note when more than one goal race is set, and the plan says so too.
+- A marathon goal time now sets how much volume the plan may build toward: 55 miles a week for 3:00, a mile more for each minute faster, within 40 and 90, but never past half again on the most you have held in the last three years. The weekly step is unchanged and a warning sign still holds it.
+- A midweek medium-long run (about a quarter of the week, 8 to 14 miles) in marathon, half-marathon and ultra builds, alternating with the heart-rate aerobic run.
+
+### Changed
+- Two warning signs in a single week now hold the volume level; a recovery week needs them for two weeks running, or three at once.
+- Easy pace at a fixed heart rate is shown but no longer counts as a warning sign (heat, wind, hills and watch error move it more than the 3% it used).
+- The learned taper and the "miles or hard running" adjustment are shown but no longer change the plan unless `apply_learned` is switched on.
+- PRINCIPLES.md corrected: Garmin HRV accuracy (principle 50), the HRV-guided training result (51), and wind, which the app has adjusted for since 2.10.1 (91).
+
 ## 2.10.2-beta.7 - 2026-10-25
 ### Changed
 - Recovery signs can now only slow the build, never speed it. Past the most you held in the last year the step is half the weekly rate whatever the readings. Steady HRV and resting heart rate are shown but change nothing; a warning flag, or HRV and resting heart rate both more than one spread off your own normal, holds the volume level. The test is against your own mean and spread over the four weeks before, replacing the fixed percentages; sleep and easy pace are no longer used to call recovery good. HRV-guided trials used the markers to hold intensity back, not to add volume, and watch readings are too noisy for a green light.
