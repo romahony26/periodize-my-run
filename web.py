@@ -124,6 +124,12 @@ def _warnings(today):
     return out
 
 
+def _why(e, default="That could not be done."):
+    """The message a ValueError was raised with, which this app wrote for the person to read."""
+    msg = e.args[0] if e.args else None
+    return msg if isinstance(msg, str) and msg else default
+
+
 def _local():
     """Is the request from this computer itself? Only then is the app password not needed.
 
@@ -777,7 +783,7 @@ def race_course(rid):
         else:
             db.run("UPDATE races SET course=NULL, climb_m=NULL WHERE id=?", (rid,))
     except ValueError as e:
-        return jsonify(error=str(e) or "That course could not be read."), 400
+        return jsonify(error=_why(e, "That course could not be read.")), 400
     except TypeError:
         return jsonify(error="That course could not be read."), 400
     return jsonify(ok=True)
@@ -845,7 +851,7 @@ def result_import():
     try:
         out = results.import_csv((request.json or {}).get("csv") or "")
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     log.info("Race log imported: %s", out)
     if db.get("setup_done"):
         jobs.start("replan")
@@ -993,7 +999,7 @@ def updates_act():
         else:
             return jsonify(error="Unknown action."), 400
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     except (requests.RequestException, OSError) as e:
         log.error("Update failed: %s", type(e).__name__)
         return jsonify(error="The update could not be completed. Nothing was changed."), 400
@@ -1033,7 +1039,7 @@ def coros_login():
     try:
         return jsonify(result=coros.login(str(j.get("email") or "").strip(), str(j.get("password") or "")))
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     except (coros.Unrecognised, requests.RequestException) as e:
         log.error("COROS sign-in failed: %s", type(e).__name__)
         return jsonify(error="COROS did not accept the sign-in. Check the email and password, and that the account has signed in to COROS's Training Hub before."), 400
@@ -1140,7 +1146,7 @@ def backup_now():
             return jsonify(ok=True, restored=done)
         return jsonify(ok=True, made=backup.make(dt.datetime.now().strftime("%H%M%S")))
     except ValueError as e:
-        return jsonify(error=str(e)), 400
+        return jsonify(error=_why(e)), 400
     except RuntimeError as e:
         log.error("Backup failed: %s", scrub(str(e))[:200])
         return jsonify(error="The backup could not be made or restored. The reason is in the log."), 400
