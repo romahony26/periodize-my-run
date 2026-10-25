@@ -53,11 +53,12 @@ def build(c, prof, races, L, today=None):
             "Previous injury is the strongest predictor of the next one (Hulme and colleagues, 2017; Desai and colleagues, 2021), so a block that ended in a "
             "breakdown does not set the ceiling. The rule itself is this project's inference; no study tests it directly.")
         proven = L.get("proven_miles") or 0
-        add("How fast the miles build", f"{c['weekly_increase']:.0%} a week up to {D(proven)}, then {c['weekly_increase'] / 2:.1%}; level for three weeks after a week without running.",
+        add("How fast the miles build", f"{c['weekly_increase']:.0%} a week up to {D(proven)}, then {c['weekly_increase'] / 2:.1%} (recovery signs can hold it level, never speed it up); level for three weeks after a week without running.",
             f"{D(proven)} is the most you have held for 8 weeks in the last year. You have gone {prof.get('weeks_unbroken', 0)} weeks without a week off running.",
-            "Week-to-week mileage change did not predict injury in 5,205 runners (Schuster Brandt Frandsen and colleagues, 2025), but jumps of 20 to 60% did in runners "
-            "preparing for a half marathon (Damsted and colleagues, 2019). A break of 7 days or more cost marathon runners 5 to 8% (Feely and colleagues, 2022). "
-            "The 6% and 3% are this project's choices.")
+            "Week-to-week mileage change did not predict injury in 5,205 runners (Frandsen and colleagues, 2025). In runners preparing for a half marathon, "
+            "a rise of 20 to 60% carried more risk over the following three weeks but not beyond (Damsted and colleagues, 2019), and a rise of over 30% over "
+            "two weeks was only a non-significant trend in novices (Nielsen and colleagues, 2014). A break of 7 days or more cost marathon runners 5 to 8% (Feely and colleagues, 2022). "
+            "The 6% and 3%, the 20% limit and a down week every third week are conventions and this project's choices; no study tests them.")
 
     # ---- this week
     if s:
@@ -71,7 +72,7 @@ def build(c, prof, races, L, today=None):
     # ---- the long run
     add("The long run", f"Up to {D(L['long_run_cap_specific'])} in the race-specific phase, {D(L['long_run_cap_base'])} before it, and never more than 10% beyond your longest run of the last 30 days.",
         "The cap scales from your peak week and your goal distance. Except for an ultra it also stops at about three hours at your easy pace.",
-        "A run more than 10% longer than the longest of the previous 30 days went with 64% more overuse injuries (Schuster Brandt Frandsen and colleagues, 2025). "
+        "A run more than 10% longer than the longest of the previous 30 days went with 64% more overuse injuries (Frandsen and colleagues, 2025). "
         "The three-hour limit is a coaching convention.")
 
     # ---- hard sessions

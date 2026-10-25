@@ -3,6 +3,16 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.7 - 2026-10-25
+### Changed
+- Recovery signs can now only slow the build, never speed it. Past the most you held in the last year the step is half the weekly rate whatever the readings. Steady HRV and resting heart rate are shown but change nothing; a warning flag, or HRV and resting heart rate both more than one spread off your own normal, holds the volume level. The test is against your own mean and spread over the four weeks before, replacing the fixed percentages; sleep and easy pace are no longer used to call recovery good. HRV-guided trials used the markers to hold intensity back, not to add volume, and watch readings are too noisy for a green light.
+- An old peak now counts less with time: the highest 8-week block you have held counts in full for three years after it ended, then fades, and is gone eight years after. It was treated as a fixed ceiling whatever its age.
+- The longest-run window ignores days away (a trip, a holiday, illness or injury), so a long run skipped for a trip does not make the first long run back look like a jump.
+- The citations in the app and in PRINCIPLES.md are corrected: Nielsen 2014 found only a non-significant trend; Damsted 2019 found the extra risk in the following three weeks and not later; the 2025 paper is Frandsen and colleagues; Impellizzeri 2020 is cited for the problems with the ratio. The 20% limit, the down-week cadence and the hard-day spacing are labelled as conventions.
+
+### Added
+- A course of a fluoroquinolone antibiotic (ciprofloxacin, levofloxacin, moxifloxacin, ofloxacin and others) named in the note of a sick, injured or recovering entry now brings 60 days of easy, flat running after it ends, as the recovering "tendon" setting does. Tendon rupture risk is highest in the first weeks and still raised at 60 to 90 days.
+
 ## 2.10.2-beta.6 - 2026-10-25
 ### Changed
 - Your recovery now sets how fast the volume climbs. Each week the app reads your HRV, resting heart rate, sleep and easy pace against your own normal. While all of them are steady or better, a build week rises by the full weekly rate (6% by default), even past the most you held in the last year. While they are only fair (one drifting, or too little data), the step past that level is half (3%). When a warning flag is up, the volume is held level until it clears. Replaces the fixed 2% step of 2.10.2-beta.5. The ceilings are unchanged: the phase cap, 20% above your best of the last three weeks, and the level you have held before.

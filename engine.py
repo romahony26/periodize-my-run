@@ -11,6 +11,7 @@ athlete's units. A day's session is a list of steps:
   ("max", metres)                    all out
 """
 import datetime as dt
+import re
 import statistics
 
 import db
@@ -221,14 +222,14 @@ def goal_race(races, monday):
 def plan(st, c, L, races):
     """The week's plan. A marathon-pace long run is held back for a week when it would lift the week more than 20% above the best of the
     last three: its minimum size, not the week's target, is what lifts the total, and a week raised by 20% or more was followed by more
-    injuries (Damsted and colleagues, 2019). Found by running the planner on 600 real athletes' histories."""
+    injuries in one study (Damsted and colleagues, 2019). Found by running the planner on 600 real athletes' histories."""
     pl = _plan(st, c, L, races)
     recent_best = max([w["mi"] for w in st["weeks"][-3:]] or [0])
     if pl["mode"] == "build" and pl["done"]["mp_long"] and recent_best >= 8 and pl["total"] > 1.20 * recent_best:
         alt = _plan(dict(st, no_mp_long=True), c, L, races)
         if alt["total"] < pl["total"]:
             alt["why"].append("Marathon-pace long run held back this week: with it the week would be more than 20% above your best of the last three, "
-                              "and a week raised by 20% or more was followed by more injuries (Damsted and colleagues, 2019). It comes a week later. [P]")
+                              "and a 20% rise was followed by a higher injury risk over three weeks in one study of half-marathon trainees (Damsted and colleagues, 2019). It comes a week later. [P]")
             return alt
     return pl
 
@@ -306,8 +307,9 @@ def _plan(st, c, L, races):
         hold = rec["level"] == "hold" and not (quality_new or gap)
         grow = 1.0 if quality_new or gap or hold else 1 + c["weekly_increase"]
         new_ground = not (quality_new or gap or hold) and base * grow > proven
-        # past the level held in the last year, recovery sets the step: full rate while it is good, half while it is only fair [P]
-        step = c["weekly_increase"] if rec["level"] == "good" else c["weekly_increase"] / 2
+        # past the level held in the last year the step is half the weekly rate. Recovery signs can hold the build level but never speed it:
+        # HRV-guided trials used them to pull intensity back, not to add volume, and watch readings are too noisy to give a green light [P]
+        step = c["weekly_increase"] / 2
         if new_ground:      # up to the proven level at the usual rate, beyond it at the step: consistency before more miles
             grow = max(1 + step, min(grow, proven / base if base else grow))
         target = min(base * grow, cap)
@@ -316,17 +318,16 @@ def _plan(st, c, L, races):
                    else "Volume held level: there was a week or more without running in the last three weeks. The routine comes back before the miles do." if gap
                    else "Volume held level: your recovery is showing strain (" + "; ".join(rec["flags"]) + "). The build carries on when it clears." if hold
                    else f"Volume is at your cap for this phase ({dist(cap, c['units'])})." if target >= cap
-                   else f"Volume up {grow - 1:.0%}: your recovery is good ({'; '.join(rec['steady'][:3])}), so the build carries on{toward}." if rec["level"] == "good"
                    else f"Volume up {grow - 1:.0%}{toward}: more than you have held for eight weeks in the last year ({dist(half(proven), c['units'])}), "
-                        "so a smaller step until your recovery markers are all steady." if new_ground
+                        "so a smaller step. Your recovery signs can hold it level but do not speed it." if new_ground
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
         recent_best = max(wk[-3:] or [0])
         if recent_best >= 8 and target > 1.20 * recent_best:
-            # a week raised by 20% or more was followed by more injuries (Damsted and colleagues, 2019); this stops a dip in the last
+            # a rise of 20 to 60% carried more risk over three weeks in one study (Damsted and colleagues, 2019); a convention, not a tested limit. This stops a dip in the last
             # weeks being "made up" in one step by planning back to the eight-week average
             target = 1.20 * recent_best
             why.append(f"Volume rise limited to 20% above your best of the last three weeks ({dist(half(recent_best), c['units'])}). "
-                       "A week raised by 20% or more was followed by more injuries (Damsted and colleagues, 2019). [P]")
+                       "A rise of 20 to 60% carried more injury risk over three weeks in one study of half-marathon trainees (Damsted and colleagues, 2019); the 20% limit is a convention, not a tested threshold. [P]")
         boost = c.get("volume_boost") or 0.0
         if boost and not quality_new and not gap:
             # the athlete's own choice, applied after the limit above, so it is the one rule in this block they can override; build weeks only
@@ -641,7 +642,7 @@ def project(st, pl):
     nxt["weeks"] = st["weeks"][1:] + [{"start": st["monday"], "mi": pl["total"], "runs": sum(1 for x in pl["days"] if x["miles"]),
                                        "long": pl["long"], "fast_mi": fast, "t_min": d["t_min"]}]
     nxt["longest_30d"], nxt["longest_10d"] = max(st["longest_30d"], pl["long"]), pl["long"]
-    if (st.get("recovery") or {}).get("level") in ("good", "hold"):      # how recovery will be in later weeks is not known: fair, not good or held
+    if (st.get("recovery") or {}).get("level") == "hold":      # how recovery will be in later weeks is not known: a hold lasts the one week
         nxt["recovery"] = {"level": "ok", "steady": [], "flags": []}
     nxt["prev_t_min"] = max(st["prev_t_min"], d["t_min"])
     nxt["prev_mp_mid"] = max(st["prev_mp_mid"], d["mp_mid"])
@@ -766,6 +767,16 @@ def _recovering(d, mode):
         d.update({"type": "Easy", "label": "Easy", "steps": [("d", mi_, "easy")], "miles": mi_, "note": note})
 
 
+QUINOLONE = re.compile(r"quinolone|cipro|levoflox|levaquin|moxiflox|avelox|oflox|norflox|enoxacin|gemiflox", re.I)
+QUINOLONE_DAYS = 60       # tendon rupture risk is highest in the first weeks and still raised at 60 to 90 days (Danish case-control, hazard ratio 3.6 at 60 days, 2.7 at 90)
+
+
+def _quinolone_window(d, statuses):
+    """Is this day within 60 days after a course of a fluoroquinolone antibiotic named in a sick, injured or recovering note?"""
+    return any(s["kind"] in ("sick", "injured", "recovering") and s.get("end") and QUINOLONE.search(s.get("note") or "")
+               and dt.date.fromisoformat(s["end"]) < d["date"] <= dt.date.fromisoformat(s["end"]) + dt.timedelta(days=QUINOLONE_DAYS) for s in statuses)
+
+
 def _away(d, statuses):
     """Is this day spent away from the long run: on a work trip, or on a holiday that does not keep the long run?"""
     for s in statuses:
@@ -856,6 +867,8 @@ def apply_status(days, statuses):
     spans = {"sick": episodes(statuses, ("sick",)), "injured": episodes(statuses, ("injured",))}
     keep_long_run(days, statuses)
     for d in days:
+        if _quinolone_window(d, statuses):
+            _recovering(d, "tendon")
         for s in statuses:
             if s["kind"] in ("holiday", "recovering", "travel"):
                 start = dt.date.fromisoformat(s["start"])

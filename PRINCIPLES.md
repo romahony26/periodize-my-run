@@ -97,27 +97,30 @@ notice); the others were matched to their published record. This is how the 2022
 19. **Volume is built before intensity, and general work before race-specific work.** [R] (*moderate*) This is how world-class
     distance runners organise a season (Haugen and colleagues, 2022), and how Norwegian world-class coaches describe best practice
     (Sandbakk and colleagues, 2025).
-20. **Volume rises gently, and recovery sets how fast.** [P] In a building week, distance rises by up to about 6% on your recent
-    level. Past the most you have held for eight weeks in the last year, the step follows how well you are recovering, read from
-    your own HRV, resting heart rate, sleep and easy pace against your own normal: the full 6% while all of them are steady,
-    half while they are only fair, and level while a warning flag is up. A build week starts from your best three-week average
-    of the last six, so a down week does not lower the next build. Before the race-specific phase it stops at 90% of your peak.
+20. **Volume rises gently; recovery signs can hold the build but never speed it.** [P] In a building week, distance rises by up to
+    about 6% on your recent level, as far as the most you have held for eight weeks in the last year; beyond that the step is half,
+    about 3%. A week with a warning flag, or with both HRV and resting heart rate more than one spread off your own normal, is held
+    level. Steady readings change nothing: HRV-guided trials used the readings to pull intensity back, not to add volume, the pooled
+    benefit was small and not significant (Manresa-Rocamora and colleagues, 2021), and watch HRV and resting heart rate are not accurate
+    enough to give a green light. The 6%, the 3%, the 20% limit, a down week every third week and the build starting from your best
+    three-week average of the last six are conventions: no study tests them. Before the race-specific phase the volume stops at 90% of
+    your peak.
 21. **The old "10% a week" rule is not what prevents injury.** [R] (*strong*) In a randomised trial, a gentler weekly build did
-    not reduce injuries in new runners (Buist and colleagues, 2008), and ratios of this week's load to the last month's are not a
-    reliable injury threshold (Impellizzeri and colleagues, 2020). Large jumps are another matter: more than about 30% over two
-    weeks was linked with some injuries (Nielsen and colleagues, 2014), and runners preparing for a half marathon who raised a
-    week by 20% to 60% had more injuries in the following three weeks than those who raised it by less than 20% (Damsted and
+    not reduce injuries in new runners (Buist and colleagues, 2008), and the ratio of this week's load to the last month's has conceptual and statistical problems and is not supported as a way to prevent
+    injury (Impellizzeri and colleagues, 2020; the project's 20% limit is a convention, not this ratio). Large jumps are another matter: more than about 30% over two
+    weeks showed only a non-significant trend towards distance-related injuries in novices (Nielsen and colleagues, 2014), and runners preparing for a half marathon who raised a
+    week by 20% to 60% had more injuries in the following three weeks, but not later, than those who raised it by less than 20% (Damsted and
     colleagues, 2019). Periodize My Run's 6%, or 3% on new ground, stays well clear of both, and no build week is planned more than 20% above the best of
     the last three (principle 104).
 22. **What matters most is the single longest run.** [R] (*moderate*) In a study of over 5,000 runners, a run more than 10% longer
     than the longest of the previous 30 days was linked with more overuse injuries, while week-to-week mileage change was not
-    (Schuster Brandt Frandsen and colleagues, 2025). Periodize My Run never plans a long run more than 10% beyond your longest in the
+    (Frandsen and colleagues, 2025). Periodize My Run never plans a long run more than 10% beyond your longest in the
     last 30 days. Among recreational marathon and half-marathon runners, high weekly volume and long endurance runs went with faster finishes and
     were not related to more injuries (Fokkema and colleagues, 2020) (*limited*: questionnaires, not a trial).
 23. **Your limits come from what you have held without breaking down, not from your recent average.** [P] The peak week is
     taken from your best eight-week block that was followed by six sound weeks: no two weeks in a row under 35% of the block,
     and no time recorded as sick or injured. Rest after a race, a very long run or a holiday does not count against a block. The
-    peak is the larger of that block from all your history and 110% of that block from the last three years, up to 90 miles. A
+    peak is the larger of that block from all your history and 110% of that block from the last three years, up to 90 miles. A block that ended more than three years ago counts less and less, and is gone eight years after it ended, because the tissue tolerance behind it is not kept for ever (no study says how fast it goes). [P] A
     high recent average no longer raises it, and a block too recent to have six weeks after it is not yet counted. With too
     little history for any such block, the peak is your recent eight weeks plus 25%. Long-run length scales from the peak and
     from your goal distance. No study has tested this rule directly; it follows from the finding that previous injury, not
@@ -165,7 +168,7 @@ notice); the others were matched to their published record. This is how the 2022
 These are the rules the planner follows when a trip, holiday or illness takes a day out of a week. They are coaching convention and
 this project's own choices, not findings from trials. [C] [P]
 
-- **Hard days are kept apart.** A quality session, the long run and a race each have an easy or rest day on either side. If a change
+- **Hard days are kept apart.** (A convention: a quality session the day before a long run is a legitimate marathon layout in some programmes, and nothing tests the spacing. The planner avoids it by default; you can still move days by hand.) A quality session, the long run and a race each have an easy or rest day on either side. If a change
   would put two together, the quality session becomes an easy run; the long run and the race never move for it. [C]
 - **The long run is the last session to go.** If its day is spent away, it moves to a day at home in the same week: the other
   weekend day first, then the nearest day, the day before first. [P]
@@ -537,7 +540,7 @@ two or a missed log from a missed day. [P]
     25 weeks, where the earlier run used eight) cut build weeks more than 20% above the best of the last three from 0.6% to 0.3%, and
     raised the median planned peak from 34 to 38 miles against 55 actually run by this more committed group. The plan builds at about 6%
     a week, with a down week every fourth, so over 18 weeks it cannot reach what the fastest-building runners did. That rate is a design
-    choice: weekly mileage change itself was not linked to injury (Schuster Brandt Frandsen and colleagues, 2025), only a long single
+    choice: weekly mileage change itself was not linked to injury (Frandsen and colleagues, 2025), only a long single
     run and jumps of 20% or more (Damsted and colleagues, 2019) were.
 107. **A low-volume runner with a marathon goal is told how the plan shows the gap.** [P] Among runners starting under 15 miles a week, the
     planned long run was more than half the week in two thirds of build weeks, because the volume limit comes from recent running while the
@@ -690,7 +693,7 @@ on a detail.
 - Saragiotto BT and colleagues (2014). What are the main risk factors for running-related injuries? *Sports Med*.
 - Sargent C, Lastella M, Halson SL, Roach GD (2014). The impact of training schedules on the sleep and fatigue of elite athletes. *Chronobiol Int*. *Abstract read.*
 - Saw AE, Main LC, Gastin PB (2016). Monitoring the athlete training response: subjective self-reported measures trump commonly used objective measures. *Br J Sports Med*.
-- Schuster Brandt Frandsen J and colleagues (2025). How much running is too much? Identifying high-risk running sessions in a 5200-person cohort study. *Br J Sports Med* 59:1203–1210.
+- Frandsen and colleagues (2025). How much running is too much? Identifying high-risk running sessions in a 5200-person cohort study. *Br J Sports Med* 59:1203–1210.
 - Seiler KS, Kjerland GØ (2006). Quantifying training intensity distribution in elite endurance athletes: is there evidence for an "optimal" distribution? *Scand J Med Sci Sports* 16:49–56.
 - Seiler S and colleagues (2013). Adaptations to aerobic interval training: interactive effects of exercise intensity and total work duration. *Scand J Med Sci Sports*.
 - Silva Oliveira P and colleagues (2024). Comparison of polarized versus other types of endurance training intensity distribution on athletes' endurance performance: a systematic review with meta-analysis. *Sports Med*.

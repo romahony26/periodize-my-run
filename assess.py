@@ -242,13 +242,21 @@ def assess(c, L, monday, prev_tp=None):
     def since(days):
         return [r for r in R if r["date"] >= monday - dt.timedelta(days=days)]
 
+    # days away (a trip, a holiday, illness or injury) do not count against the longest-run window, so a long run skipped for a trip
+    # does not make the first long run back look like a spike (Frandsen and colleagues, 2025)
+    away = set()
+    for s_ in db.rows("SELECT kind,start,end FROM status WHERE kind IN ('sick','injured','holiday','travel')"):
+        a_, b_ = dt.date.fromisoformat(s_["start"]), dt.date.fromisoformat(s_["end"]) if s_["end"] else monday
+        away.update(a_ + dt.timedelta(days=i) for i in range((b_ - a_).days + 1))
+    window = min(30 + sum(1 for i in range(1, 61) if monday - dt.timedelta(days=i) in away), 60)
+
     r21 = since(21)
     lthr = c.get("aero_lthr")
     lthr = int(lthr // 5 * 5) if lthr else None
     long_min = 0.7 * L["long_run_cap_specific"]
     mp_longs = [r for r in since(35) if r["mi"] >= long_min and r["mp_mi"] >= 5]
     st = {"monday": monday, "n_runs": len(R), "weeks": weeks, "tp": tp, "tp_raw": raw, "tp_why": why, "tp_prev": seed,
-          "longest_30d": max([r["mi"] for r in since(30)], default=0.0), "longest_10d": max([r["mi"] for r in since(10)], default=0.0),
+          "longest_30d": max([r["mi"] for r in since(window)], default=0.0), "longest_10d": max([r["mi"] for r in since(10)], default=0.0),
           "prev_t_min": max([r["t_min"] for r in r21], default=0.0),
           "prev_mp_mid": max([r["mp_mi"] for r in r21 if r["mi"] < long_min], default=0.0),
           "prev_mp_long": max([r["mp_mi"] for r in mp_longs], default=0.0),
@@ -305,38 +313,36 @@ def assess(c, L, monday, prev_tp=None):
         if now < before * (1 - c["easy_pace_drop_fraction"]):
             flags.append(f"easy pace at {elo}–{ehi} bpm has slowed by more than 3% in two weeks")
     st["flags"], st["health"] = flags, health
-    st["recovery"] = recovery_trend(health, flags, c)
+    bands = {}
+    for key, floor in (("hrv", 3.0), ("rhr", 1.5)):
+        base = vals(key, 8, 36)
+        now = mean(vals(key, 1, 8))
+        if now and len(base) >= 14:
+            bands[key] = (now, mean(base), max(statistics.pstdev(base), floor))
+    st["recovery"] = recovery_trend(bands, flags)
     return st
 
 
-def recovery_trend(health, flags, c):
-    """How well the athlete is absorbing the training, from the same markers as the flags: {level: good | ok | hold, steady: [...]}.
+def recovery_trend(bands, flags):
+    """How the athlete is absorbing the training: {level: hold | steady | ok, steady: [...]}. It can only slow the build, never speed it.
 
-    good: every marker that can be read is steady or better against the athlete's own normal, and at least two can be read. hold: a
-    warning flag is up. ok: anything else, including too little data. The build rate follows it (see engine.plan).
+    The bands are the athlete's own: last week's HRV and resting heart rate against the mean and spread of the four weeks before. Steady is
+    within half a spread of normal. Hold is a warning flag, or both HRV and resting heart rate more than one spread the wrong way. Anything
+    else, including too little data, is ok. Watch readings are noisy, so a steady reading is information and not a green light.
     """
-    steady, read = [], 0
-    if "hrv" in health:
-        read += 1
-        now, base = health["hrv"]
-        if now >= base * 0.97:
+    steady, adverse = [], 0
+    if "hrv" in bands:
+        now, base, sd = bands["hrv"]
+        if now >= base - 0.5 * sd:
             steady.append(f"HRV {now:.0f} against your normal {base:.0f}")
-    if "rhr" in health:
-        read += 1
-        now, base = health["rhr"]
-        if now - base <= 1:
+        adverse += now < base - sd
+    if "rhr" in bands:
+        now, base, sd = bands["rhr"]
+        if now <= base + 0.5 * sd:
             steady.append(f"resting heart rate {now:.0f} against your normal {base:.0f}")
-    if "sleep" in health:
-        read += 1
-        if health["sleep"] >= c["sleep_7night_min_h"] + 1:
-            steady.append(f"sleep {health['sleep']:.1f} h a night")
-    if "easy_pace" in health:
-        read += 1
-        now, before = health["easy_pace"]
-        if now >= before * 0.99:
-            steady.append("easy pace at the same heart rate holding or faster")
-    level = "hold" if flags else "good" if read >= 2 and len(steady) == read else "ok"
-    return {"level": level, "steady": steady, "flags": list(flags)}
+        adverse += now > base + sd
+    level = "hold" if flags or adverse >= 2 else "steady" if len(bands) >= 2 and len(steady) == len(bands) else "ok"
+    return {"level": level, "steady": steady, "flags": list(flags) or (["HRV and resting heart rate both off your normal"] if adverse >= 2 else [])}
 
 
 def race_time(v_ref, miles, endurance, c, slope):
