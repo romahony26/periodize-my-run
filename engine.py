@@ -763,6 +763,25 @@ def _unwell(d, statuses):
                and (not s["end"] or d["date"] <= dt.date.fromisoformat(s["end"])) for s in statuses)
 
 
+def _shift_week(days, d, pick, statuses, keys):
+    """The long run moves to the day before: the week's rest day goes, and the days from it to the long run each move a day earlier.
+
+    That keeps the week's shape (two sessions and a long run, each apart from the next) with the rest day on the day away. Used when the
+    first rest day is before the new long run, every day between is at home, and the day after the rest day is an easy run.
+    """
+    i, j = days.index(d), days.index(pick)
+    r = next((k for k in range(i) if days[k]["type"] == "Rest"), None)
+    if j != i - 1 or r is None or r + 1 >= i or days[r + 1]["type"] != "Easy":
+        return False
+    if any(_away(e, statuses) or _unwell(e, statuses) for e in days[r:i]):
+        return False
+    items = [{k: e[k] for k in keys} for e in days[r:i + 1]]
+    for e, item in zip(days[r:i + 1], items[1:] + items[:1], strict=True):
+        e.update(item)
+    pick["note"] = (pick["note"] + " " if pick["note"] else "") + f"Moved from {d['date']:%A}, when you are away."
+    return True
+
+
 def keep_long_run(days, statuses):
     """A long run that falls on a day away is moved to a day at home in the same week, so the week keeps its long run.
 
@@ -777,6 +796,8 @@ def keep_long_run(days, statuses):
             continue
         pick = min(homes, key=lambda e: (e["date"].weekday() < 5, abs((e["date"] - d["date"]).days), e["date"] > d["date"]))
         keys = ("type", "label", "steps", "miles", "note")
+        if _shift_week(days, d, pick, statuses, keys):
+            return days
         away_, home_ = {k: d[k] for k in keys}, {k: pick[k] for k in keys}
         d.update(home_)
         pick.update(away_)

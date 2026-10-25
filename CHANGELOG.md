@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.3 - 2026-10-25
+### Changed
+- When the long run moves to the day before a day away, the week's rest day goes and the days from it to the long run each move a day earlier, so the week keeps both its quality sessions and its long run, each apart from the next, with the rest day on the day away. Only when there is a rest day earlier in the week and every day between is at home; otherwise the long run swaps places with an easy day as before.
+
 ## 2.10.2-beta.2 - 2026-10-25
 ### Fixed
 - When the long run moves off a day away, a quality session on the day before or after it now becomes an easy run, so the long run never follows or precedes a hard day (a threshold session on Friday had left Saturday's long run on tired legs).
