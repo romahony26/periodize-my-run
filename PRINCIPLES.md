@@ -101,7 +101,8 @@ notice); the others were matched to their published record. This is how the 2022
     (Sandbakk and colleagues, 2025).
 20. **Volume rises gently; recovery signs can hold the build but never speed it.** [P] In a building week, distance rises by up to
     about 6% on your recent level, as far as the most you have held for eight weeks in the last year; beyond that the step is half,
-    about 3%. A week with a warning flag, or with both HRV and resting heart rate more than one spread off your own normal, is held
+    about 3%, until you have run at least 95% of the planned miles in each of the last three weeks, which earns the full 6% again
+    (consistency first: principle 1, and Feely and colleagues, 2022). A week with a warning flag, or with both HRV and resting heart rate more than one spread off your own normal, is held
     level. Steady readings change nothing: HRV-guided trials used the readings to pull intensity back, not to add volume, the pooled
     benefit was small and not significant (Manresa-Rocamora and colleagues, 2021), and watch HRV and resting heart rate are not accurate
     enough to give a green light. The 6%, the 3%, the 20% limit, a down week every third week and the build starting from your best
