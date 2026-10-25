@@ -782,6 +782,24 @@ def _shift_week(days, d, pick, statuses, keys):
     return True
 
 
+def separate_hard_days(days):
+    """Whatever has changed the week, no two hard days (a quality session, the long run or a race) are left side by side.
+
+    The later quality session becomes an easy run. A race and the long run never move. This is the last check on every week, so a new
+    way of reshaping the week cannot leave hard days together.
+    """
+    for a, b in zip(days, days[1:], strict=False):
+        if a["type"] in ("Key", "Long", "Race") and b["type"] == "Key" and (b["date"] - a["date"]).days == 1:
+            mi_ = max(half(min(b["miles"], 6)), 3)
+            b.update({"type": "Easy", "label": "Easy", "steps": [("d", mi_, "easy")], "miles": mi_,
+                      "note": f"Eased from {b['label'].lower()}: it fell the day after a hard day, and hard days are kept apart."})
+        elif a["type"] == "Key" and b["type"] in ("Long", "Race") and (b["date"] - a["date"]).days == 1:
+            mi_ = max(half(min(a["miles"], 6)), 3)
+            a.update({"type": "Easy", "label": "Easy", "steps": [("d", mi_, "easy")], "miles": mi_,
+                      "note": f"Eased from {a['label'].lower()}: the {b['type'].lower()} is the next day, and hard days are kept apart."})
+    return days
+
+
 def keep_long_run(days, statuses):
     """A long run that falls on a day away is moved to a day at home in the same week, so the week keeps its long run.
 
@@ -845,6 +863,7 @@ def apply_status(days, statuses):
                         mi_ = max(half(min(d["miles"], 10) * (0.5 + 0.4 * k / back)), 2)
                         d.update({"type": "Easy", "label": "Return: easy", "steps": [("d", mi_, "easy")], "miles": mi_,
                                   "note": f"Day {k} of {back} back after being {word.lower()}. Easy only; stop if symptoms return."})
+    separate_hard_days(days)
     return days
 
 

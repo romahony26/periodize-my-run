@@ -3,6 +3,11 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.4 - 2026-10-25
+### Added
+- A final check on every week, whatever has changed it: no two hard days (quality session, long run, race) are left side by side. The later quality session becomes an easy run; the long run and a race never move for it.
+- The rules for rebuilding a week when a day is lost are written in PRINCIPLES.md ("When a day is lost"), marked as coaching convention and this project's own choices.
+
 ## 2.10.2-beta.3 - 2026-10-25
 ### Changed
 - When the long run moves to the day before a day away, the week's rest day goes and the days from it to the long run each move a day earlier, so the week keeps both its quality sessions and its long run, each apart from the next, with the rest day on the day away. Only when there is a rest day earlier in the week and every day between is at home; otherwise the long run swaps places with an easy day as before.

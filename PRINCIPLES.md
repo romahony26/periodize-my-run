@@ -158,6 +158,21 @@ notice); the others were matched to their published record. This is how the 2022
     days, one heavy and one with plyometrics (hops, skips, bounds); one a week in the race-specific phase; none in the last two
     weeks before the goal race. [C]
 
+### When a day is lost: how the week is rebuilt
+
+These are the rules the planner follows when a trip, holiday or illness takes a day out of a week. They are coaching convention and
+this project's own choices, not findings from trials. [C] [P]
+
+- **Hard days are kept apart.** A quality session, the long run and a race each have an easy or rest day on either side. If a change
+  would put two together, the quality session becomes an easy run; the long run and the race never move for it. [C]
+- **The long run is the last session to go.** If its day is spent away, it moves to a day at home in the same week: the other
+  weekend day first, then the nearest day, the day before first. [P]
+- **The week keeps its shape.** When the long run moves to the day before, the rest day goes and the days from it to the long run each
+  move a day earlier, so both quality sessions survive and the rest day lands on the day away. With no rest day to give up, the long
+  run swaps with an easy day and any quality session beside it is eased. [P]
+- **Days of illness or injury are never used** for a moved session. [P]
+- **A week that is away from start to finish** has no long run to place: every run is short, easy and optional. [P]
+
 ## 6. The shape of a season
 
 34. **Load rises in steps, with lighter weeks.** [C] After three full weeks, the next is a down week at about three quarters of
