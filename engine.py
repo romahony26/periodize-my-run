@@ -767,7 +767,7 @@ def keep_long_run(days, statuses):
     """A long run that falls on a day away is moved to a day at home in the same week, so the week keeps its long run.
 
     The other weekend day is preferred (Sunday's long run goes to Saturday), then the nearest day, the day before first. The easy or
-    rest day it replaces takes the long run's place on the day away. Only an easy or rest day is used; the week's quality sessions stay put.
+    rest day it replaces takes the long run's place on the day away. Only an easy or rest day is used. A quality session on the day before or after the new long run becomes an easy run, so hard days stay apart.
     """
     for d in days:
         if d["type"] != "Long" or not _away(d, statuses):
@@ -781,6 +781,11 @@ def keep_long_run(days, statuses):
         d.update(home_)
         pick.update(away_)
         pick["note"] = (pick["note"] + " " if pick["note"] else "") + f"Moved from {d['date']:%A}, when you are away."
+        for e in days:      # a quality session the day before or after would leave the long run on tired legs: it becomes an easy run
+            if e["type"] == "Key" and abs((e["date"] - pick["date"]).days) == 1:
+                mi_ = max(half(min(e["miles"], 6)), 3)
+                e.update({"type": "Easy", "label": "Easy", "steps": [("d", mi_, "easy")], "miles": mi_,
+                          "note": f"Eased from {e['label'].lower()}: the long run is moved next to it, and hard days are kept apart."})
         break
     return days
 
