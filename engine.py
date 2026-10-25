@@ -256,7 +256,8 @@ def _plan(st, c, L, races):
     wtr = (goal["date"] - mon).days // 7 + 1 if goal else None
     week_end = mon + dt.timedelta(days=7)
     this_races = sorted([r for r in races if mon <= r["date"] < week_end], key=lambda r: r["date"])
-    last_races = [r for r in races if mon - dt.timedelta(days=7) <= r["date"] < mon]
+    # a week at half volume to recover is for a half marathon or longer; after a 5K or 10-mile race the easy days around it are enough [C]
+    last_races = [r for r in races if mon - dt.timedelta(days=7) <= r["date"] < mon and r["miles"] >= 13]
     specific = wtr is not None and wtr <= L["specific_weeks"]
     wk = [w["mi"] for w in st["weeks"]]
     last4 = wk[-4:]

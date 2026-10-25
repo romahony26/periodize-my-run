@@ -215,7 +215,8 @@ this project's own choices, not findings from trials. [C] [P]
     tested; the marathon taper is borrowed.
 37. **A race is followed by recovery.** [R] (*limited*) Easy running from two days after a marathon did not slow recovery
     compared with rest (Martínez-Navarro and colleagues, 2021). Periodize My Run plans a recovery week at about half your usual volume
-    after a race or a very long run, with no sessions. [C]
+    after a half marathon or longer, or a run of 26 miles or more, with no sessions. After a 5K or a 10-mile race the easy days around it
+    are enough and the next week carries on building. [C]
 
 ## 7. Is it working?
 

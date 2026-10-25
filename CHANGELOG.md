@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.14 - 2026-10-25
+### Fixed
+- A week at half volume to recover now follows only a half marathon or longer (or a run of 26 miles or more). It followed any race, so a 5K tune-up on 6 Dec was planned as 20 miles the week after. After shorter races the next week carries on building.
+
 ## 2.10.2-beta.13 - 2026-10-25
 ### Fixed
 - PRINCIPLES.md: a citation added in 2.10.2-beta.12 that could not be matched to a reference was reworded so the reference check passes.
