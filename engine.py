@@ -220,6 +220,11 @@ def goal_race(races, monday):
     return min(a, key=lambda r: r["date"]) if a else None
 
 
+def away_days(monday, statuses):
+    """How many days of the week starting `monday` are spent away on a trip or a holiday that does not keep the long run."""
+    return sum(1 for i in range(7) if _away({"date": monday + dt.timedelta(days=i)}, statuses or []))
+
+
 def plan(st, c, L, races):
     """The week's plan. A marathon-pace long run is held back for a week when it would lift the week more than 20% above the best of the
     last three: its minimum size, not the week's target, is what lifts the total, and a week raised by 20% or more was followed by more
@@ -235,7 +240,11 @@ def plan(st, c, L, races):
         if alt["total"] < pl["total"]:
             alt["why"].append("Marathon-pace long run held back this week: with it the week would be more than 20% above your best of the last three, "
                               "and a 20% rise was followed by a higher injury risk over three weeks in one study of half-marathon trainees (Damsted and colleagues, 2019). It comes a week later. [P]")
-            return alt
+            pl = alt
+    if pl.get("away"):      # the trip trims the runs after the week is planned: the next week must start from what the week will really hold
+        shaped = apply_status([dict(d) for d in pl["days"]], st.get("statuses") or [])
+        pl["projected_total"] = sum(d["miles"] or 0 for d in shaped)
+        pl["projected_long"] = max((d["miles"] or 0 for d in shaped), default=0)
     return pl
 
 
@@ -270,6 +279,7 @@ def _plan(st, c, L, races):
     taper_weeks = (2, 3) if gtype in ("marathon", "ultra") else (2,)      # 5K to half: the week before race week (8-14 days in all)
     # the markers are noisy and move together, so two signs in one week do not make a recovery week: they must persist from the week
     # before (or three appear together). Without last week's record (unknown), the old rule applies [P]
+    away_n = away_days(mon, st.get("statuses"))
     prev_flags = st.get("flags_prev")
     persisted = prev_flags is None or len(prev_flags) >= 1 or len(st["flags"]) > c["flags_to_back_off"]
     if len(st["flags"]) >= c["flags_to_back_off"] and not persisted:
@@ -280,6 +290,10 @@ def _plan(st, c, L, races):
         mode = "taper"
     elif this_races:
         mode = "tuneup"
+    elif away_n >= 4:
+        mode = "down"
+        why.append(f"Away {away_n} days (a trip or holiday): this is the down week. The runs on those days are short and optional, and the week after "
+                   "goes back to building where you left off, with no return week. A few days of lighter running cost very little fitness. [P]")
     elif last_races or st["longest_10d"] >= 26:
         mode = "postrace"
         why.append("Recovery week: you raced or ran very long in the last 10 days.")
@@ -289,7 +303,7 @@ def _plan(st, c, L, races):
     elif comeback:
         mode = "return"
         why.append(comeback[1])
-    elif prior3 > 8 and wk[-1] < 0.5 * prior3:
+    elif prior3 > 8 and wk[-1] < 0.5 * prior3 and not st.get("last_away"):
         mode = "return"
         why.append(f"Return week: last week was well below your recent level ({dist(half(wk[-1]), c['units'])} against {dist(half(prior3), c['units'])}). "
                    "Missed sessions are not made up.")
@@ -616,7 +630,7 @@ def _plan(st, c, L, races):
                                     "protects the legs against downhill damage for weeks after. " + days[long_i]["note"]).strip()
             why.append("Downhill practice on this week's long run: your goal race is hilly, and descending is what damages the legs most in long races.")
     return {"mode": mode, "weeks_to_race": wtr, "goal": goal, "gtype": gtype, "target": target, "total": sum(d["miles"] for d in days),
-            "days": days, "why": why, "done": done, "long": max((d["miles"] for d in days), default=0)}
+            "days": days, "why": why, "done": done, "long": max((d["miles"] for d in days), default=0), "away": away_n >= 4 and mode == "down"}
 
 
 def _weight():
@@ -654,9 +668,11 @@ def project(st, pl):
     d, nxt = pl["done"], dict(st)
     nxt["monday"] = st["monday"] + dt.timedelta(days=7)
     fast = d["mp_mid"] + d["mp_long"] + d["t_min"] * 60 * st["tp"] / MI
-    nxt["weeks"] = st["weeks"][1:] + [{"start": st["monday"], "mi": pl["total"], "runs": sum(1 for x in pl["days"] if x["miles"]),
-                                       "long": pl["long"], "fast_mi": fast, "t_min": d["t_min"]}]
-    nxt["longest_30d"], nxt["longest_10d"] = max(st["longest_30d"], pl["long"]), pl["long"]
+    total, long_ = pl.get("projected_total", pl["total"]), pl.get("projected_long", pl["long"])
+    nxt["last_away"] = bool(pl.get("away"))
+    nxt["weeks"] = st["weeks"][1:] + [{"start": st["monday"], "mi": total, "runs": sum(1 for x in pl["days"] if x["miles"]),
+                                       "long": long_, "fast_mi": fast, "t_min": d["t_min"]}]
+    nxt["longest_30d"], nxt["longest_10d"] = max(st["longest_30d"], long_), long_
     nxt["streak"] = min(st.get("streak", 0) + 1, 3)      # each projected week assumes the one before was run as planned
     if (st.get("recovery") or {}).get("level") == "hold":      # how recovery will be in later weeks is not known: a hold lasts the one week
         nxt["recovery"] = {"level": "ok", "steady": [], "flags": []}

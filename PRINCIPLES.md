@@ -179,6 +179,10 @@ this project's own choices, not findings from trials. [C] [P]
   move a day earlier, so both quality sessions survive and the rest day lands on the day away. With no rest day to give up, the long
   run swaps with an easy day and any quality session beside it is eased. [P]
 - **Days of illness or injury are never used** for a moved session. [P]
+- **A week with four or more days away is the down week.** The trip trims the runs, so it counts as the lighter week, restarts the count of
+  build weeks, and the week after goes back to building where you left off: no second down week and no return week. A few days of lighter
+  running cost very little fitness (about two weeks of complete rest cost around 3 ml/kg/min of VO2max and left running economy unchanged in
+  one small study of 12 runners, Int J Sports Med, 1992, read as an abstract). Longer breaks keep the return rules. [P]
 - **A week that is away from start to finish** has no long run to place: every run is short, easy and optional. [P]
 
 ### Goal-driven volume, and the midweek medium-long run

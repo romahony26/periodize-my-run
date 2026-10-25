@@ -211,6 +211,8 @@ def replan(force=False):
         log.warning("Not enough running data in the last eight weeks to plan from")
         return
     prevw = db.rows("SELECT summary FROM weeks WHERE monday=?", ((mon - dt.timedelta(days=7)).isoformat(),))
+    st["statuses"] = db.rows("SELECT * FROM status")
+    st["last_away"] = engine.away_days(mon - dt.timedelta(days=7), st["statuses"]) >= 4
     st["flags_prev"] = (json.loads(prevw[0]["summary"]) if prevw and prevw[0]["summary"] else {}).get("flags") if prevw else None
     pl = engine.plan(st, c, L, rs)
     log_forecasts(rs, st, c, mon, today)

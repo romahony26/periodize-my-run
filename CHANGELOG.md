@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.12 - 2026-10-25
+### Added
+- The plan now shows about three months ahead (13 weeks, up from 3; the setting goes up to 16). The weeks after the first are provisional and are redone as real weeks come in.
+
+### Changed
+- A week with four or more days away on a trip or holiday is now the down week: it restarts the count of build weeks, is labelled as such, and the next week goes back to building where you left off, with no second down week and no return week. Before, the trip week was labelled a build week with a target the trip could never allow, a down week followed it, and a trip that cut the week below half the usual volume would have started a return week.
+- The plan projects forward from what a trip week will really hold, not the target set before the trip trimmed it.
+
 ## 2.10.2-beta.11 - 2026-10-25
 ### Fixed
 - The plan outline to the goal race assumed the full step was never earned. Each projected week now counts as run as planned, so after three projected weeks the outline climbs at the full step, as it will if you run the plan.

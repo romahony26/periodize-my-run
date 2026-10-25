@@ -93,7 +93,7 @@ VALID = {
     "run_time": lambda v: isinstance(v, str) and bool(re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v)), "push_days": lambda v: v in (7, 14, 21) and not isinstance(v, bool),
     "easy_target": lambda v: v in ("none", "pace"), "aero_format": lambda v: v in ("short", "original"), "aero_test_weeks": lambda v: _is_int(v, 4, 8),
     "hrmax": lambda v: v is None or _is_num(v, 120, 230), "peak_miles_override": lambda v: v is None or _is_num(v, 10, 150),
-    "weekly_increase": lambda v: _is_num(v, 0, 0.2), "volume_boost": lambda v: _is_num(v, 0, 0.15), "detail_weeks": lambda v: _is_int(v, 4, 104), "weeks_ahead": lambda v: _is_int(v, 1, 5),
+    "weekly_increase": lambda v: _is_num(v, 0, 0.2), "volume_boost": lambda v: _is_num(v, 0, 0.15), "detail_weeks": lambda v: _is_int(v, 4, 104), "weeks_ahead": lambda v: _is_int(v, 1, 16),
     "forecast_completion": lambda v: v is None or _is_num(v, 0.5, 1),
     "blocked_days": lambda v: isinstance(v, list) and len(v) <= 6 and len(set(map(str, v))) == len(v) and all(_is_int(x, 0, 6) for x in v),
     "notify_url": lambda v: v is None or (isinstance(v, str) and len(v) <= 500),
