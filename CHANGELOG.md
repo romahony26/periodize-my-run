@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.13 - 2026-10-25
+### Fixed
+- PRINCIPLES.md: a citation added in 2.10.2-beta.12 that could not be matched to a reference was reworded so the reference check passes.
+
 ## 2.10.2-beta.12 - 2026-10-25
 ### Added
 - The plan now shows about three months ahead (13 weeks, up from 3; the setting goes up to 16). The weeks after the first are provisional and are redone as real weeks come in.
