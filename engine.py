@@ -318,9 +318,10 @@ def _plan(st, c, L, races):
         hold = rec["level"] == "hold" and not (quality_new or gap)
         grow = 1.0 if quality_new or gap or hold else 1 + c["weekly_increase"]
         new_ground = not (quality_new or gap or hold) and base * grow > proven
-        # past the level held in the last year the step is half the weekly rate. Recovery signs can hold the build level but never speed it:
-        # HRV-guided trials used them to pull intensity back, not to add volume, and watch readings are too noisy to give a green light [P]
-        step = c["weekly_increase"] / 2
+        # past the level held in the last year the step is half the weekly rate, or the full rate once the last three weeks were run at 95% or
+        # more of the planned miles. Recovery signs can hold the build level but never speed it: HRV-guided trials used them to pull intensity
+        # back, not to add volume, and watch readings are too noisy to give a green light [P]
+        step = c["weekly_increase"] if st.get("completed3") and rec["level"] != "hold" else c["weekly_increase"] / 2
         if new_ground:      # up to the proven level at the usual rate, beyond it at the step: consistency before more miles
             grow = max(1 + step, min(grow, proven / base if base else grow))
         target = min(base * grow, cap)
@@ -330,7 +331,8 @@ def _plan(st, c, L, races):
                    else "Volume held level: your recovery is showing strain (" + "; ".join(rec["flags"]) + "). The build carries on when it clears." if hold
                    else f"Volume is at your cap for this phase ({dist(cap, c['units'])})." if target >= cap
                    else f"Volume up {grow - 1:.0%}{toward}: more than you have held for eight weeks in the last year ({dist(half(proven), c['units'])}), "
-                        "so a smaller step. Your recovery signs can hold it level but do not speed it." if new_ground
+                        + ("so the full step: you ran at least 95% of the planned miles in each of the last three weeks." if st.get("completed3") else
+                           "so a smaller step until you have run at least 95% of the planned miles three weeks in a row.") + " Recovery signs can hold it level but do not speed it." if new_ground
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
         recent_best = max(wk[-3:] or [0])
         if recent_best >= 8 and target > 1.20 * recent_best:

@@ -176,6 +176,9 @@ def detraining(days_off):
     return min(max(days_off - 10, 0) * 0.0035, 0.12)
 
 
+COMPLETED = 0.95      # share of the planned miles that counts as a week completed
+
+
 def assess(c, L, monday, prev_tp=None):
     """c: settings, L: personal limits, monday: first day of the week being planned."""
     R = load_runs(monday - dt.timedelta(weeks=WINDOW_WEEKS), monday)
@@ -312,6 +315,14 @@ def assess(c, L, monday, prev_tp=None):
         health["easy_pace"] = (now, before)
         # shown, not a warning flag: pace at a fixed heart rate moves a few percent with heat, wind, hills and watch error
     st["flags"], st["health"] = flags, health
+    # the three weeks before this one: did the athlete run the miles that were planned? [P]
+    done3 = True
+    for k in (3, 2, 1):
+        w0, w1 = monday - dt.timedelta(weeks=k), monday - dt.timedelta(weeks=k - 1)
+        planned = db.rows("SELECT SUM(miles) m FROM plan WHERE date>=? AND date<?", (w0.isoformat(), w1.isoformat()))[0]["m"] or 0.0
+        ran = db.rows("SELECT SUM(dist_m) m FROM activities WHERE sport='running' AND date>=? AND date<?", (w0.isoformat(), w1.isoformat()))[0]["m"] or 0.0
+        done3 = done3 and planned >= 20 and ran / MI >= COMPLETED * planned
+    st["completed3"] = done3
     bands = {}
     for key, floor in (("hrv", 3.0), ("rhr", 1.5)):
         base = vals(key, 8, 36)
