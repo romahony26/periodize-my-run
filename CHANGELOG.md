@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.5 - 2026-10-26
+### Fixed
+- Strides sent to the watch no longer end with a 60 s recovery after the last one. It is 20 s fast, 60 s easy jog, repeated, and the last stride finishes the block. The workout's estimated length drops by a minute to match.
+
 ## 2.10.3-beta.4 - 2026-10-26
 ### Added
 - After a run you can tap where anything hurt (foot or Achilles, calf or shin, knee, hip or glute, hamstring, back) or Nothing. It is optional. One report is a recovery sign for two days. Pain on two different days in a week holds the sessions at easy running, and the long run shorter, until three days after the last report. Pain at one place on three days in two weeks adds a note to have it looked at (Silbernagel and colleagues, 2007; the two-day rule is this project's choice). Explain my plan and How it works describe it.

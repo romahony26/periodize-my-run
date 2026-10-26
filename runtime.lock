@@ -1,6 +1,6 @@
-# The standalone Python the installers may download when a computer has no Python 3.12 or later: python-build-standalone 20261003.
+# The standalone Python the installers may download when a computer has no Python 3.12 or later: python-build-standalone 20261021.
 # SHA-256, build, address. Written by tools/package.py; the installers refuse a download that does not match.
-9e01f63bbb08576cd9c8bc2d0564d098cb30c8453a0cd4bcf6aef458f6d2a147 aarch64-apple-darwin https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.13.16%2B20261003-aarch64-apple-darwin-install_only_stripped.tar.gz
-ec43f1a85c29f147d7ae2d13218c52c70b24a983a82ab22d6c607c0593060e10 x86_64-pc-windows-msvc https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.13.16%2B20261003-x86_64-pc-windows-msvc-install_only_stripped.tar.gz
-4595c5589fff7bf0cb158d9a88a797e0d791fa33830770fcb7bf3f4b104feeae x86_64-unknown-linux-gnu https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.13.16%2B20261003-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz
-6e9641400f8debd9b7924b27b5ff0662c372852382e291a76c450c7b67414cf6 aarch64-unknown-linux-gnu https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.13.16%2B20261003-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz
+8dc60610a82f1e73be7faf964383e02520f95f6e39592a5c37c3809f5a7b798e aarch64-apple-darwin https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.13.17%2B20261021-aarch64-apple-darwin-install_only_stripped.tar.gz
+56cde3b1a1dcc36576753cb408ee0c3568d211baafa0eee40423adc147c480f2 x86_64-pc-windows-msvc https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.13.17%2B20261021-x86_64-pc-windows-msvc-install_only_stripped.tar.gz
+f829adc9d888e76c8801b4799ed444188d35239fcae3a9808a99ec5cb0d8d92c x86_64-unknown-linux-gnu https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.13.17%2B20261021-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz
+c6857c65b996701a5da104cbb49b35249c0c026dc0664239b04f7156aa88326a aarch64-unknown-linux-gnu https://github.com/astral-sh/python-build-standalone/releases/download/20261021/cpython-3.13.17%2B20261021-aarch64-unknown-linux-gnu-install_only_stripped.tar.gz

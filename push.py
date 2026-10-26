@@ -68,9 +68,11 @@ def workout(day, tp, c, slow=0.0):
             order += 2
             secs += n * (work + rec)
         elif st[0] == "strides":
-            steps.append(_repeat(order, st[1], [_step(order + 1, "interval", "time", 20, None), _step(order + 2, "recovery", "time", 60, None)]))
-            order += 2
-            secs += st[1] * 80
+            if st[1] > 1:                                       # 60 s easy jog between strides, none after the last
+                steps.append(_repeat(order, st[1] - 1, [_step(order + 1, "interval", "time", 20, None), _step(order + 2, "recovery", "time", 60, None)]))
+                order += 3
+            steps.append(_step(order, "interval", "time", 20, None))
+            secs += st[1] * 20 + (st[1] - 1) * 60
         elif st[0] == "h":
             s = _step(order, "interval", "distance", st[1] * MI, None)
             s["targetType"], s["targetValueOne"], s["targetValueTwo"] = HEART, float(st[2]), float(st[3])
