@@ -485,6 +485,7 @@ def _days(c, today, L=None):
             if tp and day["steps"] and not item["past"] and L:
                 mins = sum(execution.planned_zones(day["steps"], tp, L["hrmax"])[0]) / 60
                 race = p["type"] == "Race"
+                item["mins"] = round(mins)
                 fu = insights.fuel(mins, c["race_carbs_g_per_h"] if race else insights.note_carbs(p["note"]), int(c["gel_carbs_g"]), race)
                 if fu:
                     item["fuel"] = fu
@@ -638,7 +639,7 @@ def state():
               "exposure": heat.exposure(today)}, met_warnings=_warnings(today),
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name"), "history": rawsync.status()},
-        felt=db.get("felt") or {}, job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, sync_age_h=round((dt.datetime.now() - lo).total_seconds() / 3600, 1) if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
+        on_feet=bool(goal and (goal["miles"] > 30 or (goal.get("climb_m") and goal["climb_m"] / goal["miles"] >= 16))), felt=db.get("felt") or {}, what_if=_what_if(c, today), job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, sync_age_h=round((dt.datetime.now() - lo).total_seconds() / 3600, 1) if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
         settings={k: (vault.get("notify_url") or "") if k == "notify_url" else c.get(k) for k in SETTINGS}, limits=L, profile=prof, races=[{k: v for k, v in r.items() if k != "course"} | {"has_course": bool(r.get("course"))} for r in rs], statuses=db.rows("SELECT * FROM status ORDER BY start DESC"),
 holiday_modes=engine.HOLIDAY_MODES, recovery_modes=engine.RECOVERY_MODES, fitness=fitness,
         backups=backup.listing()[:20], auto_backup=c["auto_backup"],
@@ -888,6 +889,21 @@ def aero_delete(date):
 
 
 FELT = ("easy", "fine", "hard", "wrecked")
+
+
+def _what_if(c, today):
+    """How tonight's sleep would change tomorrow's session, only when tomorrow has fast running and daily adjustment is on."""
+    if not (db.get("setup_done") and c.get("daily_adjust") and c.get("readiness_response", 50) > 0):
+        return None
+    row = db.rows("SELECT type,steps FROM plan WHERE date=?", ((today + dt.timedelta(days=1)).isoformat(),))
+    steps = json.loads(row[0]["steps"]) if row and row[0]["steps"] else []
+    if not row or row[0]["type"] == "Race" or not any((s[0] == "d" and s[2] in engine.QUALITY) or s[0] == "r" for s in steps):
+        return None
+    try:
+        return engine.what_if_sleep(today, c)
+    except Exception:
+        log.error("what-if failed", exc_info=True)
+        return None
 
 
 @app.post("/api/felt")

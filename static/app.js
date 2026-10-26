@@ -197,6 +197,19 @@ function feltRow(t){
   return `<div id="felt-row" role="group" aria-label="How did today's run feel?" style="margin:10px 0 0"><p class="xs mute" style="margin:0 0 6px">How did it feel? One tap, optional.</p><div class="qa">${['easy','fine','hard','wrecked'].map(k=>`<button class="ghost" data-felt="${k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`;
 }
 
+/* What tonight's sleep would do to tomorrow's session: the same rules run with different hours, so the athlete sees what would change the plan. */
+function whatIfLine(){
+  const w=S.what_if; if(!w)return '';
+  const h=v=>(Math.round(v*4)/4).toString().replace(/\.0+$/,'')+' h';
+  const body=w.already?'Tomorrow\'s paces will be eased whatever you sleep tonight; your 7-day readings already say so.'
+    :w.eases_below?`Tomorrow's session is kept as planned if you sleep ${h(w.eases_below)} or more tonight (your normal is ${w.normal} h). Less than that eases its paces${w.easy_below?`, and under ${h(w.easy_below)} it becomes an easy run`:''}.`
+    :`Tomorrow's session is kept as planned whatever you sleep tonight.`;
+  return `<p class="xs mute" id="whatif" style="margin:10px 0 0"><b>What would change tomorrow:</b> ${body}</p>`;
+}
+
+/* Time on feet, for ultras and hilly races, where hours on the legs say more than miles. The plan is still built in miles. */
+const hm=m=>m>=60?`${Math.floor(m/60)} h${m%60?' '+String(m%60).padStart(2,'0'):''}`:`${m} min`;
+
 function planView(){
   const f=S.fitness, r=S.readiness, t=S.days.find(d=>d.today)||{};
   const lev={green:'Recovered',amber:'A bit tired',red:'Not recovered',unknown:'Waiting for watch sync'};
@@ -223,14 +236,14 @@ function planView(){
     ${x.wx?`<p class="xs mute" style="margin:6px 0 0">${x.wx.wet?'☂':'☀'} Around ${x.wx.hour}:00 · ${E(wxTip(x.wx))}</p>`:''}
     ${x.purpose?`<p class="small mute" style="margin:10px 0 0">${E(x.purpose)}</p>`:''}
     ${x.note?`<p class="xs mute" style="margin:6px 0 0">${E(x.note)}</p>`:''}${x.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(x.strength)}</span></p>`:''}
-    <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p>${feltRow(t)}</div>`;
+    <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p>${feltRow(t)}${whatIfLine()}</div>`;
   } else
   h+=`<div class="card c6"><p class="eyebrow">Today</p>
-    <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}</span></p>
+    <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}${S.on_feet&&t.mins?' · '+hm(t.mins):''}</span></p>
     ${stepList(t.text)}
     ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button></div>`:''}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
-    ${whyChanged(t)}
+    ${whyChanged(t)}${whatIfLine()}
     ${t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''}${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}</div>`;
   // recovery and weather each have a panel of their own
   const wxOn=!!((S.heat&&S.heat.today)||(S.met_warnings&&(S.met_warnings.stale||S.met_warnings.county)));
@@ -258,12 +271,12 @@ function planView(){
   const fc=v=>v>=85?'green':v>=70?'amber':'red', pc=v=>v>=1?'green':v<=-3?'amber':'mute';
   weeks.forEach((w,i)=>{
     const wi=S.week_info[(w.find(d=>d.week)||{}).week], total=w.reduce((a,d)=>a+(d.miles||0),0), prov=w.some(d=>d.week&&S.week_info[d.week]&&!S.week_info[d.week].final);
-    h+=`<div class="wk"><b>${names[i]||''}</b><span class="mute small">${nice(w[0].date)} – ${nice(w[6].date)}</span>${total?`<span class="tag">${wi&&S.settings.week_start===0?E(wi.mode)+' · ':''}${U()==='mi'?Math.round(total*2)/2+' mi':Math.round(total*KM)+' km'}</span>`:''}${prov?'<span class="tag">provisional</span>':''}${w[0].week_perf!=null?`<span class="tag ${pc(w[0].week_perf)}" title="Pace for your heart rate across the week's runs, against the four weeks before">pace for heart rate ${w[0].week_perf>0?'+':''}${w[0].week_perf.toFixed(1)}%</span>`:''}
+    h+=`<div class="wk"><b>${names[i]||''}</b><span class="mute small">${nice(w[0].date)} – ${nice(w[6].date)}</span>${S.on_feet&&w.some(d=>d.mins)?`<span class="tag" title="Planned time on your feet this week, from the paces in each session">${hm(w.reduce((a,d)=>a+(d.mins||0),0))} on feet</span>`:''}${total?`<span class="tag">${wi&&S.settings.week_start===0?E(wi.mode)+' · ':''}${U()==='mi'?Math.round(total*2)/2+' mi':Math.round(total*KM)+' km'}</span>`:''}${prov?'<span class="tag">provisional</span>':''}${w[0].week_perf!=null?`<span class="tag ${pc(w[0].week_perf)}" title="Pace for your heart rate across the week's runs, against the four weeks before">pace for heart rate ${w[0].week_perf>0?'+':''}${w[0].week_perf.toFixed(1)}%</span>`:''}
       ${i===1?`<span style="margin-left:auto" class="xs mute"><span class="hint-d">Click a day for detail · drag to swap</span><span class="hint-m">Tap a day for detail</span> ${S.can_undo?'· <a href="#" id="undo">Undo last move</a>':''}</span>`:''}</div><div class="cal">`;
     for(const d of w){const can=!d.past&&d.type, b=d.body;
       h+=`<div class="dw"><div class="day ${d.type||''} ${d.past?'past':''} ${d.today?'today':''} ${SEL===d.date?'sel':''}" data-date="${d.date}" ${can?'draggable="true"':''} tabindex="0" role="button" aria-label="${d.dow} ${+d.date.slice(8)}: ${E(d.label||'no session')}">
         <div class="d"><span>${d.dow} ${+d.date.slice(8)}</span><span>${d.done&&d.done.id?'':(d.on_watch?'⌚':'')+(d.source==='moved'?' ↔':'')+(d.source==='reshuffled'?' ↻':'')}</span></div>
-        ${d.type?`<div class="l">${E(d.label)}</div>${d.dist?`<div class="m num">${E(d.dist)}</div>`:''}<div class="t">${E(d.short||'')}</div>`:''}
+        ${d.type?`<div class="l">${E(d.label)}</div>${d.dist?`<div class="m num">${E(d.dist)}${S.on_feet&&d.mins?` · ${hm(d.mins)}`:''}</div>`:''}<div class="t">${E(d.short||'')}</div>`:''}
         <div class="f">${d.done?`<span class="done">✓ ${E(d.done.dist)}</span>`:''}${d.wx&&!d.done?`<span class="xs mute num" title="${E(wxTip(d.wx))}">${d.wx.wet?'☂':'☀'} ${d.wx.hour}:00 · ${d.wx.temp}°</span>`:''}${d.adjust?`<span class="tag amber">eased ${(d.adjust.slow*100).toFixed(1)}%</span>`:''}</div>
         ${b?`<div class="mt num"><span class="${fc(b.fresh)}" title="Freshness this morning: last night’s sleep, and your 7-day HRV and resting heart rate, against your normal"><b>${b.fresh}</b></span>${b.sleep_score?`<span title="Last night's sleep score">☾${b.sleep_score}</span>`:''}${b.rhr?`<span title="Resting heart rate">♥${Math.round(b.rhr)}</span>`:''}${b.hrv?`<span title="Last night's HRV">∿${Math.round(b.hrv)}</span>`:''}</div>`:''}</div>${d.done&&d.done.id?GLINK(d.done.id,'corner'):''}</div>`}
     h+='</div>'});

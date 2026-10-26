@@ -3,6 +3,16 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.2 - 2026-10-26
+### Added
+- Today's card says what would change tomorrow: how many hours of sleep tonight keep tomorrow's fast session as planned, and below which it is eased or becomes an easy run. It runs the same recovery rules with different hours of sleep and stores nothing. It appears only when tomorrow has fast running and the daily adjustment is on.
+- For ultras and hilly goal races the plan also shows time on feet: each day's planned time, and each week's total. The plan is still built in miles, because there are no trials that show a time-based prescription trains better (principle 69 and the known gaps).
+- A skip-to-content link, a visible focus ring on everything the keyboard can reach, a status role on the toast messages, and a labelled navigation landmark.
+- A browser smoke test (4 seconds) is part of the beta check: the Plan page draws without errors, today's whole card is on the first phone screen, nothing scrolls sideways, and axe finds nothing serious in light and dark.
+
+### Changed
+- Link and accent text uses a darker (light mode) or lighter (dark mode) shade of the accent colour so it reaches the 4.5:1 contrast ratio. Buttons are 44 pixels high on touch screens.
+
 ## 2.10.3-beta.1 - 2026-10-26
 ### Added
 - A notice appears when the watch has not synced for 12 hours: how long ago, and that recovery and the newest runs are not in today's plan. The 7-day notice is now red and says the plan is running on old data.

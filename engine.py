@@ -939,10 +939,44 @@ def _z(value, base, floor):
     return (value - m) / max(statistics.pstdev(base), floor), m
 
 
+def what_if_sleep(today, c):
+    """How tonight's sleep would change tomorrow morning's session, or None when nothing is learned.
+
+    Runs the same readiness rules for tomorrow with different hours of sleep and finds where they start to ease paces and where they
+    turn a hard session into an easy run. Nothing is stored. Returns {"normal", "eases_below", "easy_below"} in hours (a bound is
+    None when no amount of sleep reaches it, or the rules already ease tomorrow whatever you sleep).
+    """
+    tomorrow = today + dt.timedelta(days=1)
+    key = tomorrow.isoformat()
+    base = readiness(today, c, learn=False)
+    n = (base.get("normal") or {}).get("sleep_h")
+    if not n:
+        return None
+    dyn = c.get("readiness_response", 50)
+    need_easy = 3 + round((100 - dyn) / 25)
+
+    def points(h):
+        return readiness(tomorrow, c, learn=False, override={key: {"sleep_h": h}})["points"]
+    if points(n) >= 1:
+        return {"normal": n, "eases_below": None, "easy_below": None, "already": True}
+    eases = easy = None
+    h = round(n * 4) / 4
+    while h >= 3.0:
+        p = points(h)
+        if eases is None and p >= 1:
+            eases = h + 0.25
+        if easy is None and p >= need_easy:
+            easy = h + 0.25
+        if eases is not None and easy is not None:
+            break
+        h -= 0.25
+    return {"normal": n, "eases_below": eases, "easy_below": easy, "already": False}
+
+
 HRV_BASELINE_NIGHTS = 28       # HRV eases nothing until this many valid nights set the athlete's normal
 
 
-def readiness(today, c, learn=True):
+def readiness(today, c, learn=True, override=None):
     """How recovered the athlete is this morning, and how much to ease today's fast running.
 
     Each marker is read over the window the research supports (see PRINCIPLES.md):
@@ -952,6 +986,8 @@ def readiness(today, c, learn=True):
         to act on (Plews et al. 2012, 2013); a shift of half the athlete's normal spread is the smallest change treated as real.
     """
     rows = {r["date"]: r for r in db.rows("SELECT * FROM daily WHERE date>=?", ((today - dt.timedelta(days=68)).isoformat(),))}
+    for d, vs in (override or {}).items():       # a what-if: these readings stand in for the real ones (see what_if_sleep)
+        rows[d] = {**rows.get(d, {}), **vs}
     now = rows.get(today.isoformat()) or {}
 
     def vals(key, a, b):
