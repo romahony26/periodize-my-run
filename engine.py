@@ -939,6 +939,9 @@ def _z(value, base, floor):
     return (value - m) / max(statistics.pstdev(base), floor), m
 
 
+HRV_BASELINE_NIGHTS = 28       # HRV eases nothing until this many valid nights set the athlete's normal
+
+
 def readiness(today, c, learn=True):
     """How recovered the athlete is this morning, and how much to ease today's fast running.
 
@@ -956,9 +959,10 @@ def readiness(today, c, learn=True):
         return [v for v in ((rows.get((today - dt.timedelta(days=i)).isoformat()) or {}).get(key) for i in range(a, b)) if v]
 
     def normal(key, sd_floor, skip):
-        """(average, spread) over the 60 days before the last `skip` days, or None with under two weeks of data."""
+        """(average, spread) over the 60 days before the last `skip` days, or None with too little data: two weeks, and for HRV four
+        weeks of valid nights, since a night-to-night measure needs a longer baseline before its spread means anything (Plews 2013)."""
         base = vals(key, skip, skip + 60)
-        return (mean(base), max(statistics.pstdev(base), sd_floor)) if len(base) >= 14 else None
+        return (mean(base), max(statistics.pstdev(base), sd_floor)) if len(base) >= (HRV_BASELINE_NIGHTS if key == "hrv" else 14) else None
 
     sleep, score, hrv, rhr = now.get("sleep_h"), now.get("sleep_score"), now.get("hrv"), now.get("rhr")
     if sleep is None and hrv is None and score is None and not vals("hrv", 1, 4):
@@ -968,6 +972,7 @@ def readiness(today, c, learn=True):
 
     # ---- HRV and resting heart rate: 7-day average against the normal range
     n, recent = normal("hrv", 3.0, 7), vals("hrv", 0, 7)
+    hrv_nights = len(vals("hrv", 7, 67))
     if n and len(recent) >= 4:
         base, sd = n
         m7 = mean(recent)
@@ -1033,13 +1038,18 @@ def readiness(today, c, learn=True):
     rated = db.rows("SELECT date,feel,rpe FROM activities WHERE sport='running' AND date>=? AND date<=? AND (feel IS NOT NULL OR rpe IS NOT NULL) ORDER BY date DESC",
                     (since, today.isoformat()))
     rough = [r for r in rated if r["rpe"] is not None and r["rpe"] >= 90]    # effort 9 or 10; a "weak" feel alone is not counted (principle 92)
+    # the same one-tap rating given in the app counts exactly as a very hard effort on the watch does, and only "wrecked" does
+    felt = db.get("felt") or {}
+    on_watch = {r["date"] for r in rough}
+    rough += [{"date": d, "rpe": 100} for d, v in felt.items() if v == "wrecked" and since <= d <= today.isoformat() and d not in on_watch]
+    rough.sort(key=lambda r: r["date"], reverse=True)
     if rough:
         latest = (today - dt.date.fromisoformat(rough[0]["date"])).days
         if len(rough) >= 2 or latest <= 1:
             fp = 2 if len(rough) >= 2 else 1
             pts += fp
             lost += 10 * fp
-            reasons.append(f"you rated {'two recent runs' if len(rough) >= 2 else 'your last run'} as a very hard effort on your watch")
+            reasons.append(f"you rated {'two recent runs' if len(rough) >= 2 else 'your last run'} as a very hard effort (on your watch or in the app)")
     # which way each reading is going: the last 7 days against the 7 before, counted as a move only when it is half the athlete's usual
     # spread (the smallest change treated as real, principle 50); sleep needs 15 minutes
     trend = {}
@@ -1054,4 +1064,5 @@ def readiness(today, c, learn=True):
     per = ((db.get("model") or {}).get("slow_per_point") or {}).get("value", 0.012) if learn else 0.012
     return {"level": "green" if pts == 0 else "amber" if pts <= 2 else "red", "slow": min(pts, 4) * per, "points": pts,
             "reasons": reasons or ["Last night's sleep was normal for you, and your 7-day HRV and resting heart rate are in your normal range."],
-            "sleep_h": sleep, "sleep_score": score, "hrv": hrv, "rhr": rhr, "fresh": round(max(35, 100 - lost)), "normal": norm, "week": week, "trend": trend}
+            "sleep_h": sleep, "sleep_score": score, "hrv": hrv, "rhr": rhr, "fresh": round(max(35, 100 - lost)), "normal": norm, "week": week, "trend": trend,
+            "hrv_building": {"nights": hrv_nights, "needed": HRV_BASELINE_NIGHTS} if not norm.get("hrv") and (hrv or vals("hrv", 0, 7)) else None}

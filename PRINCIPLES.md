@@ -595,7 +595,8 @@ Listed so they are not mistaken for principles.
 
 - **Feel is read only when the watch records it.** Self-reported fatigue, soreness and mood track the response to training at least as
   well as device measures (Saw and colleagues, 2016) (*strong*). Periodize My Run reads the feel and effort rating a Garmin watch can
-  record after a run (principle 92), and nothing else: soreness and mood are not asked about. Whether Garmin returns the rating for
+  record after a run (principle 92), and accepts one optional tap in the app after a run (easy, fine, hard or wrecked; only "wrecked"
+  counts, as a very hard effort does): soreness and mood are not asked about. Whether Garmin returns the rating for
   your account has been tested only against stand-in data.
 - **Weather** is used only if you switch it on, since it needs a weather service. Heat is estimated from temperature and
   humidity, not measured sun or wind, and takes no account of how used to heat you are, although two weeks of training in

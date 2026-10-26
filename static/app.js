@@ -127,7 +127,8 @@ function render(){
     :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?`<span class="st-full">Synced ${E(S.last_run.slice(5).replace('T',' '))}</span><span class="st-short">${E(S.last_run.slice(5,10)===S.today.slice(5)?S.last_run.slice(11):S.last_run.slice(5,10))}</span>`:'Not synced yet'} <button class="ghost" id="run">Sync</button>`;
   let h='';
   if(j.error&&!j.running)h+=`<div class="alert err">The last sync had a problem: ${E(j.error)}</div>`;
-  if(S.stale)h+=`<div class="alert">No successful sync in 7 days. Check the Log tab, then press Sync.</div>`;
+  if(S.stale)h+=`<div class="alert err" role="alert">No successful sync in 7 days, so the plan is running on old data. Check the Log tab, then press Sync.</div>`;
+  else if(S.sync_age_h!=null&&S.sync_age_h>=12&&S.setup_done)h+=`<div class="alert" role="status">Your watch last synced ${S.sync_age_h<48?Math.round(S.sync_age_h)+' hours':Math.round(S.sync_age_h/24)+' days'} ago, so recovery and the newest runs are not in today's plan yet. ${j.error?'':'It retries every hour; press Sync to try now.'}</div>`;
   $('#main').innerHTML=h+({plan:planView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])()+(MORE?moreSheet():'');
   polish();bind();bindCharts();
 }
@@ -179,6 +180,23 @@ function chart(title,rows,val,tip,label){
     <div class="xs mute" style="display:flex;justify-content:space-between"><span>${E(label(rows[0]))}</span><span>${E(label(rows[rows.length-1]))}</span></div>`}
 function stepList(text){return text?`<ul class="steps">${text.split('; ').map(x=>`<li>${E(x)}</li>`).join('')}</ul>`:''}
 
+/* One line saying why today is not what the plan first had: the readings behind an easing, or that you or a missed day moved it. */
+function whyChanged(t){
+  const a=t.adjust, bits=[];
+  if(a&&(a.slow||a.easy)&&a.reasons&&a.reasons.length)bits.push(`<b>Why:</b> ${E(a.reasons.join('; '))}.`);
+  if(a&&a.easy&&t.original)bits.push('Planned before: '+E(t.original.split('; ')[0])+'.');
+  if(t.source==='moved')bits.push('You moved this session here.');
+  else if(t.source==='reshuffled')bits.push('Moved here because a session earlier in the week was missed.');
+  return bits.length?`<p class="xs" style="margin:6px 0 0" id="why-today">${bits.join(' ')}</p>`:'';
+}
+
+/* One tap after a run, only when the watch did not already carry a rating. Never required: the plan works the same without it. */
+function feltRow(t){
+  if(!t.done||!t.done.miles||t.done.miles<0.5)return '';
+  const have=(S.felt||{})[t.date]; if(have)return `<p class="xs mute" id="felt-row" style="margin:10px 0 0">You said today's run felt <b>${E(have)}</b>. <a href="#" data-felt-redo="1">Change</a></p>`;
+  return `<div id="felt-row" role="group" aria-label="How did today's run feel?" style="margin:10px 0 0"><p class="xs mute" style="margin:0 0 6px">How did it feel? One tap, optional.</p><div class="qa">${['easy','fine','hard','wrecked'].map(k=>`<button class="ghost" data-felt="${k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`;
+}
+
 function planView(){
   const f=S.fitness, r=S.readiness, t=S.days.find(d=>d.today)||{};
   const lev={green:'Recovered',amber:'A bit tired',red:'Not recovered',unknown:'Waiting for watch sync'};
@@ -205,13 +223,14 @@ function planView(){
     ${x.wx?`<p class="xs mute" style="margin:6px 0 0">${x.wx.wet?'☂':'☀'} Around ${x.wx.hour}:00 · ${E(wxTip(x.wx))}</p>`:''}
     ${x.purpose?`<p class="small mute" style="margin:10px 0 0">${E(x.purpose)}</p>`:''}
     ${x.note?`<p class="xs mute" style="margin:6px 0 0">${E(x.note)}</p>`:''}${x.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(x.strength)}</span></p>`:''}
-    <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p></div>`;
+    <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p>${feltRow(t)}</div>`;
   } else
   h+=`<div class="card c6"><p class="eyebrow">Today</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}</span></p>
     ${stepList(t.text)}
     ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button></div>`:''}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
+    ${whyChanged(t)}
     ${t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''}${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}</div>`;
   // recovery and weather each have a panel of their own
   const wxOn=!!((S.heat&&S.heat.today)||(S.met_warnings&&(S.met_warnings.stale||S.met_warnings.county)));
@@ -224,7 +243,7 @@ function planView(){
     ${rd&&(r.sleep_h||r.hrv||r.rhr)?`<div class="stats">${r.sleep_h?`<div class="stat"><div class="v num">${r.sleep_h.toFixed(1)} h</div><div class="k">Sleep last night${nrm.sleep_h?' · normal '+nrm.sleep_h:''}${r.sleep_score?' · score '+r.sleep_score:''}</div>${tr('sleep_h',true)}</div>`:''}
       ${r.hrv?`<div class="stat"><div class="v num">${Math.round(r.hrv)}</div><div class="k">HRV last night${nrm.hrv?' · normal '+nrm.hrv:''}</div>${tr('hrv',true)}</div>`:''}
       ${r.rhr?`<div class="stat"><div class="v num">${Math.round(r.rhr)}</div><div class="k">Resting HR${nrm.rhr?' · normal '+nrm.rhr:''}</div>${tr('rhr',false)}</div>`:''}</div>`:''}
-    ${rd?`<p class="xs mute" style="margin:8px 0 0">${E(r.reasons.join(' · '))}</p>`:'<p class="xs mute" style="margin:8px 0 0">Recovery appears after your watch has synced last night.</p>'}</div>`;
+    ${rd?`<p class="xs mute" style="margin:8px 0 0">${E(r.reasons.join(' · '))}</p>${r.hrv_building?`<p class="xs amber" style="margin:6px 0 0">HRV is shown but does not change your plan yet: ${r.hrv_building.nights} of ${r.hrv_building.needed} nights needed to learn your normal.</p>`:''}`:'<p class="xs mute" style="margin:8px 0 0">Recovery appears after your watch has synced last night.</p>'}</div>`;
   if(wxOn)h+=`<div class="card c6" id="weathercard"><p class="eyebrow">Weather</p>
     ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}${S.heat.today.wind!=null?` · wind ${wxWind(S.heat.today.wind)}${S.heat.today.gust?`, gusts ${wxWind(S.heat.today.gust)}`:''}${S.heat.today.wind_pct?` · about ${S.heat.today.wind_pct}% slower for the wind`:''}`:''}</p>`:''}
     ${metWarn(S.met_warnings,S.today)}</div>`;
@@ -790,6 +809,8 @@ function bind(){
   if($('#sk'))$('#sk').onchange=()=>modeFor($('#sk').value);
   on('#qa-swap',async()=>{const x=new Date(S.today+'T12:00');x.setDate(x.getDate()+1);const to=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
     const r=await api('plan/move',{from:S.today,to});r.warning?toast(r.warning,'warn'):toast('Swapped with tomorrow. Updating your watch.');await load()});
+  $$('[data-felt]').forEach(b=>b.onclick=async()=>{await api('felt',{date:S.today,rating:b.dataset.felt});toast(b.dataset.felt==='wrecked'?'Noted. Tomorrow will be eased.':'Noted.');await load()});
+  $$('[data-felt-redo]').forEach(a=>a.onclick=async e=>{e.preventDefault();const f={...(S.felt||{})};delete f[S.today];S.felt=f;render()});
   on('#qa-sick',async()=>{await api('status',{kind:'sick',mode:'',start:S.today,end:S.today,note:''});toast('Rest today. Replanning with a gentle return.');await load()});
   on('#sday',async()=>{const d=$('#ss').value||S.today;await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:d,end:d,note:$('#sn').value});toast('Saved for one day. Replanning.');await load()});
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});

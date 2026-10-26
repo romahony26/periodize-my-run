@@ -3,6 +3,16 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.1 - 2026-10-26
+### Added
+- A notice appears when the watch has not synced for 12 hours: how long ago, and that recovery and the newest runs are not in today's plan. The 7-day notice is now red and says the plan is running on old data.
+- Today's card says why the session is not what the plan first had: the readings behind an easing, the session as first planned when it became an easy run, and whether you or a missed day moved it.
+- After a run you can tap how it felt: easy, fine, hard or wrecked. It is optional and the plan works the same without it. "Wrecked" counts as a recovery sign in the same way as a very hard effort rated on the watch; the others change nothing (Saw and colleagues, 2016).
+- The Recovery panel says when HRV is shown but not yet used, and how many of the 28 nights it has.
+
+### Changed
+- HRV changes nothing until 28 nights of it set your normal (before: 14). It applies to the daily easing and to the weekly recovery warning. With a watch that has only just started recording HRV, the plan follows sleep and resting heart rate until then.
+
 ## 2.10.2 - 2026-10-26
 ### Added
 - The plan shows about three months ahead (13 weeks, up from 3).

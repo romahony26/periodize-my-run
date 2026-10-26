@@ -284,7 +284,7 @@ def assess(c, L, monday, prev_tp=None):
         if rhr7 - b >= c["rhr_rise_bpm"]:
             flags.append(f"resting heart rate {rhr7:.0f}, {rhr7 - b:.0f} above your normal of {b:.0f}")
     hrv7, base = mean(vals("hrv", 1, 8)), vals("hrv", 8, 57)
-    if hrv7 and len(base) >= 14:
+    if hrv7 and len(base) >= 28:     # four weeks of valid nights before HRV can raise a flag (engine.HRV_BASELINE_NIGHTS)
         b = mean(base)
         health["hrv"] = (hrv7, b)
         if hrv7 < b * c["hrv_drop_fraction"]:

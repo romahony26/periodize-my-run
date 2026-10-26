@@ -638,7 +638,7 @@ def state():
               "exposure": heat.exposure(today)}, met_warnings=_warnings(today),
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name"), "history": rawsync.status()},
-        job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
+        felt=db.get("felt") or {}, job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, sync_age_h=round((dt.datetime.now() - lo).total_seconds() / 3600, 1) if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
         settings={k: (vault.get("notify_url") or "") if k == "notify_url" else c.get(k) for k in SETTINGS}, limits=L, profile=prof, races=[{k: v for k, v in r.items() if k != "course"} | {"has_course": bool(r.get("course"))} for r in rs], statuses=db.rows("SELECT * FROM status ORDER BY start DESC"),
 holiday_modes=engine.HOLIDAY_MODES, recovery_modes=engine.RECOVERY_MODES, fitness=fitness,
         backups=backup.listing()[:20], auto_backup=c["auto_backup"],
@@ -884,6 +884,29 @@ def aero_save():
 @app.delete("/api/aerobic/<date>")
 def aero_delete(date):
     db.run("DELETE FROM aerobic_tests WHERE date=?", (date,))
+    return jsonify(ok=True)
+
+
+FELT = ("easy", "fine", "hard", "wrecked")
+
+
+@app.post("/api/felt")
+def felt_save():
+    """One tap after a run: how it felt. Optional, never asked twice for a day, and kept for 14 days. Only 'wrecked' counts as a
+    recovery sign, in the same way as a very hard effort rating on the watch (principle 92)."""
+    j = request.json or {}
+    rating = j.get("rating")
+    try:
+        day = dt.date.fromisoformat(j.get("date") or "")
+    except ValueError:
+        return jsonify(error="Check the date."), 400
+    today = dt.date.today()
+    if rating not in FELT or not (today - dt.timedelta(days=3) <= day <= today):
+        return jsonify(error="Rate a run from the last three days: easy, fine, hard or wrecked."), 400
+    kept = {k: v for k, v in (db.get("felt") or {}).items() if k >= (today - dt.timedelta(days=14)).isoformat()}
+    kept[day.isoformat()] = rating
+    db.put("felt", kept)
+    jobs.start("readiness")      # tomorrow's session and today's readiness take the rating into account straight away
     return jsonify(ok=True)
 
 
