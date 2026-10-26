@@ -53,7 +53,7 @@ function metWarn(m,day){
   const when=t=>{const d=new Date(t);return isNaN(d)?t:d.toLocaleString('en-IE',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
   const col=e=>/^Red/.test(e)?'red':/^Orange/.test(e)?'amber':'';
   const items=(m.days&&m.days[day])||[];
-  const attr=`<p class="xs mute" style="margin:4px 0 0">${m.attribution.map(E).join(' · ')}</p>`;
+  const attr=`<p class="xs mute" style="margin:4px 0 0">${E(m.attribution[0])} · www.met.ie · CC BY 4.0 · full notice under How it works</p>`;
   if(m.stale)return `<div class="metwarn"><p class="xs mute" style="margin:6px 0 0"><b>Met Éireann warnings</b> could not be refreshed in the last three hours, so none is shown. Check <a href="https://www.met.ie/warnings" target="_blank" rel="noopener noreferrer">www.met.ie/warnings</a>.</p>${attr}</div>`;
   if(!m.county)return '';
   return `<div class="metwarn"><p class="lab2" style="margin:8px 0 0">Met Éireann · ${E(m.county)}</p>`+

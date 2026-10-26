@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.17 - 2026-10-26
+### Changed
+- The long Met Éireann notice no longer sits under every warning. The warnings carry one short line (Copyright Met Éireann · www.met.ie · CC BY 4.0), and the full notice (licence link, no-liability statement, and that only the formatting is simplified) is on the How it works page.
+
 ## 2.10.2-beta.16 - 2026-10-26
 ### Changed
 - The Goal and Today panels are shorter. Goal shows the three times and, in one line, how far ahead of or behind your goal the forecast is; the race-day weather and how the forecast is worked out open on a tap. Today shows the session, any easing and the weather line; how you are recovering opens on a tap. The ring and the figures are a little smaller.
