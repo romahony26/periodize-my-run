@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.20 - 2026-10-26
+### Added
+- Goal, Today, Recovery and Weather are each a panel of their own. Recovery shows last night's sleep, HRV and resting heart rate against your normal; Weather shows today's forecast line and the Met Éireann warnings, one line each. The warnings chip on the Today card is gone.
+
+### Fixed
+- The panels at the top of the Plan page stayed pinned to the top of the screen as you scrolled, and could cover what was under them (introduced in 2.10.2-beta.18, when the panel grid was given a class name the header already used).
+
 ## 2.10.2-beta.19 - 2026-10-26
 ### Changed
 - On the Today card, Met Éireann's warnings are one chip beside the recovery chip (for example "Met Éireann · Cork: Yellow Rain ×2, Yellow Wind", amber for Orange and red for Red). Tap it to open the warnings as issued, one line each; tap again to close. The day detail page keeps the full panel.
