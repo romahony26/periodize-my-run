@@ -160,7 +160,7 @@ def for_day(day, now=None):
         return None
     saved = db.get("met_warnings") or {}
     now = now or dt.datetime.now()
-    name = county((db.get("heat_forecast") or {}).get("loc") or heat.location())      # the place the weather is already read for
+    name = county(heat.location())      # where the latest GPS run started, and nowhere else
     out = {"county": name, "fetched": saved.get("fetched"), "items": [], "stale": True, "attribution": list(ATTRIBUTION)}
     if not saved.get("fetched") or (now - dt.datetime.fromisoformat(saved["fetched"])).total_seconds() > STALE_S:
         return out

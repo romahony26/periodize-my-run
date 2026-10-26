@@ -47,19 +47,20 @@ function wxCharts(w){
   const tab=`<details style="margin-top:8px"><summary class="xs mute" style="cursor:pointer">Hourly figures</summary><table class="xs" style="margin-top:6px"><tr><th>Hour</th><th class="r">Air °C</th><th class="r">Slower %</th><th class="r">Rain mm</th><th class="r">Chance %</th></tr>${r.map(x=>`<tr><td>${hh(x[0])}${x[0]===w.hour?' ★':''}</td><td class="r num">${x[1]}</td><td class="r num">${x[3]===null?'too hot':x[3]}</td><td class="r num">${x[4]??''}</td><td class="r num">${x[5]??''}</td></tr>`).join('')}</table></details>`;
   return t+rain+heat+`<p class="xs mute" style="margin:6px 0 0">The vertical line marks the best hour${common.win?'; the tinted band is your running window':''}. ${anyHeat?'':'No hour of the day costs any pace for heat. '}Daylight hours only.</p>`+tab}
 function metWarn(m,day){
-  /* Met Éireann's warnings as issued (wording, level, times and area are not changed), with the credit its licence requires. */
+  /* Met Éireann's warnings as issued (wording, level, times and area are not changed), with the credit its licence requires.
+     One line each; the full text opens on a tap. */
   if(!m)return '';
   const when=t=>{const d=new Date(t);return isNaN(d)?t:d.toLocaleString('en-IE',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
   const col=e=>/^Red/.test(e)?'red':/^Orange/.test(e)?'amber':'';
   const items=(m.days&&m.days[day])||[];
-  const attr=`<p class="xs mute" style="margin:6px 0 0">${m.attribution.map(E).join(' · ')}</p>`;
+  const attr=`<p class="xs mute" style="margin:4px 0 0">${m.attribution.map(E).join(' · ')}</p>`;
   if(m.stale)return `<div class="metwarn"><p class="xs mute" style="margin:6px 0 0"><b>Met Éireann warnings</b> could not be refreshed in the last three hours, so none is shown. Check <a href="https://www.met.ie/warnings" target="_blank" rel="noopener noreferrer">www.met.ie/warnings</a>.</p>${attr}</div>`;
   if(!m.county)return '';
-  return `<div class="metwarn"><p class="lab2" style="margin:10px 0 0">Met Éireann warnings for ${E(m.county)}</p>`+
-    (items.length?items.map(w=>`<div class="small" style="margin:6px 0 0"><b class="${col(w.event)}">${E(w.event)}</b> · ${E(w.severity)}, ${E(w.certainty)}<br>${E(w.headline)}<br>
-      <span style="white-space:pre-line">${E(w.description)}</span><br>
-      <span class="xs mute" title="${E(w.onset)} to ${E(w.expires)}, issued ${E(w.sent)}">From ${E(when(w.onset))} until ${E(when(w.expires))} · issued ${E(when(w.sent))} · ${E(w.area)}</span></div>`).join('')
-      :`<p class="xs mute" style="margin:4px 0 0">No warning in force for ${E(m.county)}.</p>`)+attr+'</div>'}
+  return `<div class="metwarn"><p class="lab2" style="margin:8px 0 0">Met Éireann · ${E(m.county)}</p>`+
+    (items.length?items.map(w=>`<details style="margin:4px 0 0"><summary class="small" style="cursor:pointer"><b class="${col(w.event)}">${E(w.event)}</b> · ${E(w.severity)} · ${E(when(w.onset))} to ${E(when(w.expires))}</summary>
+      <div class="small" style="margin:4px 0 0 14px">${E(w.headline)}<br><span style="white-space:pre-line">${E(w.description)}</span><br>
+      <span class="xs mute" title="${E(w.onset)} to ${E(w.expires)}, issued ${E(w.sent)}">${E(w.certainty)} · issued ${E(when(w.sent))} · ${E(w.area)}</span></div></details>`).join('')
+      :`<p class="xs mute" style="margin:2px 0 0">No warning in force.</p>`)+attr+'</div>'}
 function wxWind(k){return U()==='mi'?Math.round(k/1.609344)+' mph':k+' km/h'}
 function wxTip(w){return wxLines(w).join(' ')}
 function wxBest(w){
