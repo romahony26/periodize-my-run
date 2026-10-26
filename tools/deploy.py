@@ -111,7 +111,7 @@ def smoke(version, host=HOST, since=None):
     missing = [k for k in NEEDED_KEYS if k not in state]
     if missing:
         problems.append(f"/api/state is missing {missing}")
-    for path, needle in (("/", "periodize"), ("/static/app.js", "function render")):
+    for path, needle in (("/", "periodize"), ("/static/app.js", "function render"), ("/static/plan.js", "function planView"), ("/static/boot.js", "load()")):
         code, out, _ = ssh(f"curl -sk --max-time 20 https://127.0.0.1:8321{path}", host)
         if needle not in out:
             problems.append(f"{path} did not serve what was expected")

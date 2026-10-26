@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.3 - 2026-10-26
+### Changed
+- The page script is split from one 155 KB file into twelve, by page: the core (loading, drawing), weather, shared pieces, Plan, Fitness, Races, Settings, About, History, the wizard, event handlers and the start-up. They load in order and share one scope, so nothing about how the app behaves changes. Each is 0.5 to 25 KB, which makes a change to one page easier to read and to check. The deploy health check now fetches three of them.
+
 ## 2.10.3-beta.2 - 2026-10-26
 ### Added
 - Today's card says what would change tomorrow: how many hours of sleep tonight keep tomorrow's fast session as planned, and below which it is eased or becomes an easy run. It runs the same recovery rules with different hours of sleep and stores nothing. It appears only when tomorrow has fast running and the daily adjustment is on.
