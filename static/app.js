@@ -61,6 +61,17 @@ function metWarn(m,day){
       <div class="small" style="margin:4px 0 0 14px">${E(w.headline)}<br><span style="white-space:pre-line">${E(w.description)}</span><br>
       <span class="xs mute" title="${E(w.onset)} to ${E(w.expires)}, issued ${E(w.sent)}">${E(w.certainty)} · issued ${E(when(w.sent))} · ${E(w.area)}</span></div></details>`).join('')
       :`<p class="xs mute" style="margin:2px 0 0">No warning in force.</p>`)+attr+'</div>'}
+function metChip(m,day){
+  /* The Today card's one-line view of Met Éireann's warnings: a chip beside the recovery chip that opens the warnings as issued. */
+  if(!m||(!m.stale&&!m.county))return {chip:'',body:''};
+  const items=(m.days&&m.days[day])||[];
+  const rank=e=>/^Red/.test(e)?3:/^Orange/.test(e)?2:1, worst=items.reduce((a,w)=>Math.max(a,rank(w.event)),0);
+  const cls=worst===3?'red':worst===2?'amber':'';
+  const counts=[];items.forEach(w=>{const c=counts.find(x=>x[0]===w.event);c?c[1]++:counts.push([w.event,1])});
+  const text=m.stale?'Met Éireann warnings unavailable':items.length?`Met Éireann · ${E(m.county)}: ${counts.map(([e,n])=>E(e)+(n>1?' ×'+n:'')).join(', ')}`:`Met Éireann · ${E(m.county)}: no warnings`;
+  const chip=`<button type="button" class="chip metchip ${cls}" data-mettoggle aria-expanded="false" title="Show or hide the warnings as issued"><i></i>${text}</button>`;
+  return {chip,body:`<div class="metbody" hidden>${metWarn(m,day)}</div>`};
+}
 function wxWind(k){return U()==='mi'?Math.round(k/1.609344)+' mph':k+' km/h'}
 function wxTip(w){return wxLines(w).join(' ')}
 function wxBest(w){
@@ -196,6 +207,7 @@ function planView(){
   // once a run of half a mile or more is logged today the card shows tomorrow (the app plans one run a day, so there is no second session to wait for)
   const iso=(d,n)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
   const tomorrow=S.days.find(d=>d.date===iso(S.today,1));
+  const mc=metChip(S.met_warnings,S.today);
   const doneToday=!!(t.done&&t.done.miles>=0.5);     // half a mile: a warm-up or an accidental start is not the day's run
   if(doneToday&&tomorrow&&tomorrow.label){
     const x=tomorrow;
@@ -207,13 +219,13 @@ function planView(){
     ${x.note?`<p class="xs mute" style="margin:6px 0 0">${E(x.note)}</p>`:''}${x.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(x.strength)}</span></p>`:''}
     <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p></div>`;
   } else
-  h+=`<div class="card c6"><p class="eyebrow">Today ${r&&r.date===S.today?`<span class="chip ${r.level}"><i></i>${lev[r.level]}</span>`:''}</p>
+  h+=`<div class="card c6"><p class="eyebrow">Today ${r&&r.date===S.today?`<span class="chip ${r.level}"><i></i>${lev[r.level]}</span>`:''} ${mc.chip}</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}</span></p>
     ${stepList(t.text)}
     ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button></div>`:''}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
     ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}${S.heat.today.wind!=null?` · wind ${wxWind(S.heat.today.wind)}${S.heat.today.gust?`, gusts ${wxWind(S.heat.today.gust)}`:''}${S.heat.today.wind_pct?` · about ${S.heat.today.wind_pct}% slower for the wind`:''}`:''}</p>`:''}
-    ${metWarn(S.met_warnings,S.today)}
+    ${mc.body}
     ${r&&r.date===S.today?`<details class="more"><summary class="xs mute">How you are recovering</summary><p class="xs mute" style="margin:6px 0 0">${E(r.reasons.join(' · '))}</p>${r.sleep_h||r.hrv?`<p class="xs mute" style="margin:4px 0 0">Last night: ${[r.sleep_h?r.sleep_h.toFixed(1)+' h sleep':'',r.sleep_score?'sleep score '+r.sleep_score:'',r.hrv?'HRV '+Math.round(r.hrv):'',r.rhr?'resting HR '+Math.round(r.rhr):''].filter(Boolean).join(' · ')}</p>`:''}</details>`:''}
     ${t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''}${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}</div>`;
   h+='</div>';
@@ -776,6 +788,7 @@ function bind(){
     $('#sml').textContent=k==='recovering'?'While recovering I want to run':'On holiday I want to run';
     $('#sm').innerHTML=Object.entries(m).map(([v,l])=>`<option value="${v}" ${v==='easy'?'selected':''}>${E(l)}</option>`).join('')};
   if($('#sk'))$('#sk').onchange=()=>modeFor($('#sk').value);
+  $$('[data-mettoggle]').forEach(b=>b.onclick=()=>{const body=b.closest('.card').querySelector('.metbody');if(!body)return;body.hidden=!body.hidden;b.setAttribute('aria-expanded',String(!body.hidden))});
   on('#qa-swap',async()=>{const x=new Date(S.today+'T12:00');x.setDate(x.getDate()+1);const to=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
     const r=await api('plan/move',{from:S.today,to});r.warning?toast(r.warning,'warn'):toast('Swapped with tomorrow. Updating your watch.');await load()});
   on('#qa-sick',async()=>{await api('status',{kind:'sick',mode:'',start:S.today,end:S.today,note:''});toast('Rest today. Replanning with a gentle return.');await load()});

@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.19 - 2026-10-26
+### Changed
+- On the Today card, Met Éireann's warnings are one chip beside the recovery chip (for example "Met Éireann · Cork: Yellow Rain ×2, Yellow Wind", amber for Orange and red for Red). Tap it to open the warnings as issued, one line each; tap again to close. The day detail page keeps the full panel.
+
 ## 2.10.2-beta.18 - 2026-10-26
 ### Changed
 - The Goal and Today panels no longer stretch to the same height, so Today is not padded out to match Goal. Goal also puts its date on the heading line and the forecast gap on the line that opens the detail, and the padding and ring are smaller. With the test data Goal went from 240 to 162 pixels high and Today from 240 to 126.
