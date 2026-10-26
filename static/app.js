@@ -216,10 +216,14 @@ function planView(){
   // recovery and weather each have a panel of their own
   const wxOn=!!((S.heat&&S.heat.today)||(S.met_warnings&&(S.met_warnings.stale||S.met_warnings.county)));
   const rd=r&&r.date===S.today, nrm=(rd&&r.normal)||{};
+  // which way each reading is going: the last 7 days against the 7 before. Up is good for sleep and HRV, down for resting heart rate.
+  const tr=(k,goodUp)=>{const x=rd&&r.trend&&r.trend[k];if(!x)return '';const up=x.dir==='up',flat=x.dir==='flat',cls=flat?'mute':(up===goodUp?'green':'amber');
+    const amt=k==='sleep_h'?Math.abs(x.change).toFixed(1)+' h':Math.round(Math.abs(x.change));
+    return `<div class="xs ${cls}" style="margin-top:3px" title="Average of the last 7 days: ${x.now}. The 7 days before: ${x.prev}."><b>${up?'▲':flat?'→':'▼'}</b> ${flat?'steady':(up?'up ':'down ')+amt} on the week before</div>`};
   h+=`<div class="card ${wxOn?'c6':'c12'}" id="recoverycard"><p class="eyebrow">Recovery <span class="chip ${rd?r.level:'unknown'}"><i></i>${lev[rd?r.level:'unknown']}</span></p>
-    ${rd&&(r.sleep_h||r.hrv||r.rhr)?`<div class="stats">${r.sleep_h?`<div class="stat"><div class="v num">${r.sleep_h.toFixed(1)} h</div><div class="k">Sleep last night${nrm.sleep_h?' · normal '+nrm.sleep_h:''}${r.sleep_score?' · score '+r.sleep_score:''}</div></div>`:''}
-      ${r.hrv?`<div class="stat"><div class="v num">${Math.round(r.hrv)}</div><div class="k">HRV last night${nrm.hrv?' · normal '+nrm.hrv:''}</div></div>`:''}
-      ${r.rhr?`<div class="stat"><div class="v num">${Math.round(r.rhr)}</div><div class="k">Resting HR${nrm.rhr?' · normal '+nrm.rhr:''}</div></div>`:''}</div>`:''}
+    ${rd&&(r.sleep_h||r.hrv||r.rhr)?`<div class="stats">${r.sleep_h?`<div class="stat"><div class="v num">${r.sleep_h.toFixed(1)} h</div><div class="k">Sleep last night${nrm.sleep_h?' · normal '+nrm.sleep_h:''}${r.sleep_score?' · score '+r.sleep_score:''}</div>${tr('sleep_h',true)}</div>`:''}
+      ${r.hrv?`<div class="stat"><div class="v num">${Math.round(r.hrv)}</div><div class="k">HRV last night${nrm.hrv?' · normal '+nrm.hrv:''}</div>${tr('hrv',true)}</div>`:''}
+      ${r.rhr?`<div class="stat"><div class="v num">${Math.round(r.rhr)}</div><div class="k">Resting HR${nrm.rhr?' · normal '+nrm.rhr:''}</div>${tr('rhr',false)}</div>`:''}</div>`:''}
     ${rd?`<p class="xs mute" style="margin:8px 0 0">${E(r.reasons.join(' · '))}</p>`:'<p class="xs mute" style="margin:8px 0 0">Recovery appears after your watch has synced last night.</p>'}</div>`;
   if(wxOn)h+=`<div class="card c6" id="weathercard"><p class="eyebrow">Weather</p>
     ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}${S.heat.today.wind!=null?` · wind ${wxWind(S.heat.today.wind)}${S.heat.today.gust?`, gusts ${wxWind(S.heat.today.gust)}`:''}${S.heat.today.wind_pct?` · about ${S.heat.today.wind_pct}% slower for the wind`:''}`:''}</p>`:''}

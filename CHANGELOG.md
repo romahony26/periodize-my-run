@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.21 - 2026-10-26
+### Added
+- The Recovery panel shows which way each reading is going: sleep, HRV and resting heart rate, the last 7 days against the 7 before, as up, down or steady. A move counts only when it is half the usual spread (15 minutes for sleep). Green is the good direction, amber the other way.
+
 ## 2.10.2-beta.20 - 2026-10-26
 ### Added
 - Goal, Today, Recovery and Weather are each a panel of their own. Recovery shows last night's sleep, HRV and resting heart rate against your normal; Weather shows today's forecast line and the Met Éireann warnings, one line each. The warnings chip on the Today card is gone.

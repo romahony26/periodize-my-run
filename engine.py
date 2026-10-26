@@ -1040,7 +1040,18 @@ def readiness(today, c, learn=True):
             pts += fp
             lost += 10 * fp
             reasons.append(f"you rated {'two recent runs' if len(rough) >= 2 else 'your last run'} as a very hard effort on your watch")
+    # which way each reading is going: the last 7 days against the 7 before, counted as a move only when it is half the athlete's usual
+    # spread (the smallest change treated as real, principle 50); sleep needs 15 minutes
+    trend = {}
+    for key, floor in (("hrv", 3.0), ("rhr", 1.5), ("sleep_h", 0.5)):
+        a, b = vals(key, 0, 7), vals(key, 7, 14)
+        if len(a) >= 4 and len(b) >= 4:
+            n = normal(key, floor, 7)
+            step = 0.25 if key == "sleep_h" else 0.5 * (n[1] if n else floor)
+            d = mean(a) - mean(b)
+            trend[key] = {"now": round(mean(a), 1), "prev": round(mean(b), 1), "change": round(d, 1),
+                          "dir": "up" if d >= step else "down" if d <= -step else "flat"}
     per = ((db.get("model") or {}).get("slow_per_point") or {}).get("value", 0.012) if learn else 0.012
     return {"level": "green" if pts == 0 else "amber" if pts <= 2 else "red", "slow": min(pts, 4) * per, "points": pts,
             "reasons": reasons or ["Last night's sleep was normal for you, and your 7-day HRV and resting heart rate are in your normal range."],
-            "sleep_h": sleep, "sleep_score": score, "hrv": hrv, "rhr": rhr, "fresh": round(max(35, 100 - lost)), "normal": norm, "week": week}
+            "sleep_h": sleep, "sleep_score": score, "hrv": hrv, "rhr": rhr, "fresh": round(max(35, 100 - lost)), "normal": norm, "week": week, "trend": trend}
