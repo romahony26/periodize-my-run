@@ -3,6 +3,11 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.22 - 2026-10-26
+### Changed
+- Tests are tiered. A beta release or a push to a beta branch runs `./check.sh beta`: ruff, compile and seven fast planner test files, about 6 seconds. Production (main) runs the full check, browser tests and pip-audit included, about 6 minutes: `deploy.py` does it for a non-beta version, and a pre-push hook (install with `tools/install_hooks.sh`) does it and refuses the push if it fails when pushing to main. Before, every deploy ran 7 test files and the full check was run by hand.
+- The deploy health check now waits up to about 80 seconds for the service to answer after a restart. The Pi is slow to answer for a while after a restart, and a deploy was rolled back for it.
+
 ## 2.10.2-beta.21 - 2026-10-26
 ### Added
 - The Recovery panel shows which way each reading is going: sleep, HRV and resting heart rate, the last 7 days against the 7 before, as up, down or steady. A move counts only when it is half the usual spread (15 minutes for sleep). Green is the good direction, amber the other way.

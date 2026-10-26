@@ -40,5 +40,9 @@ runs ruff and the quick tests, unpacks the tag into `versions/<version>`, backs 
 and smoke-tests it (active, `/api/state` reports this version with the keys the page needs, the page and script are served, no traceback in
 the journal). If any smoke test fails it puts the previous version back and says so. `--dry-run` shows what it would do.
 
-Before tagging, run `./check.sh` (it runs every stage, including the browser tests and pip-audit). The tests are not in git; `deploy.py`
-archives them to `../test-archive/`.
+Checks are tiered so a beta is quick:
+- **Beta releases and beta pushes:** `./check.sh beta` (a few seconds: ruff, compile and the fast planner tests). `deploy.py` runs the same for a `-beta` version, and the pre-push hook runs it when pushing any branch but main.
+- **Main (production):** `./check.sh` runs everything, browser tests and pip-audit included (about 6 minutes). `deploy.py` runs it for a non-beta version, and the pre-push hook runs it and refuses the push if it fails when pushing to `main`.
+- Run `./check.sh quick` for everything except the browser tests. Install the hook with `tools/install_hooks.sh` (once per clone).
+
+The tests are not in git; `deploy.py` archives them to `../test-archive/`.

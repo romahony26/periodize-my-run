@@ -6,7 +6,7 @@
 
 Steps, in order, each of which stops the deploy if it fails:
   1. Before anything is sent: the tag exists and points at HEAD, the working tree is clean, CHANGELOG's top entry is this version,
-     ruff is clean and the quick tests pass.
+     ruff is clean and the tests pass: a few fast ones for a beta, the full ./check.sh for production.
   2. The tag is unpacked into versions/<version> on the Pi and the database is copied to backups/.
   3. `versions/current` is switched and the service restarted.
   4. Smoke tests against the running service: it is active, /api/state answers as JSON with this version, the page and script
@@ -27,7 +27,8 @@ import time
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOST = "root@192.168.1.2"
 BASE = "/home/dietpi/.periodize-my-run"
-QUICK = ("test_engine", "test_features", "test_next_level", "test_gaps", "test_references", "test_push_sync", "test_backup_calendar")
+BETA_TESTS = ("test_engine", "test_gaps", "test_next_level", "test_jobs_flow", "test_references", "test_pinned", "test_properties")   # a few seconds
+QUICK = BETA_TESTS      # kept under its old name for callers that still use it
 NEEDED_KEYS = ("version", "days", "settings", "fitness", "readiness", "warnings", "scorecard", "season")
 
 
@@ -75,12 +76,17 @@ def preflight(version, quick_tests=True):
     if run([py, "-m", "ruff", "check", ".", "--quiet"]).returncode:
         raise Stop("ruff reports problems")
     done.append("ruff is clean")
-    if quick_tests:
-        for t in QUICK:
+    if quick_tests and "-beta" in version:          # a beta: ruff and a few fast tests
+        for t in BETA_TESTS:
             r = run([py, "-W", "ignore", "-m", "unittest", f"tests.{t}"], env={**os.environ, "PYTHONPATH": f"{APP}:{APP}/tests"})
             if r.returncode:
                 raise Stop(f"{t} failed:\n" + "\n".join(r.stderr.splitlines()[-12:]))
-        done.append(f"{len(QUICK)} quick test files pass")
+        done.append(f"{len(BETA_TESTS)} fast test files pass (a beta; production runs the full check)")
+    elif quick_tests:                                # production: the full check, browser tests included
+        r = run(["sh", os.path.join(APP, "check.sh")], timeout=1800)
+        if r.returncode:
+            raise Stop("the full check failed:\n" + "\n".join((r.stdout or "").splitlines()[-25:]))
+        done.append("the full check passes (production)")
     return done
 
 
@@ -91,7 +97,11 @@ def smoke(version, host=HOST, since=None):
     if out != "active":
         return [f"service is {out or 'not answering'}"]
     time.sleep(1)
-    code, out, err = ssh("curl -sk --max-time 20 -H 'X-Requested-With: periodize' https://127.0.0.1:8321/api/state", host)
+    for _ in range(8):      # the service is slow to answer for a while after a restart on the Pi: wait for it, up to about 80 seconds
+        code, out, err = ssh("curl -sk --max-time 20 -H 'X-Requested-With: periodize' https://127.0.0.1:8321/api/state", host)
+        if out:
+            break
+        time.sleep(10)
     try:
         state = json.loads(out)
     except ValueError:
