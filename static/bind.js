@@ -35,6 +35,8 @@ function bind(){
     const r=await api('plan/move',{from:S.today,to});r.warning?toast(r.warning,'warn'):toast('Swapped with tomorrow. Updating your watch.');await load()});
   $$('[data-felt]').forEach(b=>b.onclick=async()=>{await api('felt',{date:S.today,rating:b.dataset.felt});toast(b.dataset.felt==='wrecked'?'Noted. Tomorrow will be eased.':'Noted.');await load()});
   $$('[data-felt-redo]').forEach(a=>a.onclick=async e=>{e.preventDefault();const f={...(S.felt||{})};delete f[S.today];S.felt=f;render()});
+  $$('[data-pain]').forEach(b=>b.onclick=async()=>{await api('pain',{date:S.today,site:b.dataset.pain});toast(b.dataset.pain==='none'?'Good.':'Noted. If it comes back, the next sessions are eased.');await load()});
+  $$('[data-pain-redo]').forEach(a=>a.onclick=e=>{e.preventDefault();const f={...(S.pain||{})};delete f[S.today];S.pain=f;render()});
   on('#qa-sick',async()=>{await api('status',{kind:'sick',mode:'',start:S.today,end:S.today,note:''});toast('Rest today. Replanning with a gentle return.');await load()});
   on('#sday',async()=>{const d=$('#ss').value||S.today;await api('status',{kind:$('#sk').value,mode:$('#sm').value,start:d,end:d,note:$('#sn').value});toast('Saved for one day. Replanning.');await load()});
   $$('[data-better]').forEach(b=>b.onclick=async()=>{await api('status',{id:+b.dataset.better});toast('Welcome back. Replanning with a gentle return.');await load()});

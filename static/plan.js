@@ -16,6 +16,14 @@ function feltRow(t){
   return `<div id="felt-row" role="group" aria-label="How did today's run feel?" style="margin:10px 0 0"><p class="xs mute" style="margin:0 0 6px">How did it feel? One tap, optional.</p><div class="qa">${['easy','fine','hard','wrecked'].map(k=>`<button class="ghost" data-felt="${k}">${k[0].toUpperCase()+k.slice(1)}</button>`).join('')}</div></div>`;
 }
 
+/* Also one tap, also optional: where it hurt, if anywhere. Pain on two days in a week holds the sessions at easy running for a few days. */
+function painRow(t){
+  if(!t.done||!t.done.miles||t.done.miles<0.5)return '';
+  const have=(S.pain||{})[t.date], names={foot:'Foot or Achilles',calf:'Calf or shin',knee:'Knee',hip:'Hip or glute',hamstring:'Hamstring',back:'Back'};
+  if(have)return `<p class="xs mute" id="pain-row" style="margin:8px 0 0">${have==='none'?'You said nothing hurt.':`You said your <b>${E(names[have]||have).toLowerCase()}</b> hurt.`} <a href="#" data-pain-redo="1">Change</a></p>${S.pain_note?`<p class="xs amber" style="margin:6px 0 0">${E(S.pain_note)}</p>`:''}`;
+  return `<div id="pain-row" role="group" aria-label="Did anything hurt?" style="margin:8px 0 0"><p class="xs mute" style="margin:0 0 6px">Did anything hurt? One tap, optional.</p><div class="qa">${Object.entries(names).map(([k,v])=>`<button class="ghost" data-pain="${k}">${v}</button>`).join('')}<button class="ghost" data-pain="none">Nothing</button></div></div>`;
+}
+
 /* What tonight's sleep would do to tomorrow's session: the same rules run with different hours, so the athlete sees what would change the plan. */
 function whatIfLine(){
   const w=S.what_if; if(!w)return '';
@@ -55,15 +63,15 @@ function planView(){
     ${x.wx?`<p class="xs mute" style="margin:6px 0 0">${x.wx.wet?'☂':'☀'} Around ${x.wx.hour}:00 · ${E(wxTip(x.wx))}</p>`:''}
     ${x.purpose?`<p class="small mute" style="margin:10px 0 0">${E(x.purpose)}</p>`:''}
     ${x.note?`<p class="xs mute" style="margin:6px 0 0">${E(x.note)}</p>`:''}${x.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(x.strength)}</span></p>`:''}
-    <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p>${feltRow(t)}${whatIfLine()}</div>`;
+    <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p>${feltRow(t)}${painRow(t)}${whatIfLine()}</div>`;
   } else
   h+=`<div class="card c6"><p class="eyebrow">Today</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}${S.on_feet&&t.mins?' · '+hm(t.mins):''}</span></p>
     ${stepList(t.text)}
     ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button></div>`:''}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
-    ${whyChanged(t)}${whatIfLine()}
-    ${t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''}${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}</div>`;
+    ${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}
+    ${(x=>x?`<details class="more" id="todaywhy"><summary class="xs mute">${t.adjust||t.source==='moved'||t.source==='reshuffled'?'Why this, and what would change it':'What would change tomorrow'}</summary>${x}</details>`:'')(whyChanged(t)+whatIfLine()+(t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''))}</div>`;
   // recovery and weather each have a panel of their own
   const wxOn=!!((S.heat&&S.heat.today)||(S.met_warnings&&(S.met_warnings.stale||S.met_warnings.county)));
   const rd=r&&r.date===S.today, nrm=(rd&&r.normal)||{};
@@ -90,7 +98,7 @@ function planView(){
   const fc=v=>v>=85?'green':v>=70?'amber':'red', pc=v=>v>=1?'green':v<=-3?'amber':'mute';
   weeks.forEach((w,i)=>{
     const wi=S.week_info[(w.find(d=>d.week)||{}).week], total=w.reduce((a,d)=>a+(d.miles||0),0), prov=w.some(d=>d.week&&S.week_info[d.week]&&!S.week_info[d.week].final);
-    h+=`<div class="wk"><b>${names[i]||''}</b><span class="mute small">${nice(w[0].date)} – ${nice(w[6].date)}</span>${S.on_feet&&w.some(d=>d.mins)?`<span class="tag" title="Planned time on your feet this week, from the paces in each session">${hm(w.reduce((a,d)=>a+(d.mins||0),0))} on feet</span>`:''}${total?`<span class="tag">${wi&&S.settings.week_start===0?E(wi.mode)+' · ':''}${U()==='mi'?Math.round(total*2)/2+' mi':Math.round(total*KM)+' km'}</span>`:''}${prov?'<span class="tag">provisional</span>':''}${w[0].week_perf!=null?`<span class="tag ${pc(w[0].week_perf)}" title="Pace for your heart rate across the week's runs, against the four weeks before">pace for heart rate ${w[0].week_perf>0?'+':''}${w[0].week_perf.toFixed(1)}%</span>`:''}
+    h+=`<div class="wk"><b>${names[i]||''}</b><span class="mute small">${nice(w[0].date)} – ${nice(w[6].date)}</span>${S.on_feet&&w.some(d=>d.mins)?`<span class="tag" title="Planned time on your feet this week, from the paces in each session">${hm(w.reduce((a,d)=>a+(d.mins||0),0))} on feet</span>`:''}${total?`<span class="tag">${wi&&S.settings.week_start===0?E(wi.mode)+' · ':''}${U()==='mi'?Math.round(total*2)/2+' mi':Math.round(total*KM)+' km'}</span>`:''}${prov?'<span class="tag">provisional</span>':''}${i===0&&S.streak>=2?`<span class="tag green" title="Whole weeks in a row with 90% or more of the planned miles run">${S.streak} weeks in a row at 90%+</span>`:''}${w[0].week_perf!=null?`<span class="tag ${pc(w[0].week_perf)}" title="Pace for your heart rate across the week's runs, against the four weeks before">pace for heart rate ${w[0].week_perf>0?'+':''}${w[0].week_perf.toFixed(1)}%</span>`:''}
       ${i===1?`<span style="margin-left:auto" class="xs mute"><span class="hint-d">Click a day for detail · drag to swap</span><span class="hint-m">Tap a day for detail</span> ${S.can_undo?'· <a href="#" id="undo">Undo last move</a>':''}</span>`:''}</div><div class="cal">`;
     for(const d of w){const can=!d.past&&d.type, b=d.body;
       h+=`<div class="dw"><div class="day ${d.type||''} ${d.past?'past':''} ${d.today?'today':''} ${SEL===d.date?'sel':''}" data-date="${d.date}" ${can?'draggable="true"':''} tabindex="0" role="button" aria-label="${d.dow} ${+d.date.slice(8)}: ${E(d.label||'no session')}">

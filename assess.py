@@ -24,6 +24,7 @@ ZONES = {"easy": (0.76, 0.81), "steady": (0.82, 0.86), "mp": (0.94, 0.94), "hmp"
 RACE_FACTOR = [(4.0, 1.08), (7.0, 1.035), (11.0, 1.00), (14.0, 0.985), (99.0, 0.94)]   # race miles up to -> fraction of threshold speed
 MP_BAND = (0.91, 0.97)
 T_FLOOR = 0.97
+ESTIMATE_LEAD = 1.03     # an estimate (heart-rate line, the watch's figure) may stand this far ahead of the best effort or race shown
 
 
 def race_factor(miles):
@@ -204,11 +205,13 @@ def assess(c, L, monday, prev_tp=None):
     recent = [r for r in flat if r["date"] >= monday - dt.timedelta(days=28)]
     fit = hr_speed_line(recent, L["hrmax"])
     hr_v = fit["at"](c["threshold_hr_fraction"] * L["hrmax"]) if fit else None
+    shown = list(cands)         # efforts the runner actually ran: proof of what they can do, not an estimate
     if hr_v:
         cands.append((hr_v * c.get("threshold_correction", 1.0),
                       f"your pace-to-heart-rate line over the last 28 days ({fit['minutes']:.0f} min across {fit['points']} heart rates), read at {c['threshold_hr_fraction'] * L['hrmax']:.0f} bpm", None))
     for ev in race_evidence(monday):
         cands.append(ev)
+        shown.append(ev)
     glt = db.get("garmin_lt")       # the watch's own threshold estimate counts while it is fresh (six weeks)
     if glt and glt.get("speed") and glt.get("date"):
         when = dt.date.fromisoformat(glt["date"][:10])
@@ -217,6 +220,13 @@ def assess(c, L, monday, prev_tp=None):
     if cands:
         raw, why, when = max(cands, key=lambda x: x[0])
         why = why + (f" on {when:%-d %b}" if when else "")
+        # The fastest of several noisy estimates is biased high (the heart-rate line and the watch's figure both move 2 to 4% with
+        # heat, fatigue and caffeine). Efforts and races are proof, so an estimate may lead the best proof by only a few percent;
+        # without that proof it stands, since there is nothing to check it against.
+        proof = max(shown, key=lambda x: x[0], default=None)
+        if proof and (raw, why) != (proof[0], proof[1]) and raw > proof[0] * ESTIMATE_LEAD:
+            raw, why = proof[0] * ESTIMATE_LEAD, (f"threshold is held to {(ESTIMATE_LEAD - 1) * 100:.0f}% above your {proof[1]}, because "
+                                                  f"{why.split(' on ')[0]} was more than {(ESTIMATE_LEAD - 1) * 100:.0f}% faster than anything you have shown")
     else:
         raw, why = prev_tp, "no evidence; carried forward"
     if raw is None:

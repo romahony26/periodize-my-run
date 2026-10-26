@@ -368,13 +368,19 @@ def adjust():
         ill = engine.illness_signs(r, today, db.rows("SELECT * FROM status"))
         if dyn < 100 and r["points"] < 1 + round((100 - dyn) / 25):
             ill = []
+        # pain reported on two days in a week holds the sessions at easy running for a few days, whatever the slider's thresholds
+        ps = engine.pain_state(today, db.get("pain") or {})
+        if ps["active"] and dyn > 0:
+            ill = ill + ps["reasons"]
         if ill and dyn > 0 and row[0]["type"] in ("Long", "Key") and not (adj and adj.get("easy")):
             planned = row[0]["miles"] or 0
             cap = max(engine.half(min(planned * 0.6, 8)), 3) if row[0]["type"] == "Long" else None
             adj = {"slow": 0.0, "level": r["level"], "reasons": ill, "easy": True, "recovery": True,
                    "advice": (f"Eased to an easy {engine.dist(cap, c['units'])} today" if cap else "Changed to an easy run today") +
-                             " because you are recovering from an illness and your recovery signs are not back to normal yet. "
-                             "The session comes back once they are."}
+                             (" because you have reported pain on more than one day this week. Easy running is fine while it is mild and settles by the "
+                              "next morning. The session comes back three days after the last report." if ps["active"] else
+                              " because you are recovering from an illness and your recovery signs are not back to normal yet. "
+                              "The session comes back once they are.")}
             if cap:
                 adj["miles"] = cap
         h = heat.at(today, heat.run_hour(today)) if c.get("heat_adjust") and fast else None

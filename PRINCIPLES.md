@@ -589,7 +589,25 @@ two or a missed log from a missed day. [P]
     competitive and train with a team, so the numbers may not transfer to everyone, injury is whatever the team recorded, and the
     association between a rule and an injury is not proof that following the rule prevents one.
 
-## Known gaps: where Periodize My Run does not yet follow the evidence
+113. **An estimate of threshold may lead the best proof by only 3%.** [P] The pace-to-heart-rate line and the watch's own threshold figure
+    are estimates that move by a few percent with heat, fatigue and caffeine (principle 75), and taking the fastest of several noisy
+    figures leans high. A hard effort or race you actually ran is proof of what you can do. If an estimate is more than 3% faster than the
+    best proof in the last eight weeks, threshold is held to 3% above that proof and the page says so. With no proof to check against,
+    the estimate stands. The 3% is a choice, not a finding.
+114. **Pain that keeps returning is a reason to ease, not to push.** [R] (*limited*) In a randomised trial of runners and jumpers with
+    Achilles tendinopathy, carrying on with sport was allowed while pain stayed mild and settled by the next morning, and that approach did as well as
+    stopping (Silbernagel and colleagues, 2007). Periodize My Run applies the same line to any site: one report of pain is a recovery
+    sign for two days; pain on two days in a week holds the sessions at easy running, and the long run shorter, until three days after the last
+    report; pain at one site on three days in two weeks adds a note to have it looked at. The two-day rule is this project's own choice. [P]
+115. **A whole week of the plan, run, is worth saying so.** [P] Two or more whole weeks in a row with 90% or more of the planned miles
+    run are shown as a streak on last week. It rests on principle 79 (weeks strung together count for more than a fast build) and does not change the plan.
+        ("Pain and feel, after a run", [
+            "After a run the Plan page offers two optional taps: how it felt (easy, fine, hard, wrecked) and whether anything hurt (foot or Achilles, calf or shin, knee, hip or glute, hamstring, back, or nothing). Nothing is needed from you; the plan is the same without them.",
+            "Wrecked counts as one recovery sign, as a very hard effort rated on your watch does. The other feel ratings change nothing.",
+            "One pain report counts as one recovery sign for two days. Pain on two different days in a week holds the sessions at easy running, and shortens the long run, until three days after the last report. Pain at the same place on three days in two weeks adds a note to have it looked at. Mild pain that settles by the next morning is the usual line for running on, in the Achilles trial this rests on (Silbernagel and colleagues, 2007); the two-day rule is this project's own.",
+            "It is not a diagnosis and cannot tell a niggle from an injury. Sharp pain, pain at night, or a change in how you run is a reason to stop and be seen.",
+        ]),
+        ("Daily adjustment", [
 
 Listed so they are not mistaken for principles.
 
@@ -719,6 +737,7 @@ on a detail.
 - Frandsen and colleagues (2025). How much running is too much? Identifying high-risk running sessions in a 5200-person cohort study. *Br J Sports Med* 59:1203–1210.
 - Seiler KS, Kjerland GØ (2006). Quantifying training intensity distribution in elite endurance athletes: is there evidence for an "optimal" distribution? *Scand J Med Sci Sports* 16:49–56.
 - Seiler S and colleagues (2013). Adaptations to aerobic interval training: interactive effects of exercise intensity and total work duration. *Scand J Med Sci Sports*.
+- Silbernagel KG, Thomeé R, Eriksson BI, Karlsson J (2007). Continued sports activity, using a pain-monitoring model, during rehabilitation in patients with Achilles tendinopathy: a randomized controlled study. *Am J Sports Med*. *Record confirmed.*
 - Silva Oliveira P and colleagues (2024). Comparison of polarized versus other types of endurance training intensity distribution on athletes' endurance performance: a systematic review with meta-analysis. *Sports Med*.
 - Smyth B (2021). How recreational marathon runners hit the wall. *PLoS One*.
 - Smyth B and colleagues (2022). Decoupling of internal and external workload during a marathon: an analysis of durability in 82,303 recreational runners. *Sports Med*.

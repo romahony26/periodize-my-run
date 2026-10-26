@@ -3,6 +3,15 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.4 - 2026-10-26
+### Added
+- After a run you can tap where anything hurt (foot or Achilles, calf or shin, knee, hip or glute, hamstring, back) or Nothing. It is optional. One report is a recovery sign for two days. Pain on two different days in a week holds the sessions at easy running, and the long run shorter, until three days after the last report. Pain at one place on three days in two weeks adds a note to have it looked at (Silbernagel and colleagues, 2007; the two-day rule is this project's choice). Explain my plan and How it works describe it.
+- Two or more whole weeks in a row with 90% or more of the planned miles run show as a streak on last week.
+
+### Changed
+- Threshold: an estimate (the pace-to-heart-rate line or the watch's own figure) can no longer lead the best hard effort or race of the last eight weeks by more than 3%. Before, the fastest of all the figures won, which leans high because each moves a few percent with heat, fatigue and caffeine. When it applies, the Fitness page says so. With no effort or race to check against, the estimate stands.
+- Today's card keeps the session, its steps, any easing and the strength note in view, and folds the reasons, what would change tomorrow and the day's note under one line.
+
 ## 2.10.3-beta.3 - 2026-10-26
 ### Changed
 - The page script is split from one 155 KB file into twelve, by page: the core (loading, drawing), weather, shared pieces, Plan, Fitness, Races, Settings, About, History, the wizard, event handlers and the start-up. They load in order and share one scope, so nothing about how the app behaves changes. Each is 0.5 to 25 KB, which makes a change to one page easier to read and to check. The deploy health check now fetches three of them.

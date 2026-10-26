@@ -770,6 +770,41 @@ def recent_illness(statuses, today):
     return (last, k) if k <= ILLNESS_WINDOW else None
 
 
+PAIN_SITES = {"foot": "foot or Achilles", "calf": "calf or shin", "knee": "knee", "hip": "hip or glute", "hamstring": "hamstring", "back": "back"}
+
+
+def pain_state(today, pain):
+    """What the pain you tapped after runs says about today: {"active", "recent", "reasons", "note"}.
+
+    A single report is a sign worth a readiness point for two days. Pain on two different days in a week, the latest within the last
+    three days, holds the sessions at easy running until three days after the latest report. Pain that comes back at the same site on
+    three days in two weeks adds a note to see a physiotherapist. The rule is a pain-monitoring one: carrying on is acceptable while pain
+    is mild and settles by the next morning, and not when it keeps returning (Silbernagel and colleagues, 2007)."""
+    def reports(days):
+        lo = (today - dt.timedelta(days=days - 1)).isoformat()
+        return {d: v for d, v in (pain or {}).items() if lo <= d <= today.isoformat() and v in PAIN_SITES}
+    week, fortnight = reports(7), reports(14)
+    latest = max(week, default=None)
+    gap = (today - dt.date.fromisoformat(latest)).days if latest else None
+    sites = sorted({PAIN_SITES[v] for v in week.values()})
+    active = len(week) >= 2 and gap <= 2
+    recent = bool(latest) and gap <= 1 and not active
+    reasons = []
+    if active:
+        reasons.append(f"you reported pain on {len(week)} days in the last week ({', '.join(sites)})")
+    elif recent:
+        reasons.append(f"you reported {PAIN_SITES[week[latest]]} pain after your run {'today' if gap == 0 else 'yesterday'}")
+    note = None
+    counts = {}
+    for v in fortnight.values():
+        counts[v] = counts.get(v, 0) + 1
+    for site, n in counts.items():
+        if n >= 3:
+            note = (f"{PAIN_SITES[site].capitalize()} pain has come back on {n} days in two weeks. "
+                    "Pain that keeps returning, is there when you wake, or changes how you run is worth a physiotherapist's look.")
+    return {"active": active, "recent": recent, "reasons": reasons, "note": note}
+
+
 def illness_signs(r, today, statuses):
     """Why, this morning, a recent illness is not yet behind you: the readiness signs, plus a resting heart rate well above your normal.
 
@@ -1086,6 +1121,11 @@ def readiness(today, c, learn=True, override=None):
             pts += fp
             lost += 10 * fp
             reasons.append(f"you rated {'two recent runs' if len(rough) >= 2 else 'your last run'} as a very hard effort (on your watch or in the app)")
+    ps = pain_state(today, db.get("pain") or {})
+    if ps["reasons"]:
+        pts += 2 if ps["active"] else 1
+        lost += 12 if ps["active"] else 6
+        reasons += ps["reasons"]
     # which way each reading is going: the last 7 days against the 7 before, counted as a move only when it is half the athlete's usual
     # spread (the smallest change treated as real, principle 50); sleep needs 15 minutes
     trend = {}

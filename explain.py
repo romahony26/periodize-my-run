@@ -115,6 +115,14 @@ def build(c, prof, races, L, today=None):
         "HRV and resting heart rate are read as 7-day trends against your own range (Plews and colleagues, 2012, 2013). Training guided this way gives small gains and "
         "fewer non-responders (Düking and colleagues, 2021). One short night reduces endurance performance (Craven and colleagues, 2022).")
 
+    # ---- pain you reported
+    ps = engine.pain_state(today, db.get("pain") or {})
+    if ps["active"] or ps["recent"] or ps["note"]:
+        add("Pain you reported", ("Sessions are held at easy running." if ps["active"] else "Noted; one report does not change the plan."),
+            "; ".join(ps["reasons"] + ([ps["note"]] if ps["note"] else [])),
+            "Pain that is mild and settles by the next morning can be run through; pain that keeps returning cannot (Silbernagel and colleagues, 2007). "
+            "Two days of pain in a week hold the sessions at easy running until three days after the last report: that threshold is this project's choice.")
+
     # ---- sex
     sex = c.get("sex")
     add("Sex", {"M": "The plan structure is the same for everyone. For you, long-race notes press the patient start.",

@@ -639,7 +639,7 @@ def state():
               "exposure": heat.exposure(today)}, met_warnings=_warnings(today),
         setup_done=bool(db.get("setup_done")), setup_seen=bool(db.get("setup_seen")), setup_started=bool(db.rows("SELECT 1 FROM jobs WHERE kind='setup' LIMIT 1")), watch={"source": watch.name(), "name": watch.NAMES[watch.name()], "connected": watch.connected(), "can_push": watch.can_push(),
                "recovery": watch.has_recovery_data(), "fit_folder": db.get("fit_folder") or "", "coros": coros.connected(), "local": _local()}, garmin={"connected": garmin.has_tokens(), "name": db.get("garmin_name"), "history": rawsync.status()},
-        on_feet=bool(goal and (goal["miles"] > 30 or (goal.get("climb_m") and goal["climb_m"] / goal["miles"] >= 16))), felt=db.get("felt") or {}, what_if=_what_if(c, today), job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, sync_age_h=round((dt.datetime.now() - lo).total_seconds() / 3600, 1) if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
+        on_feet=bool(goal and (goal["miles"] > 30 or (goal.get("climb_m") and goal["climb_m"] / goal["miles"] >= 16))), streak=_streak(mon, today), felt=db.get("felt") or {}, pain=db.get("pain") or {}, pain_note=engine.pain_state(today, db.get("pain") or {})["note"], what_if=_what_if(c, today), job=jobs.status, last_run=lo.isoformat(timespec="minutes") if lo else None, sync_age_h=round((dt.datetime.now() - lo).total_seconds() / 3600, 1) if lo else None, stale=bool(lo and (dt.datetime.now() - lo).days >= 7),
         settings={k: (vault.get("notify_url") or "") if k == "notify_url" else c.get(k) for k in SETTINGS}, limits=L, profile=prof, races=[{k: v for k, v in r.items() if k != "course"} | {"has_course": bool(r.get("course"))} for r in rs], statuses=db.rows("SELECT * FROM status ORDER BY start DESC"),
 holiday_modes=engine.HOLIDAY_MODES, recovery_modes=engine.RECOVERY_MODES, fitness=fitness,
         backups=backup.listing()[:20], auto_backup=c["auto_backup"],
@@ -891,6 +891,21 @@ def aero_delete(date):
 FELT = ("easy", "fine", "hard", "wrecked")
 
 
+def _streak(mon, today):
+    """How many whole weeks in a row, counting back from last week, you ran 90% or more of the miles planned. Weeks the app did not plan end it."""
+    n = 0
+    for k in range(1, 27):
+        a, b = (mon - dt.timedelta(weeks=k)).isoformat(), (mon - dt.timedelta(weeks=k - 1)).isoformat()
+        planned = db.rows("SELECT SUM(miles) m FROM plan WHERE date>=? AND date<?", (a, b))[0]["m"]
+        if not planned:
+            break
+        done = db.rows("SELECT SUM(dist_m) m FROM activities WHERE sport='running' AND date>=? AND date<?", (a, b))[0]["m"] or 0
+        if done / assess.MI < 0.9 * planned:
+            break
+        n += 1
+    return n
+
+
 def _what_if(c, today):
     """How tonight's sleep would change tomorrow's session, only when tomorrow has fast running and daily adjustment is on."""
     if not (db.get("setup_done") and c.get("daily_adjust") and c.get("readiness_response", 50) > 0):
@@ -904,6 +919,25 @@ def _what_if(c, today):
     except Exception:
         log.error("what-if failed", exc_info=True)
         return None
+
+
+@app.post("/api/pain")
+def pain_save():
+    """One tap after a run: where it hurt, or 'none'. Optional, kept for 14 days, and used by engine.pain_state."""
+    j = request.json or {}
+    site = j.get("site")
+    try:
+        day = dt.date.fromisoformat(j.get("date") or "")
+    except ValueError:
+        return jsonify(error="Check the date."), 400
+    today = dt.date.today()
+    if (site not in engine.PAIN_SITES and site != "none") or not (today - dt.timedelta(days=3) <= day <= today):
+        return jsonify(error="Say where it hurt, or none, for a run in the last three days."), 400
+    kept = {k: v for k, v in (db.get("pain") or {}).items() if k >= (today - dt.timedelta(days=14)).isoformat()}
+    kept[day.isoformat()] = site
+    db.put("pain", kept)
+    jobs.start("readiness")
+    return jsonify(ok=True)
 
 
 @app.post("/api/felt")
@@ -1536,6 +1570,12 @@ def about():
             "In Ireland the app also reads Met Éireann's public warnings feed (www.met.ie/warningsxml/rss.xml). It finds your county from where your latest GPS run started (rounded to a tenth of a degree) and from nowhere else, and shows the warnings for your county, its province or all of Ireland, exactly as issued, for today and the next two days.",
             "An Orange (Severe) or Red (Extreme) warning for wind, snow or ice, thunderstorm, fog, heat, low temperature, rain or flood that covers your start hour turns today's run into an easy one; for Red the advice is not to run outdoors. A Yellow warning is shown and changes nothing. Coastal and sea warnings are not used. Which warnings matter, and these levels, are the app's own judgement, in line with Met Éireann's own advice at each level.",
             "Licence: Copyright Met Éireann. Source: www.met.ie. Published under Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/), with Met Éireann's added rules that warnings are shown without material change, kept up to date and removed when they expire. Met Éireann does not accept any liability whatsoever for any error or omission in the data, their availability, or for any loss or damage arising from their use. The wording, times, area and level of each warning are unchanged; only its formatting is simplified. If the feed cannot be read for three hours, no warning is shown and the page says so.",
+        ]),
+        ("Pain and feel, after a run", [
+            "After a run the Plan page offers two optional taps: how it felt (easy, fine, hard, wrecked) and whether anything hurt (foot or Achilles, calf or shin, knee, hip or glute, hamstring, back, or nothing). Nothing is needed from you; the plan is the same without them.",
+            "Wrecked counts as one recovery sign, as a very hard effort rated on your watch does. The other feel ratings change nothing.",
+            "One pain report counts as one recovery sign for two days. Pain on two different days in a week holds the sessions at easy running, and shortens the long run, until three days after the last report. Pain at the same place on three days in two weeks adds a note to have it looked at. Mild pain that settles by the next morning is the usual line for running on, in the Achilles trial this rests on (Silbernagel and colleagues, 2007); the two-day rule is this project's own.",
+            "It is not a diagnosis and cannot tell a niggle from an injury. Sharp pain, pain at night, or a change in how you run is a reason to stop and be seen.",
         ]),
         ("Daily adjustment", [
             f"Status: {yn(c['daily_adjust'])}. Runs at {c['run_time']}. A bad night's sleep eases today's session; HRV and resting heart rate ease it only when their 7-day average has drifted.",
