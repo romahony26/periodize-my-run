@@ -3,6 +3,29 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2 - 2026-10-26
+### Added
+- The plan shows about three months ahead (13 weeks, up from 3).
+- Goal, Today, Recovery and Weather are separate panels, shorter than before. Recovery shows last night's sleep, HRV and resting heart rate against your normal, with which way each is going (the last 7 days against the 7 before). Weather shows today's forecast line and the Met Éireann warnings, one line each.
+- The Races page can change a race's importance (goal race or tune-up) and goal time, and notes when more than one goal race is set; the plan says so too.
+- A marathon goal time sets how much volume the plan may build toward (55 miles a week for 3:00, a mile more for each minute faster, never past half again on what you have held in three years), and marathon, half and ultra builds have a midweek medium-long run.
+- A course of a fluoroquinolone antibiotic named in a sick, injured or recovering note brings 60 days of easy, flat running.
+- A long run that falls on a trip or holiday day moves to a day at home in the same week, and a week with four or more days away is the down week, with the week after going back to building.
+
+### Changed
+- Volume climbs steadily toward what you have held before. Past the most you held in the last year the weekly step is half the usual rate, or the full rate once you have run 95% of the planned miles three weeks running. Recovery signs, judged against your own four weeks, can hold the build level but never speed it. A build week starts from your best three-week average of the last six, so down weeks no longer stall it.
+- Two warning signs in one week hold the volume level; a recovery week needs them two weeks running. Easy pace at a fixed heart rate is shown but is no longer a warning sign. A half-volume recovery week follows only a half marathon or longer.
+- An old peak counts less with time and is gone eight years after it ended. The longest-run window ignores days away.
+- The learned taper and the "miles or hard running" pattern are shown but only change the plan if switched on in Settings.
+- Met Éireann warnings are read for the county where your latest GPS run started. The full licence notice is on the How it works page.
+- Citations in the app and PRINCIPLES.md are corrected (Nielsen 2014, Damsted 2019, Frandsen 2025, Impellizzeri 2020, HRV-guided training, Garmin HRV accuracy, wind).
+- Tests are tiered: a few seconds for a beta, the full check for main. The deploy health check waits for the service after a restart.
+
+### Fixed
+- A long run on a trip day was turned into an optional easy run and the week had no long run.
+- Hard days could end up side by side after a trip changed the week.
+- The top panels of the Plan page stayed pinned to the screen as you scrolled (in the betas only).
+
 ## 2.10.2-beta.22 - 2026-10-26
 ### Changed
 - Tests are tiered. A beta release or a push to a beta branch runs `./check.sh beta`: ruff, compile and seven fast planner test files, about 6 seconds. Production (main) runs the full check, browser tests and pip-audit included, about 6 minutes: `deploy.py` does it for a non-beta version, and a pre-push hook (install with `tools/install_hooks.sh`) does it and refuses the push if it fails when pushing to main. Before, every deploy ran 7 test files and the full check was run by hand.
