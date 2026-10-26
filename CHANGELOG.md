@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.16 - 2026-10-26
+### Changed
+- The Goal and Today panels are shorter. Goal shows the three times and, in one line, how far ahead of or behind your goal the forecast is; the race-day weather and how the forecast is worked out open on a tap. Today shows the session, any easing and the weather line; how you are recovering opens on a tap. The ring and the figures are a little smaller.
+
 ## 2.10.2-beta.15 - 2026-10-26
 ### Changed
 - Met Éireann warnings are now read for the county where your latest GPS run started, and nowhere else. They used the place the weather forecast had last been read for, which could be an older location.
