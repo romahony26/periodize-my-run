@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.2-beta.18 - 2026-10-26
+### Changed
+- The Goal and Today panels no longer stretch to the same height, so Today is not padded out to match Goal. Goal also puts its date on the heading line and the forecast gap on the line that opens the detail, and the padding and ring are smaller. With the test data Goal went from 240 to 162 pixels high and Today from 240 to 126.
+
 ## 2.10.2-beta.17 - 2026-10-26
 ### Changed
 - The long Met Éireann notice no longer sits under every warning. The warnings carry one short line (Copyright Met Éireann · www.met.ie · CC BY 4.0), and the full notice (licence link, no-liability statement, and that only the formatting is simplified) is on the How it works page.
