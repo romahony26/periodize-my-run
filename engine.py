@@ -854,6 +854,25 @@ def _away(d, statuses):
     return False
 
 
+def _busy(d, statuses):
+    """Is this day given up to work: the athlete said they cannot run?"""
+    return any(s["kind"] == "busy" and dt.date.fromisoformat(s["start"]) <= d["date"]
+               and (not s["end"] or d["date"] <= dt.date.fromisoformat(s["end"])) for s in statuses)
+
+
+def _blocked(d, statuses):
+    """Can nothing be moved onto this day: away, or too busy with work?"""
+    return _away(d, statuses) or _busy(d, statuses)
+
+
+def _busy_rest(d):
+    """A day given up to work is a rest day. The run is not made up later."""
+    if d["type"] in ("Rest", "Race"):
+        return
+    d.update({"type": "Rest", "label": "Work: no run", "steps": None, "miles": 0, "strength": "",
+              "note": "Too busy with work, so no run. The rest of the week is rebuilt around it, and the miles are not made up."})
+
+
 def _unwell(d, statuses):
     return any(s["kind"] in ("sick", "injured") and dt.date.fromisoformat(s["start"]) <= d["date"]
                and (not s["end"] or d["date"] <= dt.date.fromisoformat(s["end"])) for s in statuses)
@@ -869,7 +888,7 @@ def _shift_week(days, d, pick, statuses, keys):
     r = next((k for k in range(i) if days[k]["type"] == "Rest"), None)
     if j != i - 1 or r is None or r + 1 >= i or days[r + 1]["type"] != "Easy":
         return False
-    if any(_away(e, statuses) or _unwell(e, statuses) for e in days[r:i]):
+    if any(_blocked(e, statuses) or _unwell(e, statuses) for e in days[r:i]):
         return False
     items = [{k: e[k] for k in keys} for e in days[r:i + 1]]
     for e, item in zip(days[r:i + 1], items[1:] + items[:1], strict=True):
@@ -903,9 +922,9 @@ def keep_long_run(days, statuses):
     rest day it replaces takes the long run's place on the day away. Only an easy or rest day is used. A quality session on the day before or after the new long run becomes an easy run, so hard days stay apart.
     """
     for d in days:
-        if d["type"] != "Long" or not _away(d, statuses):
+        if d["type"] != "Long" or not _blocked(d, statuses):
             continue
-        homes = [e for e in days if e["type"] in ("Easy", "Rest") and not _away(e, statuses) and not _unwell(e, statuses)]
+        homes = [e for e in days if e["type"] in ("Easy", "Rest") and not _blocked(e, statuses) and not _unwell(e, statuses)]
         if not homes:
             continue
         pick = min(homes, key=lambda e: (e["date"].weekday() < 5, abs((e["date"] - d["date"]).days), e["date"] > d["date"]))
@@ -925,8 +944,31 @@ def keep_long_run(days, statuses):
     return days
 
 
+def keep_sessions(days, statuses):
+    """A quality session that falls on a day given up to work moves to the nearest easy day at home that has no hard day beside it.
+
+    No easy day to take it means the session is dropped for the week, because it is not squeezed in beside a hard day. The easy run it
+    replaces is not made up.
+    """
+    for d in days:
+        if d["type"] != "Key" or not _busy(d, statuses):
+            continue
+        hard = ("Key", "Long", "Race")
+        homes = [e for e in days if e["type"] == "Easy" and not _blocked(e, statuses) and not _unwell(e, statuses)
+                 and not any(f["type"] in hard and abs((f["date"] - e["date"]).days) == 1 for f in days if f is not d)]
+        if not homes:
+            continue
+        pick = min(homes, key=lambda e: (abs((e["date"] - d["date"]).days), e["date"] > d["date"]))
+        keys = ("type", "label", "steps", "miles", "note")
+        away_, home_ = {k: d[k] for k in keys}, {k: pick[k] for k in keys}
+        d.update(home_)
+        pick.update(away_)
+        pick["note"] = (pick["note"] + " " if pick["note"] else "") + f"Moved from {d['date']:%A}, when you are too busy to run."
+    return days
+
+
 def apply_status(days, statuses):
-    """Overlay sick, injured, recovering, holiday and work-trip periods on planned days.
+    """Overlay sick, injured, recovering, holiday, work-trip and too-busy periods on planned days.
 
     Sick or injured: rest while unwell, then easy running for a return period. Entries that touch are one episode, so a week written as
     two entries does not get two short returns. Recovering: easy running only, for as long as it is switched on. Holiday: the
@@ -934,11 +976,12 @@ def apply_status(days, statuses):
     """
     spans = {"sick": episodes(statuses, ("sick",)), "injured": episodes(statuses, ("injured",))}
     keep_long_run(days, statuses)
+    keep_sessions(days, statuses)
     for d in days:
         if _quinolone_window(d, statuses):
             _recovering(d, "tendon")
         for s in statuses:
-            if s["kind"] in ("holiday", "recovering", "travel"):
+            if s["kind"] in ("holiday", "recovering", "travel", "busy"):
                 start = dt.date.fromisoformat(s["start"])
                 end = dt.date.fromisoformat(s["end"]) if s["end"] else None
                 if d["date"] >= start and (end is None or d["date"] <= end):
@@ -946,6 +989,8 @@ def apply_status(days, statuses):
                         _holiday(d, s.get("mode") if s.get("mode") in HOLIDAY_MODES else "easy")
                     elif s["kind"] == "travel":
                         _travel(d)
+                    elif s["kind"] == "busy":
+                        _busy_rest(d)
                     else:
                         _recovering(d, s.get("mode") if s.get("mode") in RECOVERY_MODES else "easy")
         for kind, word in (("sick", "Sick"), ("injured", "Injured")):

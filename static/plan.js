@@ -68,7 +68,7 @@ function planView(){
   h+=`<div class="card c6"><p class="eyebrow">Today</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}${S.on_feet&&t.mins?' · '+hm(t.mins):''}</span></p>
     ${stepList(t.text)}
-    ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button></div>`:''}
+    ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button><button class="ghost" id="qa-busy" title="No run today because of work; the week is rebuilt around it">Too busy today</button></div>`:''}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
     ${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}
     ${(x=>x?`<details class="more" id="todaywhy"><summary class="xs mute">${t.adjust||t.source==='moved'||t.source==='reshuffled'?'Why this, and what would change it':'What would change tomorrow'}</summary>${x}</details>`:'')(whyChanged(t)+whatIfLine()+(t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''))}</div>`;

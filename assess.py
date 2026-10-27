@@ -258,7 +258,7 @@ def assess(c, L, monday, prev_tp=None):
     # days away (a trip, a holiday, illness or injury) do not count against the longest-run window, so a long run skipped for a trip
     # does not make the first long run back look like a spike (Frandsen and colleagues, 2025)
     away = set()
-    for s_ in db.rows("SELECT kind,start,end FROM status WHERE kind IN ('sick','injured','holiday','travel')"):
+    for s_ in db.rows("SELECT kind,start,end FROM status WHERE kind IN ('sick','injured','holiday','travel','busy')"):
         a_, b_ = dt.date.fromisoformat(s_["start"]), dt.date.fromisoformat(s_["end"]) if s_["end"] else monday
         away.update(a_ + dt.timedelta(days=i) for i in range((b_ - a_).days + 1))
     window = min(30 + sum(1 for i in range(1, 61) if monday - dt.timedelta(days=i) in away), 60)

@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.6 - 2026-10-27
+### Added
+- Too busy to run: tap Too busy today on Today's card, or choose "Too busy to run (work)" with dates on the Races page. Those days become rest and the week is rebuilt around them: the long run moves to a day you are free, and a quality session moves to the nearest easy day with no hard day beside it (or is dropped for the week if there is none). The missed miles are not made up, are not counted as missed, and there is no return period. Help and principles describe it.
+
 ## 2.10.3-beta.5 - 2026-10-26
 ### Fixed
 - Strides sent to the watch no longer end with a 60 s recovery after the last one. It is 20 s fast, 60 s easy jog, repeated, and the last stride finishes the block. The workout's estimated length drops by a minute to match.

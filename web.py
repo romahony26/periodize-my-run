@@ -967,8 +967,8 @@ def status_save():
         db.run("UPDATE status SET end=? WHERE id=?", (j.get("end") or dt.date.today().isoformat(), j["id"]))
         log.info("Status %s ended", j["id"])
     else:
-        if j.get("kind") not in ("sick", "injured", "holiday", "recovering", "travel"):
-            return jsonify(error="Choose sick, injured, recovering, holiday or work trip."), 400
+        if j.get("kind") not in ("sick", "injured", "holiday", "recovering", "travel", "busy"):
+            return jsonify(error="Choose sick, injured, recovering, holiday, work trip or too busy."), 400
         mode = j.get("mode") if j["kind"] in ("holiday", "recovering") else None
         if j["kind"] == "holiday" and mode not in engine.HOLIDAY_MODES:
             return jsonify(error="Choose how you want to run on holiday."), 400
@@ -1597,6 +1597,11 @@ def about():
             "Add a work trip with its dates. Every run in that time becomes a short easy run (up to 5 miles) marked optional, and strength reminders are dropped. Rest days stay rest days.",
             "Skipped runs on a trip are not counted as missed and do not affect the next weekly review. A race during a trip is left as planned.",
             "There is no return period afterwards. A night or two of short sleep lowers endurance the next day (Lopes et al. 2023; Craven et al. 2022), which is why the runs are easy and optional, not dropped from the plan altogether.",
+        ]),
+        ("Too busy to run", [
+            "Use this on days work leaves no time to run: tap Too busy today on Today's card, or add dates on the Races page. Those days become rest.",
+            "The week is rebuilt around them: the long run moves to a day you are free, and a quality session moves to the nearest easy day that has no hard day beside it. If there is no such day the session is dropped for that week, not squeezed in.",
+            "The runs you miss are not made up later, and they are not counted as missed in the weekly review. There is no return period.",
         ]),
         ("Sick or injured", [
             "While marked sick or injured, every day is rest.",

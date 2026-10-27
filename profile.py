@@ -77,7 +77,7 @@ def derive(today=None):
         if s["kind"] == "recovering":        # still running, only easier: neither a break nor an excuse
             continue
         a, b = dt.date.fromisoformat(s["start"]), dt.date.fromisoformat(s["end"]) if s["end"] else today
-        (excused if s["kind"] in ("holiday", "travel") else hurt).extend(a + dt.timedelta(days=i) for i in range(0, max((b - a).days, 0) + 1, 7))
+        (excused if s["kind"] in ("holiday", "travel", "busy") else hurt).extend(a + dt.timedelta(days=i) for i in range(0, max((b - a).days, 0) + 1, 7))
     proven8_3y = proven_block(wk, y3, excused, hurt)
     proven8_all, proven8_all_end = proven_block(wk, dt.date.min, excused, hurt, dated=True)
 
