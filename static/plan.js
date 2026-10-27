@@ -1,3 +1,13 @@
+const QA_ASK={swap:["Swap today's session with tomorrow's?","Swap"],sick:["Mark today as unwell? Today becomes rest, then you come back with easy running.","Yes, I'm unwell"],busy:["Too busy to run today? Today becomes rest and the week is rebuilt around it. The miles are not made up.","Yes, too busy"]};
+let QAC=null;
+function qaRow(t){
+  const ds=(S.statuses||[]).find(s=>(s.kind==='busy'||s.kind==='sick')&&s.start===S.today&&s.end===S.today);
+  const lm=S.last_move,moved=S.can_undo&&lm&&(lm.a===S.today||lm.b===S.today);
+  const undo=ds?`<p class="small" style="margin:10px 0 0">${ds.kind==='busy'?'Marked too busy today.':'Marked unwell today.'} <button class="ghost" id="qa-undo-status" data-sid="${ds.id}">Undo</button></p>`
+    :moved?`<p class="small" style="margin:10px 0 0">Swapped with another day. <button class="ghost" id="qa-undo-move">Undo</button></p>`:'';
+  if(QAC&&t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done)return `<div class="qa" role="group" aria-label="Confirm"><p class="small" style="margin:0 0 8px;flex-basis:100%">${E(QA_ASK[QAC][0])}</p><button class="btn" id="qa-yes">${E(QA_ASK[QAC][1])}</button><button class="ghost" id="qa-no">Cancel</button></div>`;
+  const row=t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button><button class="ghost" id="qa-busy" title="No run today because of work; the week is rebuilt around it">Too busy today</button></div>`:'';
+  return row+undo}
 /* The Plan page: why a session changed, the feel tap, the what-if line and the weeks. One of the page scripts; see index.html for the order they load in (they share one scope). */
 /* One line saying why today is not what the plan first had: the readings behind an easing, or that you or a missed day moved it. */
 function whyChanged(t){
@@ -68,7 +78,7 @@ function planView(){
   h+=`<div class="card c6"><p class="eyebrow">Today</p>
     <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}${S.on_feet&&t.mins?' · '+hm(t.mins):''}</span></p>
     ${stepList(t.text)}
-    ${t.type&&t.type!=='Rest'&&t.type!=='Race'&&!t.done?`<div class="qa" role="group" aria-label="Quick actions for today"><button class="ghost" id="qa-swap" title="Swap today's session with tomorrow's">Swap with tomorrow</button><button class="ghost" id="qa-sick" title="Rest today and come back gently">I'm unwell today</button><button class="ghost" id="qa-busy" title="No run today because of work; the week is rebuilt around it">Too busy today</button></div>`:''}
+    ${qaRow(t)}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
     ${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}
     ${(x=>x?`<details class="more" id="todaywhy"><summary class="xs mute">${t.adjust||t.source==='moved'||t.source==='reshuffled'?'Why this, and what would change it':'What would change tomorrow'}</summary>${x}</details>`:'')(whyChanged(t)+whatIfLine()+(t.note?`<p class="xs mute" style="margin:6px 0 0">${E(t.note)}</p>`:''))}</div>`;

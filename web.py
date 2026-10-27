@@ -632,7 +632,7 @@ def state():
         drift=insights.drift_history(today) if db.get("setup_done") else [], best_grade=best_grade, about_you={"sex": c.get("sex"), "birth_date": c.get("birth_date"), "gel_carbs_g": c.get("gel_carbs_g")},
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
-        compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), has_password=bool(db.get("app_password")), uninstall=_uninstall_ready(),
+        compliance=comp, weight=weight, can_undo=bool(db.rows("SELECT 1 FROM moves LIMIT 1")), last_move=(db.rows("SELECT a,b FROM moves ORDER BY id DESC LIMIT 1") or [None])[0], has_password=bool(db.get("app_password")), uninstall=_uninstall_ready(),
         update=updates.state() if c.get("update_check", True) else None, update_check=bool(c.get("update_check", True)),
         cross=insights.cross_training(today), scorecard=insights.scorecard(c, today), heat={"on": bool(c.get("heat_adjust")), "window": heat.window(), "window_weekend": _w if (_w := db.get("run_window_weekend")) and heat._win(_w) else None, "located": bool((db.get("heat_forecast") or {}).get("loc")),
               "today": heat.at(today, heat.run_hour(today), cached_only=True) if c.get("heat_adjust") else None,

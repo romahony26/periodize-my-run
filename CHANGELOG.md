@@ -3,6 +3,11 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.7 - 2026-10-27
+### Added
+- Today's quick actions (swap with tomorrow, I'm unwell, too busy) now ask you to confirm before anything changes, with a Cancel.
+- Undo on Today's card: a one-day unwell or too-busy mark can be taken back, and so can a swap that involves today. The week replans as it was.
+
 ## 2.10.3-beta.6 - 2026-10-27
 ### Added
 - Too busy to run: tap Too busy today on Today's card, or choose "Too busy to run (work)" with dates on the Races page. Those days become rest and the week is rebuilt around them: the long run moves to a day you are free, and a quality session moves to the nearest easy day with no hard day beside it (or is dropped for the week if there is none). The missed miles are not made up, are not counted as missed, and there is no return period. Help and principles describe it.
