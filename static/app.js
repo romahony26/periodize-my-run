@@ -10,6 +10,9 @@ const hmsOut=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=Math.round
 const hmsIn=t=>{const p=String(t||'').trim().split(':').map(Number);if(!p.length||p.some(isNaN))return 0;return p.reduce((a,x)=>a*60+x,0)};
 const fmt=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`};
 const nice=d=>new Date(d+'T12:00').toLocaleDateString(undefined,{day:'numeric',month:'short'});
+/* An exact instant from the server (UTC, ends in Z) shown in the time zone of the device that is looking, so it follows you abroad and through the clock change. */
+const atTime=(iso,short)=>{const d=new Date(iso);if(isNaN(d))return null;const t=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),day=d.toLocaleDateString([],{day:'numeric',month:'short'});return short?(d.toDateString()===new Date().toDateString()?t:day):day+' '+t};
+const syncAt=short=>(S.last_run_at&&atTime(S.last_run_at,short))||(short?(S.last_run.slice(5,10)===S.today.slice(5)?S.last_run.slice(11):S.last_run.slice(5,10)):S.last_run.slice(5).replace('T',' '));
 function toast(t,k){const e=$('#toast');e.textContent=t;e.className='on '+(k||'');clearTimeout(toastT);toastT=setTimeout(()=>e.className='',k?6500:3200)}
 async function api(path, body, method){
   const r=await fetch('/api/'+path,{method:method||(body?'POST':'GET'),headers:{'Content-Type':'application/json','X-Requested-With':'periodize'},body:body?JSON.stringify(body):undefined});
@@ -54,11 +57,13 @@ function render(){
    window.GO=go}
   const j=S.job;
   $('#sync').innerHTML=j.running?`<span class="dot busy"></span><span class="st-run">${E(j.progress||'Working')}…</span>`
-    :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?`<span class="st-full">Synced ${E(S.last_run.slice(5).replace('T',' '))}</span><span class="st-short">${E(S.last_run.slice(5,10)===S.today.slice(5)?S.last_run.slice(11):S.last_run.slice(5,10))}</span>`:'Not synced yet'} <button class="ghost" id="run">Sync</button>`;
+    :`<span class="dot ${j.error||S.stale?'bad':''}"></span>${S.last_run?`<span class="st-full">Synced ${E(syncAt(false))}</span><span class="st-short">${E(syncAt(true))}</span>`:'Not synced yet'} <button class="ghost" id="run">Sync</button>`;
   let h='';
   if(j.error&&!j.running)h+=`<div class="alert err">The last sync had a problem: ${E(j.error)}</div>`;
   if(S.stale)h+=`<div class="alert err" role="alert">No successful sync in 7 days, so the plan is running on old data. Check the Log tab, then press Sync.</div>`;
   else if(S.sync_age_h!=null&&S.sync_age_h>=12&&S.setup_done)h+=`<div class="alert" role="status">Your watch last synced ${S.sync_age_h<48?Math.round(S.sync_age_h)+' hours':Math.round(S.sync_age_h/24)+' days'} ago, so recovery and the newest runs are not in today's plan yet. ${j.error?'':'It retries every hour; press Sync to try now.'}</div>`;
+  const skew=S.server_now?Math.round((Date.parse(S.server_now)-Date.now())/60000):0;
+  if(Math.abs(skew)>=5)h+=`<div class="alert" role="status">The computer running Periodize and this device disagree about the time by ${Math.abs(skew)} minutes (the computer's clock is ${skew>0?'ahead':'behind'}), so sync times can look wrong. Set that computer's clock to keep itself right.</div>`;
   $('#main').innerHTML=h+({plan:planView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])()+(MORE?moreSheet():'');
   polish();bind();bindCharts();
 }

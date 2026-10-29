@@ -255,5 +255,5 @@ def listing():
     out = []
     for f in sorted((f for f in os.listdir(DIR) if NAME.match(f)), reverse=True):
         p = os.path.join(DIR, f)
-        out.append({"name": f, "size_kb": round(os.path.getsize(p) / 1024), "made": dt.datetime.fromtimestamp(os.path.getmtime(p)).isoformat(timespec="minutes")})
+        out.append({"name": f, "size_kb": round(os.path.getsize(p) / 1024), "made": dt.datetime.fromtimestamp(os.path.getmtime(p)).isoformat(timespec="minutes"), "made_at": db.utc_iso(dt.datetime.fromtimestamp(os.path.getmtime(p)))})
     return out

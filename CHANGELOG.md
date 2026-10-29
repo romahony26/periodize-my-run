@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.8 - 2026-10-29
+### Fixed
+- The Synced time in the header, the backup times in Settings and the update-check time in About were the server's clock printed as plain text, so they did not follow the clock change or the device you look from (a phone in Boston showed Irish time). They are now sent as exact moments and shown in the time zone of the device you are using. "Hours since the last sync" no longer shows a negative number when the server's clock is ahead.
+
+### Added
+- A notice when the computer running Periodize and the device you are using disagree about the time by 5 minutes or more, because sync times then look wrong. It tells you which clock is ahead.
+
 ## 2.10.3-beta.7 - 2026-10-27
 ### Added
 - Today's quick actions (swap with tomorrow, I'm unwell, too busy) now ask you to confirm before anything changes, with a Cancel.

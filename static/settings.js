@@ -37,7 +37,7 @@ function settingsView(){const s=S.settings;
     <p style="margin:12px 0 0"><button class="ghost" id="ysave">Save</button></p></div>`;
   const backup=`<div class="card c12"><p class="eyebrow">Backups</p><p class="xs mute" style="margin-top:0">Made every night and thinned as they age: daily for 7 days, weekly for 4 weeks, monthly for 3 months. Restoring saves the current state first, so it can be undone.</p>
     <div class="fgrid"><div><label for="abk">Automatic backups</label>${yn('abk',S.auto_backup)}</div>
-    <div><label for="bsel">Backup</label><select id="bsel">${S.backups.map(b=>`<option value="${E(b.name)}" data-part="local">${E(b.made.replace('T',' '))} (${b.size_kb} KB)</option>`).join('')||'<option value="">None yet</option>'}</select></div>
+    <div><label for="bsel">Backup</label><select id="bsel">${S.backups.map(b=>`<option value="${E(b.name)}" data-part="local">${E((b.made_at&&atTime(b.made_at))||b.made.replace('T',' '))} (${b.size_kb} KB)</option>`).join('')||'<option value="">None yet</option>'}</select></div>
     <div><label for="bwhat">What to restore</label><select id="bwhat"><option value="full">Everything</option><option value="config">Settings and races only</option><option value="plan">The plan only</option></select></div></div>
     <p class="xs mute">For a copy off this computer, download a backup below, or see How it works for a daily copy into a cloud folder.</p>
     <p style="margin:12px 0 0"><button class="ghost" id="bnow">Back up now</button> <button class="ghost" id="bres">Restore</button> <a class="ghost" href="/api/export">Download backup</a></p></div>`;

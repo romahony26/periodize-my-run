@@ -1,11 +1,22 @@
 """SQLite storage. One file, ~/.periodize-my-run/periodize.db (override with PERIODIZE_HOME)."""
 import contextlib
+import datetime as dt
 import json
 import os
 import sqlite3
 
 HOME = os.path.expanduser(os.environ.get("PERIODIZE_HOME", "~/.periodize-my-run"))
 OLD_HOME = os.path.expanduser("~/.periodize")        # the folder's name before the app was renamed Periodize My Run
+
+
+def utc_iso(t):
+    """A time the server stored as naive local time (or the instant it was written), as an exact UTC instant ending in Z, so the page can
+    show it in the viewer's own time zone instead of printing the server's clock."""
+    if not t:
+        return None
+    if isinstance(t, str):
+        t = dt.datetime.fromisoformat(t)
+    return t.astimezone(dt.UTC).isoformat(timespec="seconds").replace("+00:00", "Z")      # a naive time is read as the server's local time
 
 
 def _move_old_home():

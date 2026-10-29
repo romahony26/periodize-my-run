@@ -137,7 +137,7 @@ def state():
     now = running_version()
     latest = st.get("latest") if st.get("channel", "stable") == channel() else None      # an answer for the other channel is not an answer
     newer = bool(latest and vkey(latest) > vkey(now))
-    return {"running": now, "base": base_version(), "latest": latest, "channel": channel(), "beta": is_beta(now), "newer": newer, "status": st.get("status"), "checked": st.get("checked"),
+    return {"running": now, "base": base_version(), "latest": latest, "channel": channel(), "beta": is_beta(now), "newer": newer, "status": st.get("status"), "checked": st.get("checked"), "checked_at": db.utc_iso(st.get("checked")),
             "dismissed": newer and db.get("update_dismissed") == latest, "installed": installed(), "available": st.get("available") or []}
 
 
