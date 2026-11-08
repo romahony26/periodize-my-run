@@ -15,6 +15,7 @@ import re
 import statistics
 
 import db
+import jetlag
 from assess import MI, ZONES, mean, projection
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -1148,6 +1149,14 @@ def readiness(today, c, learn=True, override=None):
             reasons.append(f"last night's sleep score was {score:.0f}, below your normal {base:.0f}")
     pts += min(sp, 2)                # length, score and the 3-night average all describe sleep, so sleep counts for at most 2
 
+    # ---- jet lag: a time-zone change of two hours or more in the watch's own record, followed until the body clock has caught up.
+    # Lasts about a day per zone and is worse eastward (Lee and Galvez, 2012); the points are this project's choice (principle 54c).
+    jl = jetlag.state(today)
+    if jl:
+        pts += jl["points"]
+        lost += 6 * jl["points"]
+        reasons.append(jl["reason"])
+
     # ---- how recent runs felt, as rated on the watch: self-reported measures track the response to training at least as well as
     # device measures (Saw and colleagues, 2016). Nothing is typed in; the rating is read only when the runner gave one on the watch.
     since = (today - dt.timedelta(days=4)).isoformat()
@@ -1186,4 +1195,5 @@ def readiness(today, c, learn=True, override=None):
     return {"level": "green" if pts == 0 else "amber" if pts <= 2 else "red", "slow": min(pts, 4) * per, "points": pts,
             "reasons": reasons or ["Last night's sleep was normal for you, and your 7-day HRV and resting heart rate are in your normal range."],
             "sleep_h": sleep, "sleep_score": score, "hrv": hrv, "rhr": rhr, "fresh": round(max(35, 100 - lost)), "normal": norm, "week": week, "trend": trend,
+            "jetlag": jl,
             "hrv_building": {"nights": hrv_nights, "needed": HRV_BASELINE_NIGHTS} if not norm.get("hrv") and (hrv or vals("hrv", 0, 7)) else None}

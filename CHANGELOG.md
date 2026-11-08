@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.9 - 2026-11-08
+### Added
+- Jet lag now counts in the daily readiness. Garmin stores each night's sleep and each day's summary in GMT and in local time, so the time zone you were in is known without you saying anything. A change of two hours or more is treated as a flight (one hour is the clocks changing). Your body clock is followed as it moves towards local time by about an hour a day, and the hours still to make up count as a warning point: one from two hours out of step, two from four hours after travelling east or six after travelling west, since eastward is the harder direction. Today then eases fast paces as it does for poor sleep, and turns into an easy run when other signs agree. The reason appears on Today ("you changed time zone by 5 hours east on Fri 6 Nov, and your body clock is still about 4 hours behind local time").
+- Short trips are handled: after four days in Boston the body clock has moved about four hours, so the flight home leaves about four hours to make up, not five. A day trip leaves nothing.
+- Nothing changes when the watch gives no time-zone record, or the latest reading is more than three days old.
+- Principle 54c in PRINCIPLES.md, with its three references. The research supports the length of the effect and that eastward is worse; no study says how much slower to run, so the point values are this project's choice and are marked so.
+
 ## 2.10.3-beta.8 - 2026-10-29
 ### Fixed
 - The Synced time in the header, the backup times in Settings and the update-check time in About were the server's clock printed as plain text, so they did not follow the clock change or the device you look from (a phone in Boston showed Irish time). They are now sent as exact moments and shown in the time zone of the device you are using. "Hours since the last sync" no longer shows a negative number when the server's clock is ahead.

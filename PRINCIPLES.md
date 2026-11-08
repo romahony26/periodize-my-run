@@ -298,6 +298,17 @@ this project's own choices, not findings from trials. [C] [P]
     running and shortens the long run, with nothing rested. The fluoroquinolone antibiotics carry a regulator's boxed warning for
     tendinitis and tendon rupture (U.S. Food and Drug Administration, 2008), so that option also asks for flat, slow running and
     no hills. It does not know which antibiotic you take; it only acts on what you choose.
+54c. **Jet lag eases the fast running until the body clock has caught up.** [R] (*limited*) A change of time zone of two hours or
+    more leaves the body clock out of step with local time, and the symptoms last about a day for each zone crossed, with eastward
+    travel the harder direction (Lee and Galvez, 2012). In a national football squad flown 11 zones east, perceived jet lag rose over
+    the first four days after arrival and wellness fell across the following week (Fowler and colleagues, 2017). The evidence for how
+    to manage it is thin, and a consensus panel found none for travel fatigue itself (Janse van Rensburg and colleagues, 2021). So
+    Periodize My Run reads the time zone from the GMT and local times the watch stores with each night's sleep, follows the body clock
+    as it moves towards local time by an hour a day, and counts the hours still to make up as a readiness warning: one point from two
+    hours out of step, two points from four hours after travelling east or six hours after travelling west. The existing readiness
+    rules then do the rest: slower fast paces, and an easy run when other signs agree. Because it follows the body clock and not only the
+    flight, a short trip leaves little to make up on the way home. A one-hour change is the clocks changing and is ignored. No study
+    says how much slower to run, or how many points a given lag is worth; those numbers are this project's choice. [P]
 
 ## 10. Racing
 
@@ -675,6 +686,7 @@ on a detail.
 - Foster C (1998). Monitoring training in athletes with reference to overtraining syndrome. *Med Sci Sports Exerc* 30:1164–1168. *Abstract read.*
 - Foster C and colleagues (2001). Differences in perceptions of training by coaches and athletes. *S Afr J Sports Med*. *From memory.*
 - Fokkema T, van Damme AADN, Fornerod MWJ, de Vos RJ (2020). Training for a (half-)marathon: training volume and longest endurance run related to performance and running injuries. *Scand J Med Sci Sports*. *Abstract read.*
+- Fowler PM, McCall A, Jones M, Duffield R (2017). Effects of long-haul transmeridian travel on player preparedness: case study of a national team at the 2014 FIFA World Cup. *J Sci Med Sport*. *Abstract read.*
 - Frimpong E, Mograss M, Zvionow T, Dang-Vu TT (2021). The effects of evening high-intensity exercise on sleep in healthy adults: a systematic review and meta-analysis. *Sleep Med Rev*. *Abstract read.*
 - Granero-Gallegos A, González-Quílez A, Plews D, Carrasco-Poyatos M (2020). HRV-based training for improving VO2max in endurance athletes: a systematic review with meta-analysis. *Int J Environ Res Public Health* 17:7999. *Abstract read.*
 - Gillinov S and colleagues (2017). Variable accuracy of wearable heart rate monitors during aerobic exercise. *Med Sci Sports Exerc* 49:1697–1703.
@@ -692,12 +704,14 @@ on a detail.
 - Iaia FM and colleagues (2009). Four weeks of speed endurance training reduces energy expenditure during exercise and maintains muscle oxidative capacity despite a reduction in training volume. *J Appl Physiol*. *Record confirmed.*
 - Impellizzeri FM, Tenan MS, Kempton T, Novak A, Coutts AJ (2020). Acute:chronic workload ratio: conceptual issues and fundamental pitfalls. *Int J Sports Physiol Perform* 15:907–913. *Record confirmed.*
 - Ivarsson A and colleagues (2017). Psychosocial factors and sport injuries: meta-analyses for prediction and prevention. *Sports Med*. *Abstract read.*
+- Janse van Rensburg DC and colleagues (2021). Managing travel fatigue and jet lag in athletes: a review and consensus statement. *Sports Med* 51:2029–2050. *Abstract read.*
 - Jeukendrup A (2014). A step towards personalized sports nutrition: carbohydrate intake during exercise. *Sports Med*. *Record confirmed.*
 - Jones A (2025). Road running age standards. Public domain (CC0).
 - Jones AM (2024). The fourth dimension: physiological resilience as an independent determinant of endurance exercise performance. *J Physiol* 602:4113–4128.
 - Joyner MJ, Coyle EF (2008). Endurance exercise performance: the physiology of champions. *J Physiol* 586:35–44.
 - Knechtle B, Rosemann T, Knechtle P, Lepers R (2010). Predictor variables for a 100-km race time in male ultra-marathoners. *Percept Mot Skills* 111:681–693.
 - Küster M and colleagues (2013). Consumption of analgesics before a marathon and the incidence of cardiovascular, gastrointestinal and renal problems. *BMJ Open*.
+- Lee A, Galvez JC (2012). Jet lag in athletes. *Sports Health* 4:211–216. *Record confirmed.*
 - Leota J and colleagues (2025). Dose-response relationship between evening exercise and sleep. *Nat Commun*. *Abstract read.*
 - Lipman GS and colleagues (2017). Ibuprofen versus placebo effect on acute kidney injury in ultramarathons: a randomised controlled trial. *Emerg Med J* 34:637–642.
 - Llanos-Lagos C, Ramirez-Campillo R, Moran J, Sáez de Villarreal E (2024). Effect of strength training programs in middle- and long-distance runners' economy at different running speeds: a systematic review with meta-analysis. *Sports Med* 54.
