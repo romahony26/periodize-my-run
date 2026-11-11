@@ -55,7 +55,7 @@ def _store_week(monday, st, pl, final, c, today):
     db.run("INSERT INTO weeks(monday,mode,target,why,tp,final,summary) VALUES(?,?,?,?,?,?,?) ON CONFLICT(monday) DO UPDATE SET "
            "mode=excluded.mode,target=excluded.target,why=excluded.why,tp=excluded.tp,final=excluded.final,summary=excluded.summary",
            (monday.isoformat(), pl["mode"], pl["target"], json.dumps(pl["why"]), st["tp"], int(final), json.dumps(summary)))
-    days = engine.apply_status([dict(d) for d in pl["days"]], db.rows("SELECT * FROM status"))
+    days = engine.apply_status([dict(d) for d in pl["days"]], db.rows("SELECT * FROM status"), c.get("blocked_days") or [])
     with db.connect() as con:
         for d in days:
             if d["date"] < today:

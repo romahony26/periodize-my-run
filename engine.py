@@ -243,7 +243,7 @@ def plan(st, c, L, races):
                               "and a 20% rise was followed by a higher injury risk over three weeks in one study of half-marathon trainees (Damsted and colleagues, 2019). It comes a week later. [P]")
             pl = alt
     if pl.get("away"):      # the trip trims the runs after the week is planned: the next week must start from what the week will really hold
-        shaped = apply_status([dict(d) for d in pl["days"]], st.get("statuses") or [])
+        shaped = apply_status([dict(d) for d in pl["days"]], st.get("statuses") or [], c.get("blocked_days") or [])
         pl["projected_total"] = sum(d["miles"] or 0 for d in shaped)
         pl["projected_long"] = max((d["miles"] or 0 for d in shaped), default=0)
     return pl
@@ -976,7 +976,7 @@ def keep_sessions(days, statuses):
     return days
 
 
-def apply_status(days, statuses):
+def apply_status(days, statuses, blocked=()):
     """Overlay sick, injured, recovering, holiday, work-trip and too-busy periods on planned days.
 
     Sick or injured: rest while unwell, then easy running for a return period. Entries that touch are one episode, so a week written as
@@ -1015,8 +1015,25 @@ def apply_status(days, statuses):
                         mi_ = max(half(min(d["miles"], 10) * (0.5 + 0.4 * k / back)), 2)
                         d.update({"type": "Easy", "label": "Return: easy", "steps": [("d", mi_, "easy")], "miles": mi_,
                                   "note": f"Day {k} of {back} back after being {word.lower()}. Easy only; stop if symptoms return."})
+    _fill_easy_long(days, statuses, blocked)
     separate_hard_days(days)
     return days
+
+
+def _fill_easy_long(days, statuses, blocked):
+    """The easy_long recovery mode wants a run on every day that is not blocked, up to six a week. The planner drops easy days when the
+    week's target is too small to give each one the usual minimum, so a rest day inside the period that is not blocked becomes an easy run."""
+    def active(d):
+        return any(s["kind"] == "recovering" and s.get("mode") == "easy_long" and dt.date.fromisoformat(s["start"]) <= d["date"]
+                   and (not s.get("end") or d["date"] <= dt.date.fromisoformat(s["end"])) for s in statuses)
+    runs = sum(1 for d in days if (d["miles"] or 0) > 0)
+    for d in days:
+        if runs >= 6:
+            break
+        if d["type"] == "Rest" and d["label"] == "Rest" and active(d) and d["date"].weekday() not in blocked and not _unwell(d, statuses):
+            d.update({"type": "Easy", "label": "Easy", "steps": [("d", EASY_RUN_MILES, "easy")], "miles": EASY_RUN_MILES, "strength": "",
+                      "note": "On treatment or easing back: easy running only."})
+            runs += 1
 
 
 # ---------------------------------------------------------------- daily readiness

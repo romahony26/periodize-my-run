@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.11 - 2026-11-11
+### Fixed
+- The 7 mile easy-running recovery mode now gives you a run on every day that is not a rest day you set (up to six a week). The planner had dropped an easy day in light weeks, leaving a rest day you had not asked for.
+
 ## 2.10.3-beta.10 - 2026-11-11
 ### Added
 - A new way to run while recovering: "Easy running at 7 miles a day, keeping the long run". Sessions and easy days all become a plain 7 mile easy run, rest days stay rest, and the long run keeps its length but is run all easy (no marathon pace section). For getting the routine back after a disrupted stretch such as a long trip, when you want the volume without any hard running.
