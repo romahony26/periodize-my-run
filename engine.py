@@ -733,8 +733,10 @@ def _travel(d):
     d.update({"type": "Easy", "label": "Easy (optional)", "steps": [("d", mi_, "easy")], "miles": mi_, "strength": "", "note": note})
 
 
+EASY_RUN_MILES = 7           # the easy_long recovery mode: every run that is not the long run becomes this many easy miles
 RECOVERY_MODES = {
     "easy": "Easy running only",
+    "easy_long": f"Easy running at {EASY_RUN_MILES} miles a day, keeping the long run",
     "tendon": "Easy running only, flat and slow (an antibiotic that can affect tendons)",
 }
 ILLNESS_WINDOW = 14           # days after an illness during which a poor recovery sign eases the long run and the sessions
@@ -826,6 +828,12 @@ def _recovering(d, mode):
     if d["type"] in ("Rest", "Race"):
         return
     d["strength"] = ""
+    if mode == "easy_long":
+        if d["type"] == "Long":
+            d.update({"type": "Long", "label": "Long run", "steps": [("d", d["miles"], "easy")], "note": note})   # kept at its length, all easy
+        else:
+            d.update({"type": "Easy", "label": "Easy", "steps": [("d", EASY_RUN_MILES, "easy")], "miles": EASY_RUN_MILES, "note": note})
+        return
     if d["type"] == "Easy":
         d["note"] = note
     elif d["type"] == "Key":

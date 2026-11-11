@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.10 - 2026-11-11
+### Added
+- A new way to run while recovering: "Easy running at 7 miles a day, keeping the long run". Sessions and easy days all become a plain 7 mile easy run, rest days stay rest, and the long run keeps its length but is run all easy (no marathon pace section). For getting the routine back after a disrupted stretch such as a long trip, when you want the volume without any hard running.
+
 ## 2.10.3-beta.9 - 2026-11-08
 ### Added
 - Jet lag now counts in the daily readiness. Garmin stores each night's sleep and each day's summary in GMT and in local time, so the time zone you were in is known without you saying anything. A change of two hours or more is treated as a flight (one hour is the clocks changing). Your body clock is followed as it moves towards local time by about an hour a day, and the hours still to make up count as a warning point: one from two hours out of step, two from four hours after travelling east or six after travelling west, since eastward is the harder direction. Today then eases fast paces as it does for poor sleep, and turns into an easy run when other signs agree. The reason appears on Today ("you changed time zone by 5 hours east on Fri 6 Nov, and your body clock is still about 4 hours behind local time").
