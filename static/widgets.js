@@ -5,8 +5,8 @@ let FTAB=(()=>{try{return localStorage.getItem('ftab')||'now'}catch(e){return 'n
 const FSECS=[['now','Now'],['progress','Progress'],['pred','Predictions'],['records','Records']];
 const FMAP=[['Threshold pace','now'],['Race-specific endurance','now'],['Steps outside','now'],['Fitness, fatigue','now'],['Aerobic drift','now'],['Recovery trends','now'],['When you run','now'],
   ['Is it working','progress'],['Plan scorecard','progress'],['Plan against actual','progress'],['Last eight weeks','progress'],['Paces now','progress'],
-  ['What each marathon','pred'],['Race predictor','pred'],['How accurate','pred'],['VO2max','pred'],
-  ['Race results','records'],['Personal bests','records'],['Shoes','records'],['Your history','records'],['Your limits','records']];
+  ['What each marathon','pred'],['Three ways to estimate','pred'],['Is the gap closing','pred'],['Race predictor','pred'],['How accurate','pred'],['VO2max','pred'],
+  ['Race results','records'],['Personal bests','records'],['Your history','records'],['Your limits','records']];
 function foldNotes(root){root.querySelectorAll('p.xs.mute').forEach(p=>{
   if(p.id||p.closest('details,table,.modal,.ov')||p.textContent.length<150||p.parentElement.classList.contains('stat')||/^(Load this week|Warning signs)/.test(p.textContent))return;     // numbers stay in view
   const d=document.createElement('details');d.className='note';d.innerHTML='<summary>What is this?</summary>';p.replaceWith(d);d.append(p)})}
@@ -26,9 +26,6 @@ function polish(){const m=$('#main');if(!m)return;
   if(view==='you'){const grid=m.querySelector('.grid');if(!grid)return;
     const cards=[...grid.children].filter(c=>c.classList.contains('card'));
     cards.forEach(c=>{const t=((c.querySelector('.eyebrow')||{}).textContent||'').trim();const hit=FMAP.find(([k])=>t.startsWith(k));c.dataset.fsec=hit?hit[1]:'now'});
-    // an empty list collapses to its heading and one line
-    const sh=$('#shoecard');if(sh&&!S.shoes.length){const rest=[...sh.children].filter(x=>!x.classList.contains('eyebrow'));const d=document.createElement('details');d.className='note';
-      d.innerHTML='<summary>No shoes yet: add a pair</summary>';rest.forEach(x=>d.append(x));sh.append(d)}
     const rr=cards.find(c=>/^Race results/.test((c.querySelector('.eyebrow')||{}).textContent||''));
     if(rr&&!S.results.length){const kids=[...rr.children].filter(x=>!x.classList.contains('eyebrow'));const keep=kids.find(x=>x.matches('p.small'));const d=document.createElement('details');d.className='note';
       d.innerHTML='<summary>Add a result by hand or import a log</summary>';kids.filter(x=>x!==keep).forEach(x=>d.append(x));rr.append(d)}
@@ -59,3 +56,19 @@ function wprof(p,tall){
 /* Seven small bars for a week: each day's miles, coloured by the kind of day. */
 function wkSpark(w){const mi=d=>d.past&&d.done?d.done.miles:(d.miles||0), mx=Math.max(...w.map(mi),1);
   return `<span class="wspark" aria-hidden="true">${w.map(d=>`<i class="${d.past&&d.done&&!d.type?'Easy':d.type||'Rest'}" style="height:${mi(d)?Math.max(3,Math.round(22*mi(d)/mx)):2}px"></i>`).join('')}</span>`}
+
+/* The goal race's forecast week by week against the goal: two lines (if raced that week; forecast for race day), the goal as a level line,
+   and a dashed line from where you are now to the goal on race day. Time runs left to right up to race day; faster is higher. */
+function trendChart(T){
+  const a=T.today||[], b=T.points||[], all=a.concat(b);if(all.length<2)return '';
+  const day=d=>Date.parse(d+'T00:00:00Z')/864e5, x0=Math.min(...all.map(p=>day(p.monday))), x1=day(T.race);
+  const ys=all.map(p=>p.s).concat(T.goal_s?[T.goal_s]:[]), lo=Math.min(...ys), hi=Math.max(...ys), pad=Math.max((hi-lo)*.15,60);
+  const W=640,H=200,L=54,R=10,Tp=10,B=22, X=d=>L+(W-L-R)*(day(d)-x0)/(x1-x0||1), Y=s=>Tp+(H-Tp-B)*(s-(lo-pad))/((hi+pad)-(lo-pad));
+  const line=(ps,cls)=>ps.length?`<polyline class="${cls}" points="${ps.map(p=>X(p.monday).toFixed(1)+','+Y(p.s).toFixed(1)).join(' ')}"/>${ps.map(p=>`<circle class="${cls}" cx="${X(p.monday).toFixed(1)}" cy="${Y(p.s).toFixed(1)}" r="3"><title>Week of ${E(p.monday)}: ${E(p.time)}</title></circle>`).join('')}`:'';
+  const last=a[a.length-1], ticks=[lo,T.goal_s&&T.goal_s!==lo?T.goal_s:null,hi].filter((v,i,arr)=>v&&arr.indexOf(v)===i);
+  return `<svg class="trend" viewBox="0 0 ${W} ${H}" role="img" aria-label="Marathon estimates week by week against the goal time">
+    ${ticks.map(v=>`<text x="${L-6}" y="${(Y(v)+4).toFixed(1)}" text-anchor="end">${hmsOut(v)}</text><line class="grid" x1="${L}" x2="${W-R}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"/>`).join('')}
+    ${T.goal_s?`<line class="goal" x1="${L}" x2="${W-R}" y1="${Y(T.goal_s).toFixed(1)}" y2="${Y(T.goal_s).toFixed(1)}"/>`:''}
+    ${T.goal_s&&last?`<line class="need" x1="${X(last.monday).toFixed(1)}" y1="${Y(last.s).toFixed(1)}" x2="${W-R}" y2="${Y(T.goal_s).toFixed(1)}"/>`:''}
+    ${line(b,'fc')}${line(a,'nw')}
+    <text x="${L}" y="${H-5}">${E(nice(all.map(p=>p.monday).sort()[0]))}</text><text x="${W-R}" y="${H-5}" text-anchor="end">Race day</text></svg>`}

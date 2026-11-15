@@ -119,10 +119,33 @@ def _open():
     return c
 
 
+_here = threading.local()      # the connection and settings shared by one thread while it is inside session()
+_MISSING = object()
+
+
+@contextlib.contextmanager
+def session():
+    """One connection for everything this thread does inside the block, and each setting read from the database once.
+
+    Working out the page's state makes several hundred small queries. Opening a connection for each took about a third of the
+    time on a small computer; inside a session they share one. Writes still commit as each `connect()` block ends, and a setting
+    that is written is read afresh."""
+    if getattr(_here, "conn", None) is not None:      # already inside one
+        yield
+        return
+    _here.conn, _here.settings = _open(), {}
+    try:
+        yield
+    finally:
+        c, _here.conn, _here.settings = _here.conn, None, None
+        c.close()
+
+
 @contextlib.contextmanager
 def connect():
-    """A connection that commits on success, rolls back on error, and is always closed."""
-    c = _open()
+    """A connection that commits on success, rolls back on error, and is always closed (or, inside session(), handed back)."""
+    shared = getattr(_here, "conn", None)
+    c = shared or _open()
     try:
         yield c
         c.commit()
@@ -130,7 +153,8 @@ def connect():
         c.rollback()
         raise
     finally:
-        c.close()
+        if shared is None:
+            c.close()
 
 
 _watch = {"conn": None, "id": None}
@@ -159,16 +183,24 @@ def version():
 
 
 def get(key, default=None):
-    with connect() as c:
-        r = c.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
-    if r is None:
+    seen = getattr(_here, "settings", None)
+    raw = seen.get(key, _MISSING) if seen is not None else _MISSING
+    if raw is _MISSING:
+        with connect() as c:
+            r = c.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+        raw = r["value"] if r is not None else None
+        if seen is not None:
+            seen[key] = raw
+    if raw is None:
         return DEFAULTS.get(key, default)
-    return json.loads(r["value"])
+    return json.loads(raw)      # decoded each time, so a caller that changes what it was given changes only its own copy
 
 
 def put(key, value):
     with connect() as c:
         c.execute("INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, json.dumps(value)))
+    if getattr(_here, "settings", None) is not None:
+        _here.settings.pop(key, None)
 
 
 def cfg():

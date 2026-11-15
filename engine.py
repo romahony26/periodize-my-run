@@ -505,7 +505,8 @@ def _plan(st, c, L, races):
     if mp_long:
         long_day = ("Long run with marathon pace", [("d", 3, "easy"), ("d", mp_long, "mp"), ("d", lr - mp_long - 3, "easy")], lr)
         done["mp_long"] = mp_long
-        why.append(f"Marathon-pace long run this week ({dist(mp_long, c['units'])} at pace), so the second session is dropped.")
+        why.append(f"Marathon-pace long run this week ({dist(mp_long, c['units'])} at pace). It is the week's fast running: the midweek run is easy all the way and the second session is dropped, "
+                   "so about four fifths of the week stays easy.")
     elif hard_ok and not quality_new and gtype != "ultra":
         fin = half(lr * 0.25)       # the steady part is the last quarter, and only in a week with room for it (see the easy share below) [C]
         long_day = ("Long run", [("d", lr - fin, "easy"), ("d", fin, "steady")], lr)
@@ -530,6 +531,9 @@ def _plan(st, c, L, races):
         key1_day = ("Sharpener", [("d", half(k1 / 2), "easy"), ("r", 3, 180, "threshold", 60), ("d", max(half(k1 / 2) - 1.5, 1), "easy")], k1)
     elif one_key_threshold and not quality_new or (not two_keys and quality_new):
         key1_day = threshold_day()
+    elif mp_long:
+        # the marathon-pace long run is the week's fast running: a second block at pace midweek put about 40% of the week above easy [C]
+        key1_day = ("Medium-long run", [("d", k1, "easy")], k1)
     elif gtype == "marathon" and mode in ("build", "taper") and mp_ready and not aero_ok:
         m = min(max(round(st["prev_mp_mid"]) + 1, 4), 8 if specific else 6)
         if mode == "taper":
@@ -554,7 +558,7 @@ def _plan(st, c, L, races):
     # heart-rate aerobic run: hold a heart rate below threshold, let the pace come to you
     hl = hr_levels(L["hrmax"])
     lthr = c.get("aero_lthr") or hl["start_lthr"]
-    if aero_ok and key1_day[0] in ("Steady finish", "Medium-long run"):
+    if aero_ok and not mp_long and key1_day[0] in ("Steady finish", "Medium-long run"):
         m_ = min(max(round(st.get("prev_lthr_mi", 0)) + 1, 5), 10)
         key1_day = ("Aerobic run by heart rate", [("d", 1.5, "easy"), ("h", m_, lthr, lthr + 5), ("d", 1, "easy")], m_ + 2.5)
         done["lthr_mi"] = m_

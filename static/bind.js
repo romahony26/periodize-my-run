@@ -107,8 +107,6 @@ function bind(){
   if($('#pov'))$('#pov').onclick=e=>{if(e.target.id==='pov'){PACE=null;render()}};
   $$('[data-mz]').forEach(b=>b.onclick=()=>{MAPZ=Math.max(-3,Math.min(4,MAPZ+(+b.dataset.mz)));render()});
   if($('#mapsw'))$('#mapsw').onchange=async()=>{await api('settings',{map_tiles:$('#mapsw').value==='1'});toast('Saved');location.reload()};
-  on('#shadd',async()=>{await api('shoes',{name:$('#shn').value,start:$('#shs').value,start_dist:$('#shm').value,alert_dist:$('#sha').value});toast('Shoes added');await load()});
-  $$('[data-shdel]').forEach(b=>b.onclick=async()=>{await api('shoes/'+b.dataset.shdel,null,'DELETE');await load()});
   on('#ysave',async()=>{await api('settings',{sex:$('#ysex').value,birth_date:$('#ydob').value,gel_carbs_g:$('#ygel').value});toast('Saved');await load()});
   on('#ntest',async()=>{await api('notify/test',{});toast('Test message sent')});
   on('#bnow',async()=>{await api('backups',{});await api('settings',{auto_backup:$('#abk').value==='1'});toast('Backup made');await load()});

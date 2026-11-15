@@ -1,4 +1,4 @@
-"""Things worth knowing that the plan itself does not show: load and form, single-run spikes, aerobic drift, fuelling, shoes.
+"""Things worth knowing that the plan itself does not show: load and form, single-run spikes, aerobic drift, fuelling.
 
 Sources, where there is one:
   - Load is Lucia's TRIMP (minutes in three zones weighted 1, 2, 3), the same measure the execution score uses.
@@ -253,21 +253,6 @@ def note_carbs(note):
     return int(m.group(1)) if m else None
 
 
-def shoes(units="mi"):
-    """Each pair of shoes with the miles run in it. A pair counts the runs from its start date until the next pair's start date."""
-    rows = db.rows("SELECT * FROM shoes ORDER BY start")
-    out = []
-    for i, s in enumerate(rows):
-        end = s["retired"] or (rows[i + 1]["start"] if i + 1 < len(rows) else "9999")
-        m = db.rows("SELECT SUM(dist_m) m, COUNT(*) n FROM activities WHERE sport='running' AND date>=? AND date<?", (s["start"], end))[0]
-        miles = (s["start_miles"] or 0) + (m["m"] or 0) / MI
-        k = 1 if units == "mi" else 1.609344
-        out.append({"id": s["id"], "name": s["name"], "start": s["start"], "retired": s["retired"], "current": i == len(rows) - 1 and not s["retired"],
-                    "dist": round(miles * k), "runs": m["n"], "alert": round(s["alert_miles"] * k) if s["alert_miles"] else None,
-                    "over": bool(s["alert_miles"] and miles >= s["alert_miles"])})
-    return out[::-1]
-
-
 def scorecard(c, today, weeks=12):
     """How the plan has gone for this athlete: each week's planned and run miles, the key sessions (Key and Long days) done, and the
     predictions made *at the time* for races since, set against the result. A session is done when a run of at least 70% of its planned
@@ -394,7 +379,4 @@ def warnings(today, units="mi", sex=None, hrmax=None):
     t = timing(today, hrmax)
     if t and t["watch"]:
         out.append({"kind": "timing", "date": today.isoformat(), "text": t["watch"]})
-    for s in shoes(units):
-        if s["current"] and s["over"]:
-            out.append({"kind": "shoes", "date": today.isoformat(), "text": f"{s['name']} have passed the {s['alert']} {units} you set as their limit ({s['dist']} {units})."})
     return out

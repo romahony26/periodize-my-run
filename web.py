@@ -28,6 +28,7 @@ import backup
 import calibrate
 import db
 import engine
+import estimates
 import execution
 import explain
 import respond
@@ -449,6 +450,37 @@ def _sync_status(p, day, tp, adj, c, d, today):
 FORECAST_SPREAD = 0.064
 
 
+def _estimates(today, model_s, tp, gs, goal, c):
+    """Three estimates of a marathon run today, and what the training equation says about the goal (principle 116)."""
+    e = estimates.marathon(today, model_s, tp)
+    per = assess.MI if c["units"] == "mi" else 1000
+    u = c["units"]
+    wk = (lambda km: f"{km * 1000 / per:.0f} {u}")
+    pc = (lambda s_km: engine.pace(1000 / s_km, u) + "/" + u)
+    rows = [{"name": "Threshold pace and endurance", "time": engine.hms(model_s), "from": "The app's own estimate, from your threshold pace and how well you hold pace over distance."}]
+    if e["cs"]:
+        ef = e["cs"]["efforts"]
+        rows.append({"name": "Critical speed", "time": engine.hms(e["cs"]["seconds"]), "low": e["cs"]["low"],
+                     "from": f"Your fastest {', '.join(str(x['seconds'] // 60) for x in ef[:-1])} and {ef[-1]['seconds'] // 60} minutes in the last {estimates.CS_WEEKS} weeks give a critical speed of "
+                             f"{pc(1000 / e['cs']['speed'])}; a marathon in this time is run at about {estimates.fraction(e['cs']['seconds']):.0%} of it."})
+    if e["training"]:
+        t = e["training"]
+        rows.append({"name": "Training volume and pace", "time": engine.hms(t["seconds"]), "outside": not t["in_range"],
+                     "from": f"Your last {estimates.TANDA_WEEKS} weeks: {wk(t['weekly_km'])} a week at an average of {pc(t['pace_s_km'])}."})
+    out = {"rows": rows, "middle": engine.hms(e["middle"]) if e["count"] >= 3 else None}
+    if gs:
+        mon = dt.date.fromisoformat(goal["date"])
+        mon -= dt.timedelta(days=mon.weekday())
+        lo, hi = (mon - dt.timedelta(weeks=estimates.TANDA_WEEKS)).isoformat(), mon.isoformat()
+        tot = {r["monday"]: json.loads(r["summary"])["total"] for r in db.rows("SELECT monday,summary FROM weeks WHERE monday>=? AND monday<?", (lo, hi))}
+        tot.update({x["monday"]: x["total"] for x in (db.get("season") or []) if lo <= x["monday"] < hi and x["monday"] not in tot})
+        planned = sum(tot.values()) * assess.MI / 1000 / len(tot) if len(tot) == estimates.TANDA_WEEKS else None
+        n = estimates.training_for(gs, planned)
+        out["goal"] = {"time": goal["goal_time"], "pace": pc(n["pace_s_km"]), "weekly": wk(n["weekly_km"]) if n["weekly_km"] else None,
+                       "planned": wk(planned) if planned else None, "planned_time": engine.hms(n["planned_s"]) if planned else None}
+    return out
+
+
 def _ladder(goal_s, goal_miles, st, c):
     """What marathon times near the goal are worth at shorter distances (exponent 1.07, between Riegel's 1.06 and the 1.08 that suits most
     recreational runners), the weekly miles each usually takes, and where the athlete stands today."""
@@ -538,7 +570,8 @@ def state():
     key = ver and (ver, int(time.time() // STATE_REUSE_S), dt.date.today().isoformat(), _local(), json.dumps(jobs.status, sort_keys=True, default=str))
     if key and _STATE["key"] == key:
         return app.response_class(_STATE["body"], mimetype="application/json")
-    r = _state()
+    with db.session():
+        r = _state()
     if key and r.status_code == 200:
         _STATE.update(key=key, body=r.get_data())
     return r
@@ -596,6 +629,14 @@ def _state():
             fitness["goal"]["forecast"]["range"] = [engine.hms(fc["seconds"] * (1 - FORECAST_SPREAD)), engine.hms(fc["seconds"] * (1 + FORECAST_SPREAD))]
             if gs and 20 <= goal["miles"] <= 27:
                 fitness["goal"]["ladder"] = _ladder(gs, goal["miles"], st, c)
+            if 26 <= goal["miles"] <= 26.4:
+                fitness["goal"]["estimates"] = _estimates(today, now_s, tp, gs, goal, c)
+            # the race-day forecast week by week, to show whether the gap to the goal is closing
+            fitness["goal"]["trend"] = {"goal_s": gs, "race": goal["date"],
+                                        "points": [{"monday": k, "s": v["s"], "time": engine.hms(v["s"])} for k, v in sorted((db.get("forecast_log") or {}).items())
+                                                   if isinstance(v, dict) and v.get("race") == goal["id"]],
+                                        "today": [{"monday": k, "s": v[0], "time": engine.hms(v[0])} for k, v in
+                                                  sorted(((db.get("forecast_book") or {}).get(f"{goal['date']}|{round(goal['miles'], 1)}") or {}).items())]}
             if c.get("heat_adjust"):
                 rh = heat.at(dt.date.fromisoformat(goal["date"]), 9, cached_only=True)    # race starts are usually around 9
                 if rh:
@@ -670,7 +711,7 @@ def _state():
         version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=(insights.warnings(today, c["units"], c.get("sex"), L["hrmax"] if L else None) + ([{"kind": "shape", "date": today.isoformat(), "text": f"This build peaks at about {_sh['peak']} miles a week with a {_sh['long']}-mile long run, so the long run is over half of several weeks. "
       "That is how the plan shows that your volume is low for the distance and the run-up short: the limit comes from your own recent running, and no longer block has been proven yet. "
       "A longer run-up, a shorter race first, or a goal of finishing comfortably would all fit it better. Volume rises about 6% a week once you are running steadily, and it is held back after a dip."}] if (_sh := insights.shape(db.get("season") or [], goal["miles"] if goal else None)) else []) ) if db.get("setup_done") else [],
-        timing=insights.timing(today, L["hrmax"] if L else None, c["sleep_7night_min_h"]) if db.get("setup_done") else None, shoes=insights.shoes(c["units"]),
+        timing=insights.timing(today, L["hrmax"] if L else None, c["sleep_7night_min_h"]) if db.get("setup_done") else None,
         drift=insights.drift_history(today) if db.get("setup_done") else [], best_grade=best_grade, about_you={"sex": c.get("sex"), "birth_date": c.get("birth_date"), "gel_carbs_g": c.get("gel_carbs_g")},
         notify_set=bool(vault.get("notify_url")),
         bests=results.bests(today), aerobic=aero, steps=steps, predictions=preds, vo2=vo2, results=[{k: v for k, v in r.items() if k != "index"} for r in res[:150]],
@@ -1287,32 +1328,6 @@ def workout_files():
     return app.response_class(buf.getvalue(), mimetype="application/zip", headers={"Content-Disposition": "attachment; filename=periodize-workouts.zip"})
 
 
-@app.post("/api/shoes")
-def shoe_save():
-    j = request.json or {}
-    try:
-        name = (j.get("name") or "").strip()[:60]
-        start = dt.date.fromisoformat(j["start"]).isoformat()
-        k = 1 if db.cfg()["units"] == "mi" else 1000 / assess.MI
-        sm = float(j.get("start_dist") or 0) * k
-        al = float(j["alert_dist"]) * k if j.get("alert_dist") not in (None, "") else None
-        if not name or not 0 <= sm <= 5000 or (al is not None and not 50 <= al <= 5000):
-            raise ValueError
-    except (KeyError, ValueError, TypeError):
-        return jsonify(error="A pair of shoes needs a name and the date you started using them."), 400
-    if j.get("id"):
-        db.run("UPDATE shoes SET retired=? WHERE id=?", (dt.date.today().isoformat() if j.get("retire") else None, int(j["id"])))
-    else:
-        db.run("INSERT INTO shoes(name,start,start_miles,alert_miles) VALUES(?,?,?,?)", (name, start, sm, al))
-    return jsonify(ok=True)
-
-
-@app.delete("/api/shoes/<int:sid>")
-def shoe_delete(sid):
-    db.run("DELETE FROM shoes WHERE id=?", (sid,))
-    return jsonify(ok=True)
-
-
 @app.post("/api/notify/test")
 def notify_test():
     if not vault.get("notify_url"):
@@ -1574,10 +1589,6 @@ def about():
         ("Treadmill runs", [
             "A watch on a treadmill guesses distance from arm swing, so pace is not trusted. Treadmill runs are scored on heart rate, and are left out of threshold evidence, pace-at-heart-rate trends and aerobic drift. Their time still counts toward load and their distance toward weekly totals.",
             "Track runs recorded in the watch's track mode are treated as normal runs.",
-        ]),
-        ("Shoes", [
-            "Add a pair with the date you started using it. Its distance is every run from that date until you start the next pair. Set a limit and you are told when it is passed.",
-            "This assumes one pair in use at a time. There is no research-backed distance at which shoes should be replaced.",
         ]),
         ("Daily message", [
             "For a morning message with the day's session and any easing, set a daily message address under Settings, Advanced (for example a private ntfy topic), save, and press Send a test message.",

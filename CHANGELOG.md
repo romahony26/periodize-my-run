@@ -3,6 +3,23 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.1 - 2026-11-15
+### Added
+- "Three ways to estimate your marathon today" on Fitness, under Predictions (marathon goals). Beside the app's own estimate it shows one from critical speed (your fastest 3, 6, 12 and 20 minutes of the last 16 weeks) and one from training volume and pace (your last 8 weeks), with the middle of the three. Each says what it was worked out from, and is marked when it reads slow for lack of all-out running or falls outside the runners it was built on.
+- The same card says what training goes with your goal time by the training equation, and what the plan's last 8 weeks before race week are worth by it. These are signposts: the plan does not chase the mileage.
+- "Is the gap closing?" on Fitness, under Predictions: the estimate for a race run today and the forecast for race day, week by week, against your goal, with the weekly improvement needed.
+- Principle 116 in PRINCIPLES.md, with two new references.
+
+### Changed
+- In a week with a marathon-pace long run, the midweek run is easy all the way. It used to hold a second block at marathon pace, which put 34% to 39% of those weeks above easy pace; they are now 18% to 25%.
+- The page's state is worked out about four times faster: its several hundred small database reads share one connection.
+
+### Removed
+- Shoe tracking (the Shoes card on Fitness, its limit warning and its help section). Shoes already recorded stay in the database but are no longer shown.
+
+### Fixed
+- PRINCIPLES.md: the "Known gaps" heading, which had been replaced by stray lines in 2.10.3-beta.4, is back.
+
 ## 2.10.3 - 2026-11-15
 ### Added
 - After a run you can tap how it felt and where anything hurt. Both are optional; "wrecked" and repeated pain count as recovery signs.

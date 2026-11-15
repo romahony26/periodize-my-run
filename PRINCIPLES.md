@@ -532,6 +532,9 @@ of ultra training, so read these as the best available reasoning, not proven met
     (Zanini and colleagues, 2025) (*limited*). Periodize My Run's marathon-pace long run puts 3 easy miles first and the marathon-pace
     block after them, so that pace is practised on tired legs, and keeps the strength sessions through the specific phase (principle 33).
     How much durability work is enough has not been tested, so the amount is the same ladder as before. [P]
+    In a week with a marathon-pace long run the midweek run is easy throughout and the second session is dropped: with a second
+    block at pace midweek, about 40% of such a week was faster than easy, and about four fifths easy is what the evidence supports
+    (principle 12). [C]
 97. **Other training is shown, not counted.** [P] Cycling, swimming and other activities from the last four weeks are listed beside the
     running load. No study gives a fair exchange rate between a cycling hour and a running hour, so none is invented.
 98. **A pattern that can go with not eating enough for the training is flagged, never diagnosed.** [R] (*moderate*) Low energy
@@ -631,13 +634,20 @@ two or a missed log from a missed day. [P]
     report; pain at one site on three days in two weeks adds a note to have it looked at. The two-day rule is this project's own choice. [P]
 115. **A whole week of the plan, run, is worth saying so.** [P] Two or more whole weeks in a row with 90% or more of the planned miles
     run are shown as a streak on last week. It rests on principle 79 (weeks strung together count for more than a fast build) and does not change the plan.
-        ("Pain and feel, after a run", [
-            "After a run the Plan page offers two optional taps: how it felt (easy, fine, hard, wrecked) and whether anything hurt (foot or Achilles, calf or shin, knee, hip or glute, hamstring, back, or nothing). Nothing is needed from you; the plan is the same without them.",
-            "Wrecked counts as one recovery sign, as a very hard effort rated on your watch does. The other feel ratings change nothing.",
-            "One pain report counts as one recovery sign for two days. Pain on two different days in a week holds the sessions at easy running, and shortens the long run, until three days after the last report. Pain at the same place on three days in two weeks adds a note to have it looked at. Mild pain that settles by the next morning is the usual line for running on, in the Achilles trial this rests on (Silbernagel and colleagues, 2007); the two-day rule is this project's own.",
-            "It is not a diagnosis and cannot tell a niggle from an injury. Sharp pain, pain at night, or a change in how you run is a reason to stop and be seen.",
-        ]),
-        ("Daily adjustment", [
+116. **A marathon estimate is three estimates.** [P] (*moderate*) A systematic review of marathon prediction equations found
+    none reliable enough to use alone (Keogh and colleagues, 2019). Beside its own estimate from threshold pace and endurance,
+    Periodize My Run shows two that use different evidence. One is critical speed, from your fastest 3, 6, 12 and 20 minutes of the
+    last 16 weeks, with the share of it marathoners hold: 93% for a 2:30 marathon and 79% for a 6:00 one (Smyth and Muniz-Pumares,
+    2020); the straight line between those two figures is this project's reading. It can only be as fast as your hardest running in
+    the window, so it is marked as reading slow when it is below your threshold speed. The other is the training equation of Tanda
+    (2011), from the weekly distance and average pace of the last 8 weeks; it was fitted to 22 runners who ran 2:47 to 3:36, and is
+    marked when its answer falls outside that. The middle of the three is shown, and so is what the training equation says about
+    your goal time, with an average training pace of 1.16 times goal pace (four fifths easy running; this project's choice). None of
+    this changes the plan: volume stays limited by what you have held before (principle 3). The forecast for race day and the
+    estimate for a race run today are kept week by week and drawn against the goal, so the direction can be seen.
+
+## Known gaps: where Periodize My Run does not yet follow the evidence
+
 
 Listed so they are not mistaken for principles.
 
@@ -673,6 +683,7 @@ on a detail.
 
 - Bangsbo J and colleagues (2009). Reduced volume and increased training intensity elevate muscle Na+-K+ pump α2-subunit expression as well as short- and long-term work capacity in humans. *J Appl Physiol*. *Record confirmed.*
 - Afonseca LA, Watanabe RN, Duarte M (2022). A worldwide comparison of long-distance running training in 2019 and 2020: associated effects of the COVID-19 pandemic. *PeerJ* 10:e13192. Data: figshare 10.6084/m9.figshare.16620238, CC BY 4.0. *Dataset description read; analysis is this project's own.*
+- Keogh A, Smyth B, Caulfield B, Lawlor A, Berndsen J, Doherty C (2019). Prediction equations for marathon performance: a systematic review. *Int J Sports Physiol Perform* 14:1159–1169. *Abstract read.*
 - Lövdal SS, den Hartigh RJR, Azzopardi G (2021). Injury prediction in competitive runners with machine learning. *Int J Sports Physiol Perform* 16:1522–1531. Data: DataverseNL doi:10.34894/UWU9PV, CC0. *Dataset record and README read; analysis is this project's own; volume and pages from memory.*
 - Banister EW (1991). Modeling elite athletic performance. In: *Physiological Testing of Elite Athletes*. Human Kinetics. *From memory; a book chapter.*
 - Bassett DR, Howley ET (2000). Limiting factors for maximum oxygen uptake and determinants of endurance performance. *Med Sci Sports Exerc* 32:70–84.
@@ -784,6 +795,7 @@ on a detail.
 - Swain P, Biggins J, Gordon D (2020). Marathon pacing ability: training characteristics and previous experience. *Eur J Sport Sci*. *Abstract read.*
 - Suter D, Sousa CV, Hill L, Scheer V, Nikolaidis PT, Knechtle B (2020). Even pacing is associated with faster finishing times in ultramarathon distance trail running: the "Ultra-Trail du Mont Blanc" 2008–2019. *Int J Environ Res Public Health* 17:7074. *Abstract read.*
 - Tanaka H, Seals DR (2008). Endurance exercise performance in Masters athletes: age-associated changes and underlying physiological mechanisms. *J Physiol* 586:55–63.
+- Tanda G (2011). Prediction of marathon performance time on the basis of training indices. *J Hum Sport Exerc* 6:511–520.
 - Thomas C, Jones H, Whitworth-Turner C, Louis J (2020). High-intensity exercise in the evening does not disrupt sleep in endurance runners. *Eur J Appl Physiol*. *Abstract read.*
 - Thomas DT, Erdman KA, Burke LM (2016). American College of Sports Medicine joint position statement: nutrition and athletic performance. *Med Sci Sports Exerc* 48:543–568.
 - Tiller NB and colleagues (2019). International Society of Sports Nutrition position stand: nutritional considerations for single-stage ultra-marathon training and racing. *J Int Soc Sports Nutr* 16:50.
