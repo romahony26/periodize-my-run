@@ -4,6 +4,7 @@ import datetime as dt
 import json
 import os
 import sqlite3
+import threading
 
 HOME = os.path.expanduser(os.environ.get("PERIODIZE_HOME", "~/.periodize-my-run"))
 OLD_HOME = os.path.expanduser("~/.periodize")        # the folder's name before the app was renamed Periodize My Run
@@ -130,6 +131,31 @@ def connect():
         raise
     finally:
         c.close()
+
+
+_watch = {"conn": None, "id": None}
+_watch_lock = threading.Lock()
+
+
+def version():
+    """A number that changes whenever anything is written to the database, so an answer worked out once can be reused until then.
+
+    SQLite keeps this count itself (PRAGMA data_version: it moves when another connection commits a change), so reading it
+    costs one small query on a connection kept open for the purpose. The file's identity is part of the answer because a restored
+    backup is a different file."""
+    path = os.path.join(HOME, "periodize.db")
+    with _watch_lock:
+        try:
+            st = os.stat(path)
+            ident = (st.st_dev, st.st_ino)
+            if _watch["conn"] is None or _watch["id"] != ident:
+                if _watch["conn"] is not None:
+                    _watch["conn"].close()
+                _watch["conn"], _watch["id"] = sqlite3.connect(path, timeout=30, check_same_thread=False), ident
+            return ident, _watch["conn"].execute("PRAGMA data_version").fetchone()[0]
+        except (OSError, sqlite3.Error):
+            _watch["conn"] = None
+            return None
 
 
 def get(key, default=None):

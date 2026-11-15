@@ -3,6 +3,11 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.16 - 2026-11-15
+### Fixed
+- An open page no longer keeps the computer running the app busy. The page asks for everything it shows every six seconds, and each answer took about three seconds to work out on a Raspberry Pi, so one open tab used about half a processor core all day. The answer is now reused until something is written to the database, a job moves on, or two minutes pass.
+- A page in a hidden tab or on a locked phone stops asking, and catches up the moment it is shown again.
+
 ## 2.10.3-beta.15 - 2026-11-15
 ### Changed
 - The Plan page is far shorter. This week and next week show their days; last week and every later week are one row each (dates, miles, a small bar for each day, and the week's sessions and long run in words) that opens with a tap. On a phone the page was about 27 screens long; it is now about 5.

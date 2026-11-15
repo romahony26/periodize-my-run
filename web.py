@@ -525,8 +525,26 @@ def _days(c, today, L=None):
     return out
 
 
+STATE_REUSE_S = 120      # the longest one worked-out answer is reused; it holds times of day, which move on with the clock
+_STATE = {"key": None, "body": None}
+
+
 @app.get("/api/state")
 def state():
+    """Everything the page shows. An open page asks for this every few seconds and working it out takes seconds on a small
+    computer, so the last answer is sent again while nothing has been written to the database, no job has moved on and the
+    clock is in the same two minutes."""
+    ver = db.version()
+    key = ver and (ver, int(time.time() // STATE_REUSE_S), dt.date.today().isoformat(), _local(), json.dumps(jobs.status, sort_keys=True, default=str))
+    if key and _STATE["key"] == key:
+        return app.response_class(_STATE["body"], mimetype="application/json")
+    r = _state()
+    if key and r.status_code == 200:
+        _STATE.update(key=key, body=r.get_data())
+    return r
+
+
+def _state():
     c, today = db.cfg(), dt.date.today()
     prof = db.get("profile")
     rs = db.rows("SELECT * FROM races ORDER BY date")
