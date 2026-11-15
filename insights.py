@@ -380,3 +380,45 @@ def warnings(today, units="mi", sex=None, hrmax=None):
     if t and t["watch"]:
         out.append({"kind": "timing", "date": today.isoformat(), "text": t["watch"]})
     return out
+
+
+FOCUS_WEEKS = 4            # how far back the focus looks
+FAST_EASY_MIN = 3          # easy runs with faster running in them before it is worth saying [C]
+MISSED_MIN = 4             # planned sessions missed in two weeks before it is worth saying [C]
+CHECKPOINT_DAYS = 21       # a tune-up race this close is the next thing to aim at
+
+
+def focus(today, c, L, tp, races, statuses=()):
+    """The one or two things most worth attention this week, read from what was run against what was planned.
+
+    Nothing here changes the plan. In order: easy runs that were not easy (principle 12), sessions missed without a recorded
+    reason (principle 79), and a tune-up race that is close. At most two are shown, so the first matter most."""
+    import engine
+    import execution       # imported here because execution imports this module
+    out = []
+    try:
+        sessions = execution.history(c, L, weeks=FOCUS_WEEKS)["sessions"]
+    except Exception:      # noqa: BLE001 - a note on the Plan page must never stop the page
+        sessions = []
+    easy = [x for x in sessions if x["type"] == "Easy" and x["done"] and x["score"]]
+    fast = [x for x in easy if x["score"].get("cause") == "Part of this easy run was faster than easy pace."]
+    if len(fast) >= FAST_EASY_MIN and 2 * len(fast) >= len(easy):
+        hr = f" or under {L['easy_hr_max']} bpm" if L.get("easy_hr_max") else ""
+        out.append({"kind": "easy", "title": "Keep the easy runs easy",
+                    "text": f"{len(fast)} of your last {len(easy)} easy runs had faster-than-easy running in them. Easy is {engine.zone_pace(tp, 'easy', c['units'])}{hr}. "
+                            "Runners who keep about four fifths of their running easy improve more than those who drift into the middle, "
+                            "and the fatigue from fast easy days is what spoils the sessions that matter."})
+    away = [(s["start"], s["end"] or today.isoformat()) for s in statuses]
+    since = (today - dt.timedelta(days=14)).isoformat()
+    missed = [x for x in sessions if x["date"] >= since and x["score"] and x["score"]["verdict"] == "Missed" and not any(a <= x["date"] <= b for a, b in away)]
+    if len(missed) >= MISSED_MIN:
+        out.append({"kind": "missed", "title": "Run the days before chasing the paces",
+                    "text": f"{len(missed)} planned runs were missed in the last two weeks with no reason recorded. Weeks strung together count for more than any single session: "
+                            "an easy run cut short still counts, and a day you cannot run is better marked as too busy, so the week is rebuilt around it."})
+    nxt = sorted((r for r in races if r["priority"] != "A" and 0 <= (dt.date.fromisoformat(str(r["date"])) - today).days <= CHECKPOINT_DAYS), key=lambda r: str(r["date"]))
+    if nxt:
+        r, d = nxt[0], (dt.date.fromisoformat(str(nxt[0]["date"])) - today).days
+        out.append({"kind": "race", "title": f"{r['name']} in {d} day{'' if d == 1 else 's'}",
+                    "text": "Your next checkpoint, and your first all-out effort in a while: it resets the paces and the estimates. Race it properly; the week is lightened for it."})
+    return out[:2]
+

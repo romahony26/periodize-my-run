@@ -645,6 +645,10 @@ two or a missed log from a missed day. [P]
     your goal time, with an average training pace of 1.16 times goal pace (four fifths easy running; this project's choice). None of
     this changes the plan: volume stays limited by what you have held before (principle 3). The forecast for race day and the
     estimate for a race run today are kept week by week and drawn against the goal, so the direction can be seen.
+117. **One or two things to attend to, read from what you ran.** [P] The Plan page names at most two: easy runs that had
+    faster running in them (three or more, and at least half, of the easy runs of the last four weeks), which rests on principle 12;
+    four or more planned runs missed in two weeks with no status recorded, which rests on principle 79; and a tune-up race within
+    three weeks. The thresholds are this project's choice. It is a note and changes nothing in the plan.
 
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 

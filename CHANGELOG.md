@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.4 - 2026-11-15
+### Added
+- A colour theme can be chosen under Settings, Training, Appearance: Match this device, Light, Dark, or Black. Black is a new, darker theme for night and for screens that switch black pixels off. The choice is kept on the device you make it on.
+- "Focus this week" on the Plan page: at most two things worth attention, read from what you ran against what was planned. Easy runs that had faster running in them, planned runs missed with no reason recorded, and a tune-up race within three weeks. It is a note and changes nothing in the plan (principle 117).
+
+### Changed
+- The Goal and Today cards at the top of the Plan page are the same height, so the row no longer has a gap under the shorter one.
+
 ## 2.10.4-beta.3 - 2026-11-15
 ### Added
 - Fitness opens with "On track?": your goal time, the forecast for race day with its range, and what you would run today, side by side, with a link to how they are estimated.

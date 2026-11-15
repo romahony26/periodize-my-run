@@ -34,7 +34,10 @@ function settingsView(){const s=S.settings;
     <div class="fgrid"><div><label for="ysex">Sex (for age-grade standards, race pacing and injury advice)</label><select id="ysex">${opt('','Not set',S.about_you.sex||'')}${opt('F','Female',S.about_you.sex||'')}${opt('M','Male',S.about_you.sex||'')}</select></div>
     <div><label for="ydob">Date of birth</label><input id="ydob" type="date" value="${E(S.about_you.birth_date||'')}"></div>
     <div><label for="ygel">Carbohydrate in one of your gels (g)</label><input id="ygel" type="number" min="10" max="60" value="${S.about_you.gel_carbs_g}"></div></div>
-    <p style="margin:12px 0 0"><button class="ghost" id="ysave">Save</button></p></div>`;
+    <p style="margin:12px 0 0"><button class="ghost" id="ysave">Save</button></p></div>
+   <div class="card c12" id="themecard"><p class="eyebrow">Appearance</p>
+     <div class="seg" role="group" aria-label="Colour theme">${[['auto','Match this device'],['light','Light'],['dark','Dark'],['black','Black']].map(([k,t])=>`<button class="ghost ${themeNow()===k?'on':''}" data-themeset="${k}" aria-pressed="${themeNow()===k}">${t}</button>`).join('')}</div>
+     <p class="xs mute" style="margin:8px 0 0">Kept on this device only. Black is the darkest: for night, and for screens that switch black pixels off.</p></div>`;
   const backup=`<div class="card c12"><p class="eyebrow">Backups</p><p class="xs mute" style="margin-top:0">Made every night and thinned as they age: daily for 7 days, weekly for 4 weeks, monthly for 3 months. Restoring saves the current state first, so it can be undone.</p>
     <div class="fgrid"><div><label for="abk">Automatic backups</label>${yn('abk',S.auto_backup)}</div>
     <div><label for="bsel">Backup</label><select id="bsel">${S.backups.map(b=>`<option value="${E(b.name)}" data-part="local">${E((b.made_at&&atTime(b.made_at))||b.made.replace('T',' '))} (${b.size_kb} KB)</option>`).join('')||'<option value="">None yet</option>'}</select></div>

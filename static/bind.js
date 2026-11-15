@@ -121,6 +121,7 @@ function bind(){
   $$('.day').forEach(d=>{const pick=()=>{SEL=SEL===d.dataset.date?null:d.dataset.date;render()};d.onclick=pick;d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}}});
   $$('[data-wk]').forEach(b=>b.onclick=()=>{WOPEN[b.dataset.wk]=b.getAttribute('aria-expanded')!=='true';render();if(WOPEN[b.dataset.wk]){const e=document.getElementById('wk-'+b.dataset.wk);if(e)e.scrollIntoView({block:'start',behavior:'smooth'})}});
   $$('[data-wkjump]').forEach(b=>{const go=()=>{WOPEN[b.dataset.wkjump]=true;render();const e=document.getElementById('wk-'+b.dataset.wkjump);if(e)e.scrollIntoView({block:'start',behavior:'smooth'})};b.onclick=go;b.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}}});
+  $$('[data-themeset]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.themeset);render()});
   on('#hall',()=>{HALL=!HALL;render()});
   on('#toladder',e=>{if(e&&e.preventDefault)e.preventDefault();view='you';FTAB='pred';try{localStorage.setItem('ftab','pred')}catch(x){}render();scrollTo({top:0})});
   on('#totrack',e=>{if(e&&e.preventDefault)e.preventDefault();view='you';FTAB='pred';try{localStorage.setItem('ftab','pred')}catch(x){}render();scrollTo({top:0})});

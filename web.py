@@ -681,12 +681,14 @@ def _state():
     graded = [r for r in res if r["age_grade"]]
     best_grade = max(graded, key=lambda r: r["age_grade"], default=None)
     form, season, lt, climb = None, [], None, None
+    focus = []
     if wk and goal:
         s1 = json.loads(wk[0]["summary"])
         longm = max((d["miles"] or 0) for d in db.rows("SELECT miles FROM plan WHERE date>=? AND date<?", (mon.isoformat(), (mon + dt.timedelta(days=7)).isoformat())) or [{"miles": 0}])
         climb = course.climb_target(goal, s1.get("weeks_to_race"), s1["total"], longm, today)
     if wk and L:
         form = insights.form(today, wk[0]["tp"], L["hrmax"])
+        focus = insights.focus(today, c, L, wk[0]["tp"], rs, db.rows("SELECT start,end FROM status")) if db.get("setup_done") else []
         for r in db.rows("SELECT monday,mode,summary FROM weeks WHERE monday>=? ORDER BY monday", (mon.isoformat(),)):
             sm = json.loads(r["summary"])
             season.append({"monday": r["monday"], "mode": r["mode"], "total": sm["total"], "long": max((d["miles"] or 0) for d in db.rows("SELECT miles FROM plan WHERE date>=? AND date<?", (r["monday"], (dt.date.fromisoformat(r["monday"]) + dt.timedelta(days=7)).isoformat())) or [{"miles": 0}])})
@@ -708,7 +710,7 @@ def _state():
              "miles_week": round(sp["week"] * 7 * 0.75 / assess.MI, 1)} if sp else None
     lo = jobs.last_ok()
     return jsonify(
-        version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, season=season, watch_threshold=lt, warnings=(insights.warnings(today, c["units"], c.get("sex"), L["hrmax"] if L else None) + ([{"kind": "shape", "date": today.isoformat(), "text": f"This build peaks at about {_sh['peak']} miles a week with a {_sh['long']}-mile long run, so the long run is over half of several weeks. "
+        version=changelog()[0]["version"], project=PROJECT, terms_ok=terms_accepted(), climb=climb, map_tiles=bool(c.get("map_tiles")), reshuffled=db.get("reshuffled") or {}, form=form, focus=focus, season=season, watch_threshold=lt, warnings=(insights.warnings(today, c["units"], c.get("sex"), L["hrmax"] if L else None) + ([{"kind": "shape", "date": today.isoformat(), "text": f"This build peaks at about {_sh['peak']} miles a week with a {_sh['long']}-mile long run, so the long run is over half of several weeks. "
       "That is how the plan shows that your volume is low for the distance and the run-up short: the limit comes from your own recent running, and no longer block has been proven yet. "
       "A longer run-up, a shorter race first, or a goal of finishing comfortably would all fit it better. Volume rises about 6% a week once you are running steadily, and it is held back after a dip."}] if (_sh := insights.shape(db.get("season") or [], goal["miles"] if goal else None)) else []) ) if db.get("setup_done") else [],
         timing=insights.timing(today, L["hrmax"] if L else None, c["sleep_7night_min_h"]) if db.get("setup_done") else None,
