@@ -91,7 +91,7 @@ VALID = {
     "strength": lambda v: isinstance(v, bool), "push_enabled": lambda v: isinstance(v, bool), "daily_adjust": lambda v: isinstance(v, bool), "readiness_response": lambda v: _is_int(v, 0, 100),
     "aero_test": lambda v: isinstance(v, bool), "aero_runs": lambda v: isinstance(v, bool), "apply_learned": lambda v: isinstance(v, bool),
     "run_time": lambda v: isinstance(v, str) and bool(re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v)), "push_days": lambda v: v in (7, 14, 21) and not isinstance(v, bool),
-    "easy_target": lambda v: v in ("none", "pace"), "aero_format": lambda v: v in ("short", "original"), "aero_test_weeks": lambda v: _is_int(v, 4, 8),
+    "easy_target": lambda v: v in ("none", "pace", "hr"), "aero_format": lambda v: v in ("short", "original"), "aero_test_weeks": lambda v: _is_int(v, 4, 8),
     "hrmax": lambda v: v is None or _is_num(v, 120, 230), "peak_miles_override": lambda v: v is None or _is_num(v, 10, 150),
     "weekly_increase": lambda v: _is_num(v, 0, 0.2), "volume_boost": lambda v: _is_num(v, 0, 0.15), "detail_weeks": lambda v: _is_int(v, 4, 104), "weeks_ahead": lambda v: _is_int(v, 1, 16),
     "forecast_completion": lambda v: v is None or _is_num(v, 0.5, 1),
@@ -1616,7 +1616,7 @@ def about():
         ]),
         ("Your watch", [
             f"Status: {yn(c['push_enabled'])}. The next {c['push_days']} days are kept on your Garmin calendar as structured workouts with pace targets on the fast parts.",
-            f"Easy and steady runs: {'pace range alerts' if c['easy_target'] == 'pace' else 'no pace alerts'}.",
+            f"Easy and steady runs: {'pace range alerts' if c['easy_target'] == 'pace' else 'heart rate alerts' if c['easy_target'] == 'hr' else 'no pace alerts'}.",
             "A day is re-sent only when it changes: a replan, a move, or today's pace adjustment. Only workouts made by this app (names starting PZ) are ever deleted.",
             "Every hour, at a random time past the hour, the app syncs again: it reads new runs, updates the plan, and puts back any workout missing from your Garmin calendar, such as one deleted in Garmin Connect.",
         ]),

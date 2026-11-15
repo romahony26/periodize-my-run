@@ -21,7 +21,16 @@ PACE = {"workoutTargetTypeId": 6, "workoutTargetTypeKey": "pace.zone", "displayO
 HEART = {"workoutTargetTypeId": 4, "workoutTargetTypeKey": "heart.rate.zone", "displayOrder": 4}
 
 
+def easy_hr(c):
+    """(low, high) beats a minute for an easy run: 70% to 76% of maximum heart rate (the app's own easy ceiling), or None with no maximum yet."""
+    hr = c.get("hrmax") or (db.get("profile") or {}).get("hrmax_observed")
+    return (round(0.70 * hr), round(0.76 * hr)) if hr else None
+
+
 def _target(zone, tp, c, slow):
+    if zone == "easy" and c["easy_target"] == "hr":
+        band = easy_hr(c)
+        return (*band, "hr") if band else None
     if zone is None or (zone in ("easy", "steady") and c["easy_target"] != "pace"):
         return None
     lo, hi = engine.zone_speeds(tp, zone, slow)
@@ -34,7 +43,7 @@ def _step(order, kind, cond, value, target):
     cid = 2 if cond == "time" else 3
     s = {"type": "ExecutableStepDTO", "stepOrder": order, "stepType": {"stepTypeId": STEP[kind], "stepTypeKey": kind, "displayOrder": STEP[kind]},
          "endCondition": {"conditionTypeId": cid, "conditionTypeKey": cond, "displayOrder": cid, "displayable": True},
-         "endConditionValue": round(float(value), 1), "targetType": PACE if target else NO_TARGET}
+         "endConditionValue": round(float(value), 1), "targetType": (HEART if len(target) == 3 else PACE) if target else NO_TARGET}
     if target:
         s["targetValueOne"], s["targetValueTwo"] = round(target[0], 3), round(target[1], 3)
     return s
@@ -95,6 +104,9 @@ def workout(day, tp, c, slow=0.0):
     text = engine.describe(day, tp, c["units"], slow)
     if slow:
         text = f"Paces eased {slow:.1%} today for recovery. " + text
+    if c["easy_target"] == "hr" and easy_hr(c) and any(s[0] == "d" and s[2] == "easy" for s in src):
+        lo, hi = easy_hr(c)
+        text += f" Easy running: the watch alerts if heart rate leaves {lo}-{hi} bpm. Slow down when it climbs."
     if day.get("note"):
         text += " " + day["note"]
     return {"workoutName": f"PZ {day['label']} {engine.dist(day['miles'], c['units'])}"[:60], "description": text[:1000], "sportType": RUNNING,

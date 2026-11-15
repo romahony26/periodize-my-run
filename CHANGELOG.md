@@ -3,6 +3,11 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.12 - 2026-11-15
+### Added
+- Easy runs on the watch can now carry a heart rate alert, so the watch beeps when you drift too fast. The band is 70% to 76% of your maximum heart rate (for a maximum of 190: 133 to 144 bpm), the same ceiling the app already shows as "Easy under". Warm-ups and cool-downs count as easy too; hard and steady parts keep their pace targets. The workout description says the band.
+- "Easy runs on the watch" in Settings has a new choice, "Heart rate alert (keeps you easy)", and it is the default for new setups. If you already chose "No alerts" or "Pace range alerts" that choice stays. With no maximum heart rate known yet, no alert is set.
+
 ## 2.10.3-beta.11 - 2026-11-11
 ### Fixed
 - The 7 mile easy-running recovery mode now gives you a run on every day that is not a rest day you set (up to six a week). The planner had dropped an easy day in light weeks, leaving a rest day you had not asked for.
