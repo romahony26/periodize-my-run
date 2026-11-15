@@ -3,6 +3,14 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.3 - 2026-11-15
+### Added
+- Fitness opens with "On track?": your goal time, the forecast for race day with its range, and what you would run today, side by side, with a link to how they are estimated.
+
+### Changed
+- Races and status: statuses that are over fold under "Past", so the list shows what is current and still to come.
+- Settings, How you train: the controls sit in an even grid, the sync-time hint is under the sync time, and the daily adjustment slider has its own row.
+
 ## 2.10.4-beta.2 - 2026-11-15
 ### Added
 - History says what the list adds up to: how many sessions were on target, close, off target and missed, and the most common reasons a session was off.

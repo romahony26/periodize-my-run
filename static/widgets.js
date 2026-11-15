@@ -5,7 +5,7 @@ let FTAB=(()=>{try{return localStorage.getItem('ftab')||'now'}catch(e){return 'n
 const FSECS=[['now','Now'],['progress','Progress'],['pred','Predictions'],['records','Records']];
 const FMAP=[['Threshold pace','now'],['Race-specific endurance','now'],['Steps outside','now'],['Fitness, fatigue','now'],['Aerobic drift','now'],['Recovery trends','now'],['When you run','now'],
   ['Is it working','progress'],['Plan scorecard','progress'],['Plan against actual','progress'],['Last eight weeks','progress'],['Paces now','progress'],
-  ['What each marathon','pred'],['Three ways to estimate','pred'],['Is the gap closing','pred'],['Race predictor','pred'],['How accurate','pred'],['VO2max','pred'],
+  ['On track','now'],['What each marathon','pred'],['Three ways to estimate','pred'],['Is the gap closing','pred'],['Race predictor','pred'],['How accurate','pred'],['VO2max','pred'],
   ['Race results','records'],['Personal bests','records'],['Your history','records'],['Your limits','records']];
 function foldNotes(root){root.querySelectorAll('p.xs.mute').forEach(p=>{
   if(p.id||p.closest('details,table,.modal,.ov')||p.textContent.length<150||p.parentElement.classList.contains('stat')||/^(Load this week|Warning signs)/.test(p.textContent))return;     // numbers stay in view

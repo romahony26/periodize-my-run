@@ -2,7 +2,7 @@
 function youView(){
   const f=S.fitness,p=S.profile,L=S.limits,st=S.steps;if(!f)return '<div class="grid"><div class="card c12">No plan yet.</div></div>';
   const t=s=>s?`<span class="num">${fmt(s.time_s)}</span> <span class="mute xs">${nice(s.date)} ${s.date.slice(0,4)}</span>`:'—';
-  return `<div class="grid">
+  return `<div class="grid">${f.goal?trackCard(f.goal):''}
   <div class="card"><p class="eyebrow" style="display:flex;align-items:center">Threshold pace ${trendBtn('speed')}</p>${TR&&TR.speed?dirTag(TR.speed.dir,TR.speed.window):''}<div class="big num">${E(f.threshold)}</div><p class="small mute">${f.change>=0?'+':''}${f.change.toFixed(1)}% on last week. Best evidence: ${E(f.evidence)}.</p>
     ${S.watch_threshold?(w=>`<p class="xs mute" id="wthr" style="margin:8px 0 0">Your watch's estimate: <b class="num">${E(w.pace)}</b>${w.hr?` at <b class="num">${w.hr}</b> bpm`:''} (${w.date?nice(w.date):'undated'}), ${Math.abs(w.diff)<0.5?'the same as':Math.abs(w.diff)+'% '+(w.diff>0?'faster than':'slower than')} the figure above. ${w.used?'It counts as evidence while it is under six weeks old.':'It is more than six weeks old, so it is shown but not used.'}</p>`)(S.watch_threshold):''}</div>
   <div class="card"><p class="eyebrow" style="display:flex;align-items:center">Race-specific endurance ${trendBtn('base')}</p>${TR&&TR.base?dirTag(TR.base.dir,TR.base.window):''}<div class="big num">${Math.round(f.endurance*100)}%</div>
@@ -82,3 +82,10 @@ function youView(){
   <div class="card c12"><p class="eyebrow">Plan against actual</p>${S.compliance.length?`<table><tr><th>Week</th><th class="r">Planned</th><th class="r">Done</th><th class="r"></th></tr>${S.compliance.map(w=>`<tr><td>${nice(w.week)}</td><td class="r num">${E(w.planned)}</td><td class="r num">${E(w.done)}</td><td class="r num">${w.pct}%</td></tr>`).join('')}</table>`:'<p class="small mute">Builds up as planned days pass.</p>'}
     ${S.weight?`<p class="small" style="margin:12px 0 0">Weight, 7-day average: <b class="num">${S.weight.now} kg</b>${S.weight.change!==null?` <span class="mute">(${S.weight.change>0?'+':''}${S.weight.change} kg in 4 weeks)</span>`:''}</p>`:''}</div></div>`;
 }
+
+/* The first thing on Fitness: the goal, the forecast for race day and where you are today, side by side. */
+function trackCard(g){const fc=g.forecast;return `<div class="card c12" id="trackcard"><p class="eyebrow">On track for ${E(g.name)}? <span class="mute" style="text-transform:none;letter-spacing:0">· ${g.days} day${g.days===1?'':'s'} to go</span></p>
+  <div class="stats3">${g.target?`<div><div class="xs mute">Goal</div><div class="big num">${E(g.target)}</div></div>`:''}
+    ${fc?`<div><div class="xs mute">Forecast for race day</div><div class="big num">${fc.time}</div>${fc.range?`<div class="xs mute num">${fc.range[0]} to ${fc.range[1]}</div>`:''}</div>`:''}
+    <div><div class="xs mute">If you raced today</div><div class="big num">${g.now}</div></div></div>
+  <p class="small" style="margin:12px 0 0">${fc&&fc.gap?`The forecast is <b class="num">${fc.gap[1]}</b> ${fc.gap[0]==='behind'?'behind':'ahead of'} your goal. `:''}<a href="#" id="totrack">How this is estimated, and whether the gap is closing</a></p></div>`}

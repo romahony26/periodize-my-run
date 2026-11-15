@@ -123,6 +123,7 @@ function bind(){
   $$('[data-wkjump]').forEach(b=>{const go=()=>{WOPEN[b.dataset.wkjump]=true;render();const e=document.getElementById('wk-'+b.dataset.wkjump);if(e)e.scrollIntoView({block:'start',behavior:'smooth'})};b.onclick=go;b.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}}});
   on('#hall',()=>{HALL=!HALL;render()});
   on('#toladder',e=>{if(e&&e.preventDefault)e.preventDefault();view='you';FTAB='pred';try{localStorage.setItem('ftab','pred')}catch(x){}render();scrollTo({top:0})});
+  on('#totrack',e=>{if(e&&e.preventDefault)e.preventDefault();view='you';FTAB='pred';try{localStorage.setItem('ftab','pred')}catch(x){}render();scrollTo({top:0})});
   on('#selx',()=>{SEL=null;render()});
   if($('#ov')){$('#ov').onclick=e=>{if(e.target.id==='ov'){SEL=null;render()}};const x=$('#selx');if(x&&document.activeElement===document.body)x.focus()}
   let from=null;
