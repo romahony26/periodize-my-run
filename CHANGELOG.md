@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.8 - 2026-11-15
+### Fixed
+- On a phone "Do this now" sits above Today's card, first on the Plan page, as it does on a desktop. It was below Today's card.
+
 ## 2.10.4-beta.7 - 2026-11-15
 ### Changed
 - "Do this now" is the first thing on the Plan page: up to five instructions in order of how much they matter, the first as a headline. It now covers recovery today, sleep over the week, mileage against the plan and the goal, and walking, as well as easy pace, missed runs, the maximum heart rate setting and the next race. The wording is direct and each one gives its numbers.
