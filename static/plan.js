@@ -51,6 +51,11 @@ function planView(){
   const f=S.fitness, r=S.readiness, t=S.days.find(d=>d.today)||{};
   const lev={green:'Recovered',amber:'A bit tired',red:'Not recovered',unknown:'Waiting for watch sync'};
   let h='<div class="grid toprow">'+termsNotice()+updateBanner();
+  // what to do now, first on the page: the one that matters most as a headline, the rest beside it
+  if(S.focus&&S.focus.length){const [top,...rest]=S.focus;
+    h+=`<div class="card c12 coach ${top.kind}" id="focuscard"><p class="eyebrow">Do this now</p>
+      <div class="lead"><p class="h">${E(top.title)}</p><p class="small" style="margin:6px 0 0">${E(top.text)}</p></div>
+      ${rest.length?`<div class="focus">${rest.map(x=>`<div class="fo ${x.kind}"><b>${E(x.title)}</b><p class="small" style="margin:4px 0 0">${E(x.text)}</p></div>`).join('')}</div>`:''}</div>`}
   if(f&&f.goal){const g=f.goal, wk=f.week.weeks_to_race||0;
     h+=`<div class="card hero c6">${ring(Math.max(0.03,Math.min(1,1-g.days/252)),wk+'w')}<p class="eyebrow">Goal · ${nice(g.date)} · ${g.days} days to go</p><p class="h">${E(g.name)}</p>
       <div class="stats"><div class="stat"><div class="v num">${g.now}</div><div class="k">If you raced today</div></div>
@@ -103,7 +108,6 @@ function planView(){
   if(wxOn)h+=`<div class="card c6" id="weathercard"><p class="eyebrow">Weather</p>
     ${S.heat&&S.heat.today?`<p class="xs mute" style="margin:6px 0 0">☀ Around ${S.heat.today.hour}:00: ${S.heat.today.temp}°C, dew point ${S.heat.today.dew}°C${S.heat.today.pct===null?' · too hot for hard running':S.heat.today.pct>0?` · about ${S.heat.today.pct}% slower for the heat`:' · no heat slowdown'}${S.heat.today.wind!=null?` · wind ${wxWind(S.heat.today.wind)}${S.heat.today.gust?`, gusts ${wxWind(S.heat.today.gust)}`:''}${S.heat.today.wind_pct?` · about ${S.heat.today.wind_pct}% slower for the wind`:''}`:''}</p>`:''}
     ${metWarn(S.met_warnings,S.today)}</div>`;
-  if(S.focus&&S.focus.length)h+=`<div class="card c12" id="focuscard"><p class="eyebrow">Focus this week</p><div class="focus">${S.focus.map(x=>`<div class="fo ${x.kind}"><b>${E(x.title)}</b><p class="small" style="margin:4px 0 0">${E(x.text)}</p></div>`).join('')}</div></div>`;
   h+='</div>';
   if(S.warnings&&S.warnings.length)h+=`<div class="alert" id="watchouts" role="status"><b>Watch-outs</b><ul class="why" style="margin:6px 0 0">${S.warnings.map(w=>`<li>${E(w.text)}</li>`).join('')}</ul></div>`;
   if(S.climb)h+=(c=>`<div class="grid" style="margin-top:14px"><div class="card c12" id="climbcard"><p class="eyebrow">Climb this week · toward ${E(c.race)}</p>

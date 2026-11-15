@@ -15,6 +15,7 @@ Sources, where there is one:
     and lower overnight HRV. Sargent and colleagues (2014): early training cuts sleep. Bone stress injury by sex: Hollander and colleagues (2021).
 """
 import datetime as dt
+import json
 import math
 import re
 
@@ -383,51 +384,111 @@ def warnings(today, units="mi", sex=None, hrmax=None):
 
 
 FOCUS_WEEKS = 4            # how far back the focus looks
+FOCUS_MOST = 5             # how many things are named; the first is the one that matters most
 FAST_EASY_MIN = 3          # easy runs with faster running in them before it is worth saying [C]
 MISSED_MIN = 4             # planned sessions missed in two weeks before it is worth saying [C]
 CHECKPOINT_DAYS = 21       # a tune-up race this close is the next thing to aim at
 HRMAX_GAP = 4              # beats a hand-set maximum heart rate may sit below the observed one before it is questioned [C]
+SLEEP_LOW_H = 7.0          # a week's average under this is said: the consensus range for adults and athletes starts at 7 hours (Walsh 2021)
+SLEEP_AIM_H = 8            # what is asked for when sleep is short, inside that 7 to 9 hour range [C]
+MILES_SHORT = 0.75         # four-week running under this share of the planned week is the gap worth naming first [C]
+WALK_MILES_WEEK = 15       # walking outside runs, miles a week, from which it is named as load [C]
+WALK_EASY_STEPS = 8000     # steps to stay under on a session day and the day before the long run [C]
+STEP_M = 0.75
 
 
-def focus(today, c, L, tp, races, statuses=()):
-    """The one or two things most worth attention this week, read from what was run against what was planned.
+def focus(today, c, L, tp, races, statuses=(), goal=None):
+    """What to do now, in order of how much it matters: recovery, sleep, mileage, walking, how the running was done, the next race.
 
-    Nothing here changes the plan. In order: easy runs that were not easy (principle 12), sessions missed without a recorded
-    reason (principle 79), and a tune-up race that is close. At most two are shown, so the first matter most."""
+    Read from the watch's readings and from what was run against what was planned. Each one says what to do and gives the numbers
+    behind it. Nothing here changes the plan; the rules that do are the planner's and the daily readiness. The order and the
+    thresholds are this project's choice (principle 117); where a figure comes from research the text names it."""
     import engine
     import execution       # imported here because execution imports this module
     out = []
+    say = (lambda rank, kind, title, text: out.append({"rank": rank, "kind": kind, "title": title, "text": text}))
+    u = c["units"]
+    per = MI if u == "mi" else 1000
+    dist = (lambda miles: f"{miles * MI / per:.0f} {u}")
+
+    # ---- recovery today
+    rd = db.get("readiness") or {}
+    if rd.get("date") == today.isoformat() and rd.get("level") in ("red", "amber") and rd.get("reasons"):
+        why = "; ".join(rd["reasons"][:2])
+        if rd["level"] == "red":
+            say(100, "recover", "Recover today: run easy or not at all",
+                f"Your readings say you have not absorbed the training: {why}. Whatever the plan shows, today is easy running or rest. "
+                "A session forced through a bad day costs more than the session is worth; moved by a day it costs nothing.")
+        else:
+            say(70, "recover", "Hold back today",
+                f"A warning sign, not a stop: {why}. Run at the slow end of today's paces and finish feeling you had more. If it is still there tomorrow, take the easy option again.")
+
+    # ---- a maximum heart rate set by hand below what the runs show puts every heart-rate zone too low
+    seen = (db.get("profile") or {}).get("hrmax_observed")
+    low_max = bool(c.get("hrmax") and seen and seen - c["hrmax"] >= HRMAX_GAP)
+    if low_max:
+        say(90, "hr", f"Fix your maximum heart rate: it is set to {c['hrmax']}, your runs show {seen}",
+            f"Every heart-rate zone follows from it, so easy runs are judged against a ceiling of {L.get('easy_hr_max')} bpm when about {round(0.76 * seen)} may be right, "
+            f"and your scores and easy-run alerts are off by the same amount. If {c['hrmax']} is not a tested figure, clear it under Settings, Advanced.")
+
+    # ---- sleep, over the week
+    sl = ((rd.get("trend") or {}).get("sleep_h") or {}).get("now") or (rd.get("week") or {}).get("sleep_h")
+    if sl and sl < SLEEP_LOW_H:
+        say(85 if sl < 6.5 else 60, "sleep", f"Sleep {SLEEP_AIM_H} hours tonight: you are averaging {sl:.1f}",
+            f"Sleep is where the training turns into fitness, and it is the cheapest thing to fix. The consensus for athletes is 7 to 9 hours a night "
+            f"(Walsh and colleagues, 2021), and short sleep slows endurance running (Lopes and colleagues, 2023). At {sl:.1f} h a night you are training on less than that. "
+            "Go to bed earlier before you add a single mile.")
+
+    # ---- mileage: what was run against what is planned and what the goal takes
+    mon = today - dt.timedelta(days=today.weekday())
+    m4 = (db.rows("SELECT SUM(dist_m) m FROM activities WHERE sport='running' AND date>=? AND date<?", ((mon - dt.timedelta(days=28)).isoformat(), mon.isoformat()))[0]["m"] or 0) / MI / 4
+    wk = db.rows("SELECT summary FROM weeks WHERE monday=?", (mon.isoformat(),))
+    planned = json.loads(wk[0]["summary"]).get("total") if wk else None
+    short = bool(planned and m4 < MILES_SHORT * planned)
+    if short:
+        need = f" A {goal['goal_time']} marathon goes with about {dist(L['peak_miles'])} a week at the peak." if goal and goal.get("goal_time") and L.get("peak_miles") else ""
+        say(80, "miles", f"Mileage is your biggest gap: run all {dist(planned)} this week",
+            f"You have averaged {dist(m4)} a week over the last four weeks.{need} No session, shoe or gadget is worth as much as the miles you are not yet running. "
+            "Do not make them up in one go: run this week whole, then the next. Slow down if you must, but cover the distance.")
+
+    # ---- walking: load the plan does not schedule
+    sp = assess.steps_summary(today, c)
+    if sp:
+        walk = sp["week"] * 7 * STEP_M / MI
+        if walk >= WALK_MILES_WEEK:
+            run = planned or m4
+            more = f" That is lighter than your usual {sp['base']:,.0f} steps a day, which suits a build week." if sp["week"] < 0.8 * sp["base"] else \
+                   f" That is above your usual {sp['base']:,.0f} steps a day: treat this week as heavier than its running miles." if sp["week"] > 1.2 * sp["base"] else ""
+            say(65 if sp["week"] > 1.2 * sp["base"] else 50, "walk", f"Count your walking: {dist(walk)} a week on top of your running",
+                f"With {dist(run)} of running that is about {dist(walk + run)} a week on your feet.{more} "
+                f"Walking is real load on the same legs. On the day of a session and the day before the long run, stay under {WALK_EASY_STEPS:,} steps outside the run; "
+                "put the long walks on easy days.")
+
+    # ---- how the running was done
     try:
         sessions = execution.history(c, L, weeks=FOCUS_WEEKS)["sessions"]
     except Exception:      # noqa: BLE001 - a note on the Plan page must never stop the page
         sessions = []
-    # a maximum heart rate set by hand below what the runs show puts every heart-rate zone too low: easy runs then read as too hard
-    seen = (db.get("profile") or {}).get("hrmax_observed")
-    low_max = bool(c.get("hrmax") and seen and seen - c["hrmax"] >= HRMAX_GAP)
-    if low_max:
-        out.append({"kind": "hr", "title": "Your maximum heart rate may be set too low",
-                    "text": f"It is set to {c['hrmax']} under Settings, Advanced, but your runs show {seen}. Every heart-rate zone follows from it, so easy runs "
-                            f"are judged against a ceiling of {L.get('easy_hr_max')} bpm when about {round(0.76 * seen)} may be right. If {c['hrmax']} is not a tested figure, "
-                            "clear it and the app uses what it has seen."})
     easy = [x for x in sessions if x["type"] == "Easy" and x["done"] and x["score"]]
     fast = [x for x in easy if x["score"].get("cause") == "Part of this easy run was faster than easy pace."]
-    if len(fast) >= FAST_EASY_MIN and 2 * len(fast) >= len(easy):
-        hr = f" or under {L['easy_hr_max']} bpm" if L.get("easy_hr_max") and not low_max else ""
-        out.append({"kind": "easy", "title": "Keep the easy runs easy",
-                    "text": f"{len(fast)} of your last {len(easy)} easy runs had faster-than-easy running in them. Easy is {engine.zone_pace(tp, 'easy', c['units'])}{hr}. "
-                            "Runners who keep about four fifths of their running easy improve more than those who drift into the middle, "
-                            "and the fatigue from fast easy days is what spoils the sessions that matter."})
-    away = [(s["start"], s["end"] or today.isoformat()) for s in statuses]
+    if len(fast) >= FAST_EASY_MIN and 2 * len(fast) >= len(easy) and not low_max:
+        hr = f" or under {L['easy_hr_max']} bpm" if L.get("easy_hr_max") else ""
+        say(68, "easy", f"Slow your easy runs down: {len(fast)} of the last {len(easy)} were too fast",
+            f"Easy is {engine.zone_pace(tp, 'easy', u)}{hr}, and slower is fine. Runners who keep about four fifths of their running easy improve more than those who drift "
+            "into the middle; the fatigue from fast easy days is what spoils the sessions that matter. Let the watch alert slow you.")
+    away = [(x["start"], x["end"] or today.isoformat()) for x in statuses]
     since = (today - dt.timedelta(days=14)).isoformat()
     missed = [x for x in sessions if x["date"] >= since and x["score"] and x["score"]["verdict"] == "Missed" and not any(a <= x["date"] <= b for a, b in away)]
-    if len(missed) >= MISSED_MIN:
-        out.append({"kind": "missed", "title": "Run the days before chasing the paces",
-                    "text": f"{len(missed)} planned runs were missed in the last two weeks with no reason recorded. Weeks strung together count for more than any single session: "
-                            "an easy run cut short still counts, and a day you cannot run is better marked as too busy, so the week is rebuilt around it."})
+    if len(missed) >= MISSED_MIN and not short:
+        say(72, "missed", f"Stop missing runs: {len(missed)} in two weeks",
+            "Weeks strung together count for more than any single session. A short easy run still counts; a day you cannot run is better marked as too busy, "
+            "so the week is rebuilt around it instead of left with a hole.")
+
+    # ---- the next race
     nxt = sorted((r for r in races if r["priority"] != "A" and 0 <= (dt.date.fromisoformat(str(r["date"])) - today).days <= CHECKPOINT_DAYS), key=lambda r: str(r["date"]))
     if nxt:
         r, d = nxt[0], (dt.date.fromisoformat(str(nxt[0]["date"])) - today).days
-        out.append({"kind": "race", "title": f"{r['name']} in {d} day{'' if d == 1 else 's'}",
-                    "text": "Your next checkpoint. An all-out race is the best evidence the plan gets: it resets the paces and the estimates. Race it properly; the week is lightened for it."})
-    return out[:2]
-
+        say(88 if d <= 7 else 55, "race", f"Race {r['name']} flat out in {d} day{'' if d == 1 else 's'}",
+            "It is your next checkpoint, and an all-out race is the best evidence the plan gets: it resets your paces and every estimate. Do not jog it as training.")
+    out.sort(key=lambda x: -x["rank"])
+    return out[:FOCUS_MOST]

@@ -163,15 +163,16 @@ def goal_minutes(goal_time):
 
 
 def goal_volume(goal_time, goal_miles):
-    """The weekly miles a marathon goal time usually takes: 55 at 3:00, a mile more for each minute faster, within 40 and 90.
+    """The weekly miles a marathon goal time usually takes: 60 at 3:00, a mile more for each minute faster, within 40 and 90.
 
-    A coaching rule of thumb [C]: no study sets a number. Across marathoners, more weekly distance goes with faster times (Doherty and
+    A coaching rule of thumb [C]: no study sets a number. The one equation fitted to training (Tanda, 2011) puts a marathon just under
+    three hours at about 60 to 70 miles a week, so 60 is the low end of that; it was 55 until 2.10.4. Across marathoners, more weekly distance goes with faster times (Doherty and
     colleagues, 2020; Fokkema and colleagues, 2020), and this file's own check on 6,582 marathons found about 5 to 7% faster per standard
     deviation of volume. Only for a marathon-length goal that has a goal time."""
     mins = goal_minutes(goal_time) if goal_time else None
     if mins is None or not 20 <= (goal_miles or 0) <= 30 or not 110 <= mins <= 330:
         return None
-    return min(max(55 + (180 - mins), 40), 90)
+    return min(max(60 + (180 - mins), 40), 90)
 
 
 def limits(prof, c, goal_miles, goal_time=None):
@@ -179,11 +180,12 @@ def limits(prof, c, goal_miles, goal_time=None):
     peak, peak_why = peak_from(prof)
     need = goal_volume(goal_time, goal_miles)
     held = prof.get("proven8_3y") or prof.get("best8_3y") or prof.get("recent8") or 0.0
-    if need and need > peak and held:
-        lifted = min(need, 1.5 * held)
-        if lifted > peak:
-            peak, peak_why = lifted, (f"what a {goal_time} marathon usually takes ({need:.0f} miles a week), no more than half again on the most you have "
-                                      "held in the last 3 years; the build still rises a small step at a time and holds when recovery slips")
+    if need and need > peak:
+        # the goal sets where the build is heading; what has been held before is kept in mind, not used as a ceiling: it is said, the
+        # build still rises a step at a time, never more than a fifth above the best recent week, and holds when recovery slips
+        over = f", which is more than the {held:.0f} you have held for eight weeks in the last 3 years, so watch how you recover" if held and need > held else ""
+        peak, peak_why = need, (f"what a {goal_time} marathon usually takes ({need:.0f} miles a week){over}; the build rises a step at a time "
+                                "and holds when recovery slips")
     peak = min(round(peak / 5) * 5, 90)
     if goal_miles is None or goal_miles < 10:
         long_spec, spec_weeks = min(max(0.30 * peak, 8), 16), 10

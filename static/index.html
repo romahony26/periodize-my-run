@@ -218,7 +218,10 @@ code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ho
   .checks label{padding:9px 13px}.wtog{min-height:44px;min-width:44px}.gl{width:32px;height:32px}.gl svg{width:16px}
 }
 .tabs button.minor{font-size:12px;font-weight:500;padding:6px 9px}.tabs button.minor:first-of-type,.tabs button:not(.minor)+button.minor{margin-left:8px}
-.focus{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px 28px}.fo{border-left:3px solid var(--brand);padding-left:12px}.fo.easy{border-color:var(--easy)}.fo.missed{border-color:var(--amber)}.fo.race{border-color:var(--race)}.fo.hr{border-color:var(--red)}
+.coach{--c:var(--brand);border-left:5px solid var(--c);background:linear-gradient(90deg,color-mix(in srgb,var(--c) 9%,var(--surface)),var(--surface) 60%)}
+.coach.recover,.coach.hr{--c:var(--red)}.coach.sleep,.coach.missed{--c:var(--amber)}.coach.miles{--c:var(--brand)}.coach.easy{--c:var(--easy)}.coach.race{--c:var(--race)}.coach.walk{--c:var(--long)}
+.grid.toprow .coach .lead .h{font-size:22px;line-height:1.2;margin:0}.coach .focus{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.focus{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px 28px}.fo{border-left:3px solid var(--brand);padding-left:12px}.fo.easy{border-color:var(--easy)}.fo.missed,.fo.sleep{border-color:var(--amber)}.fo.race{border-color:var(--race)}.fo.hr,.fo.recover{border-color:var(--red)}.fo.walk{border-color:var(--long)}
 .seg{display:flex;gap:8px;flex-wrap:wrap}.seg .on{border-color:var(--brand-ink);color:var(--brand-ink);box-shadow:0 0 0 1px var(--brand-ink) inset}
 .stats3{display:flex;gap:10px 40px;flex-wrap:wrap;align-items:flex-start}
 .trend{width:100%;height:auto;max-height:240px;display:block}.trend text{font-size:11px;fill:var(--mute);font-variant-numeric:tabular-nums}.trend .grid{stroke:var(--line);stroke-width:1}

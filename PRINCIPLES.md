@@ -198,9 +198,13 @@ this project's own choices, not findings from trials. [C] [P]
 
 - **A marathon goal time sets how much volume the plan may build toward.** [C] Across marathoners, more weekly distance goes with faster
   times (Doherty and colleagues, 2020; Fokkema and colleagues, 2020), and the project's own check of 6,582 marathons found 5 to 7% faster per
-  standard deviation (principle 99). No study gives a mileage for a time. The rule of thumb used is 55 miles a week for 3:00, a mile more for each
-  minute faster (65 for 2:50), within 40 and 90. The ceiling rises toward it but never past half again on the most you have held in the last
-  three years; the weekly step is still 6%, or 3% past what you have held, and a warning sign holds it. [C] [P]
+  standard deviation (principle 99). No study gives a mileage for a time. The rule of thumb used is 60 miles a week for 3:00, a mile more for each
+  minute faster (70 for 2:50), within 40 and 90; 60 is the low end of what the one training equation gives for just under three hours (Tanda, 2011).
+  Since 2.10.4 what you have held before is said, not enforced: the ceiling is what the goal takes, and the weekly step is 6% past your old best
+  too (it was halved there, and the ceiling stopped at half again on the most you had held). What still holds the build: a recovery warning,
+  the limit of 20% above the best of the last three weeks, and the long run's 10% step. A week run at nine tenths of the best of the last four
+  is the level the next one builds from, so a tune-up week no longer stalls the build. That is the runner's choice of more risk for more
+  volume; run on 600 real runners' builds it did not raise the share of weeks more than 20% above the last three. [C] [P]
 - **A marathon, half-marathon or ultra build has a midweek medium-long run** (about a quarter of the week, 8 to 14 miles, easy with a steady
   finish), alternating with the heart-rate aerobic run. It adds the aerobic miles that marathon endurance needs without a third hard
   session. [C]
@@ -646,7 +650,13 @@ two or a missed log from a missed day. [P]
     your goal time, with an average training pace of 1.16 times goal pace (four fifths easy running; this project's choice). None of
     this changes the plan: volume stays limited by what you have held before (principle 3). The forecast for race day and the
     estimate for a race run today are kept week by week and drawn against the goal, so the direction can be seen.
-117. **One or two things to attend to, read from what you ran.** [P] The Plan page names at most two: a maximum heart rate set by hand
+117. **What to do now, first on the Plan page.** [P] Up to five things in order, each as an instruction with its numbers: recover
+    (today's readiness is amber or red), sleep (a week averaging under 7 hours, the low end of the 7 to 9 hour consensus of Walsh and
+    colleagues, 2021; short sleep slows endurance performance, Lopes and colleagues, 2023), mileage (the last four weeks under three
+    quarters of this week's plan), walking (15 miles or more a week outside runs, with 8,000 steps as the figure to stay under around
+    sessions), and the ones below. Walking of 15,000 steps or more outside the run also counts as one recovery sign the next day, against
+    a fixed figure so that a runner who always walks a lot still has it counted. The order and every threshold are this project's choice.
+    The earlier list: a maximum heart rate set by hand
     four or more beats below the one your runs show, because every heart-rate zone follows from it; easy runs that had
     faster running in them (three or more, and at least half, of the easy runs of the last four weeks), which rests on principle 12;
     four or more planned runs missed in two weeks with no status recorded, which rests on principle 79; and a tune-up race within

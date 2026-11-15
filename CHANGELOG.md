@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.7 - 2026-11-15
+### Changed
+- "Do this now" is the first thing on the Plan page: up to five instructions in order of how much they matter, the first as a headline. It now covers recovery today, sleep over the week, mileage against the plan and the goal, and walking, as well as easy pace, missed runs, the maximum heart rate setting and the next race. The wording is direct and each one gives its numbers.
+- Walking counts: 15,000 steps or more outside your run is a recovery sign the next day, measured against a fixed figure and not only against your own normal, and the weekly walking is added to your running as time on your feet.
+- Your history no longer caps the plan. The peak week is what the goal time takes (60 miles a week for 3:00, a mile more for each minute faster; it was 55, and stopped at half again on the most you had held). The weekly step is the full 6% past your old best too. What you have held before is still said in the reasons, and a recovery warning, the 20% limit on a week's rise and the long run's 10% step still hold the build.
+- A light week (a tune-up race, a missed week) no longer stalls the build for three weeks: a week run at nine tenths of the best of the last four is the level the next one builds from.
+
 ## 2.10.4-beta.6 - 2026-11-15
 ### Added
 - The goal card says plainly what the plan is worth when the forecast is behind your goal by 1% or more: the time it leads to, the volume it reaches, and what would close the gap.

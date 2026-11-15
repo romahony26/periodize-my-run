@@ -17,7 +17,7 @@ import statistics
 import db
 import jetlag
 import profile
-from assess import MI, ZONES, mean, projection
+from assess import MI, ZONES, mean, offrun_steps, projection
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 T_LADDER = [(15, 5, 3, 1), (18, 6, 3, 1), (20, 4, 5, 1), (25, 5, 5, 1), (30, 3, 10, 2), (36, 3, 12, 2), (40, 2, 20, 3)]   # total min, reps, min, rec min
@@ -209,6 +209,8 @@ def purpose(day):
     return PURPOSE.get(label) or next((v for k, v in PURPOSE.items() if label.startswith(k)), None) or PURPOSE.get({"Long": "Long run", "Key": "Threshold"}.get(kind, "Easy"), "")
 
 
+WALK_HEAVY_STEPS = 15000      # steps outside runs in a day that count as one recovery sign the next day, about 7 miles [C]
+STEP_M = 0.75                 # metres in a walking step, for turning steps into miles
 EASY_SHARE_LIMIT = 0.25       # the share of a week's miles that may be faster than easy before the long run gives up its steady finish
 
 
@@ -388,6 +390,10 @@ def _plan(st, c, L, races):
             base = max(base, level, wk[-1])
         elif not (quality_new or gap) and level > base:
             base = max(base, level)
+        # a week run at nine tenths or more of the best of the last four is the level to build from. Without this a light week
+        # (a tune-up race, a missed week) stalled the build for three weeks, each one starting again from 92% of the earlier best [P]
+        if not (quality_new or gap) and last4 and wk[-1] >= 0.90 * max(last4):
+            base = max(base, wk[-1])
         rec = st.get("recovery") or {"level": "ok", "steady": [], "flags": []}
         hold = rec["level"] == "hold" and not (quality_new or gap)
         grow = 1.0 if quality_new or gap or hold else 1 + c["weekly_increase"]
@@ -396,7 +402,9 @@ def _plan(st, c, L, races):
         # more of the planned miles. Recovery signs can hold the build level but never speed it: HRV-guided trials used them to pull intensity
         # back, not to add volume, and watch readings are too noisy to give a green light [P]
         earned = bool(st.get("completed3")) or st.get("streak", 0) >= 3
-        step = c["weekly_increase"] if earned and rec["level"] != "hold" else c["weekly_increase"] / 2
+        # the full weekly step, past what has been held before too: the goal sets the direction, and history is said, not enforced
+        # (until 2.10.4 the step was halved here until three weeks had been run at 95%). Recovery holds and the 20% limit below stay.
+        step = c["weekly_increase"]
         if new_ground:      # up to the proven level at the usual rate, beyond it at the step: consistency before more miles
             grow = max(1 + step, min(grow, proven / base if base else grow))
         target = min(base * grow, cap)
@@ -406,8 +414,9 @@ def _plan(st, c, L, races):
                    else "Volume held level: your recovery is showing strain (" + "; ".join(rec["flags"]) + "). The build carries on when it clears." if hold
                    else f"Volume is at your cap for this phase ({dist(cap, c['units'])})." if target >= cap
                    else f"Volume up {grow - 1:.0%}{toward}: more than you have held for eight weeks in the last year ({dist(half(proven), c['units'])}), "
-                        + ("so the full step: you ran at least 95% of the planned miles in each of the last three weeks." if earned else
-                           "so a smaller step until you have run at least 95% of the planned miles three weeks in a row.") + " Recovery signs can hold it level but do not speed it." if new_ground
+                        + ("This is new ground and you have run the last three weeks as planned, so it is the right time for it." if earned else
+                           "This is new ground, and the last three weeks were not all run as planned: the miles only count if you run them, so make these weeks whole.")
+                        + " A recovery warning holds it level." if new_ground
                    else f"Volume up {c['weekly_increase']:.0%} on your recent level.")
         recent_best = max(wk[-3:] or [0])
         if recent_best >= 8 and target > 1.20 * recent_best:
@@ -1300,6 +1309,15 @@ def readiness(today, c, learn=True, override=None):
         pts += jl["points"]
         lost += 6 * jl["points"]
         reasons.append(jl["reason"])
+
+    # ---- walking: a long day on your feet is load the plan did not schedule. Counted against a fixed figure, not only against the
+    # runner's own normal, so that someone who always walks a lot still has it counted (the figure is this project's choice) [C]
+    yday = today - dt.timedelta(days=1)
+    walked = offrun_steps(yday, today).get(yday.isoformat())
+    if walked and walked >= WALK_HEAVY_STEPS:
+        pts += 1
+        lost += 5
+        reasons.append(f"you walked about {walked * STEP_M / MI:.0f} miles yesterday on top of your running ({walked:,.0f} steps)")
 
     # ---- how recent runs felt, as rated on the watch: self-reported measures track the response to training at least as well as
     # device measures (Saw and colleagues, 2016). Nothing is typed in; the rating is read only when the runner gave one on the watch.

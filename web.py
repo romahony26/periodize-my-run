@@ -710,7 +710,7 @@ def _state():
         climb = course.climb_target(goal, s1.get("weeks_to_race"), s1["total"], longm, today)
     if wk and L:
         form = insights.form(today, wk[0]["tp"], L["hrmax"])
-        focus = insights.focus(today, c, L, wk[0]["tp"], rs, db.rows("SELECT start,end FROM status")) if db.get("setup_done") else []
+        focus = insights.focus(today, c, L, wk[0]["tp"], rs, db.rows("SELECT start,end FROM status"), goal) if db.get("setup_done") else []
         for r in db.rows("SELECT monday,mode,summary FROM weeks WHERE monday>=? ORDER BY monday", (mon.isoformat(),)):
             sm = json.loads(r["summary"])
             season.append({"monday": r["monday"], "mode": r["mode"], "total": sm["total"], "long": max((d["miles"] or 0) for d in db.rows("SELECT miles FROM plan WHERE date>=? AND date<?", (r["monday"], (dt.date.fromisoformat(r["monday"]) + dt.timedelta(days=7)).isoformat())) or [{"miles": 0}])})
