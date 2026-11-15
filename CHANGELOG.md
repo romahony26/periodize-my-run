@@ -3,6 +3,33 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3 - 2026-11-15
+### Added
+- After a run you can tap how it felt and where anything hurt. Both are optional; "wrecked" and repeated pain count as recovery signs.
+- Too busy to run: one tap on Today's card, or dates on the Races page. Today's quick actions ask you to confirm and can be undone.
+- Today's card says why the session differs from the first plan, what would change tomorrow, how long the session should take, the best hour to run, the fuel for a long run and what the session is for. Sessions are drawn as blocks: width is time, height is effort.
+- Jet lag counts in the daily readiness, worked out from the time zones in the watch's own records.
+- A way to run while recovering: easy running at 7 miles a day, keeping the long run.
+- Easy runs on the watch can carry a heart rate alert (70% to 76% of maximum), so the watch tells you when you drift too fast.
+- Checkpoints: each tune-up race says what your goal time is worth at that distance, and the slower time that still keeps the goal on track with the training left.
+- "What each marathon time needs" on Fitness, under Predictions, and the usual spread around the race-day forecast.
+- Notices when the watch has not synced for 12 hours, and when the clocks of the computer running the app and your device disagree.
+- For ultras and hilly goal races the plan also shows time on feet.
+
+### Changed
+- The Plan page is far shorter: this week and next week show their days, every other week is one row that opens with a tap, and the season outline and the week's reasons sit near the top.
+- Long runs are easy, with the last quarter steady only when the week has room for it, so most of a marathon build is easy running again. Before the race-specific phase the long run is about a third of the week.
+- A week with a short tune-up race keeps about 90% of the usual miles, and the week after it is a normal week.
+- Early in a marathon build the faster intervals are at 5K pace. The second strength session is after the midweek session, not the day before the next one.
+- HRV changes nothing until 28 nights of it set your normal. A threshold estimate can no longer lead your best recent hard effort by more than 3%.
+- Text contrast, keyboard focus and touch sizes meet accessibility guidelines. The page script is split by page.
+
+### Fixed
+- An open page no longer keeps the computer running the app busy, and a hidden page stops asking for updates.
+- Strides on the watch no longer end with a recovery after the last one.
+- Times in the header, the backups and the update check follow your device's clock.
+- The 7 mile recovery mode gives a run on every day that is not a rest day.
+
 ## 2.10.3-beta.16 - 2026-11-15
 ### Fixed
 - An open page no longer keeps the computer running the app busy. The page asks for everything it shows every six seconds, and each answer took about three seconds to work out on a Raspberry Pi, so one open tab used about half a processor core all day. The answer is now reused until something is written to the database, a job moves on, or two minutes pass.
