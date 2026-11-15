@@ -61,6 +61,8 @@ def workout(day, tp, c, slow=0.0):
     if not src:
         return None
     steps, order, secs = [], 0, 0.0
+    if c["easy_target"] == "hr" and not all(s[0] == "d" and s[2] == "easy" for s in src):
+        c = {**c, "easy_target": "pace"}                    # the heart rate alert is for easy runs only; a session is run by pace, easy parts included
     easy_v = tp * sum(ZONES["easy"]) / 2
     for i, st in enumerate(src):
         order += 1

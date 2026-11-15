@@ -3,9 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.13 - 2026-11-15
+### Changed
+- The heart rate alert on the watch is for easy runs only. A session with fast running is run by pace, so every part of it, warm-up and cool-down included, gets a pace range (beta.12 left those easy parts without a target).
+
 ## 2.10.3-beta.12 - 2026-11-15
 ### Added
-- Easy runs on the watch can now carry a heart rate alert, so the watch beeps when you drift too fast. The band is 70% to 76% of your maximum heart rate (for a maximum of 190: 133 to 144 bpm), the same ceiling the app already shows as "Easy under". Warm-ups and cool-downs count as easy too; hard and steady parts keep their pace targets. The workout description says the band.
+- Easy runs on the watch can now carry a heart rate alert, so the watch beeps when you drift too fast. The band is 70% to 76% of your maximum heart rate (for a maximum of 190: 133 to 144 bpm), the same ceiling the app already shows as "Easy under". Only runs that are easy from start to finish get it: sessions with fast running keep their pace targets throughout, warm-up and cool-down included. The workout description says the band.
 - "Easy runs on the watch" in Settings has a new choice, "Heart rate alert (keeps you easy)", and it is the default for new setups. If you already chose "No alerts" or "Pace range alerts" that choice stays. With no maximum heart rate known yet, no alert is set.
 
 ## 2.10.3-beta.11 - 2026-11-11
