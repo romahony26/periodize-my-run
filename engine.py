@@ -478,10 +478,15 @@ def _plan(st, c, L, races):
     # marathon-pace long run
     mp_long = 0
     since_long = (mon - st["last_mp_long"]).days if st["last_mp_long"] else 99
-    if gtype == "marathon" and mode == "build" and specific and wtr >= 4 and since_long >= 13 and st["prev_mp_mid"] >= 5 and not st.get("no_mp_long"):
+    if gtype == "marathon" and mode == "build" and specific and wtr >= 4 and since_long >= 13 and st["prev_mp_mid"] >= min(5, max(half(0.20 * target), 3)) and not st.get("no_mp_long"):
         mp_long = next((m for m in MP_LONG_LADDER if m > st["prev_mp_long"] + 0.5), MP_LONG_LADDER[-1])
         if wtr <= 5:
             mp_long = min(mp_long, 6)
+        # the block at pace may be a quarter of the week at most, so a low-mileage week gets a shorter one, or none under 4 miles:
+        # run on 600 real runners' histories, a fixed 8 miles at pace was more than 35% of a 22-mile week [P]
+        mp_long = min(mp_long, half(EASY_SHARE_LIMIT * target))
+        if mp_long < 4:
+            mp_long = 0
 
     # long run
     lr_cap = L["long_run_cap_specific"] if specific else L["long_run_cap_base"]
@@ -529,13 +534,15 @@ def _plan(st, c, L, races):
         key1_day = ("Easy", [("d", k1, "easy")], k1)
     elif mode == "tuneup":
         key1_day = ("Sharpener", [("d", half(k1 / 2), "easy"), ("r", 3, 180, "threshold", 60), ("d", max(half(k1 / 2) - 1.5, 1), "easy")], k1)
+    elif mp_long:
+        # the marathon-pace long run is the week's fast running: a second block at pace or a threshold session midweek put about
+        # 40% of the week above easy [C]
+        key1_day = ("Medium-long run", [("d", k1, "easy")], k1)
     elif one_key_threshold and not quality_new or (not two_keys and quality_new):
         key1_day = threshold_day()
-    elif mp_long:
-        # the marathon-pace long run is the week's fast running: a second block at pace midweek put about 40% of the week above easy [C]
-        key1_day = ("Medium-long run", [("d", k1, "easy")], k1)
     elif gtype == "marathon" and mode in ("build", "taper") and mp_ready and not aero_ok:
         m = min(max(round(st["prev_mp_mid"]) + 1, 4), 8 if specific else 6)
+        m = min(m, max(half(0.20 * target), 3))       # a fifth of the week at most, so a low-mileage week keeps its easy share [P]
         if mode == "taper":
             m = max(m - (2 if wtr == 3 else 4), 3)
         k1 = max(k1, m + 4)

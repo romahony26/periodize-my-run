@@ -273,7 +273,8 @@ this project's own choices, not findings from trials. [C] [P]
     individual's future performance poorly (Hellard and colleagues, 2006), so Periodize My Run shows it as a guide and never plans from
     it. The 42-day and 7-day time constants are convention. [C]
 48. **Execution is measured against the plan.** [P] A run is scored on how far its easy, moderate and hard minutes departed from
-    the session set. Too much counts the same as too little.
+    the session set. Too much counts the same as too little, with one exception: easy minutes beyond the plan count half, because
+    a longer easy run is a smaller departure than a missed session or one run too hard. The half is this project's choice. [C]
 
 ## 9. Recovery and readiness
 
@@ -645,7 +646,8 @@ two or a missed log from a missed day. [P]
     your goal time, with an average training pace of 1.16 times goal pace (four fifths easy running; this project's choice). None of
     this changes the plan: volume stays limited by what you have held before (principle 3). The forecast for race day and the
     estimate for a race run today are kept week by week and drawn against the goal, so the direction can be seen.
-117. **One or two things to attend to, read from what you ran.** [P] The Plan page names at most two: easy runs that had
+117. **One or two things to attend to, read from what you ran.** [P] The Plan page names at most two: a maximum heart rate set by hand
+    four or more beats below the one your runs show, because every heart-rate zone follows from it; easy runs that had
     faster running in them (three or more, and at least half, of the easy runs of the last four weeks), which rests on principle 12;
     four or more planned runs missed in two weeks with no status recorded, which rests on principle 79; and a tune-up race within
     three weeks. The thresholds are this project's choice. It is a note and changes nothing in the plan.

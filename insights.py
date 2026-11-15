@@ -386,6 +386,7 @@ FOCUS_WEEKS = 4            # how far back the focus looks
 FAST_EASY_MIN = 3          # easy runs with faster running in them before it is worth saying [C]
 MISSED_MIN = 4             # planned sessions missed in two weeks before it is worth saying [C]
 CHECKPOINT_DAYS = 21       # a tune-up race this close is the next thing to aim at
+HRMAX_GAP = 4              # beats a hand-set maximum heart rate may sit below the observed one before it is questioned [C]
 
 
 def focus(today, c, L, tp, races, statuses=()):
@@ -400,10 +401,18 @@ def focus(today, c, L, tp, races, statuses=()):
         sessions = execution.history(c, L, weeks=FOCUS_WEEKS)["sessions"]
     except Exception:      # noqa: BLE001 - a note on the Plan page must never stop the page
         sessions = []
+    # a maximum heart rate set by hand below what the runs show puts every heart-rate zone too low: easy runs then read as too hard
+    seen = (db.get("profile") or {}).get("hrmax_observed")
+    low_max = bool(c.get("hrmax") and seen and seen - c["hrmax"] >= HRMAX_GAP)
+    if low_max:
+        out.append({"kind": "hr", "title": "Your maximum heart rate may be set too low",
+                    "text": f"It is set to {c['hrmax']} under Settings, Advanced, but your runs show {seen}. Every heart-rate zone follows from it, so easy runs "
+                            f"are judged against a ceiling of {L.get('easy_hr_max')} bpm when about {round(0.76 * seen)} may be right. If {c['hrmax']} is not a tested figure, "
+                            "clear it and the app uses what it has seen."})
     easy = [x for x in sessions if x["type"] == "Easy" and x["done"] and x["score"]]
     fast = [x for x in easy if x["score"].get("cause") == "Part of this easy run was faster than easy pace."]
     if len(fast) >= FAST_EASY_MIN and 2 * len(fast) >= len(easy):
-        hr = f" or under {L['easy_hr_max']} bpm" if L.get("easy_hr_max") else ""
+        hr = f" or under {L['easy_hr_max']} bpm" if L.get("easy_hr_max") and not low_max else ""
         out.append({"kind": "easy", "title": "Keep the easy runs easy",
                     "text": f"{len(fast)} of your last {len(easy)} easy runs had faster-than-easy running in them. Easy is {engine.zone_pace(tp, 'easy', c['units'])}{hr}. "
                             "Runners who keep about four fifths of their running easy improve more than those who drift into the middle, "

@@ -3,6 +3,26 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.6 - 2026-11-15
+### Added
+- The goal card says plainly what the plan is worth when the forecast is behind your goal by 1% or more: the time it leads to, the volume it reaches, and what would close the gap.
+- "Focus this week" questions a maximum heart rate set by hand four or more beats below the one your runs show, because every heart-rate zone follows from it and easy runs then read as too hard.
+- History gives the average of the sessions you ran, beside the average that counts missed sessions as 0.
+- The planner check on real runners (`tools/validate_engine.py`) now measures how much of each build week is faster than easy.
+
+### Changed
+- The marathon-pace block of a long run is at most a quarter of the week's miles, and the midweek marathon-pace block at most a fifth, so low-mileage weeks keep their easy running; under 4 miles the long run has no block that week. A week with a marathon-pace long run has an easy midweek run in place of a threshold session too. Run on 600 real runners' 18-week builds, build weeks with more than a quarter of their miles faster than easy fell from 88% (2.10.3-beta.13) to 5%, with as many marathon-pace long runs and no more jumps in volume.
+- Execution score: easy running beyond the plan counts half as much as running missed or run too hard. A 7 mile easy run on a 3 mile day is no longer scored 0.
+- The page asks for its state every six seconds as before, but is sent it only when something has changed, and text is sent compressed. An idle open page used to download about 88 MB an hour.
+- A race entered as 26.2 or 13.1 miles uses the exact marathon or half marathon distance, so the goal card and the race predictor give the same time.
+- The legend for the figures and symbols on each day is folded directly under this week, not at the foot of the page. How it works, Change log and Log are quieter in the top bar. Line charts say they answer to touch as well as hover.
+
+### Removed
+- Monotony and strain on Fitness: they were shown with a note that they did not go with injury.
+
+### Fixed
+- `tools/check_references.py` reports a missing "Known gaps" or "References" heading and lines of program code in PRINCIPLES.md.
+
 ## 2.10.4-beta.5 - 2026-11-15
 ### Fixed
 - The tune-up race note under "Focus this week" no longer says the race is your first all-out effort in a while, which the app does not check.

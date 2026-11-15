@@ -81,6 +81,22 @@ def whole_history(dist, a, start):
             "weeks_unbroken": 99, "weeks": len(wk)}
 
 
+def faster_miles(days, tp):
+    """Miles of a planned week faster than easy (as engine.faster_miles; kept here so older versions of the planner can be measured too)."""
+    out = 0.0
+    for d in days:
+        for x in d.get("steps") or []:
+            if x[0] == "d" and x[2] not in ("easy", None):
+                out += x[1]
+            elif x[0] == "r":
+                out += x[1] * x[2] * tp * engine.ZONES[x[3]][0] / 1609.344
+            elif x[0] == "rd":
+                out += x[1] * x[2] / 1609.344
+            elif x[0] == "h" and d.get("label") == "Aerobic run by heart rate":
+                out += x[1]
+    return out
+
+
 def build(st, hist, races, c0, prof=None):
     mean = float(np.mean(hist)) * KM
     prof = prof or {"best8_3y": max(mean, max(np.mean(hist[i:i + 4]) for i in range(5)) * KM), "recent8": mean, "hrmax_observed": 190}
@@ -89,6 +105,8 @@ def build(st, hist, races, c0, prof=None):
     plans = []
     for _ in range(WEEKS):
         pl = engine.plan(st, c, L, races)
+        pl["fast_share"] = faster_miles(pl["days"], st["tp"]) / pl["total"] if pl["total"] else 0.0
+        pl["labels"] = " + ".join(d["label"] for d in pl["days"] if d["type"] in ("Key", "Long"))
         plans.append(pl)
         st = engine.project(st, pl)
     return plans
@@ -119,7 +137,9 @@ def main(path, limit=600, long_history=False):
                 if long_history and (dist[a, :start] > 0).sum() < 60:
                     continue
                 rows.append({"hist": [h * KM for h in hist], "actual": actual, "plan": [p["total"] for p in plans], "mode": [p["mode"] for p in plans],
-                             "mp_long": sum(1 for p in plans if p["done"]["mp_long"]), "mins": mins})
+                             "mp_long": sum(1 for p in plans if p["done"]["mp_long"]), "mins": mins,
+                             "fast": [p["fast_share"] for p in plans if p["mode"] == "build"],
+                             "hot": [(p["labels"], round(p["total"])) for p in plans if p["mode"] == "build" and p["fast_share"] > .35]})
                 break
         if len(rows) >= limit:
             break
@@ -139,6 +159,13 @@ def report(rows):
     print(f"build weeks above the best of the last three by >10%: {100 * np.mean(s > .10):.1f}%, >20%: {100 * np.mean(s > .20):.1f}%, >30%: {100 * np.mean(s > .30):.1f}%")
     print(f"planned peak week median {np.median([max(r['plan']) for r in rows]):.0f} mi; the athletes' actual {np.median([max(r['actual']) for r in rows]):.0f} mi")
     print(f"marathon-pace long runs per athlete: {np.mean([r['mp_long'] for r in rows]):.1f}")
+    import collections
+    hot = collections.Counter(x[0] for r in rows for x in r["hot"])
+    for k, v in hot.most_common(8):
+        tot = [x[1] for r in rows for x in r["hot"] if x[0] == k]
+        print(f"  above 35%: {v:4d} weeks  median {np.median(tot):.0f} mi  {k}")
+    f = np.array([x for r in rows for x in r["fast"]])
+    print(f"share of a build week's miles faster than easy: median {100 * np.median(f):.0f}%, above 25%: {100 * np.mean(f > .25):.0f}% of weeks, above 35%: {100 * np.mean(f > .35):.0f}%")
 
 
 if __name__ == "__main__":

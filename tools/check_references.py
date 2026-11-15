@@ -77,6 +77,13 @@ def offline():
     for name, year in cites:
         cited_names.setdefault(year, set()).add(name.lower())
     unused = sorted(f"{r['authors']} ({r['year']})" for r in refs if not any(n in r["authors"].lower() for n in cited_names.get(r["year"], ())))
+    text = principles()
+    for heading in ("## Known gaps", "## References"):
+        if text.count("\n" + heading) != 1:
+            problems.append(f"the heading '{heading}' should appear exactly once")
+    stray = [ln.strip()[:60] for ln in text.split("## References")[0].splitlines() if re.match(r"\s+(\(\"|\]\),|def |import )", ln)]
+    if stray:
+        problems.append(f"lines that look like program code, not prose: {stray[:3]}")
     return rules, refs, problems, unlisted, unused
 
 

@@ -30,7 +30,14 @@ document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('s
 document.addEventListener('keydown',e=>{if(e.target.matches&&e.target.matches('select,input,textarea'))LASTUI=Date.now()},true);
 document.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('select,input,textarea,button.tgl')){LASTUI=Date.now();if(view==='settings'){DIRTY=true;const sb=$('#savebar');if(sb&&e.target.closest('[data-replan]'))sb.hidden=false}}},true);
 const holdUI=()=>{const a=document.activeElement;return !!SEL||!!document.querySelector('details.note[open]')||Date.now()-LASTUI<20000||(a&&['SELECT','INPUT','TEXTAREA'].includes(a.tagName))||(view==='settings'&&DIRTY)};
-async function load(auto){try{if(document.querySelector('.day.drag'))return;const s=await api('state');if(DAY||PACE||TRV||UNI||MORE||(auto&&holdUI())){S=s;return}if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(()=>load(true),1000)}catch(e){}}
+/* The state, or null when the server says the page already holds the current one (it sends nothing back then).
+   Only the automatic refresh asks that way; a refresh after you did something always fetches the whole state. */
+let STAG='', STALE=false;      // STALE: a newer state is held but not yet drawn, because something was open
+async function apiState(auto){const r=await fetch('/api/state',{headers:auto&&STAG?{'X-Requested-With':'periodize','If-None-Match':STAG}:{'X-Requested-With':'periodize'}});
+  if(r.status===304)return null;const j=await r.json().catch(()=>({}));
+  if(r.status===401){authView(j.auth);throw new Error('auth')}if(!r.ok)throw new Error('state');
+  STAG=r.headers.get('ETag')||'';return j}
+async function load(auto){try{if(document.querySelector('.day.drag'))return;const s=await apiState(auto), held=DAY||PACE||TRV||UNI||MORE||(auto&&holdUI());if(!s){if(STALE&&!held){STALE=false;render()}return}if(held){S=s;STALE=true;return}STALE=false;if(document.querySelector('.day.drag'))return;const fresh=!S||S.last_run!==s.last_run;S=s;render();if(fresh&&HIST&&view==='hist')loadHist();else if(fresh)HIST=null;clearTimeout(fastT);if(S.job&&S.job.running)fastT=setTimeout(()=>load(true),1000)}catch(e){}}
 function authView(kind){
   $('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';
   if(kind==='no_password'){$('#main').innerHTML=`<div class="wiz"><div class="brandhead">${LOGO}<h1>periodize my run</h1></div><div class="card c12"><p class="h">App password needed</p><p class="mute">No app password has been set, so Periodize My Run cannot be opened from another device yet.</p><p class="small">On the computer running Periodize My Run, run <code>python web.py --set-password</code> in the app folder, then reload this page.</p></div></div>`;return}
@@ -46,7 +53,7 @@ function render(){
     v.onclick=e=>{e.preventDefault();if(!S.setup_done||!S.setup_seen)return;view='changes';loadChanges();render();scrollTo({top:0})}}}
   if(!S.setup_done||!S.setup_seen){$('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';if(S.setup_done&&!S.setup_seen)wiz.step=6;return wizard()}
   const T={plan:'Plan',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
-  $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}" data-v="${v}">${T[v]}</button>`).join('');
+  $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}${['about','changes','log'].includes(v)?' minor':''}" data-v="${v}">${T[v]}</button>`).join('');
   {const on=$('#nav button.on');if(on&&on.scrollIntoView)on.scrollIntoView({inline:'center',block:'nearest'})}
   const go=v=>{MORE=false;DIRTY=false;view=v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})};
   $$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));

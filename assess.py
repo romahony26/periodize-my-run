@@ -372,6 +372,8 @@ def race_time(v_ref, miles, endurance, c, slope):
 
     `slope` is the athlete's own profile: the index shifts by that much per unit of ln(distance) away from the distance they cover in an hour.
     """
+    # a race entered as 26.2 or 13.1 miles is the marathon or the half: use the exact distance, so every page gives the same time
+    miles = next((m / MI for _, m in equiv.DISTANCES if abs(miles - m / MI) < 0.03), miles)
     d_ref = equiv.threshold_speed(v_ref) * 3600
 
     def at(m):

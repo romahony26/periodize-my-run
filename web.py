@@ -5,6 +5,7 @@ thread keeps the plan and the watch up to date every day.
 """
 import argparse
 import datetime as dt
+import gzip
 import hashlib
 import hmac
 import io
@@ -217,6 +218,10 @@ def guard():
     return None
 
 
+GZIP_TYPES = {"application/json", "text/html", "text/javascript", "application/javascript", "text/css", "text/plain", "image/svg+xml"}
+GZIP_MIN = 1024
+
+
 @app.after_request
 def headers(resp):
     resp.headers["X-Frame-Options"] = "DENY"
@@ -231,6 +236,15 @@ def headers(resp):
     resp.headers["Content-Security-Policy"] = "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" + tiles + "; connect-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
     if request.path.startswith("/api/"):
         resp.headers["Cache-Control"] = "no-store"
+    # text compresses to about a fifth: the page's scripts and its state are the bulk of what a phone downloads
+    if (resp.status_code == 200 and resp.mimetype in GZIP_TYPES and "gzip" in request.headers.get("Accept-Encoding", "")
+            and not resp.headers.get("Content-Encoding")):
+        resp.direct_passthrough = False
+        data = resp.get_data()
+        if len(data) >= GZIP_MIN:
+            resp.set_data(gzip.compress(data, 5))
+            resp.headers["Content-Encoding"] = "gzip"
+            resp.headers["Vary"] = "Accept-Encoding"
     return resp
 
 
@@ -568,12 +582,19 @@ def state():
     clock is in the same two minutes."""
     ver = db.version()
     key = ver and (ver, int(time.time() // STATE_REUSE_S), dt.date.today().isoformat(), _local(), json.dumps(jobs.status, sort_keys=True, default=str))
+    # the page says which answer it already holds; if that is still the answer, nothing is sent back at all
+    tag = '"' + hashlib.sha256(repr(key).encode()).hexdigest()[:24] + '"' if key else None
+    if tag and request.headers.get("If-None-Match") == tag:
+        return app.response_class(status=304, headers={"ETag": tag})
     if key and _STATE["key"] == key:
-        return app.response_class(_STATE["body"], mimetype="application/json")
-    with db.session():
-        r = _state()
-    if key and r.status_code == 200:
-        _STATE.update(key=key, body=r.get_data())
+        r = app.response_class(_STATE["body"], mimetype="application/json")
+    else:
+        with db.session():
+            r = _state()
+        if key and r.status_code == 200:
+            _STATE.update(key=key, body=r.get_data())
+    if tag and r.status_code == 200:
+        r.headers["ETag"] = tag
     return r
 
 
@@ -621,6 +642,7 @@ def _state():
                 "pct": round(cp["value"] * 100), "chosen": cp["chosen"], "history_pct": round(cp["history"] * 100) if cp["history"] is not None else None, "history_weeks": cp["history_weeks"],
                 "plan_pct": round(cp["plan"] * 100) if cp["plan"] is not None else None, "plan_days": cp["plan_days"], "plan_weight": round(cp["plan_weight"] * 100),
                 "gap": (("behind", engine.hms(fc["seconds"] - gs)) if fc["seconds"] > gs + 1 else ("ahead", engine.hms(gs - fc["seconds"]))) if gs else None,
+                "gap_pct": round(100 * (fc["seconds"] - gs) / gs, 1) if gs else None,
                 "needs_all": bool(gs and fc["all"] <= gs < fc["seconds"]), "out_of_reach": bool(gs and fc["all"] > gs),
                 "change": round(fc["seconds"] - prev[-1]) if prev else None,
                 "index_now": round(fc["current_index"], 1), "index_race": round(fc["index"], 1), "proven": round(fc["proven"]["index"], 1),
@@ -1548,7 +1570,7 @@ def about():
         ("History and execution score", [
             "The History tab lists every planned session that has passed, what you ran that day, and an execution score from 0 to 100. Click a session for the run itself: time of day, heart rate, load, pace and heart rate charts, and the route.",
             "The method is taken from the training-load research, not from weights of the app's own. Running is split into three zones at the two thresholds: easy, moderate and hard. Minutes in each are weighted 1, 2 and 3. That is Lucia's TRIMP (Lucia and colleagues, 2003), a published measure of training load: a minute of hard running counts three times a minute of easy running.",
-            "The score is how far the session you ran departed from the session planned, zone by zone, in those weighted minutes, as a share of the planned load. Too much counts the same as too little: the best-known finding here (Foster and colleagues, 2001) is that athletes run easy days harder than intended and hard days easier.",
+            "The score is how far the session you ran departed from the session planned, zone by zone, in those weighted minutes, as a share of the planned load. Too much counts the same as too little, except that easy running beyond the plan counts half: the best-known finding here (Foster and colleagues, 2001) is that athletes run easy days harder than intended and hard days easier.",
             "So an easy run done too fast loses marks, a session with the reps cut short loses marks, and a session run much harder than set loses marks too.",
             "What is still the app's own judgement: where the zone boundaries sit without a laboratory test (88% and 102% of your threshold speed; 82% and 89% of maximum heart rate for sessions set by heart rate), and one minute of tolerance per zone for GPS noise. The combined score is a direct use of a validated load measure, not itself a validated test.",
             "A missed session scores 0. Scores build up from the day the app started planning for you.",

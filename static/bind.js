@@ -125,6 +125,7 @@ function bind(){
   on('#hall',()=>{HALL=!HALL;render()});
   on('#toladder',e=>{if(e&&e.preventDefault)e.preventDefault();view='you';FTAB='pred';try{localStorage.setItem('ftab','pred')}catch(x){}render();scrollTo({top:0})});
   on('#totrack',e=>{if(e&&e.preventDefault)e.preventDefault();view='you';FTAB='pred';try{localStorage.setItem('ftab','pred')}catch(x){}render();scrollTo({top:0})});
+  on('#toplain',e=>{if(e&&e.preventDefault)e.preventDefault();view='you';FTAB='pred';try{localStorage.setItem('ftab','pred')}catch(x){}render();scrollTo({top:0})});
   on('#selx',()=>{SEL=null;render()});
   if($('#ov')){$('#ov').onclick=e=>{if(e.target.id==='ov'){SEL=null;render()}};const x=$('#selx');if(x&&document.activeElement===document.body)x.focus()}
   let from=null;

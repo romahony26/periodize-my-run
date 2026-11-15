@@ -84,6 +84,9 @@ def load(z):
     return sum(w * s / 60 for w, s in zip(WEIGHTS, z, strict=True))
 
 
+EXTRA_EASY = 0.5      # how much easy minutes beyond the plan count, against minutes missing or run too hard [C]
+
+
 def score(p, runs, tp, L):
     """Execution score for one planned day. `runs` are that day's runs (from assess.load_runs)."""
     steps = json.loads(p["steps"]) if p["steps"] else None
@@ -98,6 +101,8 @@ def score(p, runs, tp, L):
                 "parts": [{"name": n, "planned_min": round(plan[i] / 60), "min": 0, "weight": WEIGHTS[i]} for i, n in enumerate(NAMES) if plan[i] >= 30]}
     got = actual_zones(runs, tp, L["hrmax"], by_hr)
     diff = [max(abs(a - b) - TOLERANCE_S, 0) for a, b in zip(got, plan, strict=True)]
+    if got[0] > plan[0]:
+        diff[0] *= EXTRA_EASY      # easy running beyond the plan is a smaller departure than running hard or not running
     dev = sum(w * x for w, x in zip(WEIGHTS, diff, strict=True)) / max(sum(w * x for w, x in zip(WEIGHTS, plan, strict=True)), 1)
     total = round(100 * max(0.0, 1 - dev))
     denom = max(sum(w * x for w, x in zip(WEIGHTS, plan, strict=True)), 1)
@@ -218,4 +223,5 @@ def history(c, L, weeks=12):
                 causes[x["score"]["cause"]] = causes.get(x["score"]["cause"], 0) + 1
     return {"trend": trend, "sessions": out, "weeks": [{"week": k, "avg": round(sum(v) / len(v)), "n": len(v)} for k, v in sorted(wk.items())],
             "average": round(sum(scored) / len(scored)) if scored else None, "count": len(scored),
+            "average_run": (lambda v: round(sum(v) / len(v)) if v else None)([x["score"]["score"] for x in out if x["score"] and x["score"]["verdict"] != "Missed"]),
             "tally": tally, "causes": [{"cause": k, "n": v} for k, v in sorted(causes.items(), key=lambda kv: -kv[1])][:3]}
