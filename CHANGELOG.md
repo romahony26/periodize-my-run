@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.10 - 2026-11-15
+### Changed
+- The downloaded backup and the daily copy to another computer leave out the raw Garmin records. They were about seven tenths of the database and already compressed, so a copy was over 40 MB; it is now a few MB. Your runs, daily readings, plan, races and settings are all in it, and the app fetches the raw records again when connected to Garmin. The backups the app keeps on its own computer are still complete.
+
+### Fixed
+- `tools/deploy.py` kept a full copy of the database (over 100 MB) from before every deploy, forever: the app's own thinning never matched their names. It keeps the newest three. On a Raspberry Pi that had been deployed to often this had grown to more than 3 GB.
+
 ## 2.10.4-beta.9 - 2026-11-15
 ### Changed
 - Backup sizes are shown in MB, not KB, in Settings and in the backup copy log.

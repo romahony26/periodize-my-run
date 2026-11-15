@@ -92,7 +92,8 @@ def nightly():
 
 
 def portable():
-    """A zip of the database with every login secret removed, plus the plan as JSON. For downloading and for off-site copies."""
+    """A zip of the database with every login secret removed and the raw Garmin records left out, plus the plan as JSON. For downloading
+    and for off-site copies. The copies the app keeps on its own computer (make) are complete."""
     fd, tmp = tempfile.mkstemp(suffix=".db")
     os.close(fd)
     try:
@@ -102,6 +103,9 @@ def portable():
                 src.backup(dst)
             dst.execute("PRAGMA journal_mode=DELETE")     # one plain file, so the removals below are really in it
             dst.execute(f"DELETE FROM settings WHERE key IN ({','.join('?' * len(SECRETS))})", SECRETS)  # nosec B608
+            # the raw Garmin records are about seven tenths of the database and already compressed, so they would make a copy 40 MB or more
+            # for what can be fetched again: the runs, the daily readings, the plan, the races and the settings are all kept
+            dst.execute("DELETE FROM garmin_raw")
             dst.commit()
             dst.execute("VACUUM")
         finally:
@@ -111,7 +115,8 @@ def portable():
             z.write(tmp, "periodize.db")
             z.writestr("plan.json", json.dumps(db.rows("SELECT date,type,label,miles,steps,strength,note,source FROM plan ORDER BY date"), indent=1))
             z.writestr("README.txt", "Periodize My Run backup. To restore: stop the app, copy periodize.db into ~/.periodize-my-run/, start the app and connect Garmin again.\n"
-                                     "Garmin login tokens and the app password are not included.\n")
+                                     "Garmin login tokens and the app password are not included, and neither are the raw Garmin records (the app fetches them again\n"
+                                     "when it has been connected to Garmin): your runs, daily readings, plan, races and settings are all here.\n")
     finally:
         os.unlink(tmp)
     return buf.getvalue()

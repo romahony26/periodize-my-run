@@ -27,6 +27,7 @@ import time
 APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOST = "root@192.168.1.2"
 BASE = "/home/dietpi/.periodize-my-run"
+KEEP_PRE = 3       # copies of the database made just before a deploy that are kept on the Pi
 BETA_TESTS = ("test_engine", "test_gaps", "test_next_level", "test_jobs_flow", "test_references", "test_pinned", "test_properties")   # a few seconds
 QUICK = BETA_TESTS      # kept under its old name for callers that still use it
 NEEDED_KEYS = ("version", "days", "settings", "fitness", "readiness", "warnings", "scorecard", "season")
@@ -142,7 +143,9 @@ def deploy(version, host=HOST, dry=False, skip_checks=False, out=print):
     if tarball.returncode:
         raise Stop("git archive failed")
     unpack = (f"set -e; mkdir -p {BASE}/versions/{version}; tar -x -C {BASE}/versions/{version}; chown -R dietpi:dietpi {BASE}/versions/{version}; "
-              f"cp {BASE}/periodize.db {BASE}/backups/periodize-pre-{version}.db; chown dietpi:dietpi {BASE}/backups/periodize-pre-{version}.db")
+              f"cp {BASE}/periodize.db {BASE}/backups/periodize-pre-{version}.db; chown dietpi:dietpi {BASE}/backups/periodize-pre-{version}.db; "
+              # a full copy of the database is over 100 MB: keep the newest three from deploys, the nightly set is kept by the app itself
+              f"cd {BASE}/backups && ls -t periodize-pre-*.db | tail -n +{KEEP_PRE + 1} | xargs -r rm -f --")
     r = subprocess.run(["ssh", host, unpack], input=tarball.stdout, capture_output=True, timeout=300)  # noqa: S603, S607
     if r.returncode:
         raise Stop("unpacking on the Pi failed: " + r.stderr.decode()[:200])
