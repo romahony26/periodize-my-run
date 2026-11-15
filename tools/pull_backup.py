@@ -50,7 +50,10 @@ def main():
         to = os.path.join(root, "Periodize My Run backups")
     os.makedirs(to, exist_ok=True)
     cmd = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", a.host,
-           f"cd {shlex.quote(a.app)} && sudo -u {shlex.quote(a.user)} -H {shlex.quote(a.app + '/.venv/bin/python')} -c {shlex.quote(EXPORT)}"]
+           f"u={shlex.quote(a.user)}; h=$(getent passwd \"$u\" | cut -d: -f6); v=$(cat \"$h/.periodize-my-run/versions/current\" 2>/dev/null); "
+           # the updater's layout runs the version folder named in versions/current; the install folder only holds the Python environment
+           f"if [ -n \"$v\" ] && [ -d \"$h/.periodize-my-run/versions/$v\" ]; then cd \"$h/.periodize-my-run/versions/$v\"; else cd {shlex.quote(a.app)}; fi && "
+           f"sudo -u \"$u\" -H {shlex.quote(a.app + '/.venv/bin/python')} -c {shlex.quote(EXPORT)}"]
     r = subprocess.run(cmd, capture_output=True, timeout=600)  # noqa: S603  # nosec B603 - fixed program, arguments quoted
     if r.returncode != 0 or not r.stdout:
         print("Could not fetch a backup:", r.stderr.decode(errors="replace").strip()[-300:])
