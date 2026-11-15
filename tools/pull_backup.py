@@ -73,7 +73,7 @@ def main():
     for n in names:
         if n not in good:
             os.unlink(os.path.join(to, n))
-    print(f"{dt.datetime.now():%Y-%m-%d %H:%M} copied {name} ({len(r.stdout) // 1024} KB) to {to}; {len(good)} kept")
+    print(f"{dt.datetime.now():%Y-%m-%d %H:%M} copied {name} ({len(r.stdout) / 1048576:.1f} MB) to {to}; {len(good)} kept")
     return 0
 
 
