@@ -419,6 +419,6 @@ def focus(today, c, L, tp, races, statuses=()):
     if nxt:
         r, d = nxt[0], (dt.date.fromisoformat(str(nxt[0]["date"])) - today).days
         out.append({"kind": "race", "title": f"{r['name']} in {d} day{'' if d == 1 else 's'}",
-                    "text": "Your next checkpoint, and your first all-out effort in a while: it resets the paces and the estimates. Race it properly; the week is lightened for it."})
+                    "text": "Your next checkpoint. An all-out race is the best evidence the plan gets: it resets the paces and the estimates. Race it properly; the week is lightened for it."})
     return out[:2]
 

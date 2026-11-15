@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.5 - 2026-11-15
+### Fixed
+- The tune-up race note under "Focus this week" no longer says the race is your first all-out effort in a while, which the app does not check.
+
 ## 2.10.4-beta.4 - 2026-11-15
 ### Added
 - A colour theme can be chosen under Settings, Training, Appearance: Match this device, Light, Dark, or Black. Black is a new, darker theme for night and for screens that switch black pixels off. The choice is kept on the device you make it on.
