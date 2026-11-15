@@ -446,6 +446,25 @@ def _sync_status(p, day, tp, adj, c, d, today):
     return {"state": "pending", "text": "Not on your Garmin calendar yet. It goes at the next sync with Garmin."}
 
 
+FORECAST_SPREAD = 0.064
+
+
+def _ladder(goal_s, goal_miles, st, c):
+    """What marathon times near the goal are worth at shorter distances (exponent 1.07, between Riegel's 1.06 and the 1.08 that suits most
+    recreational runners), the weekly miles each usually takes, and where the athlete stands today."""
+    u = c["units"]
+    rungs = []
+    for off in (-5, 0, 5, 10):
+        t = goal_s + off * 60
+        row = {"time": engine.hms(t), "goal": off == 0, "pace": engine.pace(goal_miles * assess.MI / t, u) + "/" + u,
+               "miles": round(profile.goal_volume(engine.hms(t), goal_miles) or 0)}
+        for name, mi in (("5k", 3.107), ("10mi", 10.0), ("half", 13.109)):
+            row[name] = engine.hms(t * (mi / goal_miles) ** 1.07)
+        rungs.append(row)
+    now = {name: engine.hms(assess.projection(st, c, mi)[0]) for name, mi in (("5k", 3.107), ("10mi", 10.0), ("half", 13.109))}
+    return {"rungs": rungs, "now": now}
+
+
 def _days(c, today, L=None):
     ws = int(c.get("week_start", 0)) % 7
     back = (today.weekday() - ws) % 7
@@ -486,6 +505,7 @@ def _days(c, today, L=None):
                 mins = sum(execution.planned_zones(day["steps"], tp, L["hrmax"])[0]) / 60
                 race = p["type"] == "Race"
                 item["mins"] = round(mins)
+                item["profile"] = engine.shape(day["steps"], tp)
                 fu = insights.fuel(mins, c["race_carbs_g_per_h"] if race else insights.note_carbs(p["note"]), int(c["gel_carbs_g"]), race)
                 if fu:
                     item["fuel"] = fu
@@ -554,6 +574,10 @@ def state():
                 "change": round(fc["seconds"] - prev[-1]) if prev else None,
                 "index_now": round(fc["current_index"], 1), "index_race": round(fc["index"], 1), "proven": round(fc["proven"]["index"], 1),
                 "proven_from": fc["proven"]["from"], "proven_date": fc["proven"]["date"]}
+            # how far forecasts of this kind usually miss: half of marathon predictions made from shorter running landed within 6.4% (principle 103)
+            fitness["goal"]["forecast"]["range"] = [engine.hms(fc["seconds"] * (1 - FORECAST_SPREAD)), engine.hms(fc["seconds"] * (1 + FORECAST_SPREAD))]
+            if gs and 20 <= goal["miles"] <= 27:
+                fitness["goal"]["ladder"] = _ladder(gs, goal["miles"], st, c)
             if c.get("heat_adjust"):
                 rh = heat.at(dt.date.fromisoformat(goal["date"]), 9, cached_only=True)    # race starts are usually around 9
                 if rh:

@@ -3,6 +3,20 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.15 - 2026-11-15
+### Changed
+- The Plan page is far shorter. This week and next week show their days; last week and every later week are one row each (dates, miles, a small bar for each day, and the week's sessions and long run in words) that opens with a tap. On a phone the page was about 27 screens long; it is now about 5.
+- The season outline sits above the weeks, not below them. The outlined bar is this week, and tapping a bar opens that week. Its explanation is folded under "How to read this".
+- "Why this week looks like this" is directly under this week's days.
+- Today's card shows how long the session should take, the best hour and temperature when weather is on, the fuel for a long run, and what the session is for.
+- A tune-up race's checkpoint now allows for the training still to come. It gives what the goal time is worth at that distance, and the slower time that still keeps the goal on track: 1% for every four weeks left, 4% at most (this project's allowance, not a research figure).
+- Before the race-specific phase the long run is about a third of the week (it was 38%), so the easy days keep their runs and a running day is no longer dropped to make room. Inside the specific phase it is unchanged.
+
+### Added
+- Sessions are drawn as blocks: width is time, height and colour are effort. On Today's card, tomorrow's card and each day's detail.
+- "What each marathon time needs" on Fitness, under Predictions: marathon times around your goal, what each is worth at 5K, 10 miles and the half, the peak week each usually takes, and what you would run today. The goal card links to it.
+- The race-day forecast comes with its usual spread: the range half of forecasts made this way land in.
+
 ## 2.10.3-beta.14 - 2026-11-15
 ### Changed
 - Long runs are easy, with the last quarter steady only when the week has room for it. Every long run used to be steady from the first mile, which in a marathon build put half or more of the week's miles above easy pace, against the plan's own rule that about four fifths of training is easy. Now, when the sessions already take more than a quarter of the week's miles above easy, the long run is all easy and the plan says so. The marathon-pace long run is unchanged.

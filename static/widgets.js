@@ -5,7 +5,7 @@ let FTAB=(()=>{try{return localStorage.getItem('ftab')||'now'}catch(e){return 'n
 const FSECS=[['now','Now'],['progress','Progress'],['pred','Predictions'],['records','Records']];
 const FMAP=[['Threshold pace','now'],['Race-specific endurance','now'],['Steps outside','now'],['Fitness, fatigue','now'],['Aerobic drift','now'],['Recovery trends','now'],['When you run','now'],
   ['Is it working','progress'],['Plan scorecard','progress'],['Plan against actual','progress'],['Last eight weeks','progress'],['Paces now','progress'],
-  ['Race predictor','pred'],['How accurate','pred'],['VO2max','pred'],
+  ['What each marathon','pred'],['Race predictor','pred'],['How accurate','pred'],['VO2max','pred'],
   ['Race results','records'],['Personal bests','records'],['Shoes','records'],['Your history','records'],['Your limits','records']];
 function foldNotes(root){root.querySelectorAll('p.xs.mute').forEach(p=>{
   if(p.id||p.closest('details,table,.modal,.ov')||p.textContent.length<150||p.parentElement.classList.contains('stat')||/^(Load this week|Warning signs)/.test(p.textContent))return;     // numbers stay in view
@@ -46,3 +46,16 @@ function chart(title,rows,val,tip,label){
     <div class="xs mute" style="display:flex;justify-content:space-between"><span>${E(label(rows[0]))}</span><span>${E(label(rows[rows.length-1]))}</span></div>`}
 function stepList(text){return text?`<ul class="steps">${text.split('; ').map(x=>`<li>${E(x)}</li>`).join('')}</ul>`:''}
 
+
+/* A session drawn as blocks: width is time, height and colour are effort. The numbers come with each planned day (engine.shape). */
+function wprof(p,tall){
+  if(!p||p.length<2)return '';
+  const tot=p.reduce((a,x)=>a+x[0],0); if(!tot)return '';
+  const col=r=>r===0?'var(--line)':r<0.8?'var(--easy)':r<0.9?'var(--brand2)':r<0.97?'var(--key)':r<1.03?'var(--long)':'var(--race)';
+  const H=tall?44:30; let x=0;
+  const bars=p.map(b=>{const w=1000*b[0]/tot,h=b[1]===0?3:Math.max(5,Math.round(H*Math.min(1,(b[1]-0.55)/0.6))),r=`<rect x="${x.toFixed(1)}" y="${H-h}" width="${Math.max(w-(p.length>12?0.6:2),0.8).toFixed(1)}" height="${h}" rx="1.5" fill="${col(b[1])}"/>`;x+=w;return r}).join('');
+  return `<svg class="wprof" viewBox="0 0 1000 ${H}" preserveAspectRatio="none" role="img" aria-label="The session as blocks: width is time, height is effort" style="height:${H}px">${bars}</svg>`;
+}
+/* Seven small bars for a week: each day's miles, coloured by the kind of day. */
+function wkSpark(w){const mi=d=>d.past&&d.done?d.done.miles:(d.miles||0), mx=Math.max(...w.map(mi),1);
+  return `<span class="wspark" aria-hidden="true">${w.map(d=>`<i class="${d.past&&d.done&&!d.type?'Easy':d.type||'Rest'}" style="height:${mi(d)?Math.max(3,Math.round(22*mi(d)/mx)):2}px"></i>`).join('')}</span>`}

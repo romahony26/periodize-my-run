@@ -1,5 +1,5 @@
 const QA_ASK={swap:["Swap today's session with tomorrow's?","Swap"],sick:["Mark today as unwell? Today becomes rest, then you come back with easy running.","Yes, I'm unwell"],busy:["Too busy to run today? Today becomes rest and the week is rebuilt around it. The miles are not made up.","Yes, too busy"]};
-let QAC=null;
+let QAC=null, WOPEN={};
 function qaRow(t){
   const ds=(S.statuses||[]).find(s=>(s.kind==='busy'||s.kind==='sick')&&s.start===S.today&&s.end===S.today);
   const lm=S.last_move,moved=S.can_undo&&lm&&(lm.a===S.today||lm.b===S.today);
@@ -59,7 +59,8 @@ function planView(){
       <details class="more"><summary class="small">${(f2=>f2.gap?`The forecast is <b class="${f2.gap[0]==='ahead'?'green':'amber'}">${f2.gap[1]} ${f2.gap[0]==='ahead'?'ahead of':'behind'}</b> your goal`:'The forecast')(g.forecast)} <span class="xs mute">· how it is worked out</span></summary>
       ${g.heat?`<p class="small" style="margin:10px 0 0">☀ Race-day weather around 9:00: <b>${g.heat.temp}°C, dew point ${g.heat.dew}°C</b>. ${g.heat.pct===null?'<b class="amber">Very hot and humid: race for the finish, not a time, and start well inside your pace.</b>':g.heat.pct>0?`Expect about <b>${g.heat.pct}%</b> slower than the forecast above; start that much slower.`:'No slowdown expected for the heat.'}${g.heat.pct!==0&&S.heat&&S.heat.exposure?` In the last ${S.heat.exposure.window} days you ran ${S.heat.exposure.days} day${S.heat.exposure.days===1?'':'s'} in real heat. Getting used to heat takes repeated hot runs over one to two weeks (Racinais and colleagues, 2015), so a few runs at the warmest hour of the day in the fortnight before race day help.`:''}</p>`:''}
       ${(fc=>`<p class="small" style="margin:12px 0 0">It assumes you complete <b>${fc.pct}%</b> of the plan${fc.chosen?`, the figure you set${fc.history_pct!==null?` (your last two years averaged ${fc.history_pct}%${fc.plan_pct!==null&&fc.plan_days>=7?`; this plan so far ${fc.plan_pct}%`:''})`:''}`:fc.plan_weight>=100?', your record on this plan so far':fc.plan_weight>0?`, a blend of your history (${fc.history_pct}%) and this plan so far (${fc.plan_pct}%)`:fc.history_pct!==null?', your average over the last two years':', a general figure until there is history'}.</p>
-      <p class="xs mute" style="margin:6px 0 0">Complete all of it: <b class="num">${fc.all}</b> · Complete ${fc.poor_pct}%: <b class="num">${fc.poor}</b>${fc.out_of_reach?' · Your goal is beyond the best you have shown in three years; a new best along the way will move the forecast.':fc.needs_all?' · Your goal is within reach only if nearly all of the plan gets done.':''}</p>`)(g.forecast)}</details></div>`}
+      ${fc.range?`<p class="small" style="margin:6px 0 0">A forecast is not a promise: half of marathon forecasts made this way land between <b class="num">${fc.range[0]}</b> and <b class="num">${fc.range[1]}</b>.</p>`:''}
+      <p class="xs mute" style="margin:6px 0 0">Complete all of it: <b class="num">${fc.all}</b> · Complete ${fc.poor_pct}%: <b class="num">${fc.poor}</b>${fc.out_of_reach?' · Your goal is beyond the best you have shown in three years; a new best along the way will move the forecast.':fc.needs_all?' · Your goal is within reach only if nearly all of the plan gets done.':''}</p>`)(g.forecast)}${g.ladder?`<p class="xs" style="margin:10px 0 0"><a href="#" id="toladder">What each marathon time needs</a></p>`:''}</details></div>`}
   else h+=`<div class="card hero c6"><p class="eyebrow">Goal</p><p class="h">No goal race yet</p><p class="mute small">Add one under Races & status and the plan will build toward it.</p></div>`;
   // once a run of half a mile or more is logged today the card shows tomorrow (the app plans one run a day, so there is no second session to wait for)
   const iso=(d,n)=>{const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`};
@@ -69,6 +70,7 @@ function planView(){
     const x=tomorrow;
     h+=`<div class="card c6" id="tomorrowcard"><p class="eyebrow">Tomorrow <span class="chip green"><i></i>Today's run is done</span></p>
     <p class="h">${E(x.label)} <span class="mute num" style="font-weight:600">${E(x.dist||'')}</span></p>
+    ${x.mins?`<p class="tmeta num"><span>about ${hm(x.mins)}</span></p>`:''}${wprof(x.profile,true)}
     ${stepList(x.text)}
     ${x.wx?`<p class="xs mute" style="margin:6px 0 0">${x.wx.wet?'☂':'☀'} Around ${x.wx.hour}:00 · ${E(wxTip(x.wx))}</p>`:''}
     ${x.purpose?`<p class="small mute" style="margin:10px 0 0">${E(x.purpose)}</p>`:''}
@@ -76,8 +78,11 @@ function planView(){
     <p class="xs mute" style="margin:10px 0 0">Today: ${E(t.done.dist)}${t.done.pace?' at '+E(t.done.pace):''}${t.done.runs>1?' over '+t.done.runs+' runs':''}. Tomorrow's paces are eased in the morning if your recovery signs say so.</p>${feltRow(t)}${painRow(t)}${whatIfLine()}</div>`;
   } else
   h+=`<div class="card c6"><p class="eyebrow">Today</p>
-    <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}${S.on_feet&&t.mins?' · '+hm(t.mins):''}</span></p>
+    <p class="h">${E(t.label||'Nothing planned')} <span class="mute num" style="font-weight:600">${E(t.dist||'')}</span></p>
+    ${t.mins||t.wx?`<p class="tmeta num">${t.mins?`<span>about ${hm(t.mins)}</span>`:''}${t.wx?`<span>${t.wx.wet?'☂':'☀'} best around ${t.wx.hour}:00 · ${t.wx.temp}°</span>`:''}${t.fuel?`<span>fuel ${t.fuel.per_hour} g/h</span>`:''}</p>`:''}
+    ${wprof(t.profile,true)}
     ${stepList(t.text)}
+    ${t.purpose&&t.type!=='Rest'?`<p class="small mute" id="todaypurpose" style="margin:10px 0 0">${E(t.purpose)}</p>`:''}
     ${qaRow(t)}
     ${t.adjust?`<p class="small amber" style="margin:10px 0 0">${t.adjust.easy?`<b>${E(t.adjust.advice||'Changed to an easy run today.')}</b>`:`<b>Paces eased ${(t.adjust.slow*100).toFixed(1)}% today.</b> ${E(t.adjust.advice||'')}`}</p>`:''}
     ${t.strength?`<p class="xs" style="margin:6px 0 0"><span class="tag">+ ${E(t.strength)}</span></p>`:''}
@@ -103,20 +108,36 @@ function planView(){
     <div class="stats" style="margin-top:0"><div class="stat"><div class="v num">${c.week_m.toLocaleString()} m</div><div class="k">Target for the week</div></div><div class="stat"><div class="v num">${c.long_m.toLocaleString()} m</div><div class="k">Of it in the long run</div></div>
     <div class="stat"><div class="v num ${c.done_m>=c.week_m?'green':''}">${c.done_m.toLocaleString()} m</div><div class="k">Done so far</div></div></div><div class="bar"><i style="width:${Math.min(100,Math.round(100*c.done_m/Math.max(c.week_m,1)))}%"></i></div>
     <p class="xs mute" style="margin:8px 0 0">The race climbs ${c.race_per_mile} m a mile; you have averaged ${c.now_per_mile} m a mile over four weeks; this week aims for ${c.target_per_mile}. ${c.progress<=0?'The ramp toward the race figure starts 16 weeks out.':c.progress>=1?'You are at the race figure now.':'The target rises each week and reaches the race figure three weeks out.'}</p></div></div>`)(S.climb);
+  if(S.season&&S.season.length>4){const mx=Math.max(...S.season.map(x=>x.total),1), col={race:'var(--race)',taper:'var(--amber)',down:'var(--mute)',recover:'var(--mute)',postrace:'var(--mute)',return:'var(--mute)',tuneup:'var(--amber)'};
+    const have=new Set(S.days.map(d=>d.date)), nextMon=m=>{const x=new Date(m+'T12:00');x.setDate(x.getDate()+7);return x.toISOString().slice(0,10)};
+    const races=S.season.flatMap((x,i)=>(x.races||[]).map(r=>Object.assign({week:i+1},r)));
+    h+=`<div class="grid" style="margin-top:14px"><div class="card c12" id="season"><p class="eyebrow">Season outline · ${S.season.length} weeks to ${E(f&&f.goal?f.goal.name:'your goal')}</p>
+      <div class="sout" role="list" aria-label="Weekly distance for each week of the season">${S.season.map((x,i)=>{const rc=(x.races||[]);const tip='Week of '+nice(x.monday)+': '+x.mode+', '+x.total+' '+U()+', long run '+x.long+' '+U()+(rc.length?'. Race: '+rc.map(r=>r.name).join(', '):'');
+        return `<div class="sw${x.monday<=S.today&&S.today<nextMon(x.monday)?' now':''}" role="listitem" tabindex="0" ${have.has(x.monday)?`data-wkjump="${x.monday}"`:''} title="${E(tip)}" aria-label="${E(tip)}"><span class="sv num">${x.total}</span><div class="sbar"><i style="height:${Math.max(4,Math.round(100*x.total/mx))}%;${col[x.mode]?'background:'+col[x.mode]:''}"></i></div>
+          <span class="sr">${rc.map(r=>`<b class="${r.priority==='A'?'ra':'rb'}" title="${E(r.name)}">${r.priority==='A'?'★':'●'}</b>`).join('')}</span><span class="sd">${(i===S.season.length-1||(i%4===0&&i<S.season.length-3))?nice(x.monday):''}</span></div>`}).join('')}</div>
+      ${races.length?`<ul class="clist" style="margin-top:10px;list-style:none;padding-left:0">${races.map(r=>`<li><b class="${r.priority==='A'?'ra':'rb'}">${r.priority==='A'?'★':'●'}</b> ${E(r.name)} · ${nice(r.date)} · ${r.priority==='A'?'goal race':'tune-up'} · week ${r.week} of ${S.season.length}</li>`).join('')}</ul>`:''}
+      <details class="more"><summary class="xs mute">How to read this</summary><p class="xs mute" style="margin:8px 0 0">Weekly distance in ${U()==='mi'?'miles':'km'} above each bar; ★ goal race, ● tune-up race. Grey: lighter weeks · amber: taper and tune-up race weeks · red: race week. The outlined bar is this week; tap a bar to open that week. Only this week is fixed; each later week assumes the one before goes to plan, and all are redrawn at every weekly review.</p></details></div></div>`}
   const weeks=[];for(let i=0;i<S.days.length;i+=7)weeks.push(S.days.slice(i,i+7));
   const names=['Last week','This week','Next week','In 2 weeks','In 3 weeks','In 4 weeks','In 5 weeks'];
   const fc=v=>v>=85?'green':v>=70?'amber':'red', pc=v=>v>=1?'green':v<=-3?'amber':'mute';
+  const wsum=(w,i)=>{if(i===0){const dn=w.reduce((a,d)=>a+((d.done&&d.done.miles)||0),0),pl=w.reduce((a,d)=>a+(d.miles||0),0);return `ran ${U()==='mi'?Math.round(dn*10)/10+' mi':Math.round(dn*KM)+' km'}${pl?` of ${U()==='mi'?Math.round(pl*2)/2:Math.round(pl*KM)} planned`:''}`}
+    return w.filter(d=>d.type==='Key'||d.type==='Long'||d.type==='Race').map(d=>d.type==='Race'?'★ '+d.label:d.type==='Long'?`Long ${d.dist}${d.short&&d.short!=='easy'?' ('+d.short+')':''}`:(d.short||d.label)).map(E).join(' · ')||'easy running'};
   weeks.forEach((w,i)=>{
+    const open=WOPEN[w[0].date]!==undefined?WOPEN[w[0].date]:(i===1||i===2);
+    if(i===3)h+='<p class="later">Later weeks · tap to open</p>';
     const wi=S.week_info[(w.find(d=>d.week)||{}).week], total=w.reduce((a,d)=>a+(d.miles||0),0), prov=w.some(d=>d.week&&S.week_info[d.week]&&!S.week_info[d.week].final);
-    h+=`<div class="wk"><b>${names[i]||''}</b><span class="mute small">${nice(w[0].date)} – ${nice(w[6].date)}</span>${S.on_feet&&w.some(d=>d.mins)?`<span class="tag" title="Planned time on your feet this week, from the paces in each session">${hm(w.reduce((a,d)=>a+(d.mins||0),0))} on feet</span>`:''}${total?`<span class="tag">${wi&&S.settings.week_start===0?E(wi.mode)+' · ':''}${U()==='mi'?Math.round(total*2)/2+' mi':Math.round(total*KM)+' km'}</span>`:''}${prov?'<span class="tag">provisional</span>':''}${i===0&&S.streak>=2?`<span class="tag green" title="Whole weeks in a row with 90% or more of the planned miles run">${S.streak} weeks in a row at 90%+</span>`:''}${w[0].week_perf!=null?`<span class="tag ${pc(w[0].week_perf)}" title="Pace for your heart rate across the week's runs, against the four weeks before">pace for heart rate ${w[0].week_perf>0?'+':''}${w[0].week_perf.toFixed(1)}%</span>`:''}
-      ${i===1?`<span style="margin-left:auto" class="xs mute"><span class="hint-d">Click a day for detail · drag to swap</span><span class="hint-m">Tap a day for detail</span> ${S.can_undo?'· <a href="#" id="undo">Undo last move</a>':''}</span>`:''}</div><div class="cal">`;
+    h+=`${open?'':`<button class="wrow" data-wk="${w[0].date}" aria-expanded="false">`}<${open?'div':'span'} class="wk" ${open?`id="wk-${w[0].date}"`:''}><b>${names[i]||''}</b><span class="mute small">${nice(w[0].date)} – ${nice(w[6].date)}</span>${S.on_feet&&w.some(d=>d.mins)?`<span class="tag" title="Planned time on your feet this week, from the paces in each session">${hm(w.reduce((a,d)=>a+(d.mins||0),0))} on feet</span>`:''}${total?`<span class="tag">${wi&&S.settings.week_start===0?E(wi.mode)+' · ':''}${U()==='mi'?Math.round(total*2)/2+' mi':Math.round(total*KM)+' km'}</span>`:''}${prov?'<span class="tag">provisional</span>':''}${i===0&&S.streak>=2?`<span class="tag green" title="Whole weeks in a row with 90% or more of the planned miles run">${S.streak} weeks in a row at 90%+</span>`:''}${w[0].week_perf!=null?`<span class="tag ${pc(w[0].week_perf)}" title="Pace for your heart rate across the week's runs, against the four weeks before">pace for heart rate ${w[0].week_perf>0?'+':''}${w[0].week_perf.toFixed(1)}%</span>`:''}
+      ${i===1?`<span style="margin-left:auto" class="xs mute"><span class="hint-d">Click a day for detail · drag to swap</span><span class="hint-m">Tap a day for detail</span> ${S.can_undo?'· <a href="#" id="undo">Undo last move</a>':''}</span>`:open?`<button class="wtog" data-wk="${w[0].date}" aria-expanded="true" style="margin-left:auto">Hide</button>`:''}</${open?'div':'span'}>`;
+    if(!open){h+=`${wkSpark(w)}<span class="wsum">${wsum(w,i)}</span><span class="chev" aria-hidden="true">›</span></button>`;return}
+    h+='<div class="cal">';
     for(const d of w){const can=!d.past&&d.type, b=d.body;
       h+=`<div class="dw"><div class="day ${d.type||''} ${d.past?'past':''} ${d.today?'today':''} ${SEL===d.date?'sel':''}" data-date="${d.date}" ${can?'draggable="true"':''} tabindex="0" role="button" aria-label="${d.dow} ${+d.date.slice(8)}: ${E(d.label||'no session')}">
         <div class="d"><span>${d.dow} ${+d.date.slice(8)}</span><span>${d.done&&d.done.id?'':(d.on_watch?'⌚':'')+(d.source==='moved'?' ↔':'')+(d.source==='reshuffled'?' ↻':'')}</span></div>
         ${d.type?`<div class="l">${E(d.label)}</div>${d.dist?`<div class="m num">${E(d.dist)}${S.on_feet&&d.mins?` · ${hm(d.mins)}`:''}</div>`:''}<div class="t">${E(d.short||'')}</div>`:''}
         <div class="f">${d.done?`<span class="done">✓ ${E(d.done.dist)}</span>`:''}${d.wx&&!d.done?`<span class="xs mute num" title="${E(wxTip(d.wx))}">${d.wx.wet?'☂':'☀'} ${d.wx.hour}:00 · ${d.wx.temp}°</span>`:''}${d.adjust?`<span class="tag amber">eased ${(d.adjust.slow*100).toFixed(1)}%</span>`:''}</div>
         ${b?`<div class="mt num"><span class="${fc(b.fresh)}" title="Freshness this morning: last night’s sleep, and your 7-day HRV and resting heart rate, against your normal"><b>${b.fresh}</b></span>${b.sleep_score?`<span title="Last night's sleep score">☾${b.sleep_score}</span>`:''}${b.rhr?`<span title="Resting heart rate">♥${Math.round(b.rhr)}</span>`:''}${b.hrv?`<span title="Last night's HRV">∿${Math.round(b.hrv)}</span>`:''}</div>`:''}</div>${d.done&&d.done.id?GLINK(d.done.id,'corner'):''}</div>`}
-    h+='</div>'});
+    h+='</div>';
+    if(i===1&&f)h+=`<details class="more wkwhy" id="wkwhy"><summary>Why this week looks like this</summary><ul class="why">${f.week.why.map(x=>`<li>${E(x)}</li>`).join('')||'<li>Nothing unusual.</li>'}</ul></details>`});
   h+=`<p class="xs mute" style="margin:10px 2px 0">On each day: <b>freshness</b> out of 100, from that night's sleep and your 7-day HRV and resting heart rate, against your normal · ☾ that night's sleep score · ♥ resting heart rate · ∿ that night's HRV. In each week's heading: your pace for your heart rate across the week against the four weeks before. ⌚ on your watch · ↔ moved by you · ↻ moved here because it was missed earlier in the week.</p>`;
   const sd=S.days.find(d=>d.date===SEL);
   if(sd){const b=sd.body, a=sd.adjust, sy=sd.sync, sc={synced:'green',pending:'amber',later:'unknown',off:'unknown',past:'unknown',none:'unknown'};
@@ -125,7 +146,7 @@ function planView(){
     <p class="h">${E(sd.label||'No session planned')} <span class="mute num" style="font-weight:600">${E(sd.dist||'')}</span></p>
     ${sd.wx?wxBest(sd.wx):''}
     ${metWarn(S.met_warnings,sd.date)}
-    ${sd.type&&sd.type!=='Rest'?`<p class="lab2">${a?'Original session':'Session'}</p>${stepList(a?sd.original:sd.text)}`:''}
+    ${sd.type&&sd.type!=='Rest'?`<p class="lab2">${a?'Original session':'Session'}${sd.mins?` · about ${hm(sd.mins)}`:''}</p>${wprof(sd.profile,true)}${stepList(a?sd.original:sd.text)}`:''}
     ${a?`<p class="lab2">Tuned for today <span class="chip amber" style="margin-left:6px"><i></i>paces eased ${(a.slow*100).toFixed(1)}%</span></p>${stepList(sd.text)}
       <p class="small" style="margin:8px 0 0">Why: ${E((a.reasons||[]).join('; '))}. ${E(a.advice||'')}</p>`
      :sd.type&&sd.type!=='Rest'&&!sd.past?`<p class="small mute" style="margin:8px 0 0">${sd.today?(b?'Not tuned: last night’s sleep and your HRV and resting heart rate trends are normal, so it stands as planned.':'Not tuned yet: waiting for last night’s data from your watch.'):'Tuning happens on the morning of the session, from the night before and your recent trends.'}</p>`:''}
@@ -144,14 +165,6 @@ function planView(){
     ${sy?`<p class="lab2">Garmin</p><p class="small" style="margin:4px 0 0"><span class="chip ${sc[sy.state]}"><i></i>${{synced:'Synced',pending:'Waiting to sync',later:'Not sent yet',off:'Not sending',past:'Past',none:'Nothing to send'}[sy.state]}</span> ${E(sy.text)}</p>`:''}
     </div></div>`}
   h+=dayModal();
-  if(S.season&&S.season.length>4){const mx=Math.max(...S.season.map(x=>x.total),1), col={race:'var(--race)',taper:'var(--amber)',down:'var(--mute)',recover:'var(--mute)',postrace:'var(--mute)',return:'var(--mute)',tuneup:'var(--amber)'};
-    const races=S.season.flatMap((x,i)=>(x.races||[]).map(r=>Object.assign({week:i+1},r)));
-    h+=`<div class="grid" style="margin-top:22px"><div class="card c12" id="season"><p class="eyebrow">Season outline · ${S.season.length} weeks to ${E(f&&f.goal?f.goal.name:'your goal')}</p>
-      <div class="sout" role="list" aria-label="Weekly distance for each week of the season">${S.season.map((x,i)=>{const rc=(x.races||[]);const tip='Week of '+nice(x.monday)+': '+x.mode+', '+x.total+' '+U()+', long run '+x.long+' '+U()+(rc.length?'. Race: '+rc.map(r=>r.name).join(', '):'');
-        return `<div class="sw" role="listitem" tabindex="0" title="${E(tip)}" aria-label="${E(tip)}"><span class="sv num">${x.total}</span><div class="sbar"><i style="height:${Math.max(4,Math.round(100*x.total/mx))}%;${col[x.mode]?'background:'+col[x.mode]:''}"></i></div>
-          <span class="sr">${rc.map(r=>`<b class="${r.priority==='A'?'ra':'rb'}" title="${E(r.name)}">${r.priority==='A'?'★':'●'}</b>`).join('')}</span><span class="sd">${(i===S.season.length-1||(i%4===0&&i<S.season.length-3))?nice(x.monday):''}</span></div>`}).join('')}</div>
-      ${races.length?`<ul class="clist" style="margin-top:10px;list-style:none;padding-left:0">${races.map(r=>`<li><b class="${r.priority==='A'?'ra':'rb'}">${r.priority==='A'?'★':'●'}</b> ${E(r.name)} · ${nice(r.date)} · ${r.priority==='A'?'goal race':'tune-up'} · week ${r.week} of ${S.season.length}</li>`).join('')}</ul>`:''}
-      <p class="xs mute" style="margin:8px 0 0">Weekly distance in ${U()==='mi'?'miles':'km'} above each bar; ★ goal race, ● tune-up race. Grey: lighter weeks · amber: taper and tune-up race weeks · red: race week. Only this week is fixed; each later week assumes the one before goes to plan, and all are redrawn at every weekly review.</p></div></div>`}
-  if(f)h+=`<div class="grid" style="margin-top:22px"><div class="card c12"><button class="btn" id="explain" style="float:right;margin:0 0 8px 12px">Explain my plan</button><p class="eyebrow">Why this week looks like this</p><ul class="why">${f.week.why.map(w=>`<li>${E(w)}</li>`).join('')||'<li>Nothing unusual.</li>'}</ul></div></div>`;
+  if(f)h+=`<p style="margin:22px 2px 0"><button class="btn" id="explain">Explain my plan</button> <span class="xs mute" style="margin-left:8px">Every rule behind this plan, with your numbers.</span></p>`;
   return h;
 }

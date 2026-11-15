@@ -158,7 +158,8 @@ notice); the others were matched to their published record. This is how the 2022
     the long run is run at a steady effort a little slower than marathon pace, but only in a week where the sessions leave at least
     three quarters of the miles easy (principle 13). In a week already heavy with fast running, early on, and for ultra goals, it is
     all easy. Before 2.10.3 every long run was steady from the first mile, which put half or more of a marathon build's miles above
-    easy pace; the marathon-pace long run (principle 29) is where the long run is made hard on purpose. Except for ultra goals, a long run is kept to
+    easy pace; the marathon-pace long run (principle 29) is where the long run is made hard on purpose. The long run is about a third of the week
+    before the race-specific phase and up to 38% inside it: at a third, the easy days keep their runs instead of being dropped to make room. Except for ultra goals, a long run is kept to
     about three hours: beyond that, the injury risk and recovery cost grow faster than the benefit. [C]
 31. **Aerobic runs by heart rate.** [C] Before the race-specific phase, one run a week holds a fixed heart rate below threshold
     and lets the pace float. The heart rate moves up 5 beats only when 10 miles at the current level is comfortable. [P]
@@ -255,7 +256,11 @@ this project's own choices, not findings from trials. [C] [P]
     15 seconds a mile at 6-minute pace. A much wider spread means endurance, not speed, is what limits you. When the goal race has a
     goal time, each tune-up race before it carries a checkpoint: the time that goal is worth at the shorter distance, as a range. The
     slower end uses Riegel's spread, which predicts marathons too fast for most recreational runners (Vickers and Vertosick, 2016), so it
-    is the least the race must show; the faster end, a slightly wider spread, is the safe sign. The width of the range is this project's choice. [P]
+    is the least the race must show; the faster end, a slightly wider spread, is the safe sign. A race many weeks before the goal is not
+    expected to show the goal time yet, so the checkpoint also gives the time that keeps the goal on track: 1% slower for every four weeks
+    of training still to come, 4% at most. The width of the range and that allowance are this project's choice, not research figures. The
+    Fitness page sets out the same sums as a table: what marathon times near the goal are worth at 5K, 10 miles and the half, beside what
+    you would run today. [P]
 45. **Aerobic drift.** [R] (*moderate*) On a long steady run, how far your pace per heartbeat fades in the second half is a sign
     of durability (Smyth and colleagues, 2022). Under 5% is a common rule of thumb. [C]
 
@@ -566,7 +571,8 @@ two or a missed log from a missed day. [P]
     with 80% of runners within 12.8%. Training runs are slower than races, so the raw prediction is fast by about 7% on average: by
     3.7% for the fastest third of runners and 9.5% for the slowest third, which is what principle 87 says about slower runners holding
     a smaller fraction of their speed. Weekly volume and the longest run lowered the held-out error only from 6.7% to 6.3%. The app
-    does not use training runs as race results: it learns its own lean from your races (principle 41).
+    does not use training runs as race results: it learns its own lean from your races (principle 41). The goal card quotes the 6.4% beside
+    the race-day forecast, as the range half of such forecasts land in, so that the forecast is never read as a promise.
 
 104. **A build week is not planned more than 20% above the best of the last three.** [P] Running the planner on real athletes'
     histories (below) showed that, after a dip, a week could land 25 to 40% above recent weeks: two sessions and a long run have a

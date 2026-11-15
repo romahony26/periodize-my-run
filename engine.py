@@ -228,6 +228,42 @@ def faster_miles(days, tp):
     return out
 
 
+PROFILE_REL = {"easy": 0.78, "steady": 0.84, "mp": 0.94, "hmp": 0.985, "threshold": 1.0, "10k": 1.035, "5k": 1.08}
+
+
+def shape(steps, tp):
+    """A session as blocks for drawing: [seconds, effort], effort as a fraction of threshold speed (0 is standing rest). Display only."""
+    out = []
+
+    def add(sec, rel):
+        if sec > 0:
+            out.append([round(sec), rel])
+    for x in steps or []:
+        if x[0] == "d":
+            rel = PROFILE_REL.get(x[2], 1.0)       # a race is drawn at threshold effort
+            add(x[1] * MI / (tp * rel), rel)
+        elif x[0] == "r":
+            for _ in range(int(x[1])):
+                add(x[2], PROFILE_REL[x[3]])
+                add(x[4], 0.7)
+        elif x[0] == "rd":
+            for _ in range(int(x[1])):
+                add(x[2] / (tp * PROFILE_REL[x[3]]), PROFILE_REL[x[3]])
+                add(x[4] / (tp * 0.74), 0.74)
+        elif x[0] == "h":
+            add(x[1] * MI / (tp * 0.9), 0.9)
+        elif x[0] == "strides":
+            for i in range(int(x[1])):
+                add(20, 1.15)
+                if i < x[1] - 1:
+                    add(60, 0.7)
+        elif x[0] == "max":
+            add(x[1] / (tp * 1.12), 1.12)
+        elif x[0] == "rest":
+            add(x[1], 0)
+    return out
+
+
 def age_on(birth, day):
     try:
         b = dt.date.fromisoformat(str(birth)[:10])
@@ -456,7 +492,8 @@ def _plan(st, c, L, races):
             why.append(f"Long run kept to about three hours ({dist(half(lr_cap), c['units'])}): beyond that the injury and recovery cost outweighs the gain. [C]")
     safe = max(st["longest_30d"] * 1.10, L["long_run_floor"])
     if mode in ("build", "down", "taper", "tuneup"):
-        lr = min(lr_cap, safe, max((0.38 if mode == "build" else 0.33) * target, L["long_run_floor"]))
+        # a third of the week before the race-specific phase, so the easy days keep their runs; up to 38% inside it, where the long run is the point [C]
+        lr = min(lr_cap, safe, max((0.38 if mode == "build" and specific else 0.33) * target, L["long_run_floor"]))
         if mp_long:
             lr = min(max(mp_long + 5, 0.75 * lr_cap), safe, lr_cap)
             mp_long = max(min(mp_long, lr - 4), 0)
@@ -683,17 +720,27 @@ def _plan(st, c, L, races):
             "days": days, "why": why, "done": done, "long": max((d["miles"] for d in days), default=0), "away": away_n >= 4 and mode == "down"}
 
 
+ON_TRACK_PER_4_WEEKS = 0.01      # improvement allowed for between a tune-up race and the goal race: 1% for every four weeks left [C]
+ON_TRACK_MOST = 0.04
+
+
 def checkpoint(r, goal, units="mi"):
-    """What a tune-up race has to show for the goal time to be on. Equivalent times with the distance exponent between 1.06 (Riegel, 1981)
-    and 1.08: the lower figure predicts marathons too fast for most recreational runners (Vickers and Vertosick, 2016), so it is the least
-    the race must show and the higher one is the safe sign."""
+    """What a tune-up race has to show for the goal time. Two things: what the goal time is worth at this distance (exponent 1.06, Riegel 1981,
+    to 1.08: the lower figure predicts marathons too fast for most recreational runners, Vickers and Vertosick 2016), and the slower time that
+    still keeps the goal on track given the weeks of training left after the race. The allowance for those weeks is this project's choice."""
     mins = profile.goal_minutes(goal.get("goal_time")) if goal and goal.get("goal_time") else None
     if not mins or r["date"] >= goal["date"] or not 1 <= r["miles"] < goal["miles"] or goal["miles"] > 30:
         return ""
     least, safe_ = (mins * 60 * (r["miles"] / goal["miles"]) ** e for e in (1.06, 1.08))
-    return (f" Checkpoint for {goal['goal_time']} at {goal['name']}: this race needs about {hms(least)} at the least, and {hms(safe_)} is the safe sign "
-            f"({pace(r['miles'] * MI / least, units)} to {pace(r['miles'] * MI / safe_, units)}/{units}). Slower than that and the goal time is ahead of your fitness; "
-            "the plan resets its paces from the result either way.")
+    weeks = (goal["date"] - r["date"]).days // 7
+    allow = min(ON_TRACK_PER_4_WEEKS * weeks / 4, ON_TRACK_MOST)
+    track = least * (1 + allow)
+    out = (f" Checkpoint for {goal['goal_time']} at {goal['name']}: that time is worth {hms(safe_)} to {hms(least)} here "
+           f"({pace(r['miles'] * MI / safe_, units)} to {pace(r['miles'] * MI / least, units)}/{units}).")
+    if weeks >= 4:
+        out += (f" With {weeks} weeks of training still to come, {hms(track)} or faster ({pace(r['miles'] * MI / track, units)}/{units}) keeps it on track; "
+                "slower than that and the goal time is ahead of your fitness.")
+    return out + " The plan resets its paces from the result either way."
 
 
 def _weight():
