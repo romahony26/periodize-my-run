@@ -2,7 +2,9 @@
 function histView(){
   if(!HIST)return `<div class="grid"><div class="card c12 loading">${skel(4)}</div></div>`;
   const H=HIST;
-  let h=`<div class="grid"><div class="card"><p class="eyebrow">Execution, last 12 weeks</p>${H.average!==null?`<div class="big num ${scc(H.average)}">${H.average}</div><p class="small mute">average over ${H.count} planned session${H.count===1?'':'s'}</p>`:'<p class="small mute">No planned sessions have passed yet.</p>'}</div>
+  let h=`<div class="grid"><div class="card"><p class="eyebrow">Execution, last 12 weeks</p>${H.average!==null?`<div class="big num ${scc(H.average)}">${H.average}</div><p class="small mute">average over ${H.count} planned session${H.count===1?'':'s'}</p>
+      ${H.tally?`<p class="small" id="tally" style="margin:10px 0 0"><span class="tag green">${H.tally['On target']} on target</span> <span class="tag amber">${H.tally.Close} close</span> <span class="tag red">${H.tally['Off target']} off target</span> <span class="tag">${H.tally.Missed} missed</span></p>`:''}
+      ${H.causes&&H.causes.length?`<p class="lab2" style="margin:14px 0 4px">Why sessions were off, most often</p><ul class="steps" id="causes">${H.causes.map(c=>`<li><b class="num">${c.n}</b> time${c.n===1?'':'s'}: ${E(c.cause)}</li>`).join('')}</ul>`:''}`:'<p class="small mute">No planned sessions have passed yet.</p>'}</div>
     <div class="card c8" id="exectrend"><p class="eyebrow">Execution score over time</p>${H.weeks.length>1?chart('Average execution score',H.weeks,x=>x.avg,x=>'Week of '+nice(x.week)+': '+x.avg+' over '+x.n+' sessions',x=>nice(x.week)):`<p class="small mute">${H.weeks.length?`Week of ${nice(H.weeks[0].week)}: ${H.weeks[0].avg} over ${H.weeks[0].n} session${H.weeks[0].n===1?'':'s'}. A chart appears after a second week.`:'Builds up week by week from the day the app started planning for you.'}</p>`}
       ${(t=>t.length>=3?lineChart(t.map(x=>[Date.parse(x.date)/864e5,x.score,x.avg,x.date]),2,'var(--brand)','Trend: average of the last 5 sessions',v=>Math.round(v),false,s=>nice(s[3])+': scored '+s[1]+', average '+s[2])
         :`<p class="small mute" id="trendwait" style="margin:10px 0 0">The trend line appears once three sessions have been scored${t.length?` (${t.length} so far)`:''}.</p>`)(H.trend||[])}
@@ -10,13 +12,15 @@ function histView(){
     <div class="card c12"><p class="eyebrow">Sessions <span class="mute" style="text-transform:none;letter-spacing:0">· click one for the run in detail</span></p>`;
   if(!H.sessions.length)h+='<p class="small mute">Nothing yet. Each planned session appears here the day after, with what you ran and how closely it matched.</p>';
   else{h+=`<table><tr><th>Date</th><th>Planned</th><th>What you ran</th><th class="r"><span title="${SCTIP}">Execution score <span aria-hidden="true">ⓘ</span></span></th><th></th></tr>`;
-    for(const x of H.sessions){const s=x.score;
+    for(const x of (HALL?H.sessions:H.sessions.slice(0,HSHOW))){const s=x.score;
       h+=`<tr><td class="num" style="white-space:nowrap">${x.dow} ${nice(x.date)}</td><td><b>${E(x.label)}</b> <span class="mute num">${E(x.dist)}</span><div class="xs mute">${E(x.short)}${x.eased?` · eased ${(x.eased*100).toFixed(1)}%`:''}</div></td>
         <td>${x.done?`<span class="num">${E(x.done.dist)}</span> <span class="mute xs">at ${E(x.done.pace)}</span> ${x.done.id?GLINK(x.done.id):''}`:'<span class="mute">—</span>'}${x.moved_to?`<div class="xs mute">missed, moved to ${nice(x.moved_to)}</div>`:''}${x.unplanned?'<div class="xs mute">run on a rest day</div>':''}${s&&s.note?`<div class="xs mute">${E(s.note)}</div>`:''}</td>
         <td class="r">${s?`<span class="sc num ${scc(s.score)}" title="${SCTIP}">${s.score}</span><div class="xs mute">${E(s.verdict)}</div>`:'<span class="mute">—</span>'}</td>
         <td class="r"><button class="ghost" data-dopen="${x.date}">Detail</button></td></tr>`}
-    h+='</table>'}
+    h+='</table>';
+    if(H.sessions.length>HSHOW)h+=`<p style="margin:12px 0 0"><button class="ghost" id="hall">${HALL?'Show the last '+HSHOW+' only':'Show all '+H.sessions.length+' sessions'}</button></p>`}
   return h+'</div></div>'+dayModal()}
+let HALL=false;const HSHOW=14;
 const scc=v=>v>=85?'green':v>=65?'amber':'red';
 const SCTIP='Execution score out of 100: how closely the run matched the planned session. 85 or more is on target, 65 to 84 is close, under 65 is off target. Open the detail to see why.';
 let UNI=false, MORE=false, CH={}, CHN=0, CHANGES=null, PACE=null, MAPZ=0, TR=null, TRV=null;

@@ -209,5 +209,13 @@ def history(c, L, weeks=12):
     # the trend: each scored session, oldest first, with the average of it and the four before it
     asc = [(x["date"], x["score"]["score"]) for x in reversed(out) if x["score"]]
     trend = [{"date": d, "score": v, "avg": round(sum(s for _, s in asc[max(i - 4, 0):i + 1]) / len(asc[max(i - 4, 0):i + 1]))} for i, (d, v) in enumerate(asc)]
+    # what the list adds up to: how many sessions landed where, and the reasons the others did not, most common first
+    tally, causes = {"On target": 0, "Close": 0, "Off target": 0, "Missed": 0}, {}
+    for x in out:
+        if x["score"]:
+            tally[x["score"]["verdict"]] += 1
+            if x["score"]["verdict"] in ("Close", "Off target") and x["score"].get("cause"):
+                causes[x["score"]["cause"]] = causes.get(x["score"]["cause"], 0) + 1
     return {"trend": trend, "sessions": out, "weeks": [{"week": k, "avg": round(sum(v) / len(v)), "n": len(v)} for k, v in sorted(wk.items())],
-            "average": round(sum(scored) / len(scored)) if scored else None, "count": len(scored)}
+            "average": round(sum(scored) / len(scored)) if scored else None, "count": len(scored),
+            "tally": tally, "causes": [{"cause": k, "n": v} for k, v in sorted(causes.items(), key=lambda kv: -kv[1])][:3]}

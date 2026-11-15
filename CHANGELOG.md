@@ -3,6 +3,15 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.2 - 2026-11-15
+### Added
+- History says what the list adds up to: how many sessions were on target, close, off target and missed, and the most common reasons a session was off.
+
+### Changed
+- History shows the last 14 sessions, with a button for the rest.
+- On a phone, every figure in a table carries its column's name. The header row is hidden there, so the figures used to stand without labels.
+- The "Is the gap closing?" chart is drawn larger on a phone.
+
 ## 2.10.4-beta.1 - 2026-11-15
 ### Added
 - "Three ways to estimate your marathon today" on Fitness, under Predictions (marathon goals). Beside the app's own estimate it shows one from critical speed (your fastest 3, 6, 12 and 20 minutes of the last 16 weeks) and one from training volume and pace (your last 8 weeks), with the middle of the three. Each says what it was worked out from, and is marked when it reads slow for lack of all-out running or falls outside the runners it was built on.

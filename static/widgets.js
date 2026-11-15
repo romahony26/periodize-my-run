@@ -13,6 +13,9 @@ function foldNotes(root){root.querySelectorAll('p.xs.mute').forEach(p=>{
 function setFtab(t){FTAB=t;try{localStorage.setItem('ftab',t)}catch(e){}
   $$('[data-fsec]').forEach(c=>c.hidden=c.dataset.fsec!==t);$$('[data-ftab]').forEach(b=>{const on=b.dataset.ftab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});const l=$('.stabs[aria-label="Fitness sections"]');if(l)rove(l)}
 function polish(){const m=$('#main');if(!m)return;
+  // on a phone a table's header row is hidden and each row becomes a block, so every cell carries its column's name
+  m.querySelectorAll('table').forEach(t=>{const h=[...t.querySelectorAll('th')].map(x=>x.textContent.trim());if(!h.length)return;
+    t.querySelectorAll('tr').forEach(r=>[...r.children].forEach((c,i)=>{if(c.tagName==='TD'&&i&&h[i]&&c.colSpan===1)c.dataset.l=h[i]}))});
   if(view==='plan'){
     const g=m.querySelector('.hero');if(g){g.id='goalcard';
       const fp=[...g.querySelectorAll('p.small')].find(p=>p.textContent.includes('It assumes you complete'));
@@ -63,7 +66,7 @@ function trendChart(T){
   const a=T.today||[], b=T.points||[], all=a.concat(b);if(all.length<2)return '';
   const day=d=>Date.parse(d+'T00:00:00Z')/864e5, x0=Math.min(...all.map(p=>day(p.monday))), x1=day(T.race);
   const ys=all.map(p=>p.s).concat(T.goal_s?[T.goal_s]:[]), lo=Math.min(...ys), hi=Math.max(...ys), pad=Math.max((hi-lo)*.15,60);
-  const W=640,H=200,L=54,R=10,Tp=10,B=22, X=d=>L+(W-L-R)*(day(d)-x0)/(x1-x0||1), Y=s=>Tp+(H-Tp-B)*(s-(lo-pad))/((hi+pad)-(lo-pad));
+  const W=innerWidth<700?340:640,H=200,L=54,R=10,Tp=10,B=22, X=d=>L+(W-L-R)*(day(d)-x0)/(x1-x0||1), Y=s=>Tp+(H-Tp-B)*(s-(lo-pad))/((hi+pad)-(lo-pad));
   const line=(ps,cls)=>ps.length?`<polyline class="${cls}" points="${ps.map(p=>X(p.monday).toFixed(1)+','+Y(p.s).toFixed(1)).join(' ')}"/>${ps.map(p=>`<circle class="${cls}" cx="${X(p.monday).toFixed(1)}" cy="${Y(p.s).toFixed(1)}" r="3"><title>Week of ${E(p.monday)}: ${E(p.time)}</title></circle>`).join('')}`:'';
   const last=a[a.length-1], ticks=[lo,T.goal_s&&T.goal_s!==lo?T.goal_s:null,hi].filter((v,i,arr)=>v&&arr.indexOf(v)===i);
   return `<svg class="trend" viewBox="0 0 ${W} ${H}" role="img" aria-label="Marathon estimates week by week against the goal time">

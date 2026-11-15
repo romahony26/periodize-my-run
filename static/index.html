@@ -256,6 +256,7 @@ details.wkwhy{margin:10px 2px 0}details.wkwhy>summary{cursor:pointer;font-size:1
   table:has(th) th{display:none}
   table:has(th) td{display:block;border:0;padding:0!important;text-align:left;overflow-wrap:break-word;word-break:break-word}
   table:has(th) td.r{text-align:left}table:has(th) td.num{text-align:left}table:has(th) td b{display:block;font-size:15px;margin-bottom:2px}
+  table:has(th) td[data-l]::before{content:attr(data-l);display:block;font-size:11px;font-weight:500;color:var(--mute);margin-bottom:1px}
   table:has(th) td:first-child{grid-column:1/-1;font-weight:600;padding-bottom:4px!important;border-bottom:1px solid var(--line-subtle);margin-bottom:4px}
   .dw:has(.gl.corner) .day{padding-right:44px}.gl.corner{top:50%;right:10px;transform:translateY(-50%)}
 }
