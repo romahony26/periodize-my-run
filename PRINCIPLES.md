@@ -148,13 +148,17 @@ notice); the others were matched to their published record. This is how the 2022
     time at the pace, from 15 to 40 minutes, before the pace itself moves. [C]
 28. **Faster repeats** (around 10K and 5K pace) develop maximal aerobic capacity. [R] (*moderate*) Well-trained runners need
     high intensities to raise it further (Midgley and colleagues, 2006). For a 5K or 10K goal they are the main session; for a
-    marathon they appear about one week in three once threshold work is established. [P]
+    marathon they appear about one week in three once threshold work is established: at 5K pace before the race-specific phase, where
+    the aim is maximal aerobic capacity, and at 10K pace inside it. [P]
 29. **Race-pace running becomes the centre of the final phase before a long race.** [R] (*limited*) World-class marathoners shift
     from faster intervals early in the season to marathon-pace work late (Haugen and colleagues, 2022). For the marathon,
     Periodize My Run builds midweek marathon-pace runs (4 to 8 miles) and, every second week or so, a long run with 8 to 14 miles at
     marathon pace. [C]
-30. **Long runs are steady, not shuffled.** [C] Once fast running is established, the long run is run at a steady effort a
-    little slower than marathon pace; early on, and for ultra goals, it is easy. Except for ultra goals, a long run is kept to
+30. **Long runs are easy, with a steady finish when the week has room.** [C] Once fast running is established, the last quarter of
+    the long run is run at a steady effort a little slower than marathon pace, but only in a week where the sessions leave at least
+    three quarters of the miles easy (principle 13). In a week already heavy with fast running, early on, and for ultra goals, it is
+    all easy. Before 2.10.3 every long run was steady from the first mile, which put half or more of a marathon build's miles above
+    easy pace; the marathon-pace long run (principle 29) is where the long run is made hard on purpose. Except for ultra goals, a long run is kept to
     about three hours: beyond that, the injury risk and recovery cost grow faster than the benefit. [C]
 31. **Aerobic runs by heart rate.** [C] Before the race-specific phase, one run a week holds a fixed heart rate below threshold
     and lets the pace float. The heart rate moves up 5 beats only when 10 miles at the current level is comfortable. [P]
@@ -162,9 +166,10 @@ notice); the others were matched to their published record. This is how the 2022
 33. **Strength training improves running economy without harming aerobic fitness.** [R] (*strong*) Heavy-load and plyometric
     training work best; light-load and isometric training much less (Llanos-Lagos and colleagues, 2024). Explosive training cut 5K
     times by about 3% in nine weeks (Paavolainen and colleagues, 1999) (*moderate*), and one trial found strength work made economy
-    hold up better late in a long run (Zanini and colleagues, 2025) (*limited*). Periodize My Run places two short sessions a week on easy
-    days, one heavy and one with plyometrics (hops, skips, bounds); one a week in the race-specific phase; none in the last two
-    weeks before the goal race. [C]
+    hold up better late in a long run (Zanini and colleagues, 2025) (*limited*). Periodize My Run places two short sessions a week, one heavy and one with
+    plyometrics (hops, skips, bounds): one the day after the long run, the other on the day of the midweek session, after the run, so
+    that neither falls on the day before fast running. One a week in the last ten weeks of the race-specific phase; none in the last
+    two weeks before the goal race. No trial sets the best day for a runner's strength session; the placement is this project's choice. [C]
 
 ### When a day is lost: how the week is rebuilt
 
@@ -219,7 +224,9 @@ this project's own choices, not findings from trials. [C] [P]
 37. **A race is followed by recovery.** [R] (*limited*) Easy running from two days after a marathon did not slow recovery
     compared with rest (Martínez-Navarro and colleagues, 2021). Periodize My Run plans a recovery week at about half your usual volume
     after a half marathon or longer, or a run of 26 miles or more, with no sessions. After a 5K or a 10-mile race the easy days around it
-    are enough and the next week carries on building. [C]
+    are enough and the next week carries on building; the light race week is never read as a lapse that needs a return week. A week
+    with a tune-up race shorter than 10 miles keeps about 90% of the usual miles, and for a half-marathon goal or longer a longer midweek run
+    stands in for the long run the race displaces: steady weeks count for more toward the goal race than being fresh for a tune-up. [C]
 
 ## 7. Is it working?
 
@@ -245,7 +252,10 @@ this project's own choices, not findings from trials. [C] [P]
     the research; the steady bands are this project's choice. [P]
 44. **Race times should spread predictably with distance.** [R] (*moderate*) Across world records and good runners, doubling the
     distance takes a little more than twice as long (Riegel, 1981): pace slows by about 4% each time the distance doubles, about
-    15 seconds a mile at 6-minute pace. A much wider spread means endurance, not speed, is what limits you.
+    15 seconds a mile at 6-minute pace. A much wider spread means endurance, not speed, is what limits you. When the goal race has a
+    goal time, each tune-up race before it carries a checkpoint: the time that goal is worth at the shorter distance, as a range. The
+    slower end uses Riegel's spread, which predicts marathons too fast for most recreational runners (Vickers and Vertosick, 2016), so it
+    is the least the race must show; the faster end, a slightly wider spread, is the safe sign. The width of the range is this project's choice. [P]
 45. **Aerobic drift.** [R] (*moderate*) On a long steady run, how far your pace per heartbeat fades in the second half is a sign
     of durability (Smyth and colleagues, 2022). Under 5% is a common rule of thumb. [C]
 

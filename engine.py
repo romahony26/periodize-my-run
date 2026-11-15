@@ -16,6 +16,7 @@ import statistics
 
 import db
 import jetlag
+import profile
 from assess import MI, ZONES, mean, projection
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -208,6 +209,25 @@ def purpose(day):
     return PURPOSE.get(label) or next((v for k, v in PURPOSE.items() if label.startswith(k)), None) or PURPOSE.get({"Long": "Long run", "Key": "Threshold"}.get(kind, "Easy"), "")
 
 
+EASY_SHARE_LIMIT = 0.25       # the share of a week's miles that may be faster than easy before the long run gives up its steady finish
+
+
+def faster_miles(days, tp):
+    """Miles of a planned week run faster than easy: steady, race paces, repeats, and the heart-rate aerobic run."""
+    out = 0.0
+    for d in days:
+        for x in d.get("steps") or []:
+            if x[0] == "d" and x[2] not in ("easy", None):
+                out += x[1]
+            elif x[0] == "r":
+                out += x[1] * x[2] * tp * ZONES[x[3]][0] / MI
+            elif x[0] == "rd":
+                out += x[1] * x[2] / MI
+            elif x[0] == "h" and d.get("label") == "Aerobic run by heart rate":
+                out += x[1]
+    return out
+
+
 def age_on(birth, day):
     try:
         b = dt.date.fromisoformat(str(birth)[:10])
@@ -259,6 +279,8 @@ def _plan(st, c, L, races):
     this_races = sorted([r for r in races if mon <= r["date"] < week_end], key=lambda r: r["date"])
     # a week at half volume to recover is for a half marathon or longer; after a 5K or 10-mile race the easy days around it are enough [C]
     last_races = [r for r in races if mon - dt.timedelta(days=7) <= r["date"] < mon and r["miles"] >= 13]
+    raced_last = any(mon - dt.timedelta(days=7) <= r["date"] < mon for r in races)      # a race week is light by plan, not a lapse: no return week after it
+    short_tuneup = bool(this_races) and all(r["miles"] < 10 and r["priority"] != "A" for r in this_races)
     specific = wtr is not None and wtr <= L["specific_weeks"]
     wk = [w["mi"] for w in st["weeks"]]
     last4 = wk[-4:]
@@ -305,7 +327,7 @@ def _plan(st, c, L, races):
     elif comeback:
         mode = "return"
         why.append(comeback[1])
-    elif prior3 > 8 and wk[-1] < 0.5 * prior3 and not st.get("last_away"):
+    elif prior3 > 8 and wk[-1] < 0.5 * prior3 and not st.get("last_away") and not raced_last:
         mode = "return"
         why.append(f"Return week: last week was well below your recent level ({dist(half(wk[-1]), c['units'])} against {dist(half(prior3), c['units'])}). "
                    "Missed sessions are not made up.")
@@ -366,7 +388,7 @@ def _plan(st, c, L, races):
                        "set it back to 0% if injuries or illness start to show.")
     else:
         target = {"down": 0.75 * (mean(wk[-full:]) if full else ref), "recover": 0.70 * ref, "return": comeback[0] if comeback else 0.80 * prior3,
-                  "postrace": min(0.5 * ref, 25), "tuneup": 0.75 * ref,
+                  "postrace": min(0.5 * ref, 25), "tuneup": (0.90 if short_tuneup else 0.75) * ref,
                   "taper": ((0.80 if wtr == 3 else 0.65 if gtype in ("marathon", "ultra", "half") else 0.70) - (L.get("taper_shift") or 0.0)) * max(ref, 0.9 * max(wk[-6:] or [0])),
                   "race": 0.4 * ref}[mode]
         if mode == "taper" and L.get("taper_shift"):
@@ -448,7 +470,8 @@ def _plan(st, c, L, races):
         done["mp_long"] = mp_long
         why.append(f"Marathon-pace long run this week ({dist(mp_long, c['units'])} at pace), so the second session is dropped.")
     elif hard_ok and not quality_new and gtype != "ultra":
-        long_day = ("Long run", [("d", lr, "steady")], lr)
+        fin = half(lr * 0.25)       # the steady part is the last quarter, and only in a week with room for it (see the easy share below) [C]
+        long_day = ("Long run", [("d", lr - fin, "easy"), ("d", fin, "steady")], lr)
     else:
         long_day = ("Long run", [("d", lr, "easy")], lr)
 
@@ -459,6 +482,11 @@ def _plan(st, c, L, races):
     # before the race-specific phase, the midweek session is a heart-rate aerobic run rather than race-pace work
     aero_ok = bool(c.get("aero_runs", True)) and two_keys and mode == "build" and not specific and not quality_new and week_no % 2 == 0     # every other week: it leans on wrist heart rate
     one_key_threshold = not two_keys and week_no % 2 == 1
+    if mode == "tuneup" and short_tuneup and gtype in ("marathon", "half", "ultra"):
+        # the race takes the long run's place, so the midweek run carries the week's endurance: a week without a longer run is the cost to avoid [P]
+        k1 = half(min(max(0.30 * target, 8), 13, safe))
+        why.append(f"Tune-up race week: the race is short, so the week keeps most of its miles and a longer midweek run ({dist(k1, c['units'])}) stands in for the long run. "
+                   "Steady weeks count for more toward the goal race than being fresh for a tune-up.")
     if not hard_ok:
         key1_day = ("Easy", [("d", k1, "easy")], k1)
     elif mode == "tuneup":
@@ -500,8 +528,13 @@ def _plan(st, c, L, races):
     key2_day = None
     if two_keys and hard_ok and not mp_long and mode != "tuneup":
         if gtype == "marathon" and week_no % 3 == 0 and t_prev >= 18 and mode == "build":
-            key2_day = interval_day("10k", 6 if specific else 5, 210, 120)
-            why.append("Faster intervals this week: every third week, once threshold work is established.")
+            if specific:
+                key2_day = interval_day("10k", 6, 210, 120)
+                why.append("Faster intervals this week: every third week, once threshold work is established.")
+            else:
+                key2_day = interval_day("5k", 6 if t_prev >= 25 else 5, 180, 120)
+                why.append("Faster intervals this week, at 5K pace: before the race-specific phase the fast work aims at your maximal aerobic capacity, "
+                           "and well-trained runners need running this fast to raise it (Midgley and colleagues, 2006). Marathon-pace work takes over later.")
         elif week_no % 3 == 1 and mode == "build" and not specific and t_prev >= 18:
             n200 = min(15 + 5 * int(st.get("prev_200s", 0) >= 15) + 5 * int(st.get("prev_200s", 0) >= 20), 25)
             key2_day = ("200s", [("d", 2, "easy"), ("rd", n200, 200, "5k", 200), ("d", 1.5, "easy")], half(3.5 + n200 * 400 / MI))
@@ -558,7 +591,11 @@ def _plan(st, c, L, races):
         week[b2b] = {"type": "Easy", "label": "Back-to-back: medium easy", "steps": [("d", m, "easy")], "miles": m}
         slots.remove(b2b)
         why.append("Back-to-back weekend: a medium easy run the day before the long run, to practise running on tired legs.")
-    rem = max(target - sum(d["miles"] for d in week.values()), 0)
+    planned = sum(d["miles"] for d in week.values())
+    race_on_long = next((r for r in this_races if r["date"].weekday() == Ld), None)
+    if race_on_long and short_tuneup:       # the race replaces the long run below: count the race day, not the long run, so the easy days make up the difference
+        planned += race_on_long["miles"] + 3 - week[Ld]["miles"]
+    rem = max(target - planned, 0)
     while len(slots) > 1 and rem / len(slots) < c["min_easy_run_miles"]:
         slots.pop()
     each = min(half(rem / len(slots)), c["max_easy_run_miles"]) if slots else 0
@@ -569,6 +606,13 @@ def _plan(st, c, L, races):
         st_ = [("d", each, "easy")] + ([("strides", 6)] if s == strides_day and mode not in ("recover", "postrace", "return") else [])
         week[s] = {"type": "Easy", "label": "Easy + strides" if len(st_) > 1 else "Easy", "steps": st_, "miles": each}
 
+    # most of the week is easy: when the sessions already put more than a quarter of the miles above easy, the long run is all easy [P]
+    total_ = sum(d["miles"] for d in week.values())
+    if week[Ld]["label"] == "Long run" and total_ and faster_miles(week.values(), tp) > EASY_SHARE_LIMIT * total_ and any(x[2] == "steady" for x in week[Ld]["steps"]):
+        week[Ld]["steps"] = [("d", week[Ld]["miles"], "easy")]
+        why.append(f"Long run all easy this week: the sessions already take more than {EASY_SHARE_LIMIT:.0%} of the miles above easy pace, and about four fifths "
+                   "of training done easy is the pattern most consistently tied to improvement.")
+
     # races in this week override the layout around them
     for r in this_races:
         i = r["date"].weekday()
@@ -578,6 +622,8 @@ def _plan(st, c, L, races):
                 + (" Men slow far more than women in the second half of long races, and the fastest men most of all: the patient start is where your time is made."
                    if c.get("sex") == "M" and r["miles"] >= 13 else "")
                 + (f" Fuel: {c['race_carbs_g_per_h']} g of carbohydrate an hour." if r["miles"] >= 13 else ""))
+        if not a_race:
+            note += checkpoint(r, goal, c["units"])
         kg = _weight()
         if a_race:
             note += race_day_advice(kg, r["miles"], now_s)
@@ -607,9 +653,11 @@ def _plan(st, c, L, races):
     for j in c.get("blocked_days") or []:        # a race week's fixed layout (sharpener, shakeout) must not use a day the athlete cannot run
         if 0 <= j <= 6 and week[j]["type"] != "Race" and week[j]["miles"]:
             week[j] = {"type": "Rest", "label": "Rest", "steps": None, "miles": 0, "note": ""}
-    strength = {(Ld + 1) % 7: "Strength A", (key1 + 1) % 7 if key1 is not None else (Ld + 4) % 7: "Strength B"} if c["strength"] and mode != "race" and (wtr is None or wtr > 2) else {}
-    if specific and strength:
-        strength = {(Ld + 1) % 7: "Strength A"}      # one session a week in the race-specific phase keeps the gains at less cost
+    # the second session sits on the midweek session day, after the run: lifting the day before a fast session blunts it, and the day after the
+    # long run is two days clear of the next one [P]
+    strength = {(Ld + 1) % 7: "Strength A", key1 if key1 is not None else (Ld + 4) % 7: "Strength B"} if c["strength"] and mode != "race" and (wtr is None or wtr > 2) else {}
+    if strength and wtr is not None and wtr <= min(L["specific_weeks"], 10):
+        strength = {(Ld + 1) % 7: "Strength A"}      # one session a week in the last ten weeks keeps the gains at less cost
     days = []
     for i in range(7):
         d = week[i]
@@ -633,6 +681,19 @@ def _plan(st, c, L, races):
             why.append("Downhill practice on this week's long run: your goal race is hilly, and descending is what damages the legs most in long races.")
     return {"mode": mode, "weeks_to_race": wtr, "goal": goal, "gtype": gtype, "target": target, "total": sum(d["miles"] for d in days),
             "days": days, "why": why, "done": done, "long": max((d["miles"] for d in days), default=0), "away": away_n >= 4 and mode == "down"}
+
+
+def checkpoint(r, goal, units="mi"):
+    """What a tune-up race has to show for the goal time to be on. Equivalent times with the distance exponent between 1.06 (Riegel, 1981)
+    and 1.08: the lower figure predicts marathons too fast for most recreational runners (Vickers and Vertosick, 2016), so it is the least
+    the race must show and the higher one is the safe sign."""
+    mins = profile.goal_minutes(goal.get("goal_time")) if goal and goal.get("goal_time") else None
+    if not mins or r["date"] >= goal["date"] or not 1 <= r["miles"] < goal["miles"] or goal["miles"] > 30:
+        return ""
+    least, safe_ = (mins * 60 * (r["miles"] / goal["miles"]) ** e for e in (1.06, 1.08))
+    return (f" Checkpoint for {goal['goal_time']} at {goal['name']}: this race needs about {hms(least)} at the least, and {hms(safe_)} is the safe sign "
+            f"({pace(r['miles'] * MI / least, units)} to {pace(r['miles'] * MI / safe_, units)}/{units}). Slower than that and the goal time is ahead of your fitness; "
+            "the plan resets its paces from the result either way.")
 
 
 def _weight():

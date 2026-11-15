@@ -3,6 +3,19 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.3-beta.14 - 2026-11-15
+### Changed
+- Long runs are easy, with the last quarter steady only when the week has room for it. Every long run used to be steady from the first mile, which in a marathon build put half or more of the week's miles above easy pace, against the plan's own rule that about four fifths of training is easy. Now, when the sessions already take more than a quarter of the week's miles above easy, the long run is all easy and the plan says so. The marathon-pace long run is unchanged.
+- A week with a tune-up race shorter than 10 miles keeps about 90% of the usual miles (it was 75%, and less in practice because the race replaced the long run). For a half-marathon goal or longer, a longer midweek run stands in for the long run, and the easy days make up the miles the race day does not.
+- Before the race-specific phase of a marathon build, the faster intervals are at 5K pace (5 or 6 x 3 minutes), not 10K pace: early in the season the fast work is aimed at maximal aerobic capacity. Inside the specific phase they stay at 10K pace.
+- Strength: the second session of the week is on the day of the midweek session, after the run, not the day after it, so it no longer falls the day before the second fast session. Two sessions a week now continue until ten weeks before the goal race (it dropped to one at the start of the race-specific phase, 18 weeks out for a marathon).
+
+### Added
+- Checkpoints: when the goal race has a goal time, each tune-up race before it says what time that goal is worth at the shorter distance, as a range from the least the race must show to the safe sign. It is in the race's note on the plan and on the watch.
+
+### Fixed
+- The week after a tune-up race is no longer planned as a return week with a short long run. The light race week was read as a lapse; principle 37 already said the next week carries on building.
+
 ## 2.10.3-beta.13 - 2026-11-15
 ### Changed
 - The heart rate alert on the watch is for easy runs only. A session with fast running is run by pace, so every part of it, warm-up and cool-down included, gets a pace range (beta.12 left those easy parts without a target).

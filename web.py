@@ -1636,7 +1636,7 @@ def about():
             "Do not train hard while eating well under what you burn. If you want to lose weight, do it early in the plan, by a small daily deficit, and stop before the race-specific phase.",
         ]),
         ("Strength", [
-            "Two short sessions a week on the days shown, one a week in the race-specific phase, none in the last two weeks before the goal race.",
+            "Two short sessions a week on the days shown (the day after the long run, and after the run on the midweek session day, so neither is the day before fast running), one a week in the last ten weeks, none in the last two weeks before the goal race.",
             "Strength A: squat or leg press; single-leg deadlift; calf raises with straight and bent knee; side plank.",
             "Strength B: split squat or step-up; hip thrust; hamstring curl or bridge walk-outs; then plyometrics: pogo hops, skipping for height and bounding, quick and light, with full recovery between sets.",
             "Three sets of 5–8 controlled reps, stopping well short of failure. Start light for four weeks, then add load.",
