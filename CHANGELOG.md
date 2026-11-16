@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.14 - 2026-11-16
+### Fixed
+- A replan on the day of a run rewrote that day's session after the run. Sunday's long run was planned at 17 miles, you ran 14.5, and a replan later that day changed the plan to 15, so the run was scored against a session it was not run against. A day with a run of a mile or more now keeps the session it had.
+
 ## 2.10.4-beta.13 - 2026-11-16
 ### Changed
 - The optional easy run on a maybe day is 4 miles (it was 3.5, the shortest easy run).

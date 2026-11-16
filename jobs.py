@@ -56,10 +56,11 @@ def _store_week(monday, st, pl, final, c, today):
            "mode=excluded.mode,target=excluded.target,why=excluded.why,tp=excluded.tp,final=excluded.final,summary=excluded.summary",
            (monday.isoformat(), pl["mode"], pl["target"], json.dumps(pl["why"]), st["tp"], int(final), json.dumps(summary)))
     days = engine.apply_status([dict(d) for d in pl["days"]], db.rows("SELECT * FROM status"), c.get("blocked_days") or [])
+    ran_today = sum(r["dist_m"] for r in db.rows("SELECT dist_m FROM activities WHERE sport='running' AND date=? AND dist_m>0", (today.isoformat(),))) >= 1609
     with db.connect() as con:
         for d in days:
-            if d["date"] < today:
-                continue
+            if d["date"] < today or (d["date"] == today and ran_today):
+                continue      # a day already run keeps the session it was run against: rewriting it afterwards changes what the run is scored on
             con.execute("INSERT INTO plan(date,type,label,miles,steps,strength,note,source,adjust) VALUES(?,?,?,?,?,?,?,'auto',NULL) "
                         "ON CONFLICT(date) DO UPDATE SET type=excluded.type,label=excluded.label,miles=excluded.miles,steps=excluded.steps,"
                         "strength=excluded.strength,note=excluded.note,source='auto',adjust=NULL",
