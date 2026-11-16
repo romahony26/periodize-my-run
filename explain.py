@@ -76,7 +76,7 @@ def build(c, prof, races, L, today=None):
         "The three-hour limit is a coaching convention.")
 
     # ---- hard sessions
-    n = max(2, min(int(c["run_days"]), 6, 7 - len(c.get("blocked_days") or [])))
+    n = max(2, min(int(c["run_days"]), 6, 7 - len(c.get("blocked_days") or []) - len([j for j in c.get("maybe_days") or [] if j not in (c.get("blocked_days") or [])])))
     em = resp.get("emphasis") or {}
     add("Hard sessions each week", ("Two, plus the long run" if n >= 5 else "One, plus the long run") + f", on {n} running days. Hard days are never back to back."
         + (" Before the race-specific phase, every other week has one, with the second day run easy." if em.get("kind") == "miles" and n >= 5 else ""),

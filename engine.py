@@ -443,7 +443,8 @@ def _plan(st, c, L, races):
     # ---- layout ----
     # Offsets are days after the long run (0 = long run day). Days the athlete cannot run are never used.
     Ld = c["long_day"]
-    blocked = {(d - Ld) % 7 for d in c.get("blocked_days") or []} - {0}
+    maybe = [j for j in c.get("maybe_days") or [] if j not in (c.get("blocked_days") or [])]
+    blocked = {(d - Ld) % 7 for d in (c.get("blocked_days") or []) + maybe} - {0}      # a maybe day never carries a run the week relies on
     n = max(2, min(int(c["run_days"]), 6, 7 - len(blocked)))
     hard = [0]
 
@@ -710,6 +711,14 @@ def _plan(st, c, L, races):
     for j in c.get("blocked_days") or []:        # a race week's fixed layout (sharpener, shakeout) must not use a day the athlete cannot run
         if 0 <= j <= 6 and week[j]["type"] != "Race" and week[j]["miles"]:
             week[j] = {"type": "Rest", "label": "Rest", "steps": None, "miles": 0, "note": ""}
+    if maybe and mode in ("build", "down", "tuneup", "return") and not this_races:
+        # a day the athlete may or may not be free gets an optional easy run on top of the week: the target is met without it, and skipping it costs nothing
+        extra = half(c["min_easy_run_miles"])        # the shortest easy run: the extra stays small
+        for j in maybe:
+            if 0 <= j <= 6 and week[j]["type"] == "Rest" and extra > 0:
+                week[j] = {"type": "Easy", "label": "Easy (optional)", "steps": [("d", extra, "easy")], "miles": extra,
+                           "note": "A day you marked as maybe. Run it only if you are free and feel fresh; the week's miles do not depend on it, and skipping it counts as nothing missed."}
+        why.append("Maybe days get an optional easy run. The long run and the quality sessions are kept to days you are sure of, so a day that falls through never costs the week its key runs.")
     # the second session sits on the midweek session day, after the run: lifting the day before a fast session blunts it, and the day after the
     # long run is two days clear of the next one [P]
     strength = {(Ld + 1) % 7: "Strength A", key1 if key1 is not None else (Ld + 4) % 7: "Strength B"} if c["strength"] and mode != "race" and (wtr is None or wtr > 2) else {}

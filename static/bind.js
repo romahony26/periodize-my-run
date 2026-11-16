@@ -10,7 +10,7 @@ function bind(){
   $$('details[id^=tbox]').forEach(d=>d.ontoggle=()=>{TOPEN[d.id]=d.open;if(d.open&&!TERMS)loadTerms()});
   $$('details[id^=refs-]').forEach(d=>d.ontoggle=()=>{TOPEN[d.id]=d.open});
   [['#w2',3],['#w3',4],['#wb1',1],['#wb2',2],['#wb3',3],['#wb4',4]].forEach(([id,n])=>on(id,()=>{if(id==='#w4')return;wiz.step=n;render()}));
-  on('#w4',()=>{const p=prefsRead();if(p.blocked_days.includes(p.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
+  on('#w4',()=>{const p=prefsRead();if(p.blocked_days.includes(p.long_day)||p.maybe_days.includes(p.long_day))return toast('Your long run day is marked as a day you cannot or might not run.','err');
     if($('#sd').value&&hmsIn($('#st').value))p.seed_race={miles:+$('#sd').value,time_s:hmsIn($('#st').value)};wiz.prefs=p;wiz.step=5;render()});
   on('#start',async()=>{const hd=$('#wh').value==='1';await api('settings',Object.assign({},wiz.prefs||{}, {aero_test:hd,aero_runs:hd}));await api('settings',{auto_backup:$('#abk').value==='1'});
     await api('run',{kind:'setup'});wiz.step=6;await load()});
@@ -56,7 +56,7 @@ function bind(){
   on('#ssave2',()=>$('#ssave').click());
   on('#rwsave',async()=>{const w=rwRead('rw'),x=rwRead('rx');if(w===false||x===false)return toast('The earliest start must not be after the latest.','err');
     await api('settings',{run_window:w,run_window_weekend:x});toast('Hours saved');await load()});
-  on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot run.','err');
+  on('#ssave',async()=>{const s=prefsRead();if(s.blocked_days.includes(s.long_day)||s.maybe_days.includes(s.long_day))return toast('Your long run day is marked as a day you cannot or might not run.','err');
     s.run_window=rwRead('rw');s.run_window_weekend=rwRead('rx');if(s.run_window===false||s.run_window_weekend===false)return toast('In the hours you can run, the earliest start must not be after the latest.','err');
     s.hrmax=+$('#hrmax').value||null;s.peak_miles_override=+$('#peak').value||null;s.push_days=+$('#push_days').value;s.weeks_ahead=+$('#weeks_ahead').value;s.volume_boost=+$('#volume_boost').value;s.forecast_completion=$('#forecast_completion').value?+$('#forecast_completion').value/100:null;s.aero_test=+$('#aero_test_weeks').value>0;if(s.aero_test)s.aero_test_weeks=+$('#aero_test_weeks').value;s.aero_runs=$('#aero_runs').value==='1';s.apply_learned=$('#apply_learned').value==='1';s.aero_format=$('#aero_format').value;s.notify_url=$('#notify').value.trim();await api('settings',s);toast('Saved. Replanning.');await load()});
   on('#explain',openExplain);on('#run',async()=>{await api('run',{kind:'daily'});toast('Syncing');await load()});on('#lr',loadLogs);

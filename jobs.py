@@ -285,7 +285,7 @@ def reshuffle(today=None):
         for jx in range((today - mon).days, 7):
             e = mon + dt.timedelta(days=jx)
             q = plan.get(e)
-            if q and q["type"] == "Easy" and q["source"] != "moved" and e.weekday() not in (c.get("blocked_days") or []) \
+            if q and q["type"] == "Easy" and q["source"] != "moved" and e.weekday() not in (c.get("blocked_days") or []) and e.weekday() not in (c.get("maybe_days") or []) \
                     and not is_hard(e - dt.timedelta(days=1)) and not is_hard(e + dt.timedelta(days=1)) and not any(a <= e <= b for a, b in off):
                 target = e
                 break

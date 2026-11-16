@@ -96,6 +96,8 @@ def score(p, runs, tp, L):
     if adj.get("recovery"):          # eased because of a recent illness: judge the run against the eased day, not the one it replaced
         steps = engine.as_run({"steps": steps, "miles": p["miles"], "type": p["type"], "label": p["label"]}, adj)["steps"]
     plan, by_hr = planned_zones(steps, tp, L["hrmax"])
+    if not runs and str(p["label"]).endswith("(optional)"):
+        return None                  # an optional run (a maybe day, a work trip) that was not run is not a missed one
     if not runs:
         return {"score": 0, "verdict": "Missed", "planned_load": round(load(plan)), "load": 0,
                 "parts": [{"name": n, "planned_min": round(plan[i] / 60), "min": 0, "weight": WEIGHTS[i]} for i, n in enumerate(NAMES) if plan[i] >= 30]}

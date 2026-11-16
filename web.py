@@ -75,7 +75,7 @@ class Cookies(SecureCookieSessionInterface):
 app.session_interface = Cookies()
 app.config.update(SESSION_COOKIE_SAMESITE="Strict", SESSION_COOKIE_HTTPONLY=True)
 SETTINGS = ["units", "long_day", "run_days", "strength", "run_time", "push_enabled", "push_days", "easy_target", "daily_adjust", "readiness_response",
-            "hrmax", "peak_miles_override", "weekly_increase", "volume_boost", "detail_weeks", "blocked_days", "notify_url", "weeks_ahead",
+            "hrmax", "peak_miles_override", "weekly_increase", "volume_boost", "detail_weeks", "blocked_days", "maybe_days", "notify_url", "weeks_ahead",
             "aero_test", "aero_test_weeks", "aero_runs", "aero_format", "forecast_completion", "week_start", "apply_learned"]
 
 
@@ -98,6 +98,7 @@ VALID = {
     "weekly_increase": lambda v: _is_num(v, 0, 0.2), "volume_boost": lambda v: _is_num(v, 0, 0.15), "detail_weeks": lambda v: _is_int(v, 4, 104), "weeks_ahead": lambda v: _is_int(v, 1, 16),
     "forecast_completion": lambda v: v is None or _is_num(v, 0.5, 1),
     "blocked_days": lambda v: isinstance(v, list) and len(v) <= 6 and len(set(map(str, v))) == len(v) and all(_is_int(x, 0, 6) for x in v),
+    "maybe_days": lambda v: isinstance(v, list) and len(v) <= 6 and len(set(map(str, v))) == len(v) and all(_is_int(x, 0, 6) for x in v),
     "notify_url": lambda v: v is None or (isinstance(v, str) and len(v) <= 500),
 }
 PBKDF2_ROUNDS = 600_000        # OWASP's current figure for PBKDF2-HMAC-SHA256
@@ -1550,7 +1551,7 @@ def about():
             "Marathon goal: midweek marathon-pace block grows one mile at a time (4 to 8); marathon-pace long runs of 8 → 10 → 12 → 14 miles at least 13 days apart in the specific phase; 10K-pace intervals every third week.",
             "Half marathon goal: half-marathon-pace blocks of 3 to 6 miles in the specific phase. 5K and 10K goals: alternating 5K-pace and 10K-pace intervals, plus threshold.",
             "Long run: never more than 10% beyond your longest run of the last 30 days, and, except for ultra goals, no more than about three hours.",
-            f"Your week: {c['run_days']} running days, long run on {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][c['long_day']]}. With 5 or 6 days there are two quality sessions; with 3 or 4 there is one.",
+            f"Your week: {c['run_days']} running days, long run on {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][c['long_day']]}. With 5 or 6 days there are two quality sessions; with 3 or 4 there is one. Days you cannot run are never used. Days you might be able to run never get the long run or a quality session, only an optional easy run.",
             f"Strength reminders: {yn(c['strength'])}.",
         ]),
         ("Steps outside your runs", [

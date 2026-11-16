@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.12 - 2026-11-16
+### Added
+- A third kind of day in Settings: "Days you might be able to run", beside "Days you cannot run". The long run and the quality sessions are only ever put on days you are sure of, so a day that falls through never costs the week its key runs. A maybe day gets an optional easy run of the shortest easy length on top of the week; the week's target does not depend on it, and a maybe-day run you skip is not counted as missed. Every day you tick as neither is a day you can run. A maybe day cannot be the long run day.
+
+### Changed
+- A planned run marked "(optional)", on a maybe day or a work trip, no longer counts as missed when it is not run.
+
 ## 2.10.4-beta.11 - 2026-11-15
 ### Fixed
 - `tools/pull_backup.py` took its copy from the install folder on the Raspberry Pi, which the updater no longer runs, so it did not get changes made since. It now exports from the version the Pi is running. The daily copy to another computer is 0.9 MB.
