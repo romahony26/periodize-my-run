@@ -713,7 +713,7 @@ def _plan(st, c, L, races):
             week[j] = {"type": "Rest", "label": "Rest", "steps": None, "miles": 0, "note": ""}
     if maybe and mode in ("build", "down", "tuneup", "return") and not this_races:
         # a day the athlete may or may not be free gets an optional easy run on top of the week: the target is met without it, and skipping it costs nothing
-        extra = half(c["min_easy_run_miles"])        # the shortest easy run: the extra stays small
+        extra = MAYBE_RUN_MILES        # a short run: the extra stays small
         for j in maybe:
             if 0 <= j <= 6 and week[j]["type"] == "Rest" and extra > 0:
                 week[j] = {"type": "Easy", "label": "Easy (optional)", "steps": [("d", extra, "easy")], "miles": extra,
@@ -870,6 +870,7 @@ def _travel(d):
     d.update({"type": "Easy", "label": "Easy (optional)", "steps": [("d", mi_, "easy")], "miles": mi_, "strength": "", "note": note})
 
 
+MAYBE_RUN_MILES = 4           # the optional easy run on a day the athlete might be free
 EASY_RUN_MILES = 7           # the easy_long recovery mode: every run that is not the long run becomes this many easy miles
 RECOVERY_MODES = {
     "easy": "Easy running only",

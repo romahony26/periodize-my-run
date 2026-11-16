@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.13 - 2026-11-16
+### Changed
+- The optional easy run on a maybe day is 4 miles (it was 3.5, the shortest easy run).
+
 ## 2.10.4-beta.12 - 2026-11-16
 ### Added
 - A third kind of day in Settings: "Days you might be able to run", beside "Days you cannot run". The long run and the quality sessions are only ever put on days you are sure of, so a day that falls through never costs the week its key runs. A maybe day gets an optional easy run of the shortest easy length on top of the week; the week's target does not depend on it, and a maybe-day run you skip is not counted as missed. Every day you tick as neither is a day you can run. A maybe day cannot be the long run day.
