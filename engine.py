@@ -301,7 +301,7 @@ def plan(st, c, L, races):
                               "and a 20% rise was followed by a higher injury risk over three weeks in one study of half-marathon trainees (Damsted and colleagues, 2019). It comes a week later. [P]")
             pl = alt
     if pl.get("away"):      # the trip trims the runs after the week is planned: the next week must start from what the week will really hold
-        shaped = apply_status([dict(d) for d in pl["days"]], st.get("statuses") or [], c.get("blocked_days") or [])
+        shaped = apply_status([dict(d) for d in pl["days"]], st.get("statuses") or [], (c.get("blocked_days") or []) + (c.get("maybe_days") or []))
         pl["projected_total"] = sum(d["miles"] or 0 for d in shaped)
         pl["projected_long"] = max((d["miles"] or 0 for d in shaped), default=0)
     return pl
@@ -966,6 +966,9 @@ def _recovering(d, mode):
     if d["type"] in ("Rest", "Race"):
         return
     d["strength"] = ""
+    if str(d["label"]).endswith("(optional)"):
+        d["note"] = note + " Optional: run it only if you are free."      # a maybe day stays optional and short, whatever the recovery mode
+        return
     if mode == "easy_long":
         if d["type"] == "Long":
             d.update({"type": "Long", "label": "Long run", "steps": [("d", d["miles"], "easy")], "note": note})   # kept at its length, all easy

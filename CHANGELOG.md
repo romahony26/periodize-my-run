@@ -3,6 +3,11 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.16 - 2026-11-16
+### Fixed
+- A maybe day became a full 7-mile easy run while the recovery mode "easy running at 7 miles a day" was on, because that mode rewrote every day in its period. A maybe day stays an optional run of 4 miles, and a rest maybe day is not filled with a run.
+- A change to Settings, a race or a status starts a replan, and if the app restarted before it finished (an update, a power cut) the replan was lost: the new settings were saved but the plan stayed as it was. The app now writes down that a replan, readiness check or watch push is owed, and runs it again at start-up if it did not finish.
+
 ## 2.10.4-beta.15 - 2026-11-16
 ### Changed
 - Settings and the first-run wizard ask "Which days can you run?" with one choice for each day: can run, maybe, or can't run. A day can no longer be both a day you cannot run and a day you might.

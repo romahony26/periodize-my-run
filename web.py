@@ -1788,6 +1788,7 @@ def main():
     app.config.update(SESSION_COOKIE_SAMESITE="Strict", SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SECURE=tls,
                       PERMANENT_SESSION_LIFETIME=SESSION_LIFETIME, MAX_CONTENT_LENGTH=512 * 1024)
     threading.Thread(target=jobs.scheduler, daemon=True).start()
+    jobs.resume_pending()
     from cheroot.wsgi import Server
     server = Server((a.host, a.port), app, numthreads=8, server_name="periodize-my-run")
     if tls:

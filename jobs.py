@@ -55,7 +55,7 @@ def _store_week(monday, st, pl, final, c, today):
     db.run("INSERT INTO weeks(monday,mode,target,why,tp,final,summary) VALUES(?,?,?,?,?,?,?) ON CONFLICT(monday) DO UPDATE SET "
            "mode=excluded.mode,target=excluded.target,why=excluded.why,tp=excluded.tp,final=excluded.final,summary=excluded.summary",
            (monday.isoformat(), pl["mode"], pl["target"], json.dumps(pl["why"]), st["tp"], int(final), json.dumps(summary)))
-    days = engine.apply_status([dict(d) for d in pl["days"]], db.rows("SELECT * FROM status"), c.get("blocked_days") or [])
+    days = engine.apply_status([dict(d) for d in pl["days"]], db.rows("SELECT * FROM status"), (c.get("blocked_days") or []) + (c.get("maybe_days") or []))      # a maybe day is never filled with a run
     ran_today = sum(r["dist_m"] for r in db.rows("SELECT dist_m FROM activities WHERE sport='running' AND date=? AND dist_m>0", (today.isoformat(),))) >= 1609
     with db.connect() as con:
         for d in days:
@@ -421,11 +421,35 @@ _qlock = threading.Lock()
 _again = set()
 
 
+def _owe(kind):
+    """Write down that a replan, readiness or push is owed, so a restart before it finishes (a deploy, a power cut) does not lose it."""
+    if kind in QUEUED:
+        owed = db.get("pending_jobs") or []
+        if kind not in owed:
+            db.put("pending_jobs", owed + [kind])
+
+
+def _settled(kind):
+    """The job ran to the end; forget it unless another request for it came in while it ran."""
+    if kind in QUEUED and kind not in _again:
+        db.put("pending_jobs", [k for k in db.get("pending_jobs") or [] if k != kind])
+
+
+def resume_pending():
+    """At start-up, run what was owed when the app last stopped."""
+    if db.get("setup_done"):
+        for kind in db.get("pending_jobs") or []:
+            if kind in QUEUED:
+                log.info("Resuming %s, which was interrupted by a restart", kind)
+                start(kind)
+
+
 def run(kind):
     """Run one job now (blocking). kind: setup | daily | replan | readiness | push.
 
     A change made while a job is running (a setting, a race, a holiday) is not lost: its replan, readiness or push is queued and runs
     straight after, with nothing in between that looks idle. Only the heavy kinds, setup and daily, are refused while another job runs."""
+    _owe(kind)
     with _qlock:
         if not _lock.acquire(blocking=False):
             if kind in QUEUED:
@@ -518,12 +542,14 @@ def _job(kind):
     watch.save()
     db.run("UPDATE jobs SET finished=?, ok=?, message=? WHERE id=?", (dt.datetime.now().isoformat(timespec="seconds"), int(ok), msg, jid))
     if ok:
+        _settled(kind)
         log.info("=== %s finished: %s ===", kind, msg or "done")
     status.update({"error": None if ok else msg})
     return ok
 
 
 def start(kind):
+    _owe(kind)
     with _qlock:
         if status["running"]:
             if kind in QUEUED:
