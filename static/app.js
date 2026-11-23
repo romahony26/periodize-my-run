@@ -52,13 +52,13 @@ function render(){
   {const v=$('#ver');if(v&&S.version){v.hidden=false;v.textContent='v'+S.version;v.classList.toggle('beta',S.version.includes('-beta'));v.title='You are running version '+S.version+(S.version.includes('-beta')?' (a beta). ':'. ')+'Click for the change log.';
     v.onclick=e=>{e.preventDefault();if(!S.setup_done||!S.setup_seen)return;view='changes';loadChanges();render();scrollTo({top:0})}}}
   if(!S.setup_done||!S.setup_seen){$('#nav').innerHTML='';$('#sync').innerHTML='';if($('#tabbar'))$('#tabbar').innerHTML='';if(S.setup_done&&!S.setup_seen)wiz.step=6;return wizard()}
-  const T={plan:'Plan',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
+  const T={plan:'Plan',rec:'Recovery',hist:'History',you:'Fitness',races:'Races & status',settings:'Settings',about:'How it works',changes:'Change log',log:'Log'};
   $('#nav').innerHTML=Object.keys(T).map(v=>`<button class="${v===view?'on':''}${['about','changes','log'].includes(v)?' minor':''}" data-v="${v}">${T[v]}</button>`).join('');
   {const on=$('#nav button.on');if(on&&on.scrollIntoView)on.scrollIntoView({inline:'center',block:'nearest'})}
-  const go=v=>{MORE=false;DIRTY=false;view=v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='you')loadTrends();render();scrollTo({top:0})};
+  const go=v=>{MORE=false;DIRTY=false;view=v;if(view==='log')loadLogs();if(view==='about')loadAbout();if(view==='changes')loadChanges();if(view==='hist')loadHist();if(view==='rec')loadRec();if(view==='you')loadTrends();render();scrollTo({top:0})};
   $$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
-  {const ic={plan:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',hist:'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 4v4.5H8M12 8v4.5l3 2"/>',you:'<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',races:'<path d="M5 21V4M5 5h13l-2.5 4L18 13H5"/>',settings:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>',more:'<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>'};
-   const tb=[['plan','Plan'],['hist','History'],['you','Fitness'],['races','Races'],['settings','Settings'],['more','More']], inMore=['about','changes','log'].includes(view);
+  {const ic={rec:'<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.7 6.7 0 0 0 10.5 10.5z"/>',plan:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',hist:'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 4v4.5H8M12 8v4.5l3 2"/>',you:'<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',races:'<path d="M5 21V4M5 5h13l-2.5 4L18 13H5"/>',settings:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/>',more:'<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>'};
+   const tb=[['plan','Plan'],['rec','Recovery'],['hist','History'],['you','Fitness'],['settings','Settings'],['more','More']], inMore=['races','about','changes','log'].includes(view);
    $('#tabbar').innerHTML=tb.map(([v,t])=>`<button data-t="${v}" class="${(v==='more'?(inMore||MORE):(v===view&&!MORE))?'on':''}" aria-label="${t}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic[v]}</svg>${t}</button>`).join('');
    $$('#tabbar button').forEach(b=>b.onclick=()=>{if(b.dataset.t==='more'){MORE=!MORE;render()}else go(b.dataset.t)});
    window.GO=go}
@@ -71,7 +71,7 @@ function render(){
   else if(S.sync_age_h!=null&&S.sync_age_h>=12&&S.setup_done)h+=`<div class="alert" role="status">Your watch last synced ${S.sync_age_h<48?Math.round(S.sync_age_h)+' hours':Math.round(S.sync_age_h/24)+' days'} ago, so recovery and the newest runs are not in today's plan yet. ${j.error?'':'It retries every hour; press Sync to try now.'}</div>`;
   const skew=S.server_now?Math.round((Date.parse(S.server_now)-Date.now())/60000):0;
   if(Math.abs(skew)>=5)h+=`<div class="alert" role="status">The computer running Periodize and this device disagree about the time by ${Math.abs(skew)} minutes (the computer's clock is ${skew>0?'ahead':'behind'}), so sync times can look wrong. Set that computer's clock to keep itself right.</div>`;
-  $('#main').innerHTML=h+({plan:planView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])()+(MORE?moreSheet():'');
+  $('#main').innerHTML=h+({plan:planView,rec:recView,hist:histView,you:youView,races:racesView,settings:settingsView,about:aboutView,changes:changesView,log:logView}[view])()+(MORE?moreSheet():'');
   polish();bind();bindCharts();
 }
 

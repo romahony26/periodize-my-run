@@ -662,6 +662,47 @@ two or a missed log from a missed day. [P]
     four or more planned runs missed in two weeks with no status recorded, which rests on principle 79; and a tune-up race within
     three weeks. The thresholds are this project's choice. It is a note and changes nothing in the plan.
 
+118. **An illness watch reads three nights of resting heart rate, breathing rate and HRV.** [R] (*limited*) In smartwatch data, extreme
+    rises in resting heart rate against the person's own baseline flagged 63% of COVID-19 cases before symptoms appeared (Mishra and
+    colleagues, 2020, 32 cases, retrospective); in college athletes wearable breathing rate changed about three days before a positive
+    test, and HRV and resting heart rate about a day before (Rentería and colleagues, 2024). None of these signs is specific to one
+    illness, so two of the three must move the wrong way over the last three nights, each against your own 60-day normal (resting heart
+    rate 3 or more above, breathing rate one spread above, HRV one spread below). The day then counts as a red one: easy running and no
+    session, with the instruction to rest if there is fever, chest symptoms or body aches (principle 54a). An easy day costs little and
+    running through the start of an illness costs a lot, which is why the bar for easing is low. The thresholds are this project's
+    choice; no study gives them. It is a prompt to be careful and never a diagnosis. [P] for the numbers.
+119. **Breathing rate adds a readiness point only when HRV or resting heart rate already agrees.** [P] Breathing rate alone is not a
+    specific signal, and no head-to-head study shows that a combined score beats its best single marker. In recreational runners during
+    intensified training, how the effort felt and leg soreness responded most, and sleeping heart rate and HRV separated those who
+    overreached from those who coped, while resting heart rate did not respond consistently (Nuuttila and colleagues, 2024). So the
+    scheme stays conservative: signs hold the build back and ease fast running, and never add load. A 7-day average of breathing rate a
+    spread or more above your normal adds one point, and only when another sign is already present.
+120. **Sleep need comes from your own good nights, and the shortfall is counted in hours.** [R] (*moderate*) Short sleep slows endurance
+    running from a single night (principle 49), the consensus range is 7 to 9 hours (Walsh and colleagues, 2021), and extending sleep and
+    napping were the best-supported sleep interventions for performance in a review of studies with an objective measure, though no trial
+    in distance runners was found (Cunha and colleagues, 2023). Your need is taken as the median of nights you slept well (sleep score 80
+    or more) over 120 days, held between 7 and 9 hours, with 8 hours until there are 20 such nights. The page shows the hours short over
+    the last 7 nights and, when a key session is tomorrow or the week is 3 hours or more short, the time to be asleep by to get that need
+    before your usual wake time. The sleep score cut-off, the clamp and the 3-hour trigger are this project's choice. [P]
+121. **Regular sleep timing is shown as a habit to fix, not as a readiness sign.** [R] (*limited*) A regularity index from wrist
+    accelerometers predicted death from any cause more strongly than sleep length in 60,977 adults (Windred and colleagues, 2024;
+    observational, general population). In elite athletes sleep is more variable than in other people (Nedelec and colleagues, 2018), and
+    a review of professional athletes links more variable sleep schedules to more injuries; no study tests it in marathon training. The
+    page shows how much bedtime moves (under 45 minutes of spread is regular, over 60 irregular) and how far weekend nights sit from
+    weekday nights. The cut-offs are this project's choice. [P]
+122. **Sleep stages, Body Battery and the stress score are shown and never used.** [R] (*moderate*) Against laboratory sleep recordings,
+    wrist-worn devices were only moderately accurate at telling the stages of sleep apart, with little independent validation of the
+    newest watches (Schyvens and colleagues, 2025; Miller and colleagues, 2022, principle 78a). Body Battery and the stress score come
+    from the maker's own method; no independent validation was found, and their inputs, overnight HRV and resting heart rate, are the
+    weakest watch measures (principle 50). They sit in a "shown for context only" fold on the Recovery page and change nothing in the plan.
+123. **The Recovery page learns your own patterns from your own data, and shows the weekday pattern.** [R] (*limited*) Strenuous exercise
+    ending within four hours of falling asleep went with shorter, later sleep (Leota and colleagues, 2025, principle 80); the page
+    compares your own nights after late hard runs with your other nights, and reports how many mornings your resting heart rate takes
+    to return to normal after your long runs, as a plain median of your own history. Alcohol lowers overnight HRV in a dose-dependent
+    way, and being active did not protect against it (Pietilä and colleagues, 2018, general population); the app asks nothing about
+    drinking, so it shows average sleep and HRV by weekday and leaves the reading to you. The four-hour window and the 3.5 or more Garmin
+    aerobic effect (or 80% of maximum heart rate) that count as a hard run are this project's choice. [P]
+
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 
 
@@ -699,6 +740,7 @@ on a detail.
 
 - Bangsbo J and colleagues (2009). Reduced volume and increased training intensity elevate muscle Na+-K+ pump α2-subunit expression as well as short- and long-term work capacity in humans. *J Appl Physiol*. *Record confirmed.*
 - Afonseca LA, Watanabe RN, Duarte M (2022). A worldwide comparison of long-distance running training in 2019 and 2020: associated effects of the COVID-19 pandemic. *PeerJ* 10:e13192. Data: figshare 10.6084/m9.figshare.16620238, CC BY 4.0. *Dataset description read; analysis is this project's own.*
+- Cunha LA and colleagues (2023). The impact of sleep interventions on athletic performance: a systematic review. *Sports Med Open*. *Record confirmed.*
 - Keogh A, Smyth B, Caulfield B, Lawlor A, Berndsen J, Doherty C (2019). Prediction equations for marathon performance: a systematic review. *Int J Sports Physiol Perform* 14:1159–1169. *Abstract read.*
 - Lövdal SS, den Hartigh RJR, Azzopardi G (2021). Injury prediction in competitive runners with machine learning. *Int J Sports Physiol Perform* 16:1522–1531. Data: DataverseNL doi:10.34894/UWU9PV, CC0. *Dataset record and README read; analysis is this project's own; volume and pages from memory.*
 - Banister EW (1991). Modeling elite athletic performance. In: *Physiological Testing of Elite Athletes*. Human Kinetics. *From memory; a book chapter.*
@@ -716,6 +758,12 @@ on a detail.
 - Deaner RO, Carter RE, Joyner MJ, Hunter SK (2015). Men are more likely than women to slow in the marathon. *Med Sci Sports Exerc*. *Abstract read.*
 - Desai P, Jungmalm J, Börjesson M, Karlsson J, Grau S (2021). Recreational runners with a history of injury are twice as likely to sustain a running-related injury as runners with no history of injury: a 1-year prospective cohort study. *J Orthop Sports Phys Ther* 51:144–150. *Abstract read.*
 - Derman W, Badenhorst M, Eken M, Gomez-Ezeiza J, Fitzpatrick J, Gleeson M, Kunorozva L, Mjosund K, Mountjoy M, Sewry N, Schwellnus M (2022). Risk factors associated with acute respiratory illnesses in athletes: a systematic review by a subgroup of the IOC consensus on "acute respiratory illness in the athlete". *Br J Sports Med* 56:639–650. *Abstract read.*
+- Mishra T and colleagues (2020). Pre-symptomatic detection of COVID-19 from smartwatch data. *Nat Biomed Eng* 4:1208–1220.
+- Nedelec M and colleagues (2018). The variability of sleep among elite athletes. *Sports Med Open*. *Record confirmed.*
+- Nuuttila OP and colleagues (2024). Monitoring fatigue state with heart rate-based and subjective methods during intensified training in recreational runners. *Eur J Sport Sci*. *Record confirmed.*
+- Pietilä J and colleagues (2018). Acute effect of alcohol intake on cardiovascular autonomic regulation during the first hours of sleep in a large real-world sample of Finnish employees: observational study. *JMIR Ment Health* 5:e23.
+- Rentería LI and colleagues (2024). Early detection of COVID-19 in female athletes using wearable technology. *Sports Health*. *Record confirmed.*
+- Schyvens AM and colleagues (2025). A performance validation of six commercial wrist-worn wearable sleep-tracking devices for sleep stage scoring compared to polysomnography. *Sleep Adv*. *Record confirmed.*
 - Snyders C, Pyne DB, Sewry N, Hull JH, Kaulback K, Schwellnus M (2022). Acute respiratory illness and return to sport: a systematic review and meta-analysis by a subgroup of the IOC consensus on "acute respiratory illness in the athlete". *Br J Sports Med* 56:223–231. *Abstract read.*
 - Hull JH, Loosemore M, Schwellnus M (2020). Respiratory health in athletes: facing the COVID-19 challenge. *Lancet Respir Med* 8:557–558. *Text read for the neck check.*
 - Dial MB and colleagues (2025). Validation of nocturnal resting heart rate and heart rate variability in consumer wearables. *Physiol Rep*.
@@ -825,5 +873,6 @@ on a detail.
 - Vihma T (2010). Effects of weather on the performance of marathon runners. *Int J Biometeorol*. *Abstract read.*
 - Walsh NP and colleagues (2021). Sleep and the athlete: narrative review and 2021 expert consensus recommendations. *Br J Sports Med* 55:356–368.
 - Wang Z and colleagues (2023). Effects of tapering on performance in endurance athletes: a systematic review and meta-analysis. *PLoS One*.
+- Windred DP and colleagues (2024). Sleep regularity is a stronger predictor of mortality risk than sleep duration: a prospective cohort study. *Sleep*.
 - Wingo JE, Ganio MS, Cureton KJ (2012). Cardiovascular drift during heat stress: implications for exercise prescription. *Exerc Sport Sci Rev*. *Record confirmed.*
 - Zanini M, Folland JP and colleagues (2025). Strength training improves running economy durability and fatigued high-intensity performance in well-trained male runners: a randomized control trial. *Med Sci Sports Exerc*.

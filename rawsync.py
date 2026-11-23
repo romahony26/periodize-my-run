@@ -22,6 +22,7 @@ import zlib
 
 import db
 import garmin
+import recovery
 from log import log
 
 # (kind, client method). Each takes the day as "YYYY-MM-DD".
@@ -52,6 +53,43 @@ def _empty(x):
     return False
 
 
+def _real(kind, x):
+    """Does a stats or sleep record hold a day the watch measured? For dates with no wearable data Garmin sends back an empty shell with
+    the right keys and no values, which must not count as a day, or the walk back through history never reaches its start."""
+    if not isinstance(x, dict):
+        return False
+    if kind == "stats":
+        return bool((x.get("totalSteps") or 0) > 0 or x.get("restingHeartRate"))
+    if kind == "sleep":
+        return bool((x.get("dailySleepDTO") or {}).get("sleepTimeSeconds"))
+    return True
+
+
+def repair():
+    """Once, on a database filled before this fix: take out the empty shells that were stored for every day back to 1943 (the walk back
+    through history never stopped, and Garmin was asked for about 30,000 days), put sleep and HRV back among the kinds read (five failures on
+    those impossible dates had switched them off, so nothing since 12 November was read), and record where the real history starts."""
+    if db.get("raw_repaired") == 1:
+        return
+    first, shells = None, []
+    with db.connect() as c:
+        for r in c.execute("SELECT date,kind,body FROM garmin_raw WHERE kind IN ('stats','sleep') AND body IS NOT NULL ORDER BY date"):
+            if _real(r["kind"], unpack(r["body"])):
+                first = first or r["date"]
+            else:
+                shells.append((r["date"], r["kind"]))
+        if first:
+            c.execute("DELETE FROM garmin_raw WHERE date<?", (first,))
+        c.executemany("UPDATE garmin_raw SET body=NULL WHERE date=? AND kind=?", [s for s in shells if s[0] >= (first or "")])
+    state = db.get("raw_history") or {}
+    state["off"] = [k for k in (state.get("off") or []) if k not in ("sleep", "hrv")]
+    if first:
+        state["first"], state["done"] = first, True
+    db.put("raw_history", state)
+    db.put("raw_repaired", 1)
+    log.info("Garmin history repaired: real data starts %s, %d empty days dropped", first, len(shells))
+
+
 def _held():
     """({(date, kind): when it was read}, {dates with a sleep or daily record that holds something})."""
     got, full = {}, set()
@@ -76,7 +114,8 @@ def _store(rows):
     now = dt.datetime.now().isoformat(timespec="seconds")
     with db.connect() as c:
         for day, kind, x in rows:
-            c.execute("INSERT OR REPLACE INTO garmin_raw(date,kind,body,got) VALUES(?,?,?,?)", (day, kind, None if _empty(x) else _pack(x), now))
+            c.execute("INSERT OR REPLACE INTO garmin_raw(date,kind,body,got) VALUES(?,?,?,?)",
+                      (day, kind, None if _empty(x) or not _real(kind, x) else _pack(x), now))
     return now
 
 
@@ -114,6 +153,7 @@ def has_gaps(today=None):
 def run(budget_s=SLICE_S, today=None, stop=lambda: False):
     """One slice, newest day first, filling gaps only. `stop` is asked between requests. Returns (days read, finished)."""
     today = today or dt.date.today()
+    repair()
     state = db.get("raw_history") or {}
     done = bool(state.get("done"))
     g = garmin.client()
@@ -172,7 +212,7 @@ def run(budget_s=SLICE_S, today=None, stop=lambda: False):
             n += 1
             for r in rows:
                 held[(r[0], r[1])] = now
-            if any(r[1] in ("stats", "sleep") and not _empty(r[2]) for r in rows):
+            if any(r[1] in ("stats", "sleep") and _real(r[1], r[2]) for r in rows):
                 full.add(key)
         empty_run = 0 if key in full else empty_run + 1 if (key, "stats") in held else empty_run
         if not done and empty_run >= EMPTY_STOP:
@@ -204,7 +244,7 @@ def fill_daily(today=None):
     for r in db.rows("SELECT date,kind,body FROM garmin_raw WHERE body IS NOT NULL AND date<=?", (cutoff,)):
         if r["kind"] in mine:
             body[(r["date"], r["kind"])] = unpack(r["body"])
-    have = {r["date"]: r for r in db.rows("SELECT date,rhr,sleep_h,hrv,sleep_score,sleep_start,steps FROM daily")}
+    have = {r["date"]: r for r in db.rows("SELECT * FROM daily")}
     n = 0
     with db.connect() as c:
         for day in sorted({d for d, _ in body}):
@@ -219,11 +259,14 @@ def fill_daily(today=None):
                    "steps": stats.get("totalSteps")}
             old = have.get(day) or {}
             add = {k: v for k, v in new.items() if v is not None and old.get(k) is None}
-            if not add:
+            extra = {k: v for k, v in recovery.parse_night(sleep, stats).items() if v is not None and old.get(k) is None}
+            if not add and not extra:
                 continue
             c.execute("INSERT OR IGNORE INTO daily(date) VALUES(?)", (day,))
-            c.execute("UPDATE daily SET rhr=COALESCE(rhr,?), sleep_h=COALESCE(sleep_h,?), hrv=COALESCE(hrv,?), sleep_score=COALESCE(sleep_score,?), "
-                      "sleep_start=COALESCE(sleep_start,?), steps=COALESCE(steps,?) WHERE date=?", (*new.values(), day))
+            if add:
+                c.execute("UPDATE daily SET rhr=COALESCE(rhr,?), sleep_h=COALESCE(sleep_h,?), hrv=COALESCE(hrv,?), sleep_score=COALESCE(sleep_score,?), "
+                          "sleep_start=COALESCE(sleep_start,?), steps=COALESCE(steps,?) WHERE date=?", (*new.values(), day))
+            recovery.store(c, day, extra)
             n += 1
     if n:
         log.info("Daily records filled from the Garmin data already held: %d days", n)

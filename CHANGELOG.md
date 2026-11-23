@@ -3,6 +3,22 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.17 - 2026-11-23
+### Added
+- A Recovery page. It reads everything your watch records about your nights and gives instructions, not just numbers: how recovered you are this morning and why, last night against the sleep you need, the hours you are short this week, the time to be asleep by tonight (and why it matters when a key session is tomorrow), and up to five things to do, most important first. Nothing is typed in.
+- An illness watch. When two of resting heart rate, breathing rate asleep and HRV move the wrong way over the last three nights, against your own normal, the day is made a red one: easy running, no session, and a plain instruction to rest if you have a fever, chest symptoms or body aches. It is a prompt to be careful, not a diagnosis.
+- Sleep habits: how much your bedtime moves around, how far weekend nights sit from weekday nights, and average sleep and HRV by weekday, so a regular weekend dip is visible.
+- Your own patterns, from your own data: how your sleep changes on nights after a hard run that ends within four hours of falling asleep, and how many mornings your resting heart rate takes to return to normal after your long runs.
+- Breathing rate asleep, awake time, wake time, the watch's own sleep need, Body Battery gain and average stress are now saved for each night (and filled in for the nights already held). Sleep stages, Body Battery and the stress score are shown in a fold marked "for context only" and never change the plan: no independent study validates them.
+- Principles 118 to 123, with eight new references.
+
+### Changed
+- Breathing rate counts as one readiness sign when its 7-day average is a spread above your normal, and only when HRV or resting heart rate already agrees, because breathing rate alone is not specific.
+- On a phone the bottom bar has Recovery in place of Races; Races and status is under More. On a computer all the tabs are along the top as before.
+
+### Fixed
+- The saving of Garmin's daily records walked back through history to the year 1943 and never found the start: Garmin sends an empty shell for a date with no data, and the walk counted every shell as a day. It asked Garmin for about 30,000 days of records, and five failures on those impossible dates switched sleep and HRV off, so no sleep or HRV record was saved after 12 November. The first run after this update removes the shells (more than 300,000 rows), turns sleep and HRV back on, records where your real history starts, and fills the missing days.
+
 ## 2.10.4-beta.16 - 2026-11-16
 ### Fixed
 - A maybe day became a full 7-mile easy run while the recovery mode "easy running at 7 miles a day" was on, because that mode rewrote every day in its period. A maybe day stays an optional run of 4 miles, and a rest maybe day is not filled with a run.

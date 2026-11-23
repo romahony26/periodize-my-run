@@ -17,6 +17,7 @@ import statistics
 import db
 import jetlag
 import profile
+import recovery
 from assess import MI, ZONES, mean, offrun_steps, projection
 
 DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -1280,6 +1281,18 @@ def readiness(today, c, learn=True, override=None):
             pts += 1
             reasons.append(f"your 7-day resting heart rate is {m7:.0f}, {m7 - base:.0f} above your normal")
 
+    # ---- overnight breathing rate: a sustained rise on the 7-day average counts only when HRV or resting heart rate already agrees, because
+    # breathing rate alone is not specific (Renteria and colleagues, 2024); the point is this project's choice (principle 119) [P]
+    n, recent = normal("resp", 0.4, 7), vals("resp", 0, 7)
+    if n and len(recent) >= 4:
+        base, sd = n
+        m7 = mean(recent)
+        norm["resp"], week["resp"] = round(base, 1), round(m7, 1)
+        if pts > 0 and (m7 - base) / sd >= 1:
+            pts += 1
+            lost += 4
+            reasons.append(f"your breathing rate asleep is up to {m7:.1f} a minute, from your normal {base:.1f}")
+
     # ---- sleep: last night on its own, and the last three nights together
     sp = 0
     n = normal("sleep_h", 0.5, 1)
@@ -1322,6 +1335,14 @@ def readiness(today, c, learn=True, override=None):
         pts += jl["points"]
         lost += 6 * jl["points"]
         reasons.append(jl["reason"])
+
+    # ---- illness watch: resting heart rate, breathing rate and HRV, two of three the wrong way over three nights (principle 118). An easy day
+    # costs little and training through an illness costs a lot, so the day is made at least a red one: easy running, no session [P]
+    ill = recovery.illness(rows, today)
+    if ill["on"]:
+        lost += 6 * max(0, 3 - pts)
+        pts = max(pts, 3)
+        reasons.append(ill["reason"])
 
     # ---- walking: a long day on your feet is load the plan did not schedule. Counted against a fixed figure, not only against the
     # runner's own normal, so that someone who always walks a lot still has it counted (the figure is this project's choice) [C]

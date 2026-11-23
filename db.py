@@ -59,7 +59,7 @@ DEFAULTS = {
 }
 
 
-SCHEMA_VERSION = 21
+SCHEMA_VERSION = 22
 # Upgrades applied in order to an older database: {version reached: [SQL statements]}.
 MIGRATIONS = {
     2: ["CREATE TABLE IF NOT EXISTS moves (id INTEGER PRIMARY KEY AUTOINCREMENT, a TEXT, b TEXT)"],
@@ -87,6 +87,10 @@ MIGRATIONS = {
     19: ["ALTER TABLE activities ADD COLUMN weather TEXT"],
     20: ["ALTER TABLE activities ADD COLUMN feel INTEGER", "ALTER TABLE activities ADD COLUMN rpe INTEGER"],
     21: ["CREATE TABLE IF NOT EXISTS garmin_raw (date TEXT, kind TEXT, body BLOB, got TEXT, PRIMARY KEY (date, kind))"],
+    22: ["ALTER TABLE daily ADD COLUMN resp REAL", "ALTER TABLE daily ADD COLUMN sleep_stress REAL", "ALTER TABLE daily ADD COLUMN awake_s INTEGER",
+         "ALTER TABLE daily ADD COLUMN deep_s INTEGER", "ALTER TABLE daily ADD COLUMN rem_s INTEGER", "ALTER TABLE daily ADD COLUMN awake_n INTEGER",
+         "ALTER TABLE daily ADD COLUMN bb_gain INTEGER", "ALTER TABLE daily ADD COLUMN sleep_end TEXT", "ALTER TABLE daily ADD COLUMN need_min INTEGER",
+         "ALTER TABLE daily ADD COLUMN avg_stress INTEGER"],
     7: ["CREATE TABLE IF NOT EXISTS aerobic_tests (date TEXT PRIMARY KEY, stages TEXT, source TEXT, activity_id TEXT)"],
 }
 _ready = False

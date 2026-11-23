@@ -17,6 +17,7 @@ import zipfile
 
 import db
 import fitrun
+import recovery
 import vault
 from log import log
 
@@ -292,11 +293,15 @@ def sync_daily(days, progress=lambda m: None):
     no_steps = {r["date"] for r in db.rows("SELECT date FROM daily WHERE steps IS NULL")}
     no_score = {r["date"] for r in db.rows("SELECT date FROM daily WHERE sleep_score IS NULL AND sleep_h IS NOT NULL")}
     no_start = {r["date"] for r in db.rows("SELECT date FROM daily WHERE sleep_start IS NULL AND sleep_h IS NOT NULL")}
-    todo = [d for d in dates if d.isoformat() not in have or d.isoformat() in no_steps or d.isoformat() in no_score or d.isoformat() in no_start or (today - d).days <= 2]
-    stats, scores, starts = {}, {}, {}
+    recent = (today - dt.timedelta(days=10)).isoformat()      # the recovery fields (breathing, stages, wake time) of the last ten days, once
+    no_extra = {r["date"] for r in db.rows("SELECT date FROM daily WHERE sleep_h IS NOT NULL AND sleep_end IS NULL AND date>=?", (recent,))}
+    todo = [d for d in dates if d.isoformat() not in have or d.isoformat() in no_steps or d.isoformat() in no_score or d.isoformat() in no_start
+            or d.isoformat() in no_extra or (today - d).days <= 2]
+    stats, scores, starts, sleeps = {}, {}, {}, {}
 
     def get_sleep(day):
         x = g.get_sleep_data(day) or {}
+        sleeps[day] = x
         scores[day] = (((x.get("dailySleepDTO") or {}).get("sleepScores") or {}).get("overall") or {}).get("value")
         ms = (x.get("dailySleepDTO") or {}).get("sleepStartTimestampLocal")       # local wall-clock time, stored as if it were GMT
         starts[day] = dt.datetime.fromtimestamp(ms / 1000, dt.UTC).strftime("%H:%M") if isinstance(ms, (int, float)) and ms > 0 else ""    # "" = asked, none given: not asked again
@@ -314,7 +319,7 @@ def sync_daily(days, progress=lambda m: None):
     for i, d in enumerate(todo, 1):
         key, row = d.isoformat(), {}
         old = key in have and (today - d).days > 2        # backfill of an older day: fetch only what is missing
-        wanted = [p for p in picks if not old or (p[0] == "rhr" and key in no_steps) or (p[0] == "sleep_h" and (key in no_score or key in no_start))]
+        wanted = [p for p in picks if not old or (p[0] == "rhr" and key in no_steps) or (p[0] == "sleep_h" and (key in no_score or key in no_start or key in no_extra))]
         for field, what, fn, pick in wanted:
             try:
                 row[field] = pick(call(f"{what} {key}", fn, key))
@@ -332,6 +337,8 @@ def sync_daily(days, progress=lambda m: None):
                 c.execute("UPDATE daily SET sleep_start=? WHERE date=?", (starts[key], key))
             if (stats.get(key) or {}).get("totalSteps") is not None:
                 c.execute("UPDATE daily SET steps=? WHERE date=?", (stats[key]["totalSteps"], key))
+            if key in sleeps:
+                recovery.store(c, key, recovery.parse_night(sleeps[key], stats.get(key)), replace=(today - d).days <= 2)
         progress(f"Health data: {i} of {len(todo)} days")
     try:
         body = call("weight", g.get_body_composition, dates[0].isoformat(), today.isoformat())

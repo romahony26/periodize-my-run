@@ -31,6 +31,7 @@ import db
 import engine
 import estimates
 import execution
+import recovery
 import explain
 import respond
 import course
@@ -1403,6 +1404,14 @@ def terms_accept():
 @app.get("/api/changelog")
 def changelog_page():
     return jsonify(versions=changelog())
+
+
+@app.get("/api/recovery")
+def recovery_page():
+    """The Recovery page: last night, the habits behind it, the illness watch and what to do today and tonight. Reads the database only."""
+    if not db.get("setup_done"):
+        return jsonify(error="Finish setup first."), 409
+    return jsonify(recovery.report())
 
 
 @app.get("/api/history")
