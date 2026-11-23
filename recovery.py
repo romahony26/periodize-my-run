@@ -212,6 +212,52 @@ def _night(rows, today):
     return None, None
 
 
+def _r5(m):
+    return int(round(m / 5.0)) * 5
+
+
+def alarm_plan(rows, today, need_h, awake_min, plan_for=None, nights=3):
+    """When to be asleep and when to set the alarm for tonight and the next two mornings, easing toward a steady schedule [P].
+
+    The runner's wake time barely moves with their bedtime (in one runner's history it stayed at about 08:00 to 08:30 whether they fell asleep
+    at 23:30 or after 01:30), so bedtime is the lever and the alarm is the anchor. The target alarm is the runner's own weekday wake time
+    over the last 28 nights, on a 15-minute step and no later than 09:00, with weekends 30 minutes later: it never asks a late riser to
+    get up earlier, because an earlier alarm without an earlier bedtime only cut their sleep. Sleep-by is the alarm less the need and the
+    usual time awake in the night. From the median of the last seven bedtimes it steps 30 minutes earlier for tonight and 15 more each
+    night, never past the target; the alarm is the later of the target and the wake time that gives the full need from that bedtime,
+    held at the runner's usual wake time. Nothing here moves the bed-by earlier than the target, and with fewer than 7 nights it says nothing.
+    `plan_for(date)` returns the session planned for a morning, or None."""
+    ons, wkd, wke = [], [], []
+    for i in range(28):
+        d = today - dt.timedelta(days=i)
+        r = rows.get(d.isoformat()) or {}
+        if i < 7 and r.get("sleep_start"):
+            ons.append(_mins(r["sleep_start"]))
+        if r.get("sleep_end"):
+            (wke if d.weekday() in (5, 6) else wkd).append(_mins(r["sleep_end"]))
+    if len(ons) < 5 or len(wkd) < 5:
+        return None
+    recent = statistics.median(ons)
+    typ_wkd = statistics.median(wkd)
+    typ_wke = statistics.median(wke) if len(wke) >= 3 else typ_wkd + 30
+    tgt_wkd = min(round(typ_wkd / 15) * 15, _mins("09:00"))
+    gap = round(need_h * 60) + round(awake_min)
+    out = []
+    for i in range(nights):
+        morning = today + dt.timedelta(days=i + 1)
+        weekend = morning.weekday() in (5, 6)
+        tgt_wake = tgt_wkd + 30 if weekend else tgt_wkd
+        typ = max(typ_wke if weekend else typ_wkd, tgt_wake)
+        tgt_bed = tgt_wake - gap
+        bed = max(tgt_bed, recent - 30 - 15 * i)
+        wake = tgt_wake if bed <= tgt_bed else max(tgt_wake, min(typ, bed + gap))
+        s = plan_for(morning) if plan_for else None
+        out.append({"date": morning.isoformat(), "day": DAYS[morning.weekday()], "bed_by": _hhmm(_r5(bed)), "alarm": _hhmm(_r5(wake)),
+                    "hours": round((wake - bed - awake_min) / 60, 1), "at_target": bed <= tgt_bed, "session": s})
+    return {"nights": out, "recent_bed": _hhmm(_r5(recent)), "target_alarm": _hhmm(_r5(tgt_wkd)), "target_alarm_weekend": _hhmm(_r5(tgt_wkd + 30)),
+            "target_bed": _hhmm(_r5(tgt_wkd - gap)), "typical_wake": _hhmm(_r5(typ_wkd))}
+
+
 def _tomorrow(today):
     p = db.rows("SELECT date,type,label,miles FROM plan WHERE date=?", ((today + dt.timedelta(days=1)).isoformat(),))
     return p[0] if p else None
@@ -236,12 +282,17 @@ def report(today=None, c=None):
     tm = _tomorrow(today)
     keyed = bool(tm and tm["type"] in ("Key", "Long", "Race"))
     awake = [r["awake_s"] for r in rows.values() if r.get("awake_s") is not None][-14:]
-    tonight = None
+    tonight = plan = None
+    aw_min = round(mean(awake) / 60) if awake else 20
+
+    def plan_for(d):
+        p = db.rows("SELECT type,label FROM plan WHERE date=?", (d.isoformat(),))
+        return p[0]["label"] if p and p[0]["type"] in ("Key", "Long", "Race") else None
     if reg and reg["typical_wake"]:
-        wake = _mins(reg["typical_wake"])
-        bed = wake - round(need * 60) - round(mean(awake) / 60 if awake else 20)
-        tonight = {"bed_by": _hhmm(bed), "wake": reg["typical_wake"], "need_h": round(need, 1), "key": keyed,
-                   "session": tm["label"] if keyed else None}
+        plan = alarm_plan(rows, today, need, aw_min, plan_for)
+    if plan:
+        n0 = plan["nights"][0]
+        tonight = {"bed_by": n0["bed_by"], "wake": n0["alarm"], "need_h": round(need, 1), "key": keyed, "session": tm["label"] if keyed else None}
     norm = rd.get("normal") or {}
     series = []
     for i in range(41, -1, -1):
@@ -254,7 +305,7 @@ def report(today=None, c=None):
            "garmin_need_h": round(statistics.median(garmin_need) / 60, 1) if garmin_need else None,
            "week": {"avg_h": round(mean(last7), 1) if last7 else None, "short_h": short, "nights": len(last7)},
            "norm": {"hrv": norm.get("hrv"), "rhr": norm.get("rhr"), "sleep_h": norm.get("sleep_h"), "resp": None},
-           "regularity": reg, "illness": ill, "late_runs": late, "after_long": aft, "pattern": weekday_pattern(rows, today), "tonight": tonight, "series": series}
+           "regularity": reg, "illness": ill, "late_runs": late, "after_long": aft, "pattern": weekday_pattern(rows, today), "tonight": tonight, "alarms": plan, "series": series}
     n = _normal(rows, today, "resp", 0.4, 7)
     if n:
         out["norm"]["resp"] = round(n[0], 1)
@@ -287,11 +338,11 @@ def actions(r, tm):
         t = r["tonight"]
         a.append({"kind": "amber", "title": f"You are {wk['short_h']:g} hours short on sleep this week",
                   "body": f"Your last {wk['nights']} nights averaged {wk['avg_h']:g} h against a need of about {r['need_h']:g} h ({r['need_source']}). Short sleep slows endurance running from a single night, mostly by making it feel harder, so the fix is more sleep opportunity, not more training."
-                          + (f" Tonight, be asleep by {t['bed_by']} and you wake rested at your usual {t['wake']}." if t else "")})
+                          + (f" Tonight, be asleep by {t['bed_by']} and set the alarm for {t['wake']}." if t else "")})
     elif r["tonight"] and r["tonight"]["key"]:
         t = r["tonight"]
         a.append({"kind": "info", "title": f"Protect tonight's sleep: {t['session']} tomorrow",
-                  "body": f"Be asleep by {t['bed_by']} for {t['need_h']:g} h before your usual {t['wake']} wake time. Extra sleep before a key day is the best-supported way to improve how a hard run goes."})
+                  "body": f"Be asleep by {t['bed_by']} for {t['need_h']:g} h before a {t['wake']} alarm. Extra sleep before a key day is the best-supported way to improve how a hard run goes."})
     g = r["regularity"]
     if g and g["label"] == "irregular":
         a.append({"kind": "amber", "title": "Your bedtime moves around",

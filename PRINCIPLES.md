@@ -702,6 +702,13 @@ two or a missed log from a missed day. [P]
     way, and being active did not protect against it (Pietilä and colleagues, 2018, general population); the app asks nothing about
     drinking, so it shows average sleep and HRV by weekday and leaves the reading to you. The four-hour window and the 3.5 or more Garmin
     aerobic effect (or 80% of maximum heart rate) that count as a hard run are this project's choice. [P]
+124. **The alarm follows your own wake time and the bedtime does the moving.** [P] Timing that is regular predicted health outcomes at
+    least as well as sleep length (Windred and colleagues, 2024, principle 121), so the page gives a steady alarm and a bedtime that
+    eases earlier. The alarm is your own usual weekday wake time over 28 nights (no later than 09:00, weekends 30 minutes later) and is
+    never set earlier than you already wake, because in one runner's six years of nights the wake time barely moved with the bedtime, so an
+    earlier alarm alone only cut sleep. Asleep-by is the alarm less your sleep need and your usual time awake in the night; from the median
+    of the last seven bedtimes it starts 30 minutes earlier tonight and steps 15 minutes earlier each night until it reaches that time.
+    The step sizes are this project's choice; no trial tests them in distance runners. Shown for the next three mornings.
 
 ## Known gaps: where Periodize My Run does not yet follow the evidence
 

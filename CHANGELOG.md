@@ -3,6 +3,13 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.18 - 2026-11-23
+### Added
+- A bed and alarm card on the Recovery page: when to be asleep tonight and what to set the alarm to, for tonight and the next two mornings. The alarm is your own usual wake time (never earlier, and no later than 09:00, with weekends 30 minutes later), because for most late sleepers the wake time barely moves and the bedtime is what changes how much they sleep. The bedtime starts 30 minutes earlier than your recent nights and steps 15 minutes earlier each night until you reach the time that gives your sleep need. Mornings with a key session are named. Principle 124.
+
+### Changed
+- The "tonight" instructions on the Recovery page now say when to set the alarm, in place of "your usual wake time".
+
 ## 2.10.4-beta.17 - 2026-11-23
 ### Added
 - A Recovery page. It reads everything your watch records about your nights and gives instructions, not just numbers: how recovered you are this morning and why, last night against the sleep you need, the hours you are short this week, the time to be asleep by tonight (and why it matters when a key session is tomorrow), and up to five things to do, most important first. Nothing is typed in.
