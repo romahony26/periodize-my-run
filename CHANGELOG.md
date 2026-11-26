@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.19 - 2026-11-26
+### Fixed
+- The watch could report too many workouts. Every workout sent to Garmin was left in your Garmin library after its day had passed, so the list only grew (77 of them were Periodize workouts when this was checked), and a run plus a strength session for each of 21 days put about 30 more on the calendar ahead. Workouts for days already gone are now taken off Garmin (a dozen at a time, so a long backlog clears over a few syncs without tripping Garmin's limits), and no more than 24 workouts are held ahead: the nearest days stay and later days wait until earlier ones pass. A day that was sent still reads "Was on your Garmin calendar."
+
 ## 2.10.4-beta.18 - 2026-11-23
 ### Added
 - A bed and alarm card on the Recovery page: when to be asleep tonight and what to set the alarm to, for tonight and the next two mornings. The alarm is your own usual wake time (never earlier, and no later than 09:00, with weekends 30 minutes later), because for most late sleepers the wake time barely moves and the bedtime is what changes how much they sleep. The bedtime starts 30 minutes earlier than your recent nights and steps 15 minutes earlier each night until you reach the time that gives your sleep need. Mornings with a key session are named. Principle 124.

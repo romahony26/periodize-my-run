@@ -243,23 +243,69 @@ def _drop_missing(rows, start, end):
     return out
 
 
+MAX_HELD = 24          # most workouts kept on the Garmin calendar ahead: a run and a strength session each count. Watches refuse a long list [P]
+GONE = "removed"       # in a past day's id column once its workout has been taken off Garmin, so the day still reads "Was on your Garmin calendar."
+TIDY_PER_RUN = 12      # past workouts deleted in one run, so a long backlog is cleared over several runs and never trips Garmin's rate limit
+
+
+def tidy_past(dry_run=False, limit=TIDY_PER_RUN):
+    """Take workouts for days already gone off Garmin (library and calendar). A done workout has no use on the watch, and a library that
+    only grows ends in the watch refusing new ones. Returns how many were removed."""
+    today = dt.date.today().isoformat()
+    rows = db.rows("SELECT date,garmin_id,strength_id FROM plan WHERE date<? AND ((garmin_id IS NOT NULL AND garmin_id!=?) OR (strength_id IS NOT NULL AND strength_id!=?)) "
+                   "ORDER BY date DESC", (today, GONE, GONE))
+    n = 0
+    for r in rows:
+        for id_col in ("garmin_id", "strength_id"):
+            wid = r[id_col]
+            if not wid or wid == GONE:
+                continue
+            if n >= limit:
+                return n
+            if dry_run:
+                n += 1
+                continue
+            try:
+                garmin.call(f"delete workout {wid}", garmin.client().delete_workout, wid)
+            except garmin.GaveUp:
+                raise
+            except Exception as e:
+                if not _already_gone(e):
+                    log.warning("Could not remove the old workout %s (%s); trying again next time", wid, type(e).__name__)
+                    continue
+            db.run(f"UPDATE plan SET {id_col}=? WHERE date=?", (GONE, r["date"]))  # nosec B608
+            n += 1
+    return n
+
+
 def sync_calendar(c, dry_run=False):
-    """Make Garmin match the plan for the next `push_days` days. Returns (sent, removed, unchanged)."""
+    """Make Garmin match the plan for the next `push_days` days, holding at most MAX_HELD workouts (the nearest days win).
+    Workouts for days already gone are taken off first. Returns (sent, removed, unchanged)."""
     today = dt.date.today()
     end = today + dt.timedelta(days=int(c["push_days"]) - 1)
     rows = db.rows("SELECT * FROM plan WHERE date>=? AND date<=? ORDER BY date", (today.isoformat(), end.isoformat()))
     tps = {r["monday"]: r["tp"] for r in db.rows("SELECT monday,tp FROM weeks")}
     counts = [0, 0, 0]
-    if not dry_run:
-        rows = _drop_missing(rows, today, end)
+    todo, held = [], 0
     for r in rows:
         d = dt.date.fromisoformat(r["date"])
         tp = tps.get((d - dt.timedelta(days=d.weekday())).isoformat())
         adj = json.loads(r["adjust"]) if r["adjust"] else {}
         day = engine.as_run(dict(r, steps=json.loads(r["steps"]) if r["steps"] else None), adj)
-        slow = adj.get("slow", 0.0)
-        _upsert(r["date"], workout(day, tp, c, slow) if tp else None, r["garmin_id"], r["pushed_hash"], "garmin_id", "pushed_hash", dry_run, counts)
+        w = workout(day, tp, c, adj.get("slow", 0.0)) if tp else None
         sw = strength_workout(r["strength"]) if c["strength"] and c["push_strength"] else None
+        if held + bool(w) + bool(sw) > MAX_HELD:
+            end = d - dt.timedelta(days=1)       # this day and every later one stays off the watch until earlier days pass
+            log.info("Garmin calendar: holding %d workouts, the most the watch is sent; %s onward waits", held, r["date"])
+            break
+        held += bool(w) + bool(sw)
+        todo.append((r, w, sw))
+    if not dry_run:
+        tidy_past()
+        rows = _drop_missing([r for r, _, _ in todo], today, end) if todo else []
+        todo = [(r2, w, sw) for r2, (_, w, sw) in zip(rows, todo, strict=True)]
+    for r, w, sw in todo:
+        _upsert(r["date"], w, r["garmin_id"], r["pushed_hash"], "garmin_id", "pushed_hash", dry_run, counts)
         _upsert(r["date"], sw, r["strength_id"], r["strength_hash"], "strength_id", "strength_hash", dry_run, counts)
     later = db.rows("SELECT * FROM plan WHERE date>? AND (garmin_id IS NOT NULL OR strength_id IS NOT NULL) ORDER BY date", (end.isoformat(),))
     for r in later:          # sent when the window was wider (push_days lowered, or the plan moved): take it off so only the window is on the watch
