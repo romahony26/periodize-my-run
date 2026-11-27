@@ -3,6 +3,33 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4 - 2026-11-27
+### Added
+- A Recovery page. It reads everything your watch records about your nights and gives instructions, not just numbers: how recovered you are this morning and why, last night against the sleep you need, the hours you are short this week, and up to five things to do, most important first. Nothing is typed in. Principles 118 to 124.
+- A bed and alarm card: when to be asleep tonight and what to set the alarm to for tonight and the next two mornings. The alarm is your own usual wake time (never earlier, no later than 09:00, weekends 30 minutes later); the bedtime starts 30 minutes earlier than your recent nights and steps 15 minutes earlier each night until it reaches the time that gives your sleep need.
+- An illness watch: when two of resting heart rate, breathing rate asleep and HRV move the wrong way over three nights against your own normal, the day becomes a red one with a plain instruction to rest if you have a fever, chest symptoms or body aches. Sleep habits (bedtime spread, weekend shift, weekday pattern) and your own patterns after late hard runs and long runs are shown. Sleep stages, Body Battery and the stress score are shown for context only and never change the plan.
+- "Do this now" is the first thing on the Plan page: up to five instructions in order of how much they matter, covering recovery today, sleep over the week, mileage against the plan and the goal, and walking.
+- Three ways to estimate your marathon today, and "Is the gap closing?", on Fitness; "On track?" at the top of Fitness; "Focus this week" on the Plan page; History says what its list adds up to; Black colour theme; a third kind of day in Settings, "maybe", for days you might be able to run (one choice per day: can run, maybe, can't run).
+- Walking counts: 15,000 steps or more outside your run is a recovery sign the next day, and weekly walking is added to your running as time on your feet.
+- The goal card says plainly what the plan is worth when the forecast is behind your goal by 1% or more.
+
+### Changed
+- Your history no longer caps the plan: the peak week is what the goal time takes. A light week no longer stalls the build for three weeks.
+- In a week with a marathon-pace long run, the midweek run is easy all the way; marathon-pace blocks are capped at a quarter (long run) and a fifth (midweek) of the week's miles.
+- The page is sent its state only when something has changed, and text is compressed: an idle open page used to download about 88 MB an hour. The state is worked out about four times faster.
+- The downloaded backup and the daily copy leave out the raw Garmin records (a few MB, not over 40 MB). `tools/deploy.py` keeps the newest three database copies, not every one.
+- On a phone the bottom bar has Recovery in place of Races; Races and status is under More.
+- At most 24 workouts are held on the Garmin calendar ahead, nearest days first, and workouts for days already gone are taken off Garmin, so the watch no longer reports too many workouts.
+
+### Removed
+- Shoe tracking, and monotony and strain on Fitness.
+
+### Fixed
+- The saving of Garmin's daily records walked back through history to the year 1943 and switched sleep and HRV off after five failures on impossible dates. The first run after this update removes the empty records (more than 300,000 rows), turns sleep and HRV back on and finds where your real history starts.
+- A replan on the day of a run no longer rewrites that day's session after the run; a replan lost to a restart is run again at start-up; a maybe day is no longer filled to 7 miles by the recovery mode.
+- The three-way day choice in Settings had tap targets 13 px tall on a phone; they are now 32 px.
+- The static security scan no longer flags two fixed-column statements. Security review of this release: no known library vulnerabilities, no secrets, 130 security and hostile-input tests pass, live checks of headers, login, TLS and file access found nothing.
+
 ## 2.10.4-beta.20 - 2026-11-27
 ### Fixed
 - The static security scan (bandit) flagged two statements in the Recovery code as possible SQL injection. They are built once from a fixed list of column names and take no input, so they are marked as reviewed, which keeps the full check for the stable release clean.
