@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.4-beta.20 - 2026-11-27
+### Fixed
+- The static security scan (bandit) flagged two statements in the Recovery code as possible SQL injection. They are built once from a fixed list of column names and take no input, so they are marked as reviewed, which keeps the full check for the stable release clean.
+
 ## 2.10.4-beta.19 - 2026-11-26
 ### Fixed
 - The watch could report too many workouts. Every workout sent to Garmin was left in your Garmin library after its day had passed, so the list only grew (77 of them were Periodize workouts when this was checked), and a run plus a strength session for each of 21 days put about 30 more on the calendar ahead. Workouts for days already gone are now taken off Garmin (a dozen at a time, so a long backlog clears over a few syncs without tripping Garmin's limits), and no more than 24 workouts are held ahead: the nearest days stay and later days wait until earlier ones pass. A day that was sent still reads "Was on your Garmin calendar."

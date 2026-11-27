@@ -46,8 +46,8 @@ def parse_night(sleep, stats=None):
             "avg_stress": stress if isinstance(stress, (int, float)) and stress >= 0 else None}
 
 
-_KEEP = {k: f"UPDATE daily SET {k}=COALESCE({k},?) WHERE date=?" for k in COLS}      # fixed statements, one per column: no SQL is built from data
-_SET = {k: f"UPDATE daily SET {k}=? WHERE date=?" for k in COLS}
+_KEEP = {k: f"UPDATE daily SET {k}=COALESCE({k},?) WHERE date=?" for k in COLS}      # fixed statements, one per column: no SQL is built from data  # nosec B608
+_SET = {k: f"UPDATE daily SET {k}=? WHERE date=?" for k in COLS}  # nosec B608
 
 
 def store(c, day, fields, replace=False):
