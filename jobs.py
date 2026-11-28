@@ -183,7 +183,7 @@ def log_forecasts(rs, st, c, mon, today):
     try:
         book = db.get("forecast_book") or {}
         for r in rs:
-            if r["date"] < today or r["priority"] not in ("A", "B"):
+            if r["date"] < today or r["priority"] not in ("A", "B", "C"):
                 continue
             now_s, full_s = assess.projection({"tp": st["tp"], "endurance": st["endurance"]}, c, r["miles"])
             e = book.setdefault(f"{r['date'].isoformat()}|{round(r['miles'], 1)}", {})

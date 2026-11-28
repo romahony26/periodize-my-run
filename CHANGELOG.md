@@ -3,6 +3,10 @@
 Every version of Periodize, newest first. Each entry says what was added, changed, removed or fixed.
 The app's Change log page is drawn from this file.
 
+## 2.10.5-beta.1 - 2026-11-28
+### Added
+- A third kind of race, "Train through (no taper)", next to goal race and tune-up race. The week is planned as if the race were not there: same miles, no rest day after it. The day before is an easy 3 miles with strides, a hard session two days before becomes an easy run of the same length (the race is the week's hard effort), and a race on the long-run day carries the rest of the long run as an easy cool-down, to cut short if the legs are gone. The race keeps its checkpoint for the goal time, with a note that the time will be a little slower on legs that have not tapered.
+
 ## 2.10.4 - 2026-11-27
 ### Added
 - A Recovery page. It reads everything your watch records about your nights and gives instructions, not just numbers: how recovered you are this morning and why, last night against the sleep you need, the hours you are short this week, and up to five things to do, most important first. Nothing is typed in. Principles 118 to 124.

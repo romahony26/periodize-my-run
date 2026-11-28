@@ -858,8 +858,8 @@ def race_save():
     name, prio, goal = j.get("name") or "Race", j.get("priority") or "A", j.get("goal_time") or None
     if not isinstance(name, str) or len(name) > 120:
         return jsonify(error="The race name must be text of up to 120 characters."), 400
-    if prio not in ("A", "B"):
-        return jsonify(error="The priority must be a goal race or a tune-up."), 400
+    if prio not in ("A", "B", "C"):
+        return jsonify(error="The priority must be a goal race, a tune-up or a race to train through."), 400
     if goal is not None and not (isinstance(goal, str) and re.fullmatch(r"(\d{1,2}:)?[0-5]?\d:[0-5]\d", goal.strip())):
         return jsonify(error="The goal time must look like 3:00:00 or 39:30."), 400
     if j.get("id") is not None and not (isinstance(j["id"], int) and not isinstance(j["id"], bool)):

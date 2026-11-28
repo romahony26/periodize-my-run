@@ -319,7 +319,10 @@ def _plan(st, c, L, races):
     # a week at half volume to recover is for a half marathon or longer; after a 5K or 10-mile race the easy days around it are enough [C]
     last_races = [r for r in races if mon - dt.timedelta(days=7) <= r["date"] < mon and r["miles"] >= 13]
     raced_last = any(mon - dt.timedelta(days=7) <= r["date"] < mon for r in races)      # a race week is light by plan, not a lapse: no return week after it
-    short_tuneup = bool(this_races) and all(r["miles"] < 10 and r["priority"] != "A" for r in this_races)
+    # a train-through race ("C") changes nothing about the kind of week: it is run inside normal training, with only the day before kept short [C]
+    through = [r for r in this_races if r["priority"] == "C"]
+    this_races_bc = [r for r in this_races if r["priority"] != "C"]
+    short_tuneup = bool(this_races_bc) and all(r["miles"] < 10 and r["priority"] != "A" for r in this_races_bc)
     specific = wtr is not None and wtr <= L["specific_weeks"]
     wk = [w["mi"] for w in st["weeks"]]
     last4 = wk[-4:]
@@ -351,7 +354,7 @@ def _plan(st, c, L, races):
         mode = "race"
     elif wtr in taper_weeks:
         mode = "taper"
-    elif this_races:
+    elif this_races_bc:
         mode = "tuneup"
     elif away_n >= 4:
         mode = "down"
@@ -607,7 +610,7 @@ def _plan(st, c, L, races):
         why.append("One hard session this week, not two: over your history your fitness has risen with miles more than with hard running, "
                    "so before the race-specific phase every other week puts that day into easy running. The week's distance is unchanged.")
     # the monthly Aerobic test replaces the second session (or the first, with one session a week): rested, flat, windless if possible
-    test_due = c.get("aero_test", True) and mode in ("build", "down") and (mon.toordinal() // 7) % max(int(c.get("aero_test_weeks", 4)), 2) == 0
+    test_due = c.get("aero_test", True) and mode in ("build", "down") and not through and (mon.toordinal() // 7) % max(int(c.get("aero_test_weeks", 4)), 2) == 0
     if test_due and target >= 15:
         short = c.get("aero_format", "short") != "original"
         if short:
@@ -650,6 +653,21 @@ def _plan(st, c, L, races):
         week[b2b] = {"type": "Easy", "label": "Back-to-back: medium easy", "steps": [("d", m, "easy")], "miles": m}
         slots.remove(b2b)
         why.append("Back-to-back weekend: a medium easy run the day before the long run, to practise running on tired legs.")
+    for r in through:
+        # the day before a train-through race is a short easy run; the other easy days carry the miles it gives up. The race is the week's
+        # hard effort in place of a session two days before it, which becomes easy running of the same length: three hard days in a week
+        # put too much of it above easy [P]
+        i, race_days = r["date"].weekday(), {x["date"].weekday() for x in this_races}
+        if i - 1 >= 0 and i - 1 not in race_days and (i - 1 in slots or week[i - 1]["type"] == "Key"):
+            week[i - 1] = {"type": "Easy", "label": "Easy + strides", "steps": [("d", 3, "easy"), ("strides", 4)], "miles": 3}
+            if i - 1 in slots:
+                slots.remove(i - 1)
+        if i - 2 >= 0 and i - 2 not in race_days and week[i - 2]["type"] == "Key":
+            m = week[i - 2]["miles"]
+            week[i - 2] = {"type": "Easy", "label": "Easy", "steps": [("d", m, "easy")], "miles": m}
+    if through:
+        why.append(f"Training through {through[0]['name']}: the week is planned as a normal week, with no taper and no rest day after it. "
+                   "The day before is a short easy run, and the race takes the place of a hard session two days before it.")
     planned = sum(d["miles"] for d in week.values())
     race_on_long = next((r for r in this_races if r["date"].weekday() == Ld), None)
     if race_on_long and short_tuneup:       # the race replaces the long run below: count the race day, not the long run, so the easy days make up the difference
@@ -677,19 +695,29 @@ def _plan(st, c, L, races):
         i = r["date"].weekday()
         now_s, full_s = projection(st, c, r["miles"])
         a_race = r["priority"] == "A"
+        thru = r["priority"] == "C"
         note = (f"Predicted {hms(now_s)}. Start at {pace(r['miles'] * MI / now_s, c['units'])}/{c['units']} and no faster for the first half."
                 + (" Men slow far more than women in the second half of long races, and the fastest men most of all: the patient start is where your time is made."
                    if c.get("sex") == "M" and r["miles"] >= 13 else "")
                 + (f" Fuel: {c['race_carbs_g_per_h']} g of carbohydrate an hour." if r["miles"] >= 13 else ""))
         if not a_race:
             note += checkpoint(r, goal, c["units"])
+        if thru:
+            note += " Run on legs that have not tapered, so the time will undersell your fitness by a little."
         kg = _weight()
         if a_race:
             note += race_day_advice(kg, r["miles"], now_s)
         prep = {back: race_eve_advice(r["miles"], back, kg) for back in (1, 2)} if a_race else {}
         wu = 0 if r["miles"] >= 20 else 2
-        week[i] = {"type": "Race", "label": r["name"], "note": note, "miles": round(r["miles"] + (wu + 1 if wu else 0), 3),
-                   "steps": ([("d", wu, "easy")] if wu else []) + [("d", r["miles"], None)] + ([("d", 1, "easy")] if wu else [])}
+        cd = 1 if wu else 0
+        if thru and week[i]["type"] == "Long" and wu:
+            # the race sits inside the long run: warm-up, race, then the rest of the long run easy as the cool-down
+            cd = max(half(week[i]["miles"] - wu - r["miles"]), 1)
+            note += f" The rest of the long run ({dist(cd, c['units'])}) is the cool-down, all easy. Cut it short if your legs are gone."
+        week[i] = {"type": "Race", "label": r["name"], "note": note, "miles": round(r["miles"] + (wu + cd if wu else 0), 3),
+                   "steps": ([("d", wu, "easy")] if wu else []) + [("d", r["miles"], None)] + ([("d", cd, "easy")] if wu else [])}
+        if thru:
+            continue
         for back in range(1, i + 1):
             j = i - back
             if a_race:
@@ -712,7 +740,7 @@ def _plan(st, c, L, races):
     for j in c.get("blocked_days") or []:        # a race week's fixed layout (sharpener, shakeout) must not use a day the athlete cannot run
         if 0 <= j <= 6 and week[j]["type"] != "Race" and week[j]["miles"]:
             week[j] = {"type": "Rest", "label": "Rest", "steps": None, "miles": 0, "note": ""}
-    if maybe and mode in ("build", "down", "tuneup", "return") and not this_races:
+    if maybe and mode in ("build", "down", "tuneup", "return") and not this_races_bc:
         # a day the athlete may or may not be free gets an optional easy run on top of the week: the target is met without it, and skipping it costs nothing
         extra = MAYBE_RUN_MILES        # a short run: the extra stays small
         for j in maybe:
