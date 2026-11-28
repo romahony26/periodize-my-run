@@ -672,6 +672,10 @@ def _plan(st, c, L, races):
     race_on_long = next((r for r in this_races if r["date"].weekday() == Ld), None)
     if race_on_long and short_tuneup:       # the race replaces the long run below: count the race day, not the long run, so the easy days make up the difference
         planned += race_on_long["miles"] + 3 - week[Ld]["miles"]
+    elif race_on_long and race_on_long["priority"] == "C":
+        # a train-through race in the long run's place: the easy days take back half of the long run's miles, not all of them, so no easy
+        # day turns into a second long run in a week that already has a race and a session [C]
+        planned += (race_on_long["miles"] + 2 - week[Ld]["miles"]) / 2
     rem = max(target - planned, 0)
     while len(slots) > 1 and rem / len(slots) < c["min_easy_run_miles"]:
         slots.pop()
@@ -709,11 +713,7 @@ def _plan(st, c, L, races):
             note += race_day_advice(kg, r["miles"], now_s)
         prep = {back: race_eve_advice(r["miles"], back, kg) for back in (1, 2)} if a_race else {}
         wu = 0 if r["miles"] >= 20 else 2
-        cd = 1 if wu else 0
-        if thru and week[i]["type"] == "Long" and wu:
-            # the race sits inside the long run: warm-up, race, then the rest of the long run easy as the cool-down
-            cd = max(half(week[i]["miles"] - wu - r["miles"]), 1)
-            note += f" The rest of the long run ({dist(cd, c['units'])}) is the cool-down, all easy. Cut it short if your legs are gone."
+        cd = 1 if wu and not thru else 0       # a train-through race is warm-up and race only: the athlete's choice
         week[i] = {"type": "Race", "label": r["name"], "note": note, "miles": round(r["miles"] + (wu + cd if wu else 0), 3),
                    "steps": ([("d", wu, "easy")] if wu else []) + [("d", r["miles"], None)] + ([("d", cd, "easy")] if wu else [])}
         if thru:
